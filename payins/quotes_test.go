@@ -287,4 +287,3 @@ func TestQuotesClient_GetFxRate_NilParams(t *testing.T) {
 	require.Nil(t, fxRate)
 	require.Contains(t, err.Error(), "params cannot be nil")
 }
-

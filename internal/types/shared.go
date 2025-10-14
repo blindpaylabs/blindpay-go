@@ -50,13 +50,13 @@ const (
 	TransactionDocumentTypeCustomsDeclaration TransactionDocumentType = "customs_declaration"
 	TransactionDocumentTypeBillOfLading       TransactionDocumentType = "bill_of_lading"
 	TransactionDocumentTypeOthers             TransactionDocumentType = "others"
-	TransactionDocumentInvoice            = TransactionDocumentTypeInvoice
-	TransactionDocumentPurchaseOrder      = TransactionDocumentTypePurchaseOrder
-	TransactionDocumentDeliverySlip       = TransactionDocumentTypeDeliverySlip
-	TransactionDocumentContract           = TransactionDocumentTypeContract
-	TransactionDocumentCustomsDeclaration = TransactionDocumentTypeCustomsDeclaration
-	TransactionDocumentBillOfLading       = TransactionDocumentTypeBillOfLading
-	TransactionDocumentOthers             = TransactionDocumentTypeOthers
+	TransactionDocumentInvoice                                        = TransactionDocumentTypeInvoice
+	TransactionDocumentPurchaseOrder                                  = TransactionDocumentTypePurchaseOrder
+	TransactionDocumentDeliverySlip                                   = TransactionDocumentTypeDeliverySlip
+	TransactionDocumentContract                                       = TransactionDocumentTypeContract
+	TransactionDocumentCustomsDeclaration                             = TransactionDocumentTypeCustomsDeclaration
+	TransactionDocumentBillOfLading                                   = TransactionDocumentTypeBillOfLading
+	TransactionDocumentOthers                                         = TransactionDocumentTypeOthers
 )
 
 type BankAccountType string
