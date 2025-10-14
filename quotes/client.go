@@ -19,18 +19,18 @@ type CreateParams struct {
 	CoverFees               *bool                         `json:"cover_fees,omitempty"`
 	Description             *string                       `json:"description,omitempty"`
 	PartnerFeeID            *string                       `json:"partner_fee_id,omitempty"`
-	TransactionDocumentFile *string                       `json:"transaction_document_file,omitempty"`
-	TransactionDocumentID   *string                       `json:"transaction_document_id,omitempty"`
+	TransactionDocumentFile *string                       `json:"transaction_document_file"`
+	TransactionDocumentID   *string                       `json:"transaction_document_id"`
 	TransactionDocumentType types.TransactionDocumentType `json:"transaction_document_type"`
 }
 
 // QuoteContract represents contract information in a quote.
 type QuoteContract struct {
-	ABI                     []map[string]interface{} `json:"abi"`
-	Address                 string                   `json:"address"`
-	FunctionName            string                   `json:"functionName"`
-	BlindpayContractAddress string                   `json:"blindpayContractAddress"`
-	Amount                  string                   `json:"amount"`
+	ABI                     []map[string]any `json:"abi"`
+	Address                 string           `json:"address"`
+	FunctionName            string           `json:"functionName"`
+	BlindpayContractAddress string           `json:"blindpayContractAddress"`
+	Amount                  string           `json:"amount"`
 	Network                 struct {
 		Name    string `json:"name"`
 		ChainID int    `json:"chainId"`

@@ -47,14 +47,14 @@ type VirtualAccount struct {
 
 // CreateParams represents parameters for creating a virtual account.
 type CreateParams struct {
-	ReceiverID         string                `json:"receiver_id"`
+	ReceiverID         string                `json:"-"`
 	BlockchainWalletID string                `json:"blockchain_wallet_id"`
 	Token              types.StablecoinToken `json:"token"`
 }
 
 // UpdateParams represents parameters for updating a virtual account.
 type UpdateParams struct {
-	ReceiverID         string                `json:"receiver_id"`
+	ReceiverID         string                `json:"-"`
 	BlockchainWalletID string                `json:"blockchain_wallet_id"`
 	Token              types.StablecoinToken `json:"token"`
 }

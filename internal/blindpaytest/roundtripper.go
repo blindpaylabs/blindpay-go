@@ -34,7 +34,7 @@ func (rt *RoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 			rt.T.Fatalf("failed to read request body: %v", err)
 		}
 
-		var expected, actual interface{}
+		var expected, actual any
 		if err := json.Unmarshal(rt.In, &expected); err != nil {
 			rt.T.Fatalf("failed to unmarshal expected body: %v", err)
 		}

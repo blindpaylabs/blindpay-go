@@ -109,7 +109,7 @@ type TrackingPayment struct {
 	ProviderName           string    `json:"provider_name"`
 	ProviderTransactionID  string    `json:"provider_transaction_id,omitempty"`
 	ProviderStatus         string    `json:"provider_status,omitempty"`
-	EstimatedTimeOfArrival time.Time `json:"estimated_time_of_arrival,omitempty"`
+	EstimatedTimeOfArrival string    `json:"estimated_time_of_arrival,omitempty"`
 	CompletedAt            time.Time `json:"completed_at"`
 }
 
@@ -117,7 +117,7 @@ type TrackingLiquidity struct {
 	Step                   string    `json:"step"`
 	ProviderTransactionID  string    `json:"provider_transaction_id"`
 	ProviderStatus         string    `json:"provider_status"`
-	EstimatedTimeOfArrival time.Time `json:"estimated_time_of_arrival"`
+	EstimatedTimeOfArrival string    `json:"estimated_time_of_arrival"`
 	CompletedAt            time.Time `json:"completed_at"`
 }
 

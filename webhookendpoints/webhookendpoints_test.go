@@ -14,20 +14,20 @@ import (
 )
 
 func TestWebhookEndpoints_Create(t *testing.T) {
-	instanceID := "inst_123"
-	id := "we_123"
+	instanceID := "in_000000000000"
+	id := "we_000000000000"
 	url := "https://example.com/webhook"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
-		APIKey:     "test_key",
+		APIKey:     "test-key",
 		InstanceID: instanceID,
 		HTTPClient: &http.Client{
 			Transport: &blindpaytest.RoundTripper{
 				T: t,
 				In: json.RawMessage(`{
 					"url":"https://example.com/webhook",
-					"events":["payout.new","payout.complete"]
+					"events":["receiver.new"]
 				}`),
 				Out:    json.RawMessage(fmt.Sprintf(`{"id":"%s"}`, id)),
 				Method: http.MethodPost,
@@ -41,8 +41,7 @@ func TestWebhookEndpoints_Create(t *testing.T) {
 	response, err := client.Create(context.Background(), &CreateParams{
 		URL: url,
 		Events: []types.WebhookEvent{
-			types.WebhookEventPayoutNew,
-			types.WebhookEventPayoutComplete,
+			types.WebhookEventReceiverNew,
 		},
 	})
 	require.NoError(t, err)
@@ -50,33 +49,24 @@ func TestWebhookEndpoints_Create(t *testing.T) {
 }
 
 func TestWebhookEndpoints_List(t *testing.T) {
-	instanceID := "inst_123"
+	instanceID := "in_000000000000"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
-		APIKey:     "test_key",
+		APIKey:     "test-key",
 		InstanceID: instanceID,
 		HTTPClient: &http.Client{
 			Transport: &blindpaytest.RoundTripper{
 				T: t,
 				Out: json.RawMessage(`[
 					{
-						"id":"we_123",
-						"url":"https://example.com/webhook1",
-						"events":["payout.new"],
-						"last_event_at":"2024-01-01T00:00:00Z",
-						"instance_id":"inst_123",
-						"created_at":"2024-01-01T00:00:00Z",
-						"updated_at":"2024-01-01T00:00:00Z"
-					},
-					{
-						"id":"we_456",
-						"url":"https://example.com/webhook2",
-						"events":["payout.complete"],
-						"last_event_at":"2024-01-01T00:00:00Z",
-						"instance_id":"inst_123",
-						"created_at":"2024-01-01T00:00:00Z",
-						"updated_at":"2024-01-01T00:00:00Z"
+						"id":"we_000000000000",
+						"url":"https://example.com/webhook",
+						"events":["receiver.new"],
+						"last_event_at":"2024-01-01T00:00:00.000Z",
+						"instance_id":"in_000000000000",
+						"created_at":"2021-01-01T00:00:00Z",
+						"updated_at":"2021-01-01T00:00:00Z"
 					}
 				]`),
 				Method: http.MethodGet,
@@ -89,22 +79,22 @@ func TestWebhookEndpoints_List(t *testing.T) {
 	client := NewClient(cfg)
 	endpoints, err := client.List(context.Background())
 	require.NoError(t, err)
-	require.Len(t, endpoints, 2)
-	require.Equal(t, "we_123", endpoints[0].ID)
+	require.Len(t, endpoints, 1)
+	require.Equal(t, "we_000000000000", endpoints[0].ID)
 }
 
 func TestWebhookEndpoints_Delete(t *testing.T) {
-	instanceID := "inst_123"
-	id := "we_123"
+	instanceID := "in_000000000000"
+	id := "we_000000000000"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
-		APIKey:     "test_key",
+		APIKey:     "test-key",
 		InstanceID: instanceID,
 		HTTPClient: &http.Client{
 			Transport: &blindpaytest.RoundTripper{
 				T:      t,
-				Out:    json.RawMessage(`{}`),
+				Out:    json.RawMessage(`{"data":null}`),
 				Method: http.MethodDelete,
 				Path:   fmt.Sprintf("/instances/%s/webhook-endpoints/%s", instanceID, id),
 			},
@@ -118,13 +108,13 @@ func TestWebhookEndpoints_Delete(t *testing.T) {
 }
 
 func TestWebhookEndpoints_GetSecret(t *testing.T) {
-	instanceID := "inst_123"
-	id := "we_123"
-	secret := "whsec_test123"
+	instanceID := "in_000000000000"
+	id := "we_000000000000"
+	secret := "whsec_000000000000"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
-		APIKey:     "test_key",
+		APIKey:     "test-key",
 		InstanceID: instanceID,
 		HTTPClient: &http.Client{
 			Transport: &blindpaytest.RoundTripper{
@@ -144,12 +134,12 @@ func TestWebhookEndpoints_GetSecret(t *testing.T) {
 }
 
 func TestWebhookEndpoints_GetPortalAccessURL(t *testing.T) {
-	instanceID := "inst_123"
-	portalURL := "https://webhook-portal.blindpay.com/access/token123"
+	instanceID := "in_000000000000"
+	portalURL := "https://example.com/webhook"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
-		APIKey:     "test_key",
+		APIKey:     "test-key",
 		InstanceID: instanceID,
 		HTTPClient: &http.Client{
 			Transport: &blindpaytest.RoundTripper{

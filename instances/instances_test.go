@@ -13,35 +13,25 @@ import (
 )
 
 func TestInstances_GetMembers(t *testing.T) {
-	instanceID := "inst_123"
+	instanceID := "in_000000000000"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
-		APIKey:     "test_key",
+		APIKey:     "test-key",
 		InstanceID: instanceID,
 		HTTPClient: &http.Client{
 			Transport: &blindpaytest.RoundTripper{
 				T: t,
 				Out: json.RawMessage(`[
 					{
-						"id":"mem_123",
-						"email":"admin@example.com",
-						"first_name":"John",
-						"middle_name":"",
-						"last_name":"Doe",
-						"image_url":"https://example.com/avatar.jpg",
-						"created_at":"2024-01-01T00:00:00Z",
-						"role":"owner"
-					},
-					{
-						"id":"mem_456",
-						"email":"dev@example.com",
-						"first_name":"Jane",
-						"middle_name":"",
-						"last_name":"Smith",
-						"image_url":"https://example.com/avatar2.jpg",
-						"created_at":"2024-01-02T00:00:00Z",
-						"role":"developer"
+						"id": "us_000000000000",
+						"email": "email@example.com",
+						"first_name": "Harry",
+						"middle_name": "James",
+						"last_name": "Potter",
+						"image_url": "https://example.com/image.png",
+						"created_at": "2021-01-01T00:00:00Z",
+						"role": "admin"
 					}
 				]`),
 				Method: http.MethodGet,
@@ -54,24 +44,24 @@ func TestInstances_GetMembers(t *testing.T) {
 	client := NewClient(cfg)
 	members, err := client.GetMembers(context.Background())
 	require.NoError(t, err)
-	require.Len(t, members, 2)
-	require.Equal(t, "mem_123", members[0].ID)
-	require.Equal(t, "admin@example.com", members[0].Email)
-	require.Equal(t, InstanceMemberRoleOwner, members[0].Role)
+	require.Len(t, members, 1)
+	require.Equal(t, "us_000000000000", members[0].ID)
+	require.Equal(t, "email@example.com", members[0].Email)
+	require.Equal(t, InstanceMemberRoleAdmin, members[0].Role)
 }
 
 func TestInstances_Update(t *testing.T) {
-	instanceID := "inst_123"
+	instanceID := "in_000000000000"
 	redirectURL := "https://example.com/invite"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
-		APIKey:     "test_key",
+		APIKey:     "test-key",
 		InstanceID: instanceID,
 		HTTPClient: &http.Client{
 			Transport: &blindpaytest.RoundTripper{
 				T:      t,
-				Out:    json.RawMessage(`{}`),
+				Out:    json.RawMessage(`{"data":null}`),
 				Method: http.MethodPut,
 				Path:   fmt.Sprintf("/instances/%s", instanceID),
 			},
@@ -81,23 +71,23 @@ func TestInstances_Update(t *testing.T) {
 
 	client := NewClient(cfg)
 	err := client.Update(context.Background(), &UpdateParams{
-		Name:                      "My Updated Instance",
+		Name:                      "New Instance Name",
 		ReceiverInviteRedirectURL: &redirectURL,
 	})
 	require.NoError(t, err)
 }
 
 func TestInstances_Delete(t *testing.T) {
-	instanceID := "inst_123"
+	instanceID := "in_000000000000"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
-		APIKey:     "test_key",
+		APIKey:     "test-key",
 		InstanceID: instanceID,
 		HTTPClient: &http.Client{
 			Transport: &blindpaytest.RoundTripper{
 				T:      t,
-				Out:    json.RawMessage(`{}`),
+				Out:    json.RawMessage(`{"data":null}`),
 				Method: http.MethodDelete,
 				Path:   fmt.Sprintf("/instances/%s", instanceID),
 			},
@@ -111,17 +101,17 @@ func TestInstances_Delete(t *testing.T) {
 }
 
 func TestInstances_DeleteMember(t *testing.T) {
-	instanceID := "inst_123"
-	memberID := "mem_456"
+	instanceID := "in_000000000000"
+	memberID := "us_000000000000"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
-		APIKey:     "test_key",
+		APIKey:     "test-key",
 		InstanceID: instanceID,
 		HTTPClient: &http.Client{
 			Transport: &blindpaytest.RoundTripper{
 				T:      t,
-				Out:    json.RawMessage(`{}`),
+				Out:    json.RawMessage(`{"data":null}`),
 				Method: http.MethodDelete,
 				Path:   fmt.Sprintf("/instances/%s/members/%s", instanceID, memberID),
 			},
@@ -135,17 +125,17 @@ func TestInstances_DeleteMember(t *testing.T) {
 }
 
 func TestInstances_UpdateMemberRole(t *testing.T) {
-	instanceID := "inst_123"
-	memberID := "mem_456"
+	instanceID := "in_000000000000"
+	memberID := "us_000000000000"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
-		APIKey:     "test_key",
+		APIKey:     "test-key",
 		InstanceID: instanceID,
 		HTTPClient: &http.Client{
 			Transport: &blindpaytest.RoundTripper{
 				T:      t,
-				Out:    json.RawMessage(`{}`),
+				Out:    json.RawMessage(`{"data":null}`),
 				Method: http.MethodPut,
 				Path:   fmt.Sprintf("/instances/%s/members/%s", instanceID, memberID),
 			},
@@ -156,7 +146,7 @@ func TestInstances_UpdateMemberRole(t *testing.T) {
 	client := NewClient(cfg)
 	err := client.UpdateMemberRole(context.Background(), &UpdateMemberRoleParams{
 		MemberID: memberID,
-		Role:     InstanceMemberRoleAdmin,
+		Role:     InstanceMemberRoleChecker,
 	})
 	require.NoError(t, err)
 }

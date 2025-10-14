@@ -79,7 +79,7 @@ func (c *Client) Update(ctx context.Context, params *UpdateParams) error {
 
 	path := fmt.Sprintf("/instances/%s", c.instanceID)
 
-	body := map[string]interface{}{
+	body := map[string]any{
 		"name": params.Name,
 	}
 
@@ -120,7 +120,7 @@ func (c *Client) UpdateMemberRole(ctx context.Context, params *UpdateMemberRoleP
 
 	path := fmt.Sprintf("/instances/%s/members/%s", c.instanceID, params.MemberID)
 
-	body := map[string]interface{}{
+	body := map[string]any{
 		"role": params.Role,
 	}
 

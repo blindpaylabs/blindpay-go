@@ -14,9 +14,9 @@ import (
 )
 
 func TestQuotes_Create(t *testing.T) {
-	instanceID := "inst_123"
-	id := "quote_123"
-	bankAccountID := "ba_123"
+	instanceID := "in_000000000000"
+	id := "qu_000000000000"
+	bankAccountID := "ba_000000000000"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
@@ -26,24 +26,41 @@ func TestQuotes_Create(t *testing.T) {
 			Transport: &blindpaytest.RoundTripper{
 				T: t,
 				In: json.RawMessage(`{
-					"bank_account_id":"ba_123",
+					"bank_account_id":"ba_000000000000",
 					"currency_type":"sender",
-					"request_amount":100.50,
+					"network":"sepolia",
+					"request_amount":1000,
+					"token":"USDC",
+					"cover_fees":true,
+					"description":"Memo code or description, only works with USD and BRL",
+					"partner_fee_id":"pf_000000000000",
+					"transaction_document_file":null,
+					"transaction_document_id":null,
 					"transaction_document_type":"invoice"
 				}`),
-				Out: json.RawMessage(fmt.Sprintf(`{
-					"id":"%s",
-					"expires_at":1704067200,
-					"commercial_quotation":1.05,
-					"blindpay_quotation":1.04,
-					"receiver_amount":96.15,
-					"sender_amount":100.50,
-					"partner_fee_amount":0,
-					"flat_fee":2.50,
-					"contract":{"abi":[],"address":"0x123","functionName":"transfer","blindpayContractAddress":"0x456","amount":"100500000","network":{"name":"ethereum","chainId":1}},
-					"receiver_local_amount":96.15,
-					"description":""
-				}`, id)),
+				Out: json.RawMessage(`{
+					"id":"qu_000000000000",
+					"expires_at":1712958191,
+					"commercial_quotation":495,
+					"blindpay_quotation":485,
+					"receiver_amount":5240,
+					"sender_amount":1010,
+					"partner_fee_amount":150,
+					"flat_fee":50,
+					"contract":{
+						"abi":[{}],
+						"address":"0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+						"functionName":"approve",
+						"blindpayContractAddress":"0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+						"amount":"1000000000000000000",
+						"network":{
+							"name":"Ethereum",
+							"chainId":1
+						}
+					},
+					"receiver_local_amount":1000,
+					"description":"Memo code or description, only works with USD and BRL"
+				}`),
 				Method: http.MethodPost,
 				Path:   fmt.Sprintf("/instances/%s/quotes", instanceID),
 			},
@@ -52,20 +69,32 @@ func TestQuotes_Create(t *testing.T) {
 	}
 
 	client := NewClient(cfg)
+	network := types.Network("sepolia")
+	token := types.StablecoinToken("USDC")
+	coverFees := true
+	description := "Memo code or description, only works with USD and BRL"
+	partnerFeeID := "pf_000000000000"
 	quote, err := client.Create(context.Background(), &CreateParams{
 		BankAccountID:           bankAccountID,
 		CurrencyType:            types.CurrencyTypeSender,
-		RequestAmount:           100.50,
+		Network:                 &network,
+		RequestAmount:           1000,
+		Token:                   &token,
+		CoverFees:               &coverFees,
+		Description:             &description,
+		PartnerFeeID:            &partnerFeeID,
+		TransactionDocumentFile: nil,
+		TransactionDocumentID:   nil,
 		TransactionDocumentType: types.TransactionDocumentTypeInvoice,
 	})
 	require.NoError(t, err)
 	require.Equal(t, id, quote.ID)
-	require.Equal(t, 100.50, quote.SenderAmount)
-	require.Equal(t, 96.15, quote.ReceiverAmount)
+	require.Equal(t, 1010.0, quote.SenderAmount)
+	require.Equal(t, 5240.0, quote.ReceiverAmount)
 }
 
 func TestQuotes_GetFxRate(t *testing.T) {
-	instanceID := "inst_123"
+	instanceID := "in_000000000000"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
@@ -78,14 +107,14 @@ func TestQuotes_GetFxRate(t *testing.T) {
 					"currency_type":"sender",
 					"from":"USD",
 					"to":"BRL",
-					"request_amount":100.0
+					"request_amount":1000
 				}`),
 				Out: json.RawMessage(`{
-					"commercial_quotation":5.25,
-					"blindpay_quotation":5.20,
-					"result_amount":520.0,
-					"instance_flat_fee":2.5,
-					"instance_percentage_fee":0.02
+					"commercial_quotation":495,
+					"blindpay_quotation":485,
+					"result_amount":1,
+					"instance_flat_fee":50,
+					"instance_percentage_fee":0
 				}`),
 				Method: http.MethodPost,
 				Path:   fmt.Sprintf("/instances/%s/quotes/fx", instanceID),
@@ -99,9 +128,9 @@ func TestQuotes_GetFxRate(t *testing.T) {
 		CurrencyType:  types.CurrencyTypeSender,
 		From:          types.CurrencyUSD,
 		To:            types.CurrencyBRL,
-		RequestAmount: 100.0,
+		RequestAmount: 1000,
 	})
 	require.NoError(t, err)
-	require.Equal(t, 5.25, response.CommercialQuotation)
-	require.Equal(t, 520.0, response.ResultAmount)
+	require.Equal(t, 495.0, response.CommercialQuotation)
+	require.Equal(t, 1.0, response.ResultAmount)
 }

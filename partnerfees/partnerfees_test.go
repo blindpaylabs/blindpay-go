@@ -13,27 +13,41 @@ import (
 )
 
 func TestPartnerFees_Create(t *testing.T) {
-	instanceID := "inst_123"
-	id := "pf_123"
-	name := "Test Fee Config"
-	evmWallet := "0x1234567890abcdef"
+	instanceID := "in_000000000000"
+	id := "fe_000000000000"
+	name := "Display Name"
+	evmWallet := "0x1234567890123456789012345678901234567890"
+	stellarWallet := "GAB22222222222222222222222222222222222222222222222222222222222222"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
-		APIKey:     "test_key",
+		APIKey:     "test-key",
 		InstanceID: instanceID,
 		HTTPClient: &http.Client{
 			Transport: &blindpaytest.RoundTripper{
 				T: t,
 				In: json.RawMessage(`{
-					"evm_wallet_address":"0x1234567890abcdef",
-					"name":"Test Fee Config",
-					"payin_flat_fee":1.5,
-					"payin_percentage_fee":0.02,
-					"payout_flat_fee":2.0,
-					"payout_percentage_fee":0.025
+					"name":"Display Name",
+					"payout_percentage_fee":0,
+					"payout_flat_fee":0,
+					"payin_percentage_fee":0,
+					"payin_flat_fee":0,
+					"evm_wallet_address":"0x1234567890123456789012345678901234567890",
+					"stellar_wallet_address":"GAB22222222222222222222222222222222222222222222222222222222222222"
 				}`),
-				Out:    json.RawMessage(fmt.Sprintf(`{"id":"%s","instance_id":"%s","name":"%s","payout_percentage_fee":0.025,"payout_flat_fee":2.0,"payin_percentage_fee":0.02,"payin_flat_fee":1.5,"evm_wallet_address":"%s"}`, id, instanceID, name, evmWallet)),
+				Out: json.RawMessage(fmt.Sprintf(
+					`{
+						"id":"%s",
+						"instance_id":"%s",
+						"name":"%s",
+						"payout_percentage_fee":0,
+						"payout_flat_fee":0,
+						"payin_percentage_fee":0,
+						"payin_flat_fee":0,
+						"evm_wallet_address":"%s",
+						"stellar_wallet_address":"%s"
+					}`, id, instanceID, name, evmWallet, stellarWallet,
+				)),
 				Method: http.MethodPost,
 				Path:   fmt.Sprintf("/instances/%s/partner-fees", instanceID),
 			},
@@ -43,32 +57,42 @@ func TestPartnerFees_Create(t *testing.T) {
 
 	client := NewClient(cfg)
 	fee, err := client.Create(context.Background(), &CreatePartnerFeeParams{
-		Name:                name,
-		EVMWalletAddress:    evmWallet,
-		PayinFlatFee:        1.5,
-		PayinPercentageFee:  0.02,
-		PayoutFlatFee:       2.0,
-		PayoutPercentageFee: 0.025,
+		Name:                 name,
+		PayoutPercentageFee:  0,
+		PayoutFlatFee:        0,
+		PayinPercentageFee:   0,
+		PayinFlatFee:         0,
+		EVMWalletAddress:     evmWallet,
+		StellarWalletAddress: &stellarWallet,
 	})
 	require.NoError(t, err)
 	require.Equal(t, id, fee.ID)
 	require.Equal(t, name, fee.Name)
-	require.Equal(t, 0.025, fee.PayoutPercentageFee)
+	require.Equal(t, 0.0, fee.PayoutPercentageFee)
 }
 
 func TestPartnerFees_List(t *testing.T) {
-	instanceID := "inst_123"
+	instanceID := "in_000000000000"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
-		APIKey:     "test_key",
+		APIKey:     "test-key",
 		InstanceID: instanceID,
 		HTTPClient: &http.Client{
 			Transport: &blindpaytest.RoundTripper{
 				T: t,
 				Out: json.RawMessage(`[
-					{"id":"pf_123","instance_id":"inst_123","name":"Fee Config 1","payout_percentage_fee":0.025,"payout_flat_fee":2.0,"payin_percentage_fee":0.02,"payin_flat_fee":1.5},
-					{"id":"pf_456","instance_id":"inst_123","name":"Fee Config 2","payout_percentage_fee":0.03,"payout_flat_fee":2.5,"payin_percentage_fee":0.025,"payin_flat_fee":2.0}
+					{
+						"id":"fe_000000000000",
+						"instance_id":"in_000000000000",
+						"name":"Display Name",
+						"payout_percentage_fee":0,
+						"payout_flat_fee":0,
+						"payin_percentage_fee":0,
+						"payin_flat_fee":0,
+						"evm_wallet_address":"0x1234567890123456789012345678901234567890",
+						"stellar_wallet_address":"GAB22222222222222222222222222222222222222222222222222222222222222"
+					}
 				]`),
 				Method: http.MethodGet,
 				Path:   fmt.Sprintf("/instances/%s/partner-fees", instanceID),
@@ -80,23 +104,34 @@ func TestPartnerFees_List(t *testing.T) {
 	client := NewClient(cfg)
 	fees, err := client.List(context.Background())
 	require.NoError(t, err)
-	require.Len(t, fees, 2)
-	require.Equal(t, "pf_123", fees[0].ID)
-	require.Equal(t, "Fee Config 1", fees[0].Name)
+	require.Len(t, fees, 1)
+	require.Equal(t, "fe_000000000000", fees[0].ID)
+	require.Equal(t, "Display Name", fees[0].Name)
 }
 
 func TestPartnerFees_Get(t *testing.T) {
-	instanceID := "inst_123"
-	id := "pf_123"
+	instanceID := "in_000000000000"
+	id := "fe_000000000000"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
-		APIKey:     "test_key",
+		APIKey:     "test-key",
 		InstanceID: instanceID,
 		HTTPClient: &http.Client{
 			Transport: &blindpaytest.RoundTripper{
-				T:      t,
-				Out:    json.RawMessage(fmt.Sprintf(`{"id":"%s","instance_id":"%s","name":"Fee Config","payout_percentage_fee":0.025,"payout_flat_fee":2.0,"payin_percentage_fee":0.02,"payin_flat_fee":1.5}`, id, instanceID)),
+				T: t,
+				Out: json.RawMessage(
+					`{
+						"id":"fe_000000000000",
+						"instance_id":"in_000000000000",
+						"name":"Display Name",
+						"payout_percentage_fee":0,
+						"payout_flat_fee":0,
+						"payin_percentage_fee":0,
+						"payin_flat_fee":0,
+						"evm_wallet_address":"0x1234567890123456789012345678901234567890",
+						"stellar_wallet_address":"GAB22222222222222222222222222222222222222222222222222222222222222"
+					}`),
 				Method: http.MethodGet,
 				Path:   fmt.Sprintf("/instances/%s/partner-fees/%s", instanceID, id),
 			},
@@ -108,21 +143,21 @@ func TestPartnerFees_Get(t *testing.T) {
 	fee, err := client.Get(context.Background(), id)
 	require.NoError(t, err)
 	require.Equal(t, id, fee.ID)
-	require.Equal(t, "Fee Config", fee.Name)
+	require.Equal(t, "Display Name", fee.Name)
 }
 
 func TestPartnerFees_Delete(t *testing.T) {
-	instanceID := "inst_123"
-	id := "pf_123"
+	instanceID := "in_000000000000"
+	id := "fe_000000000000"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
-		APIKey:     "test_key",
+		APIKey:     "test-key",
 		InstanceID: instanceID,
 		HTTPClient: &http.Client{
 			Transport: &blindpaytest.RoundTripper{
 				T:      t,
-				Out:    json.RawMessage(`{}`),
+				Out:    json.RawMessage(`{"data":null}`),
 				Method: http.MethodDelete,
 				Path:   fmt.Sprintf("/instances/%s/partner-fees/%s", instanceID, id),
 			},

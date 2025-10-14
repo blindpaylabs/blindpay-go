@@ -14,25 +14,33 @@ import (
 )
 
 func TestWallets_CreateWithAddress(t *testing.T) {
-	receiverID := "recv_123"
-	instanceID := "inst_123"
-	id := "wallet_123"
-	address := "0x1234567890abcdef"
+	receiverID := "re_000000000000"
+	instanceID := "in_000000000000"
+	id := "bw_000000000000"
+	address := "0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
-		APIKey:     "test_key",
+		APIKey:     "test-key",
 		InstanceID: instanceID,
 		HTTPClient: &http.Client{
 			Transport: &blindpaytest.RoundTripper{
 				T: t,
 				In: json.RawMessage(`{
-					"name":"My Wallet",
-					"network":"ethereum",
-					"address":"0x1234567890abcdef",
-					"is_account_abstraction":true
+			"name":"Wallet Display Name",
+			"network":"polygon",
+			"address":"0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C",
+			"is_account_abstraction":true
+		}`),
+				Out: json.RawMessage(`{
+					"id":"bw_000000000000",
+					"name":"Wallet Display Name",
+					"network":"polygon",
+					"address":"0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C",
+					"signature_tx_hash":null,
+					"is_account_abstraction":true,
+					"receiver_id":"re_000000000000"
 				}`),
-				Out:    json.RawMessage(fmt.Sprintf(`{"id":"%s","name":"My Wallet","network":"ethereum","address":"%s","is_account_abstraction":false,"receiver_id":"%s"}`, id, address, receiverID)),
 				Method: http.MethodPost,
 				Path:   fmt.Sprintf("/instances/%s/receivers/%s/blockchain-wallets", instanceID, receiverID),
 			},
@@ -43,29 +51,37 @@ func TestWallets_CreateWithAddress(t *testing.T) {
 	client := NewClient(cfg)
 	wallet, err := client.CreateWithAddress(context.Background(), &CreateWithAddressParams{
 		ReceiverID: receiverID,
-		Name:       "My Wallet",
-		Network:    types.NetworkEthereum,
+		Name:       "Wallet Display Name",
+		Network:    types.NetworkPolygon,
 		Address:    address,
 	})
 	require.NoError(t, err)
 	require.Equal(t, id, wallet.ID)
 	require.Equal(t, address, wallet.Address)
+	require.True(t, wallet.IsAccountAbstraction)
 }
 
 func TestWallets_List(t *testing.T) {
-	receiverID := "recv_123"
-	instanceID := "inst_123"
+	receiverID := "re_000000000000"
+	instanceID := "in_000000000000"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
-		APIKey:     "test_key",
+		APIKey:     "test-key",
 		InstanceID: instanceID,
 		HTTPClient: &http.Client{
 			Transport: &blindpaytest.RoundTripper{
 				T: t,
 				Out: json.RawMessage(`[
-					{"id":"wallet_123","name":"Wallet 1","network":"ethereum_mainnet","address":"0x123","is_account_abstraction":false,"receiver_id":"recv_123"},
-					{"id":"wallet_456","name":"Wallet 2","network":"polygon_mainnet","address":"0x456","is_account_abstraction":false,"receiver_id":"recv_123"}
+					{
+						"id":"bw_000000000000",
+						"name":"Wallet Display Name",
+						"network":"polygon",
+						"address":"0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C",
+						"signature_tx_hash":"0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
+						"is_account_abstraction":false,
+						"receiver_id":"re_000000000000"
+					}
 				]`),
 				Method: http.MethodGet,
 				Path:   fmt.Sprintf("/instances/%s/receivers/%s/blockchain-wallets", instanceID, receiverID),
@@ -77,23 +93,37 @@ func TestWallets_List(t *testing.T) {
 	client := NewClient(cfg)
 	wallets, err := client.List(context.Background(), receiverID)
 	require.NoError(t, err)
-	require.Len(t, wallets, 2)
-	require.Equal(t, "wallet_123", wallets[0].ID)
+	require.Len(t, wallets, 1)
+	require.Equal(t, "bw_000000000000", wallets[0].ID)
+	require.Equal(t, "Wallet Display Name", wallets[0].Name)
+	require.Equal(t, types.NetworkPolygon, wallets[0].Network)
+	require.Equal(t, "0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C", wallets[0].Address)
+	require.Equal(t, "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359", wallets[0].SignatureTxHash)
+	require.False(t, wallets[0].IsAccountAbstraction)
+	require.Equal(t, "re_000000000000", wallets[0].ReceiverID)
 }
 
 func TestWallets_Get(t *testing.T) {
-	receiverID := "recv_123"
-	id := "wallet_123"
-	instanceID := "inst_123"
+	receiverID := "re_000000000000"
+	id := "bw_000000000000"
+	instanceID := "in_000000000000"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
-		APIKey:     "test_key",
+		APIKey:     "test-key",
 		InstanceID: instanceID,
 		HTTPClient: &http.Client{
 			Transport: &blindpaytest.RoundTripper{
-				T:      t,
-				Out:    json.RawMessage(fmt.Sprintf(`{"id":"%s","name":"My Wallet","network":"ethereum_mainnet","address":"0x123","is_account_abstraction":false,"receiver_id":"%s"}`, id, receiverID)),
+				T: t,
+				Out: json.RawMessage(`{
+					"id":"bw_000000000000",
+					"name":"Wallet Display Name",
+					"network":"polygon",
+					"address":"0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C",
+					"signature_tx_hash":"0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
+					"is_account_abstraction":false,
+					"receiver_id":"re_000000000000"
+				}`),
 				Method: http.MethodGet,
 				Path:   fmt.Sprintf("/instances/%s/receivers/%s/blockchain-wallets/%s", instanceID, receiverID, id),
 			},
@@ -105,21 +135,27 @@ func TestWallets_Get(t *testing.T) {
 	wallet, err := client.Get(context.Background(), receiverID, id)
 	require.NoError(t, err)
 	require.Equal(t, id, wallet.ID)
+	require.Equal(t, "Wallet Display Name", wallet.Name)
+	require.Equal(t, types.NetworkPolygon, wallet.Network)
+	require.Equal(t, "0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C", wallet.Address)
+	require.Equal(t, "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359", wallet.SignatureTxHash)
+	require.False(t, wallet.IsAccountAbstraction)
+	require.Equal(t, "re_000000000000", wallet.ReceiverID)
 }
 
 func TestWallets_Delete(t *testing.T) {
-	receiverID := "recv_123"
-	id := "wallet_123"
-	instanceID := "inst_123"
+	receiverID := "re_000000000000"
+	id := "bw_000000000000"
+	instanceID := "in_000000000000"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
-		APIKey:     "test_key",
+		APIKey:     "test-key",
 		InstanceID: instanceID,
 		HTTPClient: &http.Client{
 			Transport: &blindpaytest.RoundTripper{
 				T:      t,
-				Out:    json.RawMessage(`{}`),
+				Out:    json.RawMessage(`{"data":null}`),
 				Method: http.MethodDelete,
 				Path:   fmt.Sprintf("/instances/%s/receivers/%s/blockchain-wallets/%s", instanceID, receiverID, id),
 			},
@@ -133,17 +169,17 @@ func TestWallets_Delete(t *testing.T) {
 }
 
 func TestWallets_GetWalletMessage(t *testing.T) {
-	receiverID := "recv_123"
-	instanceID := "inst_123"
+	receiverID := "re_000000000000"
+	instanceID := "in_000000000000"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
-		APIKey:     "test_key",
+		APIKey:     "test-key",
 		InstanceID: instanceID,
 		HTTPClient: &http.Client{
 			Transport: &blindpaytest.RoundTripper{
 				T:      t,
-				Out:    json.RawMessage(`{"message":"Sign this message to verify wallet ownership"}`),
+				Out:    json.RawMessage(`{"message":"random"}`),
 				Method: http.MethodGet,
 				Path:   fmt.Sprintf("/instances/%s/receivers/%s/blockchain-wallets/sign-message", instanceID, receiverID),
 			},
@@ -154,5 +190,5 @@ func TestWallets_GetWalletMessage(t *testing.T) {
 	client := NewClient(cfg)
 	response, err := client.GetWalletMessage(context.Background(), receiverID)
 	require.NoError(t, err)
-	require.Equal(t, "Sign this message to verify wallet ownership", response.Message)
+	require.Equal(t, "random", response.Message)
 }

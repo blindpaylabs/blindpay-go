@@ -340,7 +340,7 @@ func (c *Client) CreateIndividualStandard(ctx context.Context, params *CreateInd
 
 	path := fmt.Sprintf("/instances/%s/receivers", c.instanceID)
 
-	body := map[string]interface{}{
+	body := map[string]any{
 		"kyc_type":                  "standard",
 		"type":                      "individual",
 		"address_line_1":            params.AddressLine1,
@@ -385,7 +385,7 @@ func (c *Client) CreateIndividualEnhanced(ctx context.Context, params *CreateInd
 
 	path := fmt.Sprintf("/instances/%s/receivers", c.instanceID)
 
-	body := map[string]interface{}{
+	body := map[string]any{
 		"kyc_type":                          "enhanced",
 		"type":                              "individual",
 		"address_line_1":                    params.AddressLine1,
@@ -437,7 +437,7 @@ func (c *Client) CreateBusinessStandard(ctx context.Context, params *CreateBusin
 
 	path := fmt.Sprintf("/instances/%s/receivers", c.instanceID)
 
-	body := map[string]interface{}{
+	body := map[string]any{
 		"kyc_type":                    "standard",
 		"type":                        "business",
 		"address_line_1":              params.AddressLine1,
@@ -493,7 +493,7 @@ func (c *Client) Update(ctx context.Context, params *UpdateParams) error {
 	path := fmt.Sprintf("/instances/%s/receivers/%s", c.instanceID, params.ReceiverID)
 
 	// Build the request body with only non-nil fields
-	body := make(map[string]interface{})
+	body := make(map[string]any)
 
 	if params.Email != nil {
 		body["email"] = params.Email

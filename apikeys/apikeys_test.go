@@ -3,7 +3,6 @@ package apikeys
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"testing"
 
@@ -13,23 +12,24 @@ import (
 )
 
 func TestAPIKeys_Create(t *testing.T) {
-	name := "Test API Key"
-	permission := "read"
-	id := "key_123"
-	token := "bp_test_token_123"
-	instanceID := "inst_123"
-
+	instanceID := "in_000000000000"
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
-		APIKey:     "test_key",
+		APIKey:     "test-key",
 		InstanceID: instanceID,
 		HTTPClient: &http.Client{
 			Transport: &blindpaytest.RoundTripper{
-				T:      t,
-				In:     json.RawMessage(fmt.Sprintf(`{"name":"%s","permission":"%s"}`, name, permission)),
-				Out:    json.RawMessage(fmt.Sprintf(`{"id":"%s","token":"%s"}`, id, token)),
+				T: t,
+				In: json.RawMessage(`{
+					"name": "test",
+					"permission": "full_access"
+				}`),
+				Out: json.RawMessage(`{
+					"id": "ap_000000000000",
+					"token": "token"
+				}`),
 				Method: http.MethodPost,
-				Path:   fmt.Sprintf("/instances/%s/api-keys", instanceID),
+				Path:   "/instances/in_000000000000/api-keys",
 			},
 		},
 		UserAgent: "test",
@@ -37,29 +37,39 @@ func TestAPIKeys_Create(t *testing.T) {
 
 	client := NewClient(cfg)
 	apiKey, err := client.Create(context.Background(), &CreateParams{
-		Name:       name,
-		Permission: permission,
+		Name:       "test",
+		Permission: "full_access",
 	})
 	require.NoError(t, err)
-	require.Equal(t, id, apiKey.ID)
-	require.Equal(t, token, apiKey.Token)
+	require.Equal(t, "ap_000000000000", apiKey.ID)
+	require.Equal(t, "token", apiKey.Token)
 }
 
 func TestAPIKeys_List(t *testing.T) {
-	instanceID := "inst_123"
+	instanceID := "in_000000000000"
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
-		APIKey:     "test_key",
+		APIKey:     "test-key",
 		InstanceID: instanceID,
 		HTTPClient: &http.Client{
 			Transport: &blindpaytest.RoundTripper{
 				T: t,
 				Out: json.RawMessage(`[
-					{"id":"key_123","name":"Test Key 1","permission":"read","token":"","unkey_id":"unkey_1","instance_id":"inst_123","created_at":"2024-01-01T00:00:00Z","updated_at":"2024-01-01T00:00:00Z"},
-					{"id":"key_456","name":"Test Key 2","permission":"write","token":"","unkey_id":"unkey_2","instance_id":"inst_123","created_at":"2024-01-01T00:00:00Z","updated_at":"2024-01-01T00:00:00Z"}
+					{
+						"id": "ap_000000000000",
+						"token": "token",
+						"name": "test",
+						"permission": "full_access",
+						"ip_whitelist": ["127.0.0.1"],
+						"unkey_id": "key_123456789",
+						"last_used_at": "2024-01-01T00:00:00.000Z",
+						"instance_id": "in_000000000000",
+						"created_at": "2021-01-01T00:00:00Z",
+						"updated_at": "2021-01-01T00:00:00Z"
+					}
 				]`),
 				Method: http.MethodGet,
-				Path:   fmt.Sprintf("/instances/%s/api-keys", instanceID),
+				Path:   "/instances/in_000000000000/api-keys",
 			},
 		},
 		UserAgent: "test",
@@ -68,24 +78,44 @@ func TestAPIKeys_List(t *testing.T) {
 	client := NewClient(cfg)
 	keys, err := client.List(context.Background())
 	require.NoError(t, err)
-	require.Len(t, keys, 2)
-	require.Equal(t, "key_123", keys[0].ID)
-	require.Equal(t, "Test Key 1", keys[0].Name)
+	require.Len(t, keys, 1)
+	require.Equal(t, "ap_000000000000", keys[0].ID)
+	require.Equal(t, "test", keys[0].Name)
+	require.Equal(t, "token", keys[0].Token)
+	require.Equal(t, "full_access", keys[0].Permission)
+	require.Equal(t, []string{"127.0.0.1"}, keys[0].IPWhitelist)
+	require.Equal(t, "key_123456789", keys[0].UnkeyID)
+	require.NotNil(t, keys[0].LastUsedAt)
+	require.Equal(t, "2024-01-01T00:00:00.000Z", keys[0].LastUsedAt.Format("2006-01-02T15:04:05.000Z"))
+	require.Equal(t, "in_000000000000", keys[0].InstanceID)
+	require.Equal(t, "2021-01-01T00:00:00Z", keys[0].CreatedAt.Format("2006-01-02T15:04:05Z"))
+	require.Equal(t, "2021-01-01T00:00:00Z", keys[0].UpdatedAt.Format("2006-01-02T15:04:05Z"))
 }
 
 func TestAPIKeys_Get(t *testing.T) {
-	id := "key_123"
-	instanceID := "inst_123"
+	id := "ap_000000000000"
+	instanceID := "in_000000000000"
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
-		APIKey:     "test_key",
+		APIKey:     "test-key",
 		InstanceID: instanceID,
 		HTTPClient: &http.Client{
 			Transport: &blindpaytest.RoundTripper{
-				T:      t,
-				Out:    json.RawMessage(fmt.Sprintf(`{"id":"%s","name":"Test Key","permission":"read","token":"","unkey_id":"unkey_1","instance_id":"inst_123","created_at":"2024-01-01T00:00:00Z","updated_at":"2024-01-01T00:00:00Z"}`, id)),
+				T: t,
+				Out: json.RawMessage(`{
+					"id": "ap_000000000000",
+					"token": "token",
+					"name": "test",
+					"permission": "full_access",
+					"ip_whitelist": ["127.0.0.1"],
+					"unkey_id": "key_123456789",
+					"last_used_at": "2024-01-01T00:00:00.000Z",
+					"instance_id": "in_000000000000",
+					"created_at": "2021-01-01T00:00:00Z",
+					"updated_at": "2021-01-01T00:00:00Z"
+				}`),
 				Method: http.MethodGet,
-				Path:   fmt.Sprintf("/instances/%s/api-keys/%s", instanceID, id),
+				Path:   "/instances/in_000000000000/api-keys/ap_000000000000",
 			},
 		},
 		UserAgent: "test",
@@ -94,23 +124,32 @@ func TestAPIKeys_Get(t *testing.T) {
 	client := NewClient(cfg)
 	apiKey, err := client.Get(context.Background(), id)
 	require.NoError(t, err)
-	require.Equal(t, id, apiKey.ID)
-	require.Equal(t, "Test Key", apiKey.Name)
+	require.Equal(t, "ap_000000000000", apiKey.ID)
+	require.Equal(t, "token", apiKey.Token)
+	require.Equal(t, "test", apiKey.Name)
+	require.Equal(t, "full_access", apiKey.Permission)
+	require.Equal(t, []string{"127.0.0.1"}, apiKey.IPWhitelist)
+	require.Equal(t, "key_123456789", apiKey.UnkeyID)
+	require.NotNil(t, apiKey.LastUsedAt)
+	require.Equal(t, "2024-01-01T00:00:00.000Z", apiKey.LastUsedAt.Format("2006-01-02T15:04:05.000Z"))
+	require.Equal(t, "in_000000000000", apiKey.InstanceID)
+	require.Equal(t, "2021-01-01T00:00:00Z", apiKey.CreatedAt.Format("2006-01-02T15:04:05Z"))
+	require.Equal(t, "2021-01-01T00:00:00Z", apiKey.UpdatedAt.Format("2006-01-02T15:04:05Z"))
 }
 
 func TestAPIKeys_Delete(t *testing.T) {
-	id := "key_123"
-	instanceID := "inst_123"
+	id := "ap_000000000000"
+	instanceID := "in_000000000000"
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
-		APIKey:     "test_key",
+		APIKey:     "test-key",
 		InstanceID: instanceID,
 		HTTPClient: &http.Client{
 			Transport: &blindpaytest.RoundTripper{
 				T:      t,
-				Out:    json.RawMessage(`{}`),
+				Out:    json.RawMessage(`{"data":null}`),
 				Method: http.MethodDelete,
-				Path:   fmt.Sprintf("/instances/%s/api-keys/%s", instanceID, id),
+				Path:   "/instances/in_000000000000/api-keys/ap_000000000000",
 			},
 		},
 		UserAgent: "test",
@@ -124,8 +163,8 @@ func TestAPIKeys_Delete(t *testing.T) {
 func TestAPIKeys_Create_Error(t *testing.T) {
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
-		APIKey:     "test_key",
-		InstanceID: "inst_123",
+		APIKey:     "test-key",
+		InstanceID: "in_000000000000",
 		HTTPClient: &http.Client{
 			Transport: &blindpaytest.RoundTripper{
 				T:      t,
