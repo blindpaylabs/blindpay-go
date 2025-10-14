@@ -44,7 +44,7 @@ func TestWallets_CreateWithAddress(t *testing.T) {
 	wallet, err := client.CreateWithAddress(context.Background(), &CreateWithAddressParams{
 		ReceiverID: receiverID,
 		Name:       "My Wallet",
-		Network:    types.NetworkEthereumMainnet,
+		Network:    types.NetworkEthereum,
 		Address:    address,
 	})
 	require.NoError(t, err)
