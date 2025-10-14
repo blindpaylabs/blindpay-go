@@ -1,4 +1,3 @@
-// Package payins provides the payins resource for the BlindPay API.
 package payins
 
 import (

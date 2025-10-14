@@ -1,4 +1,3 @@
-// Package available provides the available resource for the BlindPay API.
 package available
 
 import (

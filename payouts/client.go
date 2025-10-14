@@ -1,4 +1,3 @@
-// Package payouts provides the payouts resource for the BlindPay API.
 package payouts
 
 import (

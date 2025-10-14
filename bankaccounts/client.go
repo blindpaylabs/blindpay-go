@@ -1,4 +1,3 @@
-// Package bankaccounts provides the bank accounts resource for the BlindPay API.
 package bankaccounts
 
 import (

@@ -1,4 +1,3 @@
-// Package apikeys provides the API keys resource for the BlindPay API.
 package apikeys
 
 import (
