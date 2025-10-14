@@ -1,7 +1,6 @@
 package blindpay
 
 import (
-	"encoding/json"
 	"fmt"
 )
 
@@ -45,21 +44,4 @@ func (e *APIError) Error() string {
 	}
 
 	return msg
-}
-
-// parseAPIError attempts to parse an API error from the response body.
-func parseAPIError(statusCode int, body []byte) *APIError {
-	apiErr := &APIError{
-		StatusCode: statusCode,
-		RawBody:    body,
-	}
-
-	if err := json.Unmarshal(body, apiErr); err != nil {
-		apiErr.Message = fmt.Sprintf("HTTP %d error", statusCode)
-		if len(body) > 0 && len(body) < 1000 { // Don't include huge response bodies
-			apiErr.Message += fmt.Sprintf(": %s", string(body))
-		}
-	}
-
-	return apiErr
 }
