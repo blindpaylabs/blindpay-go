@@ -28,11 +28,11 @@ func TestWallets_CreateWithAddress(t *testing.T) {
 				T: t,
 				In: json.RawMessage(`{
 					"name":"My Wallet",
-					"network":"ethereum_mainnet",
+					"network":"ethereum",
 					"address":"0x1234567890abcdef",
 					"is_account_abstraction":true
 				}`),
-				Out:    json.RawMessage(fmt.Sprintf(`{"id":"%s","name":"My Wallet","network":"ethereum_mainnet","address":"%s","is_account_abstraction":false,"receiver_id":"%s"}`, id, address, receiverID)),
+				Out:    json.RawMessage(fmt.Sprintf(`{"id":"%s","name":"My Wallet","network":"ethereum","address":"%s","is_account_abstraction":false,"receiver_id":"%s"}`, id, address, receiverID)),
 				Method: http.MethodPost,
 				Path:   fmt.Sprintf("/instances/%s/receivers/%s/blockchain-wallets", instanceID, receiverID),
 			},
