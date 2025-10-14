@@ -341,12 +341,8 @@ func (c *Client) CreateIndividualStandard(ctx context.Context, params *CreateInd
 	path := fmt.Sprintf("/instances/%s/receivers", c.instanceID)
 
 	body := map[string]interface{}{
-		"kyc_type": "standard",
-		"type":     "individual",
-	}
-
-	// Marshal params to map
-	bodyData := map[string]interface{}{
+		"kyc_type":                  "standard",
+		"type":                      "individual",
 		"address_line_1":            params.AddressLine1,
 		"city":                      params.City,
 		"country":                   params.Country,
@@ -366,20 +362,16 @@ func (c *Client) CreateIndividualStandard(ctx context.Context, params *CreateInd
 	}
 
 	if params.AddressLine2 != nil {
-		bodyData["address_line_2"] = params.AddressLine2
+		body["address_line_2"] = params.AddressLine2
 	}
 	if params.PhoneNumber != nil {
-		bodyData["phone_number"] = params.PhoneNumber
+		body["phone_number"] = params.PhoneNumber
 	}
 	if params.IDDocBackFile != nil {
-		bodyData["id_doc_back_file"] = params.IDDocBackFile
+		body["id_doc_back_file"] = params.IDDocBackFile
 	}
 	if params.ExternalID != nil {
-		bodyData["external_id"] = params.ExternalID
-	}
-
-	for k, v := range bodyData {
-		body[k] = v
+		body["external_id"] = params.ExternalID
 	}
 
 	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, body)

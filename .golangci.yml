@@ -1,0 +1,41 @@
+run:
+  timeout: 5m
+  tests: true
+  build-tags: []
+  skip-dirs: []
+
+linters:
+  enable:
+    - errcheck        # Check for unchecked errors
+    - gofmt           # Check that code is formatted with gofmt
+    - gosimple        # Simplify code
+    - govet           # Vet examines Go source code
+    - ineffassign     # Detect ineffectual assignments
+    - staticcheck     # Go static analysis
+    - unused          # Check for unused constants, variables, functions and types
+    - misspell        # Check spelling
+    - unconvert       # Remove unnecessary type conversions
+    - gocyclo         # Computes cyclomatic complexity
+    - unparam         # Reports unused function parameters
+    - goconst         # Finds repeated strings that could be replaced by a constant
+
+linters-settings:
+  gocyclo:
+    min-complexity: 15
+  goconst:
+    min-len: 3
+    min-occurrences: 3
+  misspell:
+    locale: US
+
+issues:
+  exclude-use-default: false
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - gocyclo
+        - errcheck
+        - gosec
+

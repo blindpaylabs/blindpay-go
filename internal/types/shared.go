@@ -20,10 +20,7 @@ const (
 	NetworkPolygon         Network = "polygon"
 	NetworkPolygonAmoy     Network = "polygon_amoy"
 	NetworkEthereum        Network = "ethereum"
-	NetworkEthereumMainnet Network = "ethereum_mainnet"
-	NetworkPolygonMainnet  Network = "polygon_mainnet"
 	NetworkStellar         Network = "stellar"
-	NetworkStellarMainnet  Network = "stellar_mainnet"
 	NetworkStellarTestnet  Network = "stellar_testnet"
 	NetworkTron            Network = "tron"
 )
@@ -34,10 +31,6 @@ const (
 	StablecoinTokenUSDC StablecoinToken = "USDC"
 	StablecoinTokenUSDT StablecoinToken = "USDT"
 	StablecoinTokenUSDB StablecoinToken = "USDB"
-	// Legacy aliases
-	StablecoinUSDC = StablecoinTokenUSDC
-	StablecoinUSDT = StablecoinTokenUSDT
-	StablecoinUSDB = StablecoinTokenUSDB
 )
 
 type TransactionDocumentType string
@@ -50,13 +43,6 @@ const (
 	TransactionDocumentTypeCustomsDeclaration TransactionDocumentType = "customs_declaration"
 	TransactionDocumentTypeBillOfLading       TransactionDocumentType = "bill_of_lading"
 	TransactionDocumentTypeOthers             TransactionDocumentType = "others"
-	TransactionDocumentInvoice                                        = TransactionDocumentTypeInvoice
-	TransactionDocumentPurchaseOrder                                  = TransactionDocumentTypePurchaseOrder
-	TransactionDocumentDeliverySlip                                   = TransactionDocumentTypeDeliverySlip
-	TransactionDocumentContract                                       = TransactionDocumentTypeContract
-	TransactionDocumentCustomsDeclaration                             = TransactionDocumentTypeCustomsDeclaration
-	TransactionDocumentBillOfLading                                   = TransactionDocumentTypeBillOfLading
-	TransactionDocumentOthers                                         = TransactionDocumentTypeOthers
 )
 
 type BankAccountType string

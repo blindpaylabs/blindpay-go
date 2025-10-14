@@ -41,6 +41,7 @@ type Client struct {
 	Receivers        *receivers.Client
 	VirtualAccounts  *virtualaccounts.Client
 	Wallets          *wallets.Client
+	OfframpWallets   *wallets.OfframpClient
 	WebhookEndpoints *webhookendpoints.Client
 }
 
@@ -86,6 +87,7 @@ func New(apiKey, instanceID string, opts ...Option) (*Client, error) {
 	c.Receivers = receivers.NewClient(cfg)
 	c.VirtualAccounts = virtualaccounts.NewClient(cfg)
 	c.Wallets = wallets.NewClient(cfg)
+	c.OfframpWallets = wallets.NewOfframpClient(cfg)
 	c.WebhookEndpoints = webhookendpoints.NewClient(cfg)
 
 	return c, nil

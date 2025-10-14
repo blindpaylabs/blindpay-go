@@ -30,7 +30,7 @@ func NewClient(cfg *config.Config) *Client {
 // GetBankDetails retrieves the bank details configuration for a specific rail.
 func (c *Client) GetBankDetails(ctx context.Context, rail types.Rail) ([]types.BankDetail, error) {
 	if rail == "" {
-		return nil, fmt.Errorf("rail parameter is required")
+		return nil, fmt.Errorf("rail cannot be empty")
 	}
 
 	path := fmt.Sprintf("/available/bank-details?rail=%s", rail)

@@ -83,8 +83,8 @@ type Payout struct {
 // ListParams represents parameters for listing payouts.
 type ListParams struct {
 	ReceiverID string `json:"receiver_id,omitempty"`
-	Limit      string `json:"limit,omitempty"`
-	Offset     string `json:"offset,omitempty"`
+	Limit      int    `json:"limit,omitempty"`
+	Offset     int    `json:"offset,omitempty"`
 }
 
 // ListResponse represents the response when listing payouts.
@@ -156,11 +156,11 @@ func (c *Client) List(ctx context.Context, params *ListParams) (*ListResponse, e
 		if params.ReceiverID != "" {
 			q.Set("receiver_id", params.ReceiverID)
 		}
-		if params.Limit != "" {
-			q.Set("limit", params.Limit)
+		if params.Limit > 0 {
+			q.Set("limit", fmt.Sprintf("%d", params.Limit))
 		}
-		if params.Offset != "" {
-			q.Set("offset", params.Offset)
+		if params.Offset > 0 {
+			q.Set("offset", fmt.Sprintf("%d", params.Offset))
 		}
 		if len(q) > 0 {
 			path += "?" + q.Encode()

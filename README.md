@@ -58,7 +58,7 @@ go run main.go
 ```
 
 For detailed API documentation, visit:
-- [Blindpay API documentation](https://blindpay.com/docs/getting-started/overview)
+- [BlindPay API documentation](https://blindpay.com/docs/getting-started/overview)
 - [API Reference](https://api.blindpay.com/reference)
 
 ## Support
@@ -70,4 +70,4 @@ For detailed API documentation, visit:
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-Made with ❤️ by the [Blindpay](https://blindpay.com) team
+Made with ❤️ by the [BlindPay](https://blindpay.com) team

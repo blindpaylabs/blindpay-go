@@ -33,7 +33,7 @@ type ErrorItem struct {
 	LongMessage string `json:"long_message,omitempty"`
 }
 
-// Error returns a string representation of the APIError.
+// Error implements the error interface for APIError.
 func (e *APIError) Error() string {
 	msg := fmt.Sprintf("blindpay: API error (status %d)", e.StatusCode)
 

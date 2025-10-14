@@ -21,4 +21,4 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
       - name: Run tests
-        run: go test -v -race $(go list ./... | grep -v -E '/internal/|/examples/')
+        run: go test -v -race $(go list ./... | grep -v '/examples/')

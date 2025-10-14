@@ -83,8 +83,8 @@ type BankDetails struct {
 type ListParams struct {
 	Status     types.TransactionStatus `json:"status,omitempty"`
 	ReceiverID string                  `json:"receiver_id,omitempty"`
-	Limit      string                  `json:"limit,omitempty"`
-	Offset     string                  `json:"offset,omitempty"`
+	Limit      int                     `json:"limit,omitempty"`
+	Offset     int                     `json:"offset,omitempty"`
 }
 
 // ListResponse represents the response when listing payins.
@@ -144,11 +144,11 @@ func (c *Client) List(ctx context.Context, params *ListParams) (*ListResponse, e
 		if params.ReceiverID != "" {
 			q.Set("receiver_id", params.ReceiverID)
 		}
-		if params.Limit != "" {
-			q.Set("limit", params.Limit)
+		if params.Limit > 0 {
+			q.Set("limit", fmt.Sprintf("%d", params.Limit))
 		}
-		if params.Offset != "" {
-			q.Set("offset", params.Offset)
+		if params.Offset > 0 {
+			q.Set("offset", fmt.Sprintf("%d", params.Offset))
 		}
 		if len(q) > 0 {
 			path += "?" + q.Encode()
@@ -179,18 +179,18 @@ func (c *Client) GetTrack(ctx context.Context, payinID string) (*Payin, error) {
 }
 
 // Export exports payins with filters.
-func (c *Client) Export(ctx context.Context, status types.TransactionStatus, limit, offset string) ([]Payin, error) {
+func (c *Client) Export(ctx context.Context, status types.TransactionStatus, limit, offset int) ([]Payin, error) {
 	path := fmt.Sprintf("/instances/%s/export/payins", c.instanceID)
 
 	q := url.Values{}
 	if status != "" {
 		q.Set("status", string(status))
 	}
-	if limit != "" {
-		q.Set("limit", limit)
+	if limit > 0 {
+		q.Set("limit", fmt.Sprintf("%d", limit))
 	}
-	if offset != "" {
-		q.Set("offset", offset)
+	if offset > 0 {
+		q.Set("offset", fmt.Sprintf("%d", offset))
 	}
 	if len(q) > 0 {
 		path += "?" + q.Encode()

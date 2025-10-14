@@ -29,5 +29,5 @@ go run main.go
 
 - Check the main [README](../README.md) for SDK documentation
 - Visit the [BlindPay API documentation](https://api.blindpay.com/reference)
-- Open an issue on [GitHub](https://github.com/blindpaylabs/blindpay-go)
+- Open an issue on [GitHub](https://github.com/blindpaylabs/blindpay-go/issues)
 

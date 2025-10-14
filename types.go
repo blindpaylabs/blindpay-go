@@ -1,11 +1,8 @@
 package blindpay
 
 import (
-	"github.com/blindpaylabs/blindpay-go/internal/config"
 	"github.com/blindpaylabs/blindpay-go/internal/types"
 )
-
-type Config = config.Config
 
 type CurrencyType = types.CurrencyType
 type Network = types.Network
@@ -32,17 +29,17 @@ const (
 	NetworkStellarTestnet  = types.NetworkStellarTestnet
 	NetworkTron            = types.NetworkTron
 
-	StablecoinUSDC = types.StablecoinUSDC
-	StablecoinUSDT = types.StablecoinUSDT
-	StablecoinUSDB = types.StablecoinUSDB
+	StablecoinUSDC = types.StablecoinTokenUSDC
+	StablecoinUSDT = types.StablecoinTokenUSDT
+	StablecoinUSDB = types.StablecoinTokenUSDB
 
-	TransactionDocumentInvoice            = types.TransactionDocumentInvoice
-	TransactionDocumentPurchaseOrder      = types.TransactionDocumentPurchaseOrder
-	TransactionDocumentDeliverySlip       = types.TransactionDocumentDeliverySlip
-	TransactionDocumentContract           = types.TransactionDocumentContract
-	TransactionDocumentCustomsDeclaration = types.TransactionDocumentCustomsDeclaration
-	TransactionDocumentBillOfLading       = types.TransactionDocumentBillOfLading
-	TransactionDocumentOthers             = types.TransactionDocumentOthers
+	TransactionDocumentInvoice            = types.TransactionDocumentTypeInvoice
+	TransactionDocumentPurchaseOrder      = types.TransactionDocumentTypePurchaseOrder
+	TransactionDocumentDeliverySlip       = types.TransactionDocumentTypeDeliverySlip
+	TransactionDocumentContract           = types.TransactionDocumentTypeContract
+	TransactionDocumentCustomsDeclaration = types.TransactionDocumentTypeCustomsDeclaration
+	TransactionDocumentBillOfLading       = types.TransactionDocumentTypeBillOfLading
+	TransactionDocumentOthers             = types.TransactionDocumentTypeOthers
 
 	BankAccountTypeChecking = types.BankAccountTypeChecking
 	BankAccountTypeSavings  = types.BankAccountTypeSavings
@@ -59,6 +56,7 @@ const (
 	AccountClassIndividual = types.AccountClassIndividual
 	AccountClassBusiness   = types.AccountClassBusiness
 
+	TransactionStatusPending    = types.TransactionStatusPending
 	TransactionStatusRefunded   = types.TransactionStatusRefunded
 	TransactionStatusProcessing = types.TransactionStatusProcessing
 	TransactionStatusCompleted  = types.TransactionStatusCompleted
@@ -321,8 +319,8 @@ const (
 )
 
 type PaginationParams struct {
-	Limit         string `json:"limit,omitempty"`
-	Offset        string `json:"offset,omitempty"`
+	Limit         int    `json:"limit,omitempty"`
+	Offset        int    `json:"offset,omitempty"`
 	StartingAfter string `json:"starting_after,omitempty"`
 	EndingBefore  string `json:"ending_before,omitempty"`
 }
