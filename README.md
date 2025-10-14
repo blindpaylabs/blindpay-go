@@ -10,7 +10,7 @@ go get github.com/blindpaylabs/blindpay-go
 
 ## 📋 Requirements
 
-- Go 1.21 or higher
+- Go 1.19 or higher
 - BlindPay API credentials (API Key and Instance ID)
 
 ## 🔧 Quick Start

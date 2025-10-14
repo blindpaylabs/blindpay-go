@@ -1,6 +1,6 @@
 module github.com/blindpaylabs/blindpay-go
 
-go 1.21
+go 1.19
 
 require github.com/stretchr/testify v1.11.1
 
