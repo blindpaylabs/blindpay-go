@@ -2,6 +2,17 @@ package types
 
 type Rail string
 
+const (
+	RailWire               Rail = "wire"
+	RailACH                Rail = "ach"
+	RailPix                Rail = "pix"
+	RailSpeiBitso          Rail = "spei_bitso"
+	RailTransfersBitso     Rail = "transfers_bitso"
+	RailACHCopBitso        Rail = "ach_cop_bitso"
+	RailInternationalSwift Rail = "international_swift"
+	RailRTP                Rail = "rtp"
+)
+
 type BankDetail struct {
 	Label    string `json:"label"`
 	Regex    string `json:"regex"`

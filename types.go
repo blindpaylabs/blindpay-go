@@ -338,6 +338,17 @@ type RailEntry = types.RailEntry
 type WebhookEvent = types.WebhookEvent
 
 const (
+	RailWire               = types.RailWire
+	RailACH                = types.RailACH
+	RailPix                = types.RailPix
+	RailSpeiBitso          = types.RailSpeiBitso
+	RailTransfersBitso     = types.RailTransfersBitso
+	RailACHCopBitso        = types.RailACHCopBitso
+	RailInternationalSwift = types.RailInternationalSwift
+	RailRTP                = types.RailRTP
+)
+
+const (
 	WebhookEventReceiverNew         = types.WebhookEventReceiverNew
 	WebhookEventReceiverUpdate      = types.WebhookEventReceiverUpdate
 	WebhookEventBankAccountNew      = types.WebhookEventBankAccountNew
