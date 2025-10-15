@@ -92,6 +92,12 @@ type ListResponse struct {
 	Pagination types.PaginationMetadata `json:"pagination"`
 }
 
+// ExportParams represents parameters for exporting payouts.
+type ExportParams struct {
+	Limit  int `json:"limit,omitempty"`
+	Offset int `json:"offset,omitempty"`
+}
+
 // AuthorizeStellarTokenParams represents parameters for authorizing a Stellar token.
 type AuthorizeStellarTokenParams struct {
 	QuoteID             string `json:"quote_id"`
@@ -167,6 +173,26 @@ func (c *Client) List(ctx context.Context, params *ListParams) (*ListResponse, e
 	}
 
 	return request.Do[*ListResponse](c.cfg, ctx, "GET", path, nil)
+}
+
+// Export retrieves all payouts for export with optional pagination.
+func (c *Client) Export(ctx context.Context, params *ExportParams) ([]Payout, error) {
+	path := fmt.Sprintf("/instances/%s/export/payouts", c.instanceID)
+
+	if params != nil {
+		q := url.Values{}
+		if params.Limit > 0 {
+			q.Set("limit", fmt.Sprintf("%d", params.Limit))
+		}
+		if params.Offset > 0 {
+			q.Set("offset", fmt.Sprintf("%d", params.Offset))
+		}
+		if len(q) > 0 {
+			path += "?" + q.Encode()
+		}
+	}
+
+	return request.Do[[]Payout](c.cfg, ctx, "GET", path, nil)
 }
 
 // Get retrieves a specific payout by ID.

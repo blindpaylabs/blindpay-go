@@ -332,8 +332,8 @@ func (c *Client) List(ctx context.Context) ([]Receiver, error) {
 	return request.Do[[]Receiver](c.cfg, ctx, "GET", path, nil)
 }
 
-// CreateIndividualStandard creates an individual receiver with standard KYC.
-func (c *Client) CreateIndividualStandard(ctx context.Context, params *CreateIndividualStandardParams) (*CreateResponse, error) {
+// CreateIndividualWithStandardKYC creates an individual receiver with standard KYC.
+func (c *Client) CreateIndividualWithStandardKYC(ctx context.Context, params *CreateIndividualStandardParams) (*CreateResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -377,8 +377,8 @@ func (c *Client) CreateIndividualStandard(ctx context.Context, params *CreateInd
 	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, body)
 }
 
-// CreateIndividualEnhanced creates an individual receiver with enhanced KYC.
-func (c *Client) CreateIndividualEnhanced(ctx context.Context, params *CreateIndividualEnhancedParams) (*CreateResponse, error) {
+// CreateIndividualWithEnhancedKYC creates an individual receiver with enhanced KYC.
+func (c *Client) CreateIndividualWithEnhancedKYC(ctx context.Context, params *CreateIndividualEnhancedParams) (*CreateResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -429,8 +429,8 @@ func (c *Client) CreateIndividualEnhanced(ctx context.Context, params *CreateInd
 	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, body)
 }
 
-// CreateBusinessStandard creates a business receiver with standard KYB.
-func (c *Client) CreateBusinessStandard(ctx context.Context, params *CreateBusinessStandardParams) (*CreateResponse, error) {
+// CreateBusinessWithStandardKYB creates a business receiver with standard KYB.
+func (c *Client) CreateBusinessWithStandardKYB(ctx context.Context, params *CreateBusinessStandardParams) (*CreateResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}

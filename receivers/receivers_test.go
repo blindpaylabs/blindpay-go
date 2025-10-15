@@ -191,7 +191,7 @@ func TestReceivers_List(t *testing.T) {
 	require.Equal(t, "Business Corp", receivers[2].LegalName)
 }
 
-func TestReceivers_CreateIndividualStandard(t *testing.T) {
+func TestReceivers_CreateIndividualWithStandardKYC(t *testing.T) {
 	instanceID := "in_000000000000"
 	receiverID := "re_Euw7HN4OdxPn"
 
@@ -214,7 +214,7 @@ func TestReceivers_CreateIndividualStandard(t *testing.T) {
 	addressLine2 := "Apto 101"
 	phoneNumber := "+5511987654321"
 	idDocBackFile := "https://example.com/image.png"
-	response, err := client.CreateIndividualStandard(context.Background(), &CreateIndividualStandardParams{
+	response, err := client.CreateIndividualWithStandardKYC(context.Background(), &CreateIndividualStandardParams{
 		Email:                 "bernardo.simonassi@gmail.com",
 		FirstName:             "Bernardo",
 		LastName:              "Simonassi",
@@ -239,7 +239,7 @@ func TestReceivers_CreateIndividualStandard(t *testing.T) {
 	require.Equal(t, receiverID, response.ID)
 }
 
-func TestReceivers_CreateIndividualEnhanced(t *testing.T) {
+func TestReceivers_CreateIndividualWithEnhancedKYC(t *testing.T) {
 	instanceID := "in_000000000000"
 	receiverID := "re_YuaMcI2B8zbQ"
 
@@ -263,7 +263,7 @@ func TestReceivers_CreateIndividualEnhanced(t *testing.T) {
 	phoneNumber := "+5511987654321"
 	idDocBackFile := "https://example.com/image.png"
 	purposeExplanation := "I am receiving salary payments from my employer"
-	response, err := client.CreateIndividualEnhanced(context.Background(), &CreateIndividualEnhancedParams{
+	response, err := client.CreateIndividualWithEnhancedKYC(context.Background(), &CreateIndividualEnhancedParams{
 		Email:                            "bernardo.simonassi@gmail.com",
 		FirstName:                        "Bernardo",
 		LastName:                         "Simonassi",
@@ -293,7 +293,7 @@ func TestReceivers_CreateIndividualEnhanced(t *testing.T) {
 	require.Equal(t, receiverID, response.ID)
 }
 
-func TestReceivers_CreateBusinessStandard(t *testing.T) {
+func TestReceivers_CreateBusinessWithStandardKYB(t *testing.T) {
 	instanceID := "in_000000000000"
 	receiverID := "re_IOxAUL24LG7P"
 
@@ -316,7 +316,7 @@ func TestReceivers_CreateBusinessStandard(t *testing.T) {
 	addressLine2 := "Sala 1201"
 	website := "https://site.com/"
 	ownerIDDocBackFile := "https://example.com/image.png"
-	response, err := client.CreateBusinessStandard(context.Background(), &CreateBusinessStandardParams{
+	response, err := client.CreateBusinessWithStandardKYB(context.Background(), &CreateBusinessStandardParams{
 		Email:                   "contato@empresa.com.br",
 		TaxID:                   "20096178000195",
 		AddressLine1:            "Av. Brigadeiro Faria Lima, 400",
