@@ -526,3 +526,95 @@ func TestReceivers_GetLimits(t *testing.T) {
 	require.Equal(t, 10000.0, limits.Limits.Payin.Daily)
 	require.Equal(t, 20000.0, limits.Limits.Payout.Daily)
 }
+
+func TestReceivers_GetLimitIncreaseRequests(t *testing.T) {
+	instanceID := "in_000000000000"
+	receiverID := "re_YuaMcI2B8zbQ"
+
+	cfg := &config.Config{
+		BaseURL:    "https://api.blindpay.com",
+		APIKey:     "test_key",
+		InstanceID: instanceID,
+		HTTPClient: &http.Client{
+			Transport: &blindpaytest.RoundTripper{
+				T: t,
+				Out: json.RawMessage(`[
+					{
+						"id": "rl_000000000000",
+						"receiver_id": "re_YuaMcI2B8zbQ",
+						"status": "in_review",
+						"daily": 50000,
+						"monthly": 250000,
+						"per_transaction": 25000,
+						"supporting_document_file": "https://example.com/bank-statement.pdf",
+						"supporting_document_type": "individual_bank_statement",
+						"created_at": "2025-01-15T10:30:00.000Z",
+						"updated_at": "2025-01-15T10:30:00.000Z"
+					},
+					{
+						"id": "rl_000000000001",
+						"receiver_id": "re_YuaMcI2B8zbQ",
+						"status": "approved",
+						"daily": 30000,
+						"monthly": 150000,
+						"per_transaction": 15000,
+						"supporting_document_file": "https://example.com/proof-of-income.pdf",
+						"supporting_document_type": "individual_proof_of_income",
+						"created_at": "2024-12-10T14:20:00.000Z",
+						"updated_at": "2024-12-12T09:45:00.000Z"
+					}
+				]`),
+				Method: http.MethodGet,
+				Path:   fmt.Sprintf("/instances/%s/receivers/%s/limit-increase", instanceID, receiverID),
+			},
+		},
+		UserAgent: "test",
+	}
+
+	client := NewClient(cfg)
+	requests, err := client.GetLimitIncreaseRequests(context.Background(), receiverID)
+	require.NoError(t, err)
+	require.Len(t, requests, 2)
+	require.Equal(t, "rl_000000000000", requests[0].ID)
+	require.Equal(t, receiverID, requests[0].ReceiverID)
+	require.Equal(t, LimitIncreaseRequestStatusInReview, requests[0].Status)
+	require.Equal(t, 50000.0, requests[0].Daily)
+	require.Equal(t, 250000.0, requests[0].Monthly)
+	require.Equal(t, 25000.0, requests[0].PerTransaction)
+	require.Equal(t, "https://example.com/bank-statement.pdf", requests[0].SupportingDocumentFile)
+	require.Equal(t, LimitIncreaseRequestSupportingDocumentTypeIndividualBankStatement, requests[0].SupportingDocumentType)
+	require.Equal(t, "rl_000000000001", requests[1].ID)
+	require.Equal(t, LimitIncreaseRequestStatusApproved, requests[1].Status)
+}
+
+func TestReceivers_RequestLimitIncrease(t *testing.T) {
+	instanceID := "in_000000000000"
+	receiverID := "re_YuaMcI2B8zbQ"
+
+	cfg := &config.Config{
+		BaseURL:    "https://api.blindpay.com",
+		APIKey:     "test_key",
+		InstanceID: instanceID,
+		HTTPClient: &http.Client{
+			Transport: &blindpaytest.RoundTripper{
+				T:      t,
+				Out:    json.RawMessage(`{"id": "rl_000000000000"}`),
+				Method: http.MethodPost,
+				Path:   fmt.Sprintf("/instances/%s/receivers/%s/limit-increase", instanceID, receiverID),
+			},
+		},
+		UserAgent: "test",
+	}
+
+	client := NewClient(cfg)
+	response, err := client.RequestLimitIncrease(context.Background(), &RequestLimitIncreaseParams{
+		ReceiverID:             receiverID,
+		Daily:                  100000,
+		Monthly:                500000,
+		PerTransaction:         50000,
+		SupportingDocumentFile: "https://example.com/tax-return.pdf",
+		SupportingDocumentType: LimitIncreaseRequestSupportingDocumentTypeIndividualTaxReturn,
+	})
+	require.NoError(t, err)
+	require.Equal(t, "rl_000000000000", response.ID)
+}
