@@ -56,6 +56,27 @@ const (
 	SourceOfFundsSomeoneElseFunds       SourceOfFundsDocType = "someone_else_funds"
 )
 
+// LimitIncreaseRequestStatus represents the status of a limit increase request.
+type LimitIncreaseRequestStatus string
+
+const (
+	LimitIncreaseRequestStatusInReview LimitIncreaseRequestStatus = "in_review"
+	LimitIncreaseRequestStatusApproved LimitIncreaseRequestStatus = "approved"
+	LimitIncreaseRequestStatusRejected LimitIncreaseRequestStatus = "rejected"
+)
+
+// LimitIncreaseRequestSupportingDocumentType represents supporting document types for limit increase requests.
+type LimitIncreaseRequestSupportingDocumentType string
+
+const (
+	LimitIncreaseRequestSupportingDocumentTypeIndividualBankStatement     LimitIncreaseRequestSupportingDocumentType = "individual_bank_statement"
+	LimitIncreaseRequestSupportingDocumentTypeIndividualTaxReturn         LimitIncreaseRequestSupportingDocumentType = "individual_tax_return"
+	LimitIncreaseRequestSupportingDocumentTypeIndividualProofOfIncome     LimitIncreaseRequestSupportingDocumentType = "individual_proof_of_income"
+	LimitIncreaseRequestSupportingDocumentTypeBusinessBankStatement       LimitIncreaseRequestSupportingDocumentType = "business_bank_statement"
+	LimitIncreaseRequestSupportingDocumentTypeBusinessFinancialStatements LimitIncreaseRequestSupportingDocumentType = "business_financial_statements"
+	LimitIncreaseRequestSupportingDocumentTypeBusinessTaxReturn           LimitIncreaseRequestSupportingDocumentType = "business_tax_return"
+)
+
 // IdentificationDocument represents identification document types.
 type IdentificationDocument string
 
@@ -305,6 +326,35 @@ type LimitsResponse struct {
 			Monthly float64 `json:"monthly"`
 		} `json:"payout"`
 	} `json:"limits"`
+}
+
+// LimitIncreaseRequest represents a limit increase request for a receiver.
+type LimitIncreaseRequest struct {
+	ID                     string                                     `json:"id"`
+	ReceiverID             string                                     `json:"receiver_id"`
+	Status                 LimitIncreaseRequestStatus                 `json:"status"`
+	Daily                  float64                                    `json:"daily"`
+	Monthly                float64                                    `json:"monthly"`
+	PerTransaction         float64                                    `json:"per_transaction"`
+	SupportingDocumentFile string                                     `json:"supporting_document_file"`
+	SupportingDocumentType LimitIncreaseRequestSupportingDocumentType `json:"supporting_document_type"`
+	CreatedAt              string                                     `json:"created_at"`
+	UpdatedAt              string                                     `json:"updated_at"`
+}
+
+// RequestLimitIncreaseParams represents parameters for requesting a limit increase.
+type RequestLimitIncreaseParams struct {
+	ReceiverID             string                                     `json:"-"`
+	Daily                  float64                                    `json:"daily"`
+	Monthly                float64                                    `json:"monthly"`
+	PerTransaction         float64                                    `json:"per_transaction"`
+	SupportingDocumentFile string                                     `json:"supporting_document_file"`
+	SupportingDocumentType LimitIncreaseRequestSupportingDocumentType `json:"supporting_document_type"`
+}
+
+// RequestLimitIncreaseResponse represents the response when requesting a limit increase.
+type RequestLimitIncreaseResponse struct {
+	ID string `json:"id"`
 }
 
 // Client handles receiver-related operations.
@@ -621,4 +671,36 @@ func (c *Client) GetLimits(ctx context.Context, receiverID string) (*LimitsRespo
 
 	path := fmt.Sprintf("/instances/%s/limits/receivers/%s", c.instanceID, receiverID)
 	return request.Do[*LimitsResponse](c.cfg, ctx, "GET", path, nil)
+}
+
+// GetLimitIncreaseRequests retrieves all limit increase requests for a receiver.
+func (c *Client) GetLimitIncreaseRequests(ctx context.Context, receiverID string) ([]LimitIncreaseRequest, error) {
+	if receiverID == "" {
+		return nil, fmt.Errorf("receiver ID cannot be empty")
+	}
+
+	path := fmt.Sprintf("/instances/%s/receivers/%s/limit-increase", c.instanceID, receiverID)
+	return request.Do[[]LimitIncreaseRequest](c.cfg, ctx, "GET", path, nil)
+}
+
+// RequestLimitIncrease creates a new limit increase request for a receiver.
+func (c *Client) RequestLimitIncrease(ctx context.Context, params *RequestLimitIncreaseParams) (*RequestLimitIncreaseResponse, error) {
+	if params == nil {
+		return nil, fmt.Errorf("params cannot be nil")
+	}
+	if params.ReceiverID == "" {
+		return nil, fmt.Errorf("receiver ID cannot be empty")
+	}
+
+	path := fmt.Sprintf("/instances/%s/receivers/%s/limit-increase", c.instanceID, params.ReceiverID)
+
+	body := map[string]any{
+		"daily":                    params.Daily,
+		"monthly":                  params.Monthly,
+		"per_transaction":          params.PerTransaction,
+		"supporting_document_file": params.SupportingDocumentFile,
+		"supporting_document_type": params.SupportingDocumentType,
+	}
+
+	return request.Do[*RequestLimitIncreaseResponse](c.cfg, ctx, "POST", path, body)
 }
