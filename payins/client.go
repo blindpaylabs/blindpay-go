@@ -117,12 +117,7 @@ type Client struct {
 
 // NewClient creates a new payins client.
 func NewClient(cfg *config.Config) *Client {
-	reqCfg := &request.Config{
-		BaseURL:    cfg.BaseURL,
-		APIKey:     cfg.APIKey,
-		HTTPClient: cfg.HTTPClient,
-		UserAgent:  cfg.UserAgent,
-	}
+	reqCfg := cfg.ToRequestConfig()
 
 	return &Client{
 		cfg:        reqCfg,
