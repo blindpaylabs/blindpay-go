@@ -14,6 +14,18 @@ type Client struct {
 	cfg *request.Config
 }
 
+// GetSwiftCodeBankDetailsResponse represents the response when retrieving the bank details of a specific swift code.
+type GetSwiftCodeBankDetailsResponse struct {
+	ID            string `json:"id"`
+	Bank          string `json:"bank"`
+	City          string `json:"city"`
+	Branch        string `json:"branch"`
+	SwiftCode     string `json:"swiftCode"`
+	SwiftCodeLink string `json:"swiftCodeLink"`
+	Country       string `json:"country"`
+	CountrySlug   string `json:"countrySlug"`
+}
+
 // NewClient creates a new available client.
 func NewClient(cfg *config.Config) *Client {
 	return &Client{
@@ -39,4 +51,15 @@ func (c *Client) GetBankDetails(ctx context.Context, rail types.Rail) ([]types.B
 // GetRails retrieves all available payment rails.
 func (c *Client) GetRails(ctx context.Context) ([]types.RailEntry, error) {
 	return request.Do[[]types.RailEntry](c.cfg, ctx, "GET", "/available/rails", nil)
+}
+
+// GetSwiftCodeBankDetails retrieves the bank details of a specific swift code.
+func (c *Client) GetSwiftCodeBankDetails(ctx context.Context, swift string) ([]GetSwiftCodeBankDetailsResponse, error) {
+	if swift == "" {
+		return nil, fmt.Errorf("swift code cannot be empty")
+	}
+
+	path := fmt.Sprintf("/available/swift/%s", swift)
+
+	return request.Do[[]GetSwiftCodeBankDetailsResponse](c.cfg, ctx, "GET", path, nil)
 }

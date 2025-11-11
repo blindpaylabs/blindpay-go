@@ -3,6 +3,7 @@ package available
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"testing"
 
@@ -137,4 +138,39 @@ func TestAvailable_GetRails(t *testing.T) {
 	require.Equal(t, "rtp", rails[7].Value)
 	require.Equal(t, "RTP", rails[7].Label)
 	require.Equal(t, "US", rails[7].Country)
+}
+
+func TestAvailable_GetSwiftCodeBankDetails(t *testing.T) {
+	swift := "BOFAUS3NLMA"
+	cfg := &config.Config{
+		BaseURL:    "https://api.blindpay.com",
+		APIKey:     "test-key",
+		InstanceID: "in_000000000000",
+		HTTPClient: &http.Client{
+			Transport: &blindpaytest.RoundTripper{
+				T: t,
+				Out: json.RawMessage(`[
+						{
+							"id": "416",
+							"bank": "BANK OF AMERICA, N.A.",
+							"city": "NEW JERSEY",
+							"branch": "LENDING SERVICES AND OPERATIONS (LSOP)",
+							"swiftCode": "BOFAUS3NLMA",
+							"swiftCodeLink": "https://bank.codes/swift-code/united-states/bofaus3nlma/",
+							"country": "United States",
+							"countrySlug": "united-states"
+						}
+				]`),
+				Method: http.MethodGet,
+				Path:   fmt.Sprintf("/available/swift/%s", swift),
+			},
+		},
+		UserAgent: "test",
+	}
+
+	client := NewClient(cfg)
+	bankAccountDetails, err := client.GetSwiftCodeBankDetails(context.Background(), swift)
+	require.NoError(t, err)
+	require.Len(t, bankAccountDetails, 1)
+	require.Equal(t, "416", bankAccountDetails[0].ID)
 }
