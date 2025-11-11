@@ -29,12 +29,7 @@ type GetSwiftCodeBankDetailsResponse struct {
 // NewClient creates a new available client.
 func NewClient(cfg *config.Config) *Client {
 	return &Client{
-		cfg: &request.Config{
-			BaseURL:    cfg.BaseURL,
-			APIKey:     cfg.APIKey,
-			HTTPClient: cfg.HTTPClient,
-			UserAgent:  cfg.UserAgent,
-		},
+		cfg: cfg.ToRequestConfig(),
 	}
 }
 

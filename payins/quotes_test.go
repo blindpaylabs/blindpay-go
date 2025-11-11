@@ -60,12 +60,7 @@ func TestQuotesClient_Create(t *testing.T) {
 	}
 
 	client := &QuotesClient{
-		cfg: &request.Config{
-			BaseURL:    cfg.BaseURL,
-			APIKey:     cfg.APIKey,
-			HTTPClient: cfg.HTTPClient,
-			UserAgent:  cfg.UserAgent,
-		},
+		cfg:        cfg.ToRequestConfig(),
 		instanceID: instanceID,
 	}
 
@@ -144,12 +139,7 @@ func TestQuotesClient_Create_WithPartnerFee(t *testing.T) {
 	}
 
 	client := &QuotesClient{
-		cfg: &request.Config{
-			BaseURL:    cfg.BaseURL,
-			APIKey:     cfg.APIKey,
-			HTTPClient: cfg.HTTPClient,
-			UserAgent:  cfg.UserAgent,
-		},
+		cfg:        cfg.ToRequestConfig(),
 		instanceID: instanceID,
 	}
 
@@ -224,12 +214,7 @@ func TestQuotesClient_GetFxRate(t *testing.T) {
 	}
 
 	client := &QuotesClient{
-		cfg: &request.Config{
-			BaseURL:    cfg.BaseURL,
-			APIKey:     cfg.APIKey,
-			HTTPClient: cfg.HTTPClient,
-			UserAgent:  cfg.UserAgent,
-		},
+		cfg:        cfg.ToRequestConfig(),
 		instanceID: instanceID,
 	}
 
@@ -287,12 +272,7 @@ func TestQuotesClient_GetFxRate_ReceiverCurrency(t *testing.T) {
 	}
 
 	client := &QuotesClient{
-		cfg: &request.Config{
-			BaseURL:    cfg.BaseURL,
-			APIKey:     cfg.APIKey,
-			HTTPClient: cfg.HTTPClient,
-			UserAgent:  cfg.UserAgent,
-		},
+		cfg:        cfg.ToRequestConfig(),
 		instanceID: instanceID,
 	}
 

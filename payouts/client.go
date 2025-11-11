@@ -142,12 +142,7 @@ type Client struct {
 // NewClient creates a new payouts client.
 func NewClient(cfg *config.Config) *Client {
 	return &Client{
-		cfg: &request.Config{
-			BaseURL:    cfg.BaseURL,
-			APIKey:     cfg.APIKey,
-			HTTPClient: cfg.HTTPClient,
-			UserAgent:  cfg.UserAgent,
-		},
+		cfg:        cfg.ToRequestConfig(),
 		instanceID: cfg.InstanceID,
 	}
 }
