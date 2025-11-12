@@ -54,6 +54,32 @@ type MintUsdbStellarParams struct {
 	SignedXDR string `json:"signedXdr"`
 }
 
+// MintUsdbSolanaParams represents parameters for minting USDB on Solana.
+type MintUsdbSolanaParams struct {
+	Address string `json:"address"`
+	Amount  string `json:"amount"`
+}
+
+// MintUsdbSolanaResponse represents the response from minting USDB on Solana.
+type MintUsdbSolanaResponse struct {
+	Success   bool   `json:"success"`
+	Signature string `json:"signature"`
+	Error     string `json:"error"`
+}
+
+// PrepareSolanaDelegationTransactionParams represents parameters for preparing a Solana delegation transaction.
+type PrepareSolanaDelegationTransactionParams struct {
+	TokenAddress string `json:"token_address"`
+	Amount       string `json:"amount"`
+	OwnerAddress string `json:"owner_address"`
+}
+
+// PrepareSolanaDelegationTransactionResponse represents the response from preparing a Solana delegation transaction.
+type PrepareSolanaDelegationTransactionResponse struct {
+	Success     bool   `json:"success"`
+	Transaction string `json:"transaction"`
+}
+
 // Client handles blockchain wallet-related operations.
 type Client struct {
 	cfg        *request.Config
@@ -192,6 +218,26 @@ func (c *Client) MintUsdbStellar(ctx context.Context, params *MintUsdbStellarPar
 	path := fmt.Sprintf("/instances/%s/mint-usdb-stellar", c.instanceID)
 	_, err := request.Do[struct{}](c.cfg, ctx, "POST", path, params)
 	return err
+}
+
+// MintUsdbSolana mints USDB on Solana.
+func (c *Client) MintUsdbSolana(ctx context.Context, params *MintUsdbSolanaParams) (*MintUsdbSolanaResponse, error) {
+	if params == nil {
+		return nil, fmt.Errorf("params cannot be nil")
+	}
+
+	path := fmt.Sprintf("/instances/%s/mint-usdb-solana", c.instanceID)
+	return request.Do[*MintUsdbSolanaResponse](c.cfg, ctx, "POST", path, params)
+}
+
+// PrepareSolanaDelegationTransaction prepares a Solana delegation transaction.
+func (c *Client) PrepareSolanaDelegationTransaction(ctx context.Context, params *PrepareSolanaDelegationTransactionParams) (*PrepareSolanaDelegationTransactionResponse, error) {
+	if params == nil {
+		return nil, fmt.Errorf("params cannot be nil")
+	}
+
+	path := fmt.Sprintf("/instances/%s/prepare-delegate-solana", c.instanceID)
+	return request.Do[*PrepareSolanaDelegationTransactionResponse](c.cfg, ctx, "POST", path, params)
 }
 
 // OfframpWallet represents an offramp wallet.
