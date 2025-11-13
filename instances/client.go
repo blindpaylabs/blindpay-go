@@ -7,6 +7,7 @@ import (
 
 	"github.com/blindpaylabs/blindpay-go/internal/config"
 	"github.com/blindpaylabs/blindpay-go/internal/request"
+	"github.com/blindpaylabs/blindpay-go/termsofservice"
 )
 
 // InstanceMemberRole represents the role of an instance member.
@@ -50,6 +51,9 @@ type UpdateMemberRoleParams struct {
 type Client struct {
 	cfg        *request.Config
 	instanceID string
+
+	// TermsOfService provides access to terms of service operations.
+	Tos *termsofservice.Client
 }
 
 // NewClient creates a new instances client.
@@ -57,6 +61,7 @@ func NewClient(cfg *config.Config) *Client {
 	return &Client{
 		cfg:        cfg.ToRequestConfig(),
 		instanceID: cfg.InstanceID,
+		Tos:        termsofservice.NewClient(cfg),
 	}
 }
 
