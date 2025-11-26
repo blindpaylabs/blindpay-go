@@ -27,3 +27,6 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# Snyk Security Extension - AI Rules (auto-generated)
+.cursor/rules/snyk_rules.mdc
