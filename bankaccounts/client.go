@@ -133,6 +133,140 @@ type CreatePixResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+// CreateArgentinaTransfersResponse represents the response when creating an Argentina transfers bank account.
+type CreateArgentinaTransfersResponse struct {
+	ID               string             `json:"id"`
+	Type             string             `json:"type"`
+	Name             string             `json:"name"`
+	BeneficiaryName  string             `json:"beneficiary_name"`
+	TransfersType    ArgentinaTransfers `json:"transfers_type"`
+	TransfersAccount string             `json:"transfers_account"`
+	CreatedAt        time.Time          `json:"created_at"`
+}
+
+// CreateSpeiResponse represents the response when creating a SPEI bank account.
+type CreateSpeiResponse struct {
+	ID                  string       `json:"id"`
+	Type                string       `json:"type"`
+	Name                string       `json:"name"`
+	BeneficiaryName     string       `json:"beneficiary_name"`
+	SpeiProtocol        SpeiProtocol `json:"spei_protocol"`
+	SpeiInstitutionCode string       `json:"spei_institution_code"`
+	SpeiClabe           string       `json:"spei_clabe"`
+	CreatedAt           time.Time    `json:"created_at"`
+}
+
+// CreateColombiaAchResponse represents the response when creating a Colombia ACH bank account.
+type CreateColombiaAchResponse struct {
+	ID                         string                `json:"id"`
+	Type                       string                `json:"type"`
+	Name                       string                `json:"name"`
+	AccountType                types.BankAccountType `json:"account_type"`
+	AchCopBeneficiaryFirstName string                `json:"ach_cop_beneficiary_first_name"`
+	AchCopBeneficiaryLastName  string                `json:"ach_cop_beneficiary_last_name"`
+	AchCopDocumentID           string                `json:"ach_cop_document_id"`
+	AchCopDocumentType         AchCopDocument        `json:"ach_cop_document_type"`
+	AchCopEmail                string                `json:"ach_cop_email"`
+	AchCopBankCode             string                `json:"ach_cop_bank_code"`
+	AchCopBankAccount          string                `json:"ach_cop_bank_account"`
+	CreatedAt                  time.Time             `json:"created_at"`
+}
+
+// CreateAchResponse represents the response when creating an ACH bank account.
+type CreateAchResponse struct {
+	ID                         string                `json:"id"`
+	Type                       string                `json:"type"`
+	Name                       string                `json:"name"`
+	BeneficiaryName            string                `json:"beneficiary_name"`
+	RoutingNumber              string                `json:"routing_number"`
+	AccountNumber              string                `json:"account_number"`
+	AccountType                types.BankAccountType `json:"account_type"`
+	AccountClass               types.AccountClass    `json:"account_class"`
+	AddressLine1               *string               `json:"address_line_1"`
+	AddressLine2               *string               `json:"address_line_2"`
+	City                       *string               `json:"city"`
+	StateProvinceRegion        *string               `json:"state_province_region"`
+	Country                    *types.Country        `json:"country"`
+	PostalCode                 *string               `json:"postal_code"`
+	AchCopBeneficiaryFirstName *string               `json:"ach_cop_beneficiary_first_name"`
+	AchCopBeneficiaryLastName  *string               `json:"ach_cop_beneficiary_last_name"`
+	AchCopDocumentID           *string               `json:"ach_cop_document_id"`
+	AchCopDocumentType         *AchCopDocument       `json:"ach_cop_document_type"`
+	AchCopEmail                *string               `json:"ach_cop_email"`
+	AchCopBankCode             *string               `json:"ach_cop_bank_code"`
+	AchCopBankAccount          *string               `json:"ach_cop_bank_account"`
+	CreatedAt                  time.Time             `json:"created_at"`
+}
+
+// CreateWireResponse represents the response when creating a Wire bank account.
+type CreateWireResponse struct {
+	ID                  string        `json:"id"`
+	Type                string        `json:"type"`
+	Name                string        `json:"name"`
+	BeneficiaryName     string        `json:"beneficiary_name"`
+	RoutingNumber       string        `json:"routing_number"`
+	AccountNumber       string        `json:"account_number"`
+	AddressLine1        string        `json:"address_line_1"`
+	AddressLine2        string        `json:"address_line_2"`
+	City                string        `json:"city"`
+	StateProvinceRegion string        `json:"state_province_region"`
+	Country             types.Country `json:"country"`
+	PostalCode          string        `json:"postal_code"`
+	CreatedAt           time.Time     `json:"created_at"`
+}
+
+// CreateInternationalSwiftResponse represents the response when creating an international SWIFT bank account.
+type CreateInternationalSwiftResponse struct {
+	ID                                     string         `json:"id"`
+	Type                                   string         `json:"type"`
+	Name                                   string         `json:"name"`
+	BeneficiaryName                        *string        `json:"beneficiary_name"`
+	AddressLine1                           *string        `json:"address_line_1"`
+	AddressLine2                           *string        `json:"address_line_2"`
+	City                                   *string        `json:"city"`
+	StateProvinceRegion                    *string        `json:"state_province_region"`
+	Country                                *types.Country `json:"country"`
+	PostalCode                             *string        `json:"postal_code"`
+	SwiftCodeBic                           string         `json:"swift_code_bic"`
+	SwiftAccountHolderName                 string         `json:"swift_account_holder_name"`
+	SwiftAccountNumberIban                 string         `json:"swift_account_number_iban"`
+	SwiftBeneficiaryAddressLine1           string         `json:"swift_beneficiary_address_line_1"`
+	SwiftBeneficiaryAddressLine2           *string        `json:"swift_beneficiary_address_line_2"`
+	SwiftBeneficiaryCountry                types.Country  `json:"swift_beneficiary_country"`
+	SwiftBeneficiaryCity                   string         `json:"swift_beneficiary_city"`
+	SwiftBeneficiaryStateProvinceRegion    string         `json:"swift_beneficiary_state_province_region"`
+	SwiftBeneficiaryPostalCode             string         `json:"swift_beneficiary_postal_code"`
+	SwiftBankName                          string         `json:"swift_bank_name"`
+	SwiftBankAddressLine1                  string         `json:"swift_bank_address_line_1"`
+	SwiftBankAddressLine2                  *string        `json:"swift_bank_address_line_2"`
+	SwiftBankCountry                       types.Country  `json:"swift_bank_country"`
+	SwiftBankCity                          string         `json:"swift_bank_city"`
+	SwiftBankStateProvinceRegion           string         `json:"swift_bank_state_province_region"`
+	SwiftBankPostalCode                    string         `json:"swift_bank_postal_code"`
+	SwiftIntermediaryBankSwiftCodeBic      *string        `json:"swift_intermediary_bank_swift_code_bic"`
+	SwiftIntermediaryBankAccountNumberIban *string        `json:"swift_intermediary_bank_account_number_iban"`
+	SwiftIntermediaryBankName              *string        `json:"swift_intermediary_bank_name"`
+	SwiftIntermediaryBankCountry           *types.Country `json:"swift_intermediary_bank_country"`
+	CreatedAt                              time.Time      `json:"created_at"`
+}
+
+// CreateRtpResponse represents the response when creating an RTP bank account.
+type CreateRtpResponse struct {
+	ID                  string        `json:"id"`
+	Type                string        `json:"type"`
+	Name                string        `json:"name"`
+	BeneficiaryName     string        `json:"beneficiary_name"`
+	RoutingNumber       string        `json:"routing_number"`
+	AccountNumber       string        `json:"account_number"`
+	AddressLine1        string        `json:"address_line_1"`
+	AddressLine2        *string       `json:"address_line_2"`
+	City                string        `json:"city"`
+	StateProvinceRegion string        `json:"state_province_region"`
+	Country             types.Country `json:"country"`
+	PostalCode          string        `json:"postal_code"`
+	CreatedAt           time.Time     `json:"created_at"`
+}
+
 // CreateAchParams represents parameters for creating an ACH bank account.
 type CreateAchParams struct {
 	ReceiverID      string                `json:"-"`
@@ -305,7 +439,7 @@ func (c *Client) CreatePix(ctx context.Context, params *CreatePixParams) (*Creat
 }
 
 // CreateAch creates an ACH bank account.
-func (c *Client) CreateAch(ctx context.Context, params *CreateAchParams) (*BankAccount, error) {
+func (c *Client) CreateAch(ctx context.Context, params *CreateAchParams) (*CreateAchResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -325,11 +459,11 @@ func (c *Client) CreateAch(ctx context.Context, params *CreateAchParams) (*BankA
 		"routing_number":   params.RoutingNumber,
 	}
 
-	return request.Do[*BankAccount](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateAchResponse](c.cfg, ctx, "POST", path, body)
 }
 
 // CreateWire creates a Wire bank account.
-func (c *Client) CreateWire(ctx context.Context, params *CreateWireParams) (*BankAccount, error) {
+func (c *Client) CreateWire(ctx context.Context, params *CreateWireParams) (*CreateWireResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -356,11 +490,11 @@ func (c *Client) CreateWire(ctx context.Context, params *CreateWireParams) (*Ban
 		body["address_line_2"] = params.AddressLine2
 	}
 
-	return request.Do[*BankAccount](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateWireResponse](c.cfg, ctx, "POST", path, body)
 }
 
 // CreateArgentinaTransfers creates an Argentina transfers bank account.
-func (c *Client) CreateArgentinaTransfers(ctx context.Context, params *CreateArgentinaTransfersParams) (*BankAccount, error) {
+func (c *Client) CreateArgentinaTransfers(ctx context.Context, params *CreateArgentinaTransfersParams) (*CreateArgentinaTransfersResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -378,11 +512,11 @@ func (c *Client) CreateArgentinaTransfers(ctx context.Context, params *CreateArg
 		"transfers_type":    params.TransfersType,
 	}
 
-	return request.Do[*BankAccount](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateArgentinaTransfersResponse](c.cfg, ctx, "POST", path, body)
 }
 
 // CreateSpei creates a SPEI bank account.
-func (c *Client) CreateSpei(ctx context.Context, params *CreateSpeiParams) (*BankAccount, error) {
+func (c *Client) CreateSpei(ctx context.Context, params *CreateSpeiParams) (*CreateSpeiResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -401,11 +535,11 @@ func (c *Client) CreateSpei(ctx context.Context, params *CreateSpeiParams) (*Ban
 		"spei_protocol":         params.SpeiProtocol,
 	}
 
-	return request.Do[*BankAccount](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateSpeiResponse](c.cfg, ctx, "POST", path, body)
 }
 
 // CreateColombiaAch creates a Colombia ACH bank account.
-func (c *Client) CreateColombiaAch(ctx context.Context, params *CreateColombiaAchParams) (*BankAccount, error) {
+func (c *Client) CreateColombiaAch(ctx context.Context, params *CreateColombiaAchParams) (*CreateColombiaAchResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -428,11 +562,11 @@ func (c *Client) CreateColombiaAch(ctx context.Context, params *CreateColombiaAc
 		"ach_cop_bank_account":           params.AchCopBankAccount,
 	}
 
-	return request.Do[*BankAccount](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateColombiaAchResponse](c.cfg, ctx, "POST", path, body)
 }
 
 // CreateInternationalSwift creates an international SWIFT bank account.
-func (c *Client) CreateInternationalSwift(ctx context.Context, params *CreateInternationalSwiftParams) (*BankAccount, error) {
+func (c *Client) CreateInternationalSwift(ctx context.Context, params *CreateInternationalSwiftParams) (*CreateInternationalSwiftResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -473,11 +607,11 @@ func (c *Client) CreateInternationalSwift(ctx context.Context, params *CreateInt
 		body["swift_beneficiary_address_line_2"] = params.SwiftBeneficiaryAddressLine2
 	}
 
-	return request.Do[*BankAccount](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateInternationalSwiftResponse](c.cfg, ctx, "POST", path, body)
 }
 
 // CreateRtp creates an RTP (Real-Time Payments) bank account.
-func (c *Client) CreateRtp(ctx context.Context, params *CreateRtpParams) (*BankAccount, error) {
+func (c *Client) CreateRtp(ctx context.Context, params *CreateRtpParams) (*CreateRtpResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -504,5 +638,5 @@ func (c *Client) CreateRtp(ctx context.Context, params *CreateRtpParams) (*BankA
 		body["address_line_2"] = params.AddressLine2
 	}
 
-	return request.Do[*BankAccount](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateRtpResponse](c.cfg, ctx, "POST", path, body)
 }
