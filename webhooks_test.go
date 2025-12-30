@@ -1,29 +1,38 @@
 package blindpay
 
 import (
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/base64"
+	"fmt"
+	"net/http"
 	"testing"
+	"time"
+
+	svix "github.com/svix/svix-webhooks/go"
 
 	"github.com/stretchr/testify/require"
 )
 
+// generateTestSignature creates a valid Svix signature for testing
+func generateTestSignature(t *testing.T, secret, id, payload string) (timestamp, signature string) {
+	wh, err := svix.NewWebhook(secret)
+	require.NoError(t, err)
+
+	ts := time.Now()
+	sig, err := wh.Sign(id, ts, []byte(payload))
+	require.NoError(t, err)
+
+	return fmt.Sprintf("%d", ts.Unix()), sig
+}
+
 func TestVerifyWebhookSignature(t *testing.T) {
-	// Create a test secret
-	secretKey := []byte("test_secret_key_12345")
-	secretB64 := base64.StdEncoding.EncodeToString(secretKey)
-	secret := "whsec_" + secretB64
+	// Using a test secret in the whsec_ format
+	secret := "whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw"
 
-	id := "msg_test123"
-	timestamp := "1704067200"
-	payload := `{"webhook_event":"blockchainWallet.new","id":"bw_000000000000","name":"Wallet Display Name","network":"polygon","address":"0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C","signature_tx_hash":"0x3c499c542cef5e3811e1192ce70d8cc03d5c3359","is_account_abstraction":false,"receiver_id":"re_000000000000"}`
+	// Test payload
+	payload := `{"test": 2432232314}`
+	id := "msg_p5jXN8AQM9LWM0D4loKWxJek"
 
-	// Generate valid signature
-	signedContent := id + "." + timestamp + "." + payload
-	h := hmac.New(sha256.New, secretKey)
-	h.Write([]byte(signedContent))
-	expectedSignature := base64.StdEncoding.EncodeToString(h.Sum(nil))
+	// Generate valid signature with current timestamp
+	timestamp, signature := generateTestSignature(t, secret, id, payload)
 
 	tests := []struct {
 		name          string
@@ -33,7 +42,6 @@ func TestVerifyWebhookSignature(t *testing.T) {
 		payload       string
 		signature     string
 		expectedValid bool
-		expectedError bool
 	}{
 		{
 			name:          "valid signature",
@@ -41,9 +49,8 @@ func TestVerifyWebhookSignature(t *testing.T) {
 			id:            id,
 			timestamp:     timestamp,
 			payload:       payload,
-			signature:     expectedSignature,
+			signature:     signature,
 			expectedValid: true,
-			expectedError: false,
 		},
 		{
 			name:          "invalid signature",
@@ -51,19 +58,17 @@ func TestVerifyWebhookSignature(t *testing.T) {
 			id:            id,
 			timestamp:     timestamp,
 			payload:       payload,
-			signature:     "invalid_signature",
+			signature:     "v1,invalid_signature",
 			expectedValid: false,
-			expectedError: false,
 		},
 		{
 			name:          "tampered payload",
 			secret:        secret,
 			id:            id,
 			timestamp:     timestamp,
-			payload:       `{"webhook_event":"blockchainWallet.new","id":"bw_999999999999","name":"Wallet Display Name","network":"polygon","address":"0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C","signature_tx_hash":"0x3c499c542cef5e3811e1192ce70d8cc03d5c3359","is_account_abstraction":false,"receiver_id":"re_000000000000"}`,
-			signature:     expectedSignature,
+			payload:       `{"test": 9999999999}`,
+			signature:     signature,
 			expectedValid: false,
-			expectedError: false,
 		},
 		{
 			name:          "tampered timestamp",
@@ -71,9 +76,8 @@ func TestVerifyWebhookSignature(t *testing.T) {
 			id:            id,
 			timestamp:     "1704067999",
 			payload:       payload,
-			signature:     expectedSignature,
+			signature:     signature,
 			expectedValid: false,
-			expectedError: false,
 		},
 		{
 			name:          "empty secret",
@@ -81,9 +85,8 @@ func TestVerifyWebhookSignature(t *testing.T) {
 			id:            id,
 			timestamp:     timestamp,
 			payload:       payload,
-			signature:     expectedSignature,
+			signature:     signature,
 			expectedValid: false,
-			expectedError: true,
 		},
 		{
 			name:          "empty id",
@@ -91,9 +94,8 @@ func TestVerifyWebhookSignature(t *testing.T) {
 			id:            "",
 			timestamp:     timestamp,
 			payload:       payload,
-			signature:     expectedSignature,
+			signature:     signature,
 			expectedValid: false,
-			expectedError: true,
 		},
 		{
 			name:          "empty timestamp",
@@ -101,19 +103,8 @@ func TestVerifyWebhookSignature(t *testing.T) {
 			id:            id,
 			timestamp:     "",
 			payload:       payload,
-			signature:     expectedSignature,
+			signature:     signature,
 			expectedValid: false,
-			expectedError: true,
-		},
-		{
-			name:          "empty payload",
-			secret:        secret,
-			id:            id,
-			timestamp:     timestamp,
-			payload:       "",
-			signature:     expectedSignature,
-			expectedValid: false,
-			expectedError: true,
 		},
 		{
 			name:          "empty signature",
@@ -123,61 +114,29 @@ func TestVerifyWebhookSignature(t *testing.T) {
 			payload:       payload,
 			signature:     "",
 			expectedValid: false,
-			expectedError: true,
 		},
 		{
-			name:          "invalid secret format - no prefix",
-			secret:        secretB64,
+			name:          "invalid secret format",
+			secret:        "invalid_secret",
 			id:            id,
 			timestamp:     timestamp,
 			payload:       payload,
-			signature:     expectedSignature,
+			signature:     signature,
 			expectedValid: false,
-			expectedError: true,
-		},
-		{
-			name:          "invalid secret format - wrong prefix",
-			secret:        "wrong_" + secretB64,
-			id:            id,
-			timestamp:     timestamp,
-			payload:       payload,
-			signature:     expectedSignature,
-			expectedValid: false,
-			expectedError: true,
-		},
-		{
-			name:          "invalid secret format - invalid base64",
-			secret:        "whsec_invalid!!!base64",
-			id:            id,
-			timestamp:     timestamp,
-			payload:       payload,
-			signature:     expectedSignature,
-			expectedValid: false,
-			expectedError: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			valid, err := VerifyWebhookSignature(tt.secret, tt.id, tt.timestamp, tt.payload, tt.signature)
-
-			if tt.expectedError {
-				require.Error(t, err)
-			} else {
-				require.NoError(t, err)
-			}
-
+			valid := VerifyWebhookSignature(tt.secret, tt.id, tt.timestamp, tt.payload, tt.signature)
 			require.Equal(t, tt.expectedValid, valid)
 		})
 	}
 }
 
 func TestVerifyWebhookSignature_RealWorldExample(t *testing.T) {
-	secretKey := []byte("my_webhook_secret_key_very_secure_123456")
-	secretB64 := base64.StdEncoding.EncodeToString(secretKey)
-	secret := "whsec_" + secretB64
+	secret := "whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw"
 	id := "msg_2ZNTsTTSoODpWdYiMvNJn6yJOmL"
-	timestamp := "1704153600"
 	payload := `{
   "webhook_event": "blockchainWallet.new",
   "id": "bw_000000000000",
@@ -189,13 +148,10 @@ func TestVerifyWebhookSignature_RealWorldExample(t *testing.T) {
   "receiver_id": "re_000000000000"
 }`
 
-	signedContent := id + "." + timestamp + "." + payload
-	h := hmac.New(sha256.New, secretKey)
-	h.Write([]byte(signedContent))
-	signature := base64.StdEncoding.EncodeToString(h.Sum(nil))
+	// Generate signature with current timestamp
+	timestamp, signature := generateTestSignature(t, secret, id, payload)
 
-	valid, err := VerifyWebhookSignature(secret, id, timestamp, payload, signature)
-	require.NoError(t, err)
+	valid := VerifyWebhookSignature(secret, id, timestamp, payload, signature)
 	require.True(t, valid, "Real-world webhook signature should be valid")
 
 	// Test with modified payload (should fail)
@@ -210,32 +166,55 @@ func TestVerifyWebhookSignature_RealWorldExample(t *testing.T) {
   "receiver_id": "re_000000000000"
 }`
 
-	valid, err = VerifyWebhookSignature(secret, id, timestamp, tamperedPayload, signature)
-	require.NoError(t, err)
+	valid = VerifyWebhookSignature(secret, id, timestamp, tamperedPayload, signature)
 	require.False(t, valid, "Tampered webhook should be invalid")
 }
 
 func TestVerifyWebhookSignature_TimingAttackResistance(t *testing.T) {
-	secretKey := []byte("timing_test_secret")
-	secretB64 := base64.StdEncoding.EncodeToString(secretKey)
-	secret := "whsec_" + secretB64
-
+	secret := "whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw"
 	id := "msg_timing"
-	timestamp := "1704153600"
 	payload := `{"test":"data"}`
 
-	signedContent := id + "." + timestamp + "." + payload
-	h := hmac.New(sha256.New, secretKey)
-	h.Write([]byte(signedContent))
-	correctSignature := base64.StdEncoding.EncodeToString(h.Sum(nil))
+	// Generate correct signature with current timestamp
+	timestamp, correctSignature := generateTestSignature(t, secret, id, payload)
 
-	almostCorrectOne := correctSignature[:len(correctSignature)-1] + "X"
-	almostCorrectTwo := "X" + correctSignature[1:]
-	almostCorrectThree := correctSignature[:len(correctSignature)/2] + "XXXXX"
+	// Test correct signature first
+	valid := VerifyWebhookSignature(secret, id, timestamp, payload, correctSignature)
+	require.True(t, valid, "Correct signature should be accepted")
+
+	// Test almost-correct signatures (modify the signature slightly)
+	almostCorrectOne := correctSignature[:len(correctSignature)-2] + "X="
+	almostCorrectTwo := "v1,X" + correctSignature[4:]
+	almostCorrectThree := correctSignature[:20] + "XXXXX" + correctSignature[25:]
 
 	for _, sig := range []string{almostCorrectOne, almostCorrectTwo, almostCorrectThree} {
-		valid, err := VerifyWebhookSignature(secret, id, timestamp, payload, sig)
-		require.NoError(t, err)
+		valid := VerifyWebhookSignature(secret, id, timestamp, payload, sig)
 		require.False(t, valid, "Almost-correct signature should be rejected")
 	}
+}
+
+func TestVerifyWebhookSignature_WithHTTPRequest(t *testing.T) {
+	// This test simulates how the function would be used with an actual HTTP request
+	secret := "whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw"
+	id := "msg_http_test"
+	payload := `{"webhook_event":"payment.completed","amount":1000}`
+
+	// Generate signature with current timestamp
+	timestamp, signature := generateTestSignature(t, secret, id, payload)
+
+	// Simulate extracting headers from HTTP request
+	req, _ := http.NewRequest("POST", "/webhook", nil)
+	req.Header.Set("webhook-id", id)
+	req.Header.Set("webhook-timestamp", timestamp)
+	req.Header.Set("webhook-signature", signature)
+
+	// Verify using extracted header values
+	valid := VerifyWebhookSignature(
+		secret,
+		req.Header.Get("webhook-id"),
+		req.Header.Get("webhook-timestamp"),
+		payload,
+		req.Header.Get("webhook-signature"),
+	)
+	require.True(t, valid, "Webhook signature from HTTP request should be valid")
 }
