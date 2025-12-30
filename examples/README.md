@@ -4,7 +4,7 @@ This directory contains example code showing how to use the BlindPay Go SDK.
 
 ## Prerequisites
 
-1. Go 1.19 or higher installed
+1. Go 1.21 or higher installed
 2. BlindPay API credentials (API key and Instance ID)
 
 ## Running Examples
