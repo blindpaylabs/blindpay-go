@@ -42,7 +42,7 @@ const (
 	TransactionDocumentOthers             = types.TransactionDocumentTypeOthers
 
 	BankAccountTypeChecking = types.BankAccountTypeChecking
-	BankAccountTypeSavings  = types.BankAccountTypeSavings
+	BankAccountTypeSaving   = types.BankAccountTypeSaving
 
 	CurrencyUSDC = types.CurrencyUSDC
 	CurrencyUSDT = types.CurrencyUSDT

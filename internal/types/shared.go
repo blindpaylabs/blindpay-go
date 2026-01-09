@@ -49,7 +49,7 @@ type BankAccountType string
 
 const (
 	BankAccountTypeChecking BankAccountType = "checking"
-	BankAccountTypeSavings  BankAccountType = "savings"
+	BankAccountTypeSaving   BankAccountType = "saving"
 )
 
 type Currency string
