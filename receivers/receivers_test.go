@@ -282,7 +282,7 @@ func TestReceivers_CreateIndividualWithEnhancedKYC(t *testing.T) {
 		IDDocBackFile:                    &idDocBackFile,
 		ProofOfAddressDocType:            ProofOfAddressDocTypeUtilityBill,
 		ProofOfAddressDocFile:            "https://example.com/image.png",
-		SelfieFile:    "https://example.com/image.png",
+		SelfieFile:                       "https://example.com/image.png",
 		PurposeOfTransactions:            PurposePersonalOrLivingExpenses,
 		SourceOfFundsDocType:             SourceOfFundsSavings,
 		PurposeOfTransactionsExplanation: &purposeExplanation,
