@@ -180,7 +180,7 @@ type Receiver struct {
 	// Enhanced KYC fields
 	SourceOfFundsDocType             string                `json:"source_of_funds_doc_type,omitempty"`
 	SourceOfFundsDocFile             string                `json:"source_of_funds_doc_file,omitempty"`
-	IndividualHoldingDocFrontFile    string                `json:"individual_holding_doc_front_file,omitempty"`
+	SelfieFile                       string                `json:"selfie_file,omitempty"`
 	PurposeOfTransactions            PurposeOfTransactions `json:"purpose_of_transactions,omitempty"`
 	PurposeOfTransactionsExplanation *string               `json:"purpose_of_transactions_explanation,omitempty"`
 	// Business fields
@@ -232,7 +232,7 @@ type CreateIndividualEnhancedParams struct {
 	IDDocFrontFile                   string                 `json:"id_doc_front_file"`
 	IDDocType                        IdentificationDocument `json:"id_doc_type"`
 	IDDocBackFile                    *string                `json:"id_doc_back_file,omitempty"`
-	IndividualHoldingDocFrontFile    string                 `json:"individual_holding_doc_front_file"`
+	SelfieFile                       string                 `json:"selfie_file"`
 	LastName                         string                 `json:"last_name"`
 	PostalCode                       string                 `json:"postal_code"`
 	PhoneNumber                      *string                `json:"phone_number"`
@@ -307,7 +307,7 @@ type UpdateParams struct {
 	ProofOfOwnershipDocFile          *string                 `json:"proof_of_ownership_doc_file,omitempty"`
 	SourceOfFundsDocType             *SourceOfFundsDocType   `json:"source_of_funds_doc_type,omitempty"`
 	SourceOfFundsDocFile             *string                 `json:"source_of_funds_doc_file,omitempty"`
-	IndividualHoldingDocFrontFile    *string                 `json:"individual_holding_doc_front_file,omitempty"`
+	SelfieFile                       *string                 `json:"selfie_file,omitempty"`
 	PurposeOfTransactions            *PurposeOfTransactions  `json:"purpose_of_transactions,omitempty"`
 	PurposeOfTransactionsExplanation *string                 `json:"purpose_of_transactions_explanation,omitempty"`
 	ExternalID                       *string                 `json:"external_id,omitempty"`
@@ -431,28 +431,28 @@ func (c *Client) CreateIndividualWithEnhancedKYC(ctx context.Context, params *Cr
 	path := fmt.Sprintf("/instances/%s/receivers", c.instanceID)
 
 	body := map[string]any{
-		"kyc_type":                          "enhanced",
-		"type":                              "individual",
-		"address_line_1":                    params.AddressLine1,
-		"city":                              params.City,
-		"country":                           params.Country,
-		"date_of_birth":                     params.DateOfBirth,
-		"email":                             params.Email,
-		"first_name":                        params.FirstName,
-		"id_doc_country":                    params.IDDocCountry,
-		"id_doc_front_file":                 params.IDDocFrontFile,
-		"id_doc_type":                       params.IDDocType,
-		"individual_holding_doc_front_file": params.IndividualHoldingDocFrontFile,
-		"last_name":                         params.LastName,
-		"postal_code":                       params.PostalCode,
-		"proof_of_address_doc_file":         params.ProofOfAddressDocFile,
-		"proof_of_address_doc_type":         params.ProofOfAddressDocType,
-		"purpose_of_transactions":           params.PurposeOfTransactions,
-		"source_of_funds_doc_file":          params.SourceOfFundsDocFile,
-		"source_of_funds_doc_type":          params.SourceOfFundsDocType,
-		"state_province_region":             params.StateProvinceRegion,
-		"tax_id":                            params.TaxID,
-		"tos_id":                            params.TosID,
+		"kyc_type":                  "enhanced",
+		"type":                      "individual",
+		"address_line_1":            params.AddressLine1,
+		"city":                      params.City,
+		"country":                   params.Country,
+		"date_of_birth":             params.DateOfBirth,
+		"email":                     params.Email,
+		"first_name":                params.FirstName,
+		"id_doc_country":            params.IDDocCountry,
+		"id_doc_front_file":         params.IDDocFrontFile,
+		"id_doc_type":               params.IDDocType,
+		"selfie_file":               params.SelfieFile,
+		"last_name":                 params.LastName,
+		"postal_code":               params.PostalCode,
+		"proof_of_address_doc_file": params.ProofOfAddressDocFile,
+		"proof_of_address_doc_type": params.ProofOfAddressDocType,
+		"purpose_of_transactions":   params.PurposeOfTransactions,
+		"source_of_funds_doc_file":  params.SourceOfFundsDocFile,
+		"source_of_funds_doc_type":  params.SourceOfFundsDocType,
+		"state_province_region":     params.StateProvinceRegion,
+		"tax_id":                    params.TaxID,
+		"tos_id":                    params.TosID,
 	}
 
 	if params.AddressLine2 != nil {
@@ -627,8 +627,8 @@ func (c *Client) Update(ctx context.Context, params *UpdateParams) error {
 	if params.SourceOfFundsDocFile != nil {
 		body["source_of_funds_doc_file"] = params.SourceOfFundsDocFile
 	}
-	if params.IndividualHoldingDocFrontFile != nil {
-		body["individual_holding_doc_front_file"] = params.IndividualHoldingDocFrontFile
+	if params.SelfieFile != nil {
+		body["selfie_file"] = params.SelfieFile
 	}
 	if params.PurposeOfTransactions != nil {
 		body["purpose_of_transactions"] = params.PurposeOfTransactions
