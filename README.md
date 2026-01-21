@@ -1,6 +1,6 @@
 # BlindPay Go SDK
 
-The official Go SDK for [BlindPay](https://blindpay.com) - Global payments infrastructure made simple.
+The official Go SDK for [BlindPay](https://blindpay.com) - Stablecoin API for global payments.
 
 ## 🚀 Installation
 
