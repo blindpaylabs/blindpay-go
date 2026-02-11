@@ -52,8 +52,10 @@ func TestVirtualAccounts_Create(t *testing.T) {
 	}`
 
 	inJson := `{
+		"banking_partner": "jpmorgan",
 		"blockchain_wallet_id": "bw_000000000000",
-		"token": "USDC"
+		"token": "USDC",
+		"signed_agreement_id": "123e4567-e89b-12d3-a456-426614174000"
 	}`
 
 	cfg := &config.Config{
@@ -73,10 +75,13 @@ func TestVirtualAccounts_Create(t *testing.T) {
 	}
 
 	client := NewClient(cfg)
+	signedAgreementID := "123e4567-e89b-12d3-a456-426614174000"
 	account, err := client.Create(context.Background(), &CreateParams{
 		ReceiverID:         receiverID,
+		BankingPartner:     BankingPartnerJPMorgan,
 		BlockchainWalletID: walletID,
 		Token:              types.StablecoinTokenUSDC,
+		SignedAgreementID:  &signedAgreementID,
 	})
 	require.NoError(t, err)
 	require.Equal(t, id, account.ID)

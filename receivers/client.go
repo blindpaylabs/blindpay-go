@@ -37,6 +37,110 @@ const (
 	PurposeOther                           PurposeOfTransactions = "other"
 )
 
+// AccountPurpose represents the account purpose.
+type AccountPurpose string
+
+const (
+	AccountPurposeCharitableDonations              AccountPurpose = "charitable_donations"
+	AccountPurposeEcommerceRetailPayments           AccountPurpose = "ecommerce_retail_payments"
+	AccountPurposeInvestmentPurposes                AccountPurpose = "investment_purposes"
+	AccountPurposeBusinessExpenses                  AccountPurpose = "business_expenses"
+	AccountPurposePaymentsToFriendsOrFamilyAbroad   AccountPurpose = "payments_to_friends_or_family_abroad"
+	AccountPurposePersonalOrLivingExpenses           AccountPurpose = "personal_or_living_expenses"
+	AccountPurposeProtectWealth                     AccountPurpose = "protect_wealth"
+	AccountPurposePurchaseGoodsAndServices           AccountPurpose = "purchase_goods_and_services"
+	AccountPurposeReceivePaymentsForGoodsAndServices AccountPurpose = "receive_payments_for_goods_and_services"
+	AccountPurposeTaxOptimization                   AccountPurpose = "tax_optimization"
+	AccountPurposeThirdPartyMoneyTransmission        AccountPurpose = "third_party_money_transmission"
+	AccountPurposeOther                             AccountPurpose = "other"
+	AccountPurposePayroll                           AccountPurpose = "payroll"
+	AccountPurposeTreasuryManagement                AccountPurpose = "treasury_management"
+)
+
+// BusinessType represents the legal structure of a business.
+type BusinessType string
+
+const (
+	BusinessTypeCorporation        BusinessType = "corporation"
+	BusinessTypeLLC                BusinessType = "llc"
+	BusinessTypePartnership        BusinessType = "partnership"
+	BusinessTypeSoleProprietorship BusinessType = "sole_proprietorship"
+	BusinessTypeTrust              BusinessType = "trust"
+	BusinessTypeNonProfit          BusinessType = "non_profit"
+)
+
+// BusinessIndustry represents the NAICS industry code.
+type BusinessIndustry string
+
+const (
+	BusinessIndustry541511 BusinessIndustry = "541511"
+	BusinessIndustry541512 BusinessIndustry = "541512"
+	BusinessIndustry541519 BusinessIndustry = "541519"
+	BusinessIndustry518210 BusinessIndustry = "518210"
+	BusinessIndustry511210 BusinessIndustry = "511210"
+	BusinessIndustry541611 BusinessIndustry = "541611"
+	BusinessIndustry541618 BusinessIndustry = "541618"
+	BusinessIndustry541330 BusinessIndustry = "541330"
+	BusinessIndustry541990 BusinessIndustry = "541990"
+	BusinessIndustry522110 BusinessIndustry = "522110"
+	BusinessIndustry523110 BusinessIndustry = "523110"
+	BusinessIndustry523920 BusinessIndustry = "523920"
+	BusinessIndustry423430 BusinessIndustry = "423430"
+	BusinessIndustry423690 BusinessIndustry = "423690"
+	BusinessIndustry423110 BusinessIndustry = "423110"
+	BusinessIndustry423830 BusinessIndustry = "423830"
+	BusinessIndustry423840 BusinessIndustry = "423840"
+	BusinessIndustry423510 BusinessIndustry = "423510"
+	BusinessIndustry424210 BusinessIndustry = "424210"
+	BusinessIndustry424690 BusinessIndustry = "424690"
+	BusinessIndustry424990 BusinessIndustry = "424990"
+	BusinessIndustry454110 BusinessIndustry = "454110"
+	BusinessIndustry334111 BusinessIndustry = "334111"
+	BusinessIndustry334118 BusinessIndustry = "334118"
+	BusinessIndustry325412 BusinessIndustry = "325412"
+	BusinessIndustry339112 BusinessIndustry = "339112"
+	BusinessIndustry336111 BusinessIndustry = "336111"
+	BusinessIndustry336390 BusinessIndustry = "336390"
+	BusinessIndustry551112 BusinessIndustry = "551112"
+	BusinessIndustry561499 BusinessIndustry = "561499"
+	BusinessIndustry488510 BusinessIndustry = "488510"
+	BusinessIndustry484121 BusinessIndustry = "484121"
+	BusinessIndustry493110 BusinessIndustry = "493110"
+	BusinessIndustry424410 BusinessIndustry = "424410"
+	BusinessIndustry424480 BusinessIndustry = "424480"
+	BusinessIndustry315990 BusinessIndustry = "315990"
+	BusinessIndustry313110 BusinessIndustry = "313110"
+	BusinessIndustry213112 BusinessIndustry = "213112"
+	BusinessIndustry517110 BusinessIndustry = "517110"
+	BusinessIndustry541214 BusinessIndustry = "541214"
+)
+
+// EstimatedAnnualRevenue represents the estimated annual revenue range.
+type EstimatedAnnualRevenue string
+
+const (
+	EstimatedAnnualRevenue0to99999            EstimatedAnnualRevenue = "0_99999"
+	EstimatedAnnualRevenue100000to999999      EstimatedAnnualRevenue = "100000_999999"
+	EstimatedAnnualRevenue1000000to9999999    EstimatedAnnualRevenue = "1000000_9999999"
+	EstimatedAnnualRevenue10000000to49999999  EstimatedAnnualRevenue = "10000000_49999999"
+	EstimatedAnnualRevenue50000000to249999999 EstimatedAnnualRevenue = "50000000_249999999"
+	EstimatedAnnualRevenue2500000000Plus      EstimatedAnnualRevenue = "2500000000_plus"
+)
+
+// SourceOfWealth represents the source of wealth.
+type SourceOfWealth string
+
+const (
+	SourceOfWealthBusinessDividendsOrProfits  SourceOfWealth = "business_dividends_or_profits"
+	SourceOfWealthInvestments                 SourceOfWealth = "investments"
+	SourceOfWealthAssetSales                  SourceOfWealth = "asset_sales"
+	SourceOfWealthClientInvestorContributions SourceOfWealth = "client_investor_contributions"
+	SourceOfWealthGambling                    SourceOfWealth = "gambling"
+	SourceOfWealthCharitableContributions     SourceOfWealth = "charitable_contributions"
+	SourceOfWealthInheritance                 SourceOfWealth = "inheritance"
+	SourceOfWealthAffiliateOrRoyaltyIncome    SourceOfWealth = "affiliate_or_royalty_income"
+)
+
 // SourceOfFundsDocType represents source of funds document types.
 type SourceOfFundsDocType string
 
@@ -125,7 +229,9 @@ type Owner struct {
 	IDDocFrontFile        string                 `json:"id_doc_front_file"`
 	IDDocBackFile         *string                `json:"id_doc_back_file"`
 	ProofOfAddressDocType ProofOfAddressDocType  `json:"proof_of_address_doc_type"`
-	ProofOfAddressDocFile string                 `json:"proof_of_address_doc_file"`
+	ProofOfAddressDocFile *string                `json:"proof_of_address_doc_file"`
+	OwnershipPercentage   *float64               `json:"ownership_percentage"`
+	Title                 *string                `json:"title"`
 }
 
 // KycWarning represents a KYC warning.
@@ -196,78 +302,101 @@ type Receiver struct {
 
 // CreateIndividualStandardParams represents parameters for creating an individual with standard KYC.
 type CreateIndividualStandardParams struct {
-	ExternalID            *string                `json:"external_id,omitempty"`
-	AddressLine1          string                 `json:"address_line_1"`
-	AddressLine2          *string                `json:"address_line_2,omitempty"`
-	City                  string                 `json:"city"`
-	Country               types.Country          `json:"country"`
-	DateOfBirth           string                 `json:"date_of_birth"`
-	Email                 string                 `json:"email"`
-	FirstName             string                 `json:"first_name"`
-	PhoneNumber           *string                `json:"phone_number"`
-	IDDocCountry          types.Country          `json:"id_doc_country"`
-	IDDocFrontFile        string                 `json:"id_doc_front_file"`
-	IDDocType             IdentificationDocument `json:"id_doc_type"`
-	IDDocBackFile         *string                `json:"id_doc_back_file,omitempty"`
-	LastName              string                 `json:"last_name"`
-	PostalCode            string                 `json:"postal_code"`
-	ProofOfAddressDocFile string                 `json:"proof_of_address_doc_file"`
-	ProofOfAddressDocType ProofOfAddressDocType  `json:"proof_of_address_doc_type"`
-	StateProvinceRegion   string                 `json:"state_province_region"`
-	TaxID                 string                 `json:"tax_id"`
-	TosID                 string                 `json:"tos_id"`
+	Country               types.Country           `json:"country"`
+	Email                 string                  `json:"email"`
+	AccountPurpose        *AccountPurpose         `json:"account_purpose,omitempty"`
+	AddressLine1          *string                 `json:"address_line_1,omitempty"`
+	AddressLine2          *string                 `json:"address_line_2,omitempty"`
+	City                  *string                 `json:"city,omitempty"`
+	DateOfBirth           *string                 `json:"date_of_birth,omitempty"`
+	ExternalID            *string                 `json:"external_id,omitempty"`
+	FirstName             *string                 `json:"first_name,omitempty"`
+	IDDocBackFile         *string                 `json:"id_doc_back_file,omitempty"`
+	IDDocCountry          *types.Country          `json:"id_doc_country,omitempty"`
+	IDDocFrontFile        *string                 `json:"id_doc_front_file,omitempty"`
+	IDDocType             *IdentificationDocument `json:"id_doc_type,omitempty"`
+	ImageURL              *string                 `json:"image_url,omitempty"`
+	IPAddress             *string                 `json:"ip_address,omitempty"`
+	LastName              *string                 `json:"last_name,omitempty"`
+	PhoneNumber           *string                 `json:"phone_number,omitempty"`
+	PostalCode            *string                 `json:"postal_code,omitempty"`
+	ProofOfAddressDocFile *string                 `json:"proof_of_address_doc_file,omitempty"`
+	ProofOfAddressDocType *ProofOfAddressDocType  `json:"proof_of_address_doc_type,omitempty"`
+	SelfieFile            *string                 `json:"selfie_file,omitempty"`
+	SourceOfFundsDocFile  *string                 `json:"source_of_funds_doc_file,omitempty"`
+	SourceOfFundsDocType  *SourceOfFundsDocType   `json:"source_of_funds_doc_type,omitempty"`
+	SourceOfWealth        *SourceOfWealth         `json:"source_of_wealth,omitempty"`
+	StateProvinceRegion   *string                 `json:"state_province_region,omitempty"`
+	TaxID                 *string                 `json:"tax_id,omitempty"`
+	TosID                 *string                 `json:"tos_id,omitempty"`
 }
 
 // CreateIndividualEnhancedParams represents parameters for creating an individual with enhanced KYC.
 type CreateIndividualEnhancedParams struct {
-	ExternalID                       *string                `json:"external_id,omitempty"`
-	AddressLine1                     string                 `json:"address_line_1"`
-	AddressLine2                     *string                `json:"address_line_2,omitempty"`
-	City                             string                 `json:"city"`
-	Country                          types.Country          `json:"country"`
-	DateOfBirth                      string                 `json:"date_of_birth"`
-	Email                            string                 `json:"email"`
-	FirstName                        string                 `json:"first_name"`
-	IDDocCountry                     types.Country          `json:"id_doc_country"`
-	IDDocFrontFile                   string                 `json:"id_doc_front_file"`
-	IDDocType                        IdentificationDocument `json:"id_doc_type"`
-	IDDocBackFile                    *string                `json:"id_doc_back_file,omitempty"`
-	IndividualHoldingDocFrontFile    string                 `json:"individual_holding_doc_front_file"`
-	LastName                         string                 `json:"last_name"`
-	PostalCode                       string                 `json:"postal_code"`
-	PhoneNumber                      *string                `json:"phone_number"`
-	ProofOfAddressDocFile            string                 `json:"proof_of_address_doc_file"`
-	ProofOfAddressDocType            ProofOfAddressDocType  `json:"proof_of_address_doc_type"`
-	PurposeOfTransactions            PurposeOfTransactions  `json:"purpose_of_transactions"`
-	SourceOfFundsDocFile             string                 `json:"source_of_funds_doc_file"`
-	SourceOfFundsDocType             SourceOfFundsDocType   `json:"source_of_funds_doc_type"`
-	PurposeOfTransactionsExplanation *string                `json:"purpose_of_transactions_explanation,omitempty"`
-	StateProvinceRegion              string                 `json:"state_province_region"`
-	TaxID                            string                 `json:"tax_id"`
-	TosID                            string                 `json:"tos_id"`
+	Country                          types.Country           `json:"country"`
+	Email                            string                  `json:"email"`
+	AccountPurpose                   *AccountPurpose         `json:"account_purpose,omitempty"`
+	AddressLine1                     *string                 `json:"address_line_1,omitempty"`
+	AddressLine2                     *string                 `json:"address_line_2,omitempty"`
+	City                             *string                 `json:"city,omitempty"`
+	DateOfBirth                      *string                 `json:"date_of_birth,omitempty"`
+	ExternalID                       *string                 `json:"external_id,omitempty"`
+	FirstName                        *string                 `json:"first_name,omitempty"`
+	IDDocBackFile                    *string                 `json:"id_doc_back_file,omitempty"`
+	IDDocCountry                     *types.Country          `json:"id_doc_country,omitempty"`
+	IDDocFrontFile                   *string                 `json:"id_doc_front_file,omitempty"`
+	IDDocType                        *IdentificationDocument `json:"id_doc_type,omitempty"`
+	ImageURL                         *string                 `json:"image_url,omitempty"`
+	IPAddress                        *string                 `json:"ip_address,omitempty"`
+	LastName                         *string                 `json:"last_name,omitempty"`
+	PhoneNumber                      *string                 `json:"phone_number,omitempty"`
+	PostalCode                       *string                 `json:"postal_code,omitempty"`
+	ProofOfAddressDocFile            *string                 `json:"proof_of_address_doc_file,omitempty"`
+	ProofOfAddressDocType            *ProofOfAddressDocType  `json:"proof_of_address_doc_type,omitempty"`
+	PurposeOfTransactions            *PurposeOfTransactions  `json:"purpose_of_transactions,omitempty"`
+	PurposeOfTransactionsExplanation *string                 `json:"purpose_of_transactions_explanation,omitempty"`
+	SelfieFile                       *string                 `json:"selfie_file,omitempty"`
+	SourceOfFundsDocFile             *string                 `json:"source_of_funds_doc_file,omitempty"`
+	SourceOfFundsDocType             *SourceOfFundsDocType   `json:"source_of_funds_doc_type,omitempty"`
+	SourceOfWealth                   *SourceOfWealth         `json:"source_of_wealth,omitempty"`
+	StateProvinceRegion              *string                 `json:"state_province_region,omitempty"`
+	TaxID                            *string                 `json:"tax_id,omitempty"`
+	TosID                            *string                 `json:"tos_id,omitempty"`
 }
 
 // CreateBusinessStandardParams represents parameters for creating a business with standard KYB.
 type CreateBusinessStandardParams struct {
-	ExternalID              *string               `json:"external_id,omitempty"`
-	AddressLine1            string                `json:"address_line_1"`
-	AddressLine2            *string               `json:"address_line_2,omitempty"`
-	AlternateName           string                `json:"alternate_name"`
-	City                    string                `json:"city"`
-	Country                 types.Country         `json:"country"`
-	Email                   string                `json:"email"`
-	FormationDate           string                `json:"formation_date"`
-	IncorporationDocFile    string                `json:"incorporation_doc_file"`
-	LegalName               string                `json:"legal_name"`
-	Owners                  []Owner               `json:"owners"`
-	PostalCode              string                `json:"postal_code"`
-	ProofOfAddressDocFile   string                `json:"proof_of_address_doc_file"`
-	ProofOfAddressDocType   ProofOfAddressDocType `json:"proof_of_address_doc_type"`
-	ProofOfOwnershipDocFile string                `json:"proof_of_ownership_doc_file"`
-	StateProvinceRegion     string                `json:"state_province_region"`
-	TaxID                   string                `json:"tax_id"`
-	TosID                   string                `json:"tos_id"`
-	Website                 *string               `json:"website,omitempty"`
+	Country                 types.Country           `json:"country"`
+	Email                   string                  `json:"email"`
+	AccountPurpose          *AccountPurpose         `json:"account_purpose,omitempty"`
+	AddressLine1            *string                 `json:"address_line_1,omitempty"`
+	AddressLine2            *string                 `json:"address_line_2,omitempty"`
+	AlternateName           *string                 `json:"alternate_name,omitempty"`
+	BusinessDescription     *string                 `json:"business_description,omitempty"`
+	BusinessIndustry        *BusinessIndustry       `json:"business_industry,omitempty"`
+	BusinessType            *BusinessType           `json:"business_type,omitempty"`
+	City                    *string                 `json:"city,omitempty"`
+	EstimatedAnnualRevenue  *EstimatedAnnualRevenue `json:"estimated_annual_revenue,omitempty"`
+	ExternalID              *string                 `json:"external_id,omitempty"`
+	FormationDate           *string                 `json:"formation_date,omitempty"`
+	ImageURL                *string                 `json:"image_url,omitempty"`
+	IncorporationDocFile    *string                 `json:"incorporation_doc_file,omitempty"`
+	IPAddress               *string                 `json:"ip_address,omitempty"`
+	LegalName               *string                 `json:"legal_name,omitempty"`
+	Owners                  []Owner                 `json:"owners,omitempty"`
+	PhoneNumber             *string                 `json:"phone_number,omitempty"`
+	PostalCode              *string                 `json:"postal_code,omitempty"`
+	ProofOfAddressDocFile   *string                 `json:"proof_of_address_doc_file,omitempty"`
+	ProofOfAddressDocType   *ProofOfAddressDocType  `json:"proof_of_address_doc_type,omitempty"`
+	ProofOfOwnershipDocFile *string                 `json:"proof_of_ownership_doc_file,omitempty"`
+	PubliclyTraded          *bool                   `json:"publicly_traded,omitempty"`
+	SourceOfFundsDocFile    *string                 `json:"source_of_funds_doc_file,omitempty"`
+	SourceOfFundsDocType    *SourceOfFundsDocType   `json:"source_of_funds_doc_type,omitempty"`
+	SourceOfWealth          *SourceOfWealth         `json:"source_of_wealth,omitempty"`
+	StateProvinceRegion     *string                 `json:"state_province_region,omitempty"`
+	TaxID                   *string                 `json:"tax_id,omitempty"`
+	TosID                   *string                 `json:"tos_id,omitempty"`
+	Website                 *string                 `json:"website,omitempty"`
 }
 
 // CreateResponse represents the response when creating a receiver.
@@ -278,40 +407,47 @@ type CreateResponse struct {
 // UpdateParams represents parameters for updating a receiver.
 type UpdateParams struct {
 	ReceiverID                       string                  `json:"-"`
-	Email                            *string                 `json:"email,omitempty"`
-	TaxID                            *string                 `json:"tax_id,omitempty"`
+	AccountPurpose                   *AccountPurpose         `json:"account_purpose,omitempty"`
 	AddressLine1                     *string                 `json:"address_line_1,omitempty"`
 	AddressLine2                     *string                 `json:"address_line_2,omitempty"`
-	City                             *string                 `json:"city,omitempty"`
-	StateProvinceRegion              *string                 `json:"state_province_region,omitempty"`
-	Country                          *types.Country          `json:"country,omitempty"`
-	PostalCode                       *string                 `json:"postal_code,omitempty"`
-	IPAddress                        *string                 `json:"ip_address,omitempty"`
-	ImageURL                         *string                 `json:"image_url,omitempty"`
-	PhoneNumber                      *string                 `json:"phone_number,omitempty"`
-	ProofOfAddressDocType            *ProofOfAddressDocType  `json:"proof_of_address_doc_type,omitempty"`
-	ProofOfAddressDocFile            *string                 `json:"proof_of_address_doc_file,omitempty"`
-	FirstName                        *string                 `json:"first_name,omitempty"`
-	LastName                         *string                 `json:"last_name,omitempty"`
-	DateOfBirth                      *string                 `json:"date_of_birth,omitempty"`
-	IDDocCountry                     *types.Country          `json:"id_doc_country,omitempty"`
-	IDDocType                        *IdentificationDocument `json:"id_doc_type,omitempty"`
-	IDDocFrontFile                   *string                 `json:"id_doc_front_file,omitempty"`
-	IDDocBackFile                    *string                 `json:"id_doc_back_file,omitempty"`
-	LegalName                        *string                 `json:"legal_name,omitempty"`
 	AlternateName                    *string                 `json:"alternate_name,omitempty"`
+	BusinessDescription              *string                 `json:"business_description,omitempty"`
+	BusinessIndustry                 *BusinessIndustry       `json:"business_industry,omitempty"`
+	BusinessType                     *BusinessType           `json:"business_type,omitempty"`
+	City                             *string                 `json:"city,omitempty"`
+	Country                          *types.Country          `json:"country,omitempty"`
+	DateOfBirth                      *string                 `json:"date_of_birth,omitempty"`
+	Email                            *string                 `json:"email,omitempty"`
+	EstimatedAnnualRevenue           *EstimatedAnnualRevenue `json:"estimated_annual_revenue,omitempty"`
+	ExternalID                       *string                 `json:"external_id,omitempty"`
+	FirstName                        *string                 `json:"first_name,omitempty"`
 	FormationDate                    *string                 `json:"formation_date,omitempty"`
-	Website                          *string                 `json:"website,omitempty"`
-	Owners                           []Owner                 `json:"owners,omitempty"`
+	IDDocBackFile                    *string                 `json:"id_doc_back_file,omitempty"`
+	IDDocCountry                     *types.Country          `json:"id_doc_country,omitempty"`
+	IDDocFrontFile                   *string                 `json:"id_doc_front_file,omitempty"`
+	IDDocType                        *IdentificationDocument `json:"id_doc_type,omitempty"`
+	ImageURL                         *string                 `json:"image_url,omitempty"`
 	IncorporationDocFile             *string                 `json:"incorporation_doc_file,omitempty"`
+	IPAddress                        *string                 `json:"ip_address,omitempty"`
+	LastName                         *string                 `json:"last_name,omitempty"`
+	LegalName                        *string                 `json:"legal_name,omitempty"`
+	Owners                           []Owner                 `json:"owners,omitempty"`
+	PhoneNumber                      *string                 `json:"phone_number,omitempty"`
+	PostalCode                       *string                 `json:"postal_code,omitempty"`
+	ProofOfAddressDocFile            *string                 `json:"proof_of_address_doc_file,omitempty"`
+	ProofOfAddressDocType            *ProofOfAddressDocType  `json:"proof_of_address_doc_type,omitempty"`
 	ProofOfOwnershipDocFile          *string                 `json:"proof_of_ownership_doc_file,omitempty"`
-	SourceOfFundsDocType             *SourceOfFundsDocType   `json:"source_of_funds_doc_type,omitempty"`
-	SourceOfFundsDocFile             *string                 `json:"source_of_funds_doc_file,omitempty"`
-	IndividualHoldingDocFrontFile    *string                 `json:"individual_holding_doc_front_file,omitempty"`
+	PubliclyTraded                   *bool                   `json:"publicly_traded,omitempty"`
 	PurposeOfTransactions            *PurposeOfTransactions  `json:"purpose_of_transactions,omitempty"`
 	PurposeOfTransactionsExplanation *string                 `json:"purpose_of_transactions_explanation,omitempty"`
-	ExternalID                       *string                 `json:"external_id,omitempty"`
+	SelfieFile                       *string                 `json:"selfie_file,omitempty"`
+	SourceOfFundsDocFile             *string                 `json:"source_of_funds_doc_file,omitempty"`
+	SourceOfFundsDocType             *SourceOfFundsDocType   `json:"source_of_funds_doc_type,omitempty"`
+	SourceOfWealth                   *SourceOfWealth         `json:"source_of_wealth,omitempty"`
+	StateProvinceRegion              *string                 `json:"state_province_region,omitempty"`
+	TaxID                            *string                 `json:"tax_id,omitempty"`
 	TosID                            *string                 `json:"tos_id,omitempty"`
+	Website                          *string                 `json:"website,omitempty"`
 }
 
 // LimitsResponse represents receiver limits.
@@ -391,37 +527,86 @@ func (c *Client) CreateIndividualWithStandardKYC(ctx context.Context, params *Cr
 	path := fmt.Sprintf("/instances/%s/receivers", c.instanceID)
 
 	body := map[string]any{
-		"kyc_type":                  "standard",
-		"type":                      "individual",
-		"address_line_1":            params.AddressLine1,
-		"city":                      params.City,
-		"country":                   params.Country,
-		"date_of_birth":             params.DateOfBirth,
-		"email":                     params.Email,
-		"first_name":                params.FirstName,
-		"id_doc_country":            params.IDDocCountry,
-		"id_doc_front_file":         params.IDDocFrontFile,
-		"id_doc_type":               params.IDDocType,
-		"last_name":                 params.LastName,
-		"postal_code":               params.PostalCode,
-		"proof_of_address_doc_file": params.ProofOfAddressDocFile,
-		"proof_of_address_doc_type": params.ProofOfAddressDocType,
-		"state_province_region":     params.StateProvinceRegion,
-		"tax_id":                    params.TaxID,
-		"tos_id":                    params.TosID,
+		"kyc_type": "standard",
+		"type":     "individual",
+		"country":  params.Country,
+		"email":    params.Email,
 	}
 
+	if params.AccountPurpose != nil {
+		body["account_purpose"] = *params.AccountPurpose
+	}
+	if params.AddressLine1 != nil {
+		body["address_line_1"] = *params.AddressLine1
+	}
 	if params.AddressLine2 != nil {
-		body["address_line_2"] = params.AddressLine2
+		body["address_line_2"] = *params.AddressLine2
 	}
-	if params.PhoneNumber != nil {
-		body["phone_number"] = params.PhoneNumber
+	if params.City != nil {
+		body["city"] = *params.City
 	}
-	if params.IDDocBackFile != nil {
-		body["id_doc_back_file"] = params.IDDocBackFile
+	if params.DateOfBirth != nil {
+		body["date_of_birth"] = *params.DateOfBirth
 	}
 	if params.ExternalID != nil {
-		body["external_id"] = params.ExternalID
+		body["external_id"] = *params.ExternalID
+	}
+	if params.FirstName != nil {
+		body["first_name"] = *params.FirstName
+	}
+	if params.IDDocBackFile != nil {
+		body["id_doc_back_file"] = *params.IDDocBackFile
+	}
+	if params.IDDocCountry != nil {
+		body["id_doc_country"] = *params.IDDocCountry
+	}
+	if params.IDDocFrontFile != nil {
+		body["id_doc_front_file"] = *params.IDDocFrontFile
+	}
+	if params.IDDocType != nil {
+		body["id_doc_type"] = *params.IDDocType
+	}
+	if params.ImageURL != nil {
+		body["image_url"] = *params.ImageURL
+	}
+	if params.IPAddress != nil {
+		body["ip_address"] = *params.IPAddress
+	}
+	if params.LastName != nil {
+		body["last_name"] = *params.LastName
+	}
+	if params.PhoneNumber != nil {
+		body["phone_number"] = *params.PhoneNumber
+	}
+	if params.PostalCode != nil {
+		body["postal_code"] = *params.PostalCode
+	}
+	if params.ProofOfAddressDocFile != nil {
+		body["proof_of_address_doc_file"] = *params.ProofOfAddressDocFile
+	}
+	if params.ProofOfAddressDocType != nil {
+		body["proof_of_address_doc_type"] = *params.ProofOfAddressDocType
+	}
+	if params.SelfieFile != nil {
+		body["selfie_file"] = *params.SelfieFile
+	}
+	if params.SourceOfFundsDocFile != nil {
+		body["source_of_funds_doc_file"] = *params.SourceOfFundsDocFile
+	}
+	if params.SourceOfFundsDocType != nil {
+		body["source_of_funds_doc_type"] = *params.SourceOfFundsDocType
+	}
+	if params.SourceOfWealth != nil {
+		body["source_of_wealth"] = *params.SourceOfWealth
+	}
+	if params.StateProvinceRegion != nil {
+		body["state_province_region"] = *params.StateProvinceRegion
+	}
+	if params.TaxID != nil {
+		body["tax_id"] = *params.TaxID
+	}
+	if params.TosID != nil {
+		body["tos_id"] = *params.TosID
 	}
 
 	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, body)
@@ -436,44 +621,92 @@ func (c *Client) CreateIndividualWithEnhancedKYC(ctx context.Context, params *Cr
 	path := fmt.Sprintf("/instances/%s/receivers", c.instanceID)
 
 	body := map[string]any{
-		"kyc_type":                          "enhanced",
-		"type":                              "individual",
-		"address_line_1":                    params.AddressLine1,
-		"city":                              params.City,
-		"country":                           params.Country,
-		"date_of_birth":                     params.DateOfBirth,
-		"email":                             params.Email,
-		"first_name":                        params.FirstName,
-		"id_doc_country":                    params.IDDocCountry,
-		"id_doc_front_file":                 params.IDDocFrontFile,
-		"id_doc_type":                       params.IDDocType,
-		"individual_holding_doc_front_file": params.IndividualHoldingDocFrontFile,
-		"last_name":                         params.LastName,
-		"postal_code":                       params.PostalCode,
-		"proof_of_address_doc_file":         params.ProofOfAddressDocFile,
-		"proof_of_address_doc_type":         params.ProofOfAddressDocType,
-		"purpose_of_transactions":           params.PurposeOfTransactions,
-		"source_of_funds_doc_file":          params.SourceOfFundsDocFile,
-		"source_of_funds_doc_type":          params.SourceOfFundsDocType,
-		"state_province_region":             params.StateProvinceRegion,
-		"tax_id":                            params.TaxID,
-		"tos_id":                            params.TosID,
+		"kyc_type": "enhanced",
+		"type":     "individual",
+		"country":  params.Country,
+		"email":    params.Email,
 	}
 
+	if params.AccountPurpose != nil {
+		body["account_purpose"] = *params.AccountPurpose
+	}
+	if params.AddressLine1 != nil {
+		body["address_line_1"] = *params.AddressLine1
+	}
 	if params.AddressLine2 != nil {
-		body["address_line_2"] = params.AddressLine2
+		body["address_line_2"] = *params.AddressLine2
 	}
-	if params.PhoneNumber != nil {
-		body["phone_number"] = params.PhoneNumber
+	if params.City != nil {
+		body["city"] = *params.City
 	}
-	if params.IDDocBackFile != nil {
-		body["id_doc_back_file"] = params.IDDocBackFile
-	}
-	if params.PurposeOfTransactionsExplanation != nil {
-		body["purpose_of_transactions_explanation"] = params.PurposeOfTransactionsExplanation
+	if params.DateOfBirth != nil {
+		body["date_of_birth"] = *params.DateOfBirth
 	}
 	if params.ExternalID != nil {
-		body["external_id"] = params.ExternalID
+		body["external_id"] = *params.ExternalID
+	}
+	if params.FirstName != nil {
+		body["first_name"] = *params.FirstName
+	}
+	if params.IDDocBackFile != nil {
+		body["id_doc_back_file"] = *params.IDDocBackFile
+	}
+	if params.IDDocCountry != nil {
+		body["id_doc_country"] = *params.IDDocCountry
+	}
+	if params.IDDocFrontFile != nil {
+		body["id_doc_front_file"] = *params.IDDocFrontFile
+	}
+	if params.IDDocType != nil {
+		body["id_doc_type"] = *params.IDDocType
+	}
+	if params.ImageURL != nil {
+		body["image_url"] = *params.ImageURL
+	}
+	if params.IPAddress != nil {
+		body["ip_address"] = *params.IPAddress
+	}
+	if params.LastName != nil {
+		body["last_name"] = *params.LastName
+	}
+	if params.PhoneNumber != nil {
+		body["phone_number"] = *params.PhoneNumber
+	}
+	if params.PostalCode != nil {
+		body["postal_code"] = *params.PostalCode
+	}
+	if params.ProofOfAddressDocFile != nil {
+		body["proof_of_address_doc_file"] = *params.ProofOfAddressDocFile
+	}
+	if params.ProofOfAddressDocType != nil {
+		body["proof_of_address_doc_type"] = *params.ProofOfAddressDocType
+	}
+	if params.PurposeOfTransactions != nil {
+		body["purpose_of_transactions"] = *params.PurposeOfTransactions
+	}
+	if params.PurposeOfTransactionsExplanation != nil {
+		body["purpose_of_transactions_explanation"] = *params.PurposeOfTransactionsExplanation
+	}
+	if params.SelfieFile != nil {
+		body["selfie_file"] = *params.SelfieFile
+	}
+	if params.SourceOfFundsDocFile != nil {
+		body["source_of_funds_doc_file"] = *params.SourceOfFundsDocFile
+	}
+	if params.SourceOfFundsDocType != nil {
+		body["source_of_funds_doc_type"] = *params.SourceOfFundsDocType
+	}
+	if params.SourceOfWealth != nil {
+		body["source_of_wealth"] = *params.SourceOfWealth
+	}
+	if params.StateProvinceRegion != nil {
+		body["state_province_region"] = *params.StateProvinceRegion
+	}
+	if params.TaxID != nil {
+		body["tax_id"] = *params.TaxID
+	}
+	if params.TosID != nil {
+		body["tos_id"] = *params.TosID
 	}
 
 	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, body)
@@ -488,34 +721,98 @@ func (c *Client) CreateBusinessWithStandardKYB(ctx context.Context, params *Crea
 	path := fmt.Sprintf("/instances/%s/receivers", c.instanceID)
 
 	body := map[string]any{
-		"kyc_type":                    "standard",
-		"type":                        "business",
-		"address_line_1":              params.AddressLine1,
-		"alternate_name":              params.AlternateName,
-		"city":                        params.City,
-		"country":                     params.Country,
-		"email":                       params.Email,
-		"formation_date":              params.FormationDate,
-		"incorporation_doc_file":      params.IncorporationDocFile,
-		"legal_name":                  params.LegalName,
-		"owners":                      params.Owners,
-		"postal_code":                 params.PostalCode,
-		"proof_of_address_doc_file":   params.ProofOfAddressDocFile,
-		"proof_of_address_doc_type":   params.ProofOfAddressDocType,
-		"proof_of_ownership_doc_file": params.ProofOfOwnershipDocFile,
-		"state_province_region":       params.StateProvinceRegion,
-		"tax_id":                      params.TaxID,
-		"tos_id":                      params.TosID,
+		"kyc_type": "standard",
+		"type":     "business",
+		"country":  params.Country,
+		"email":    params.Email,
 	}
 
-	if params.AddressLine2 != nil {
-		body["address_line_2"] = params.AddressLine2
+	if params.AccountPurpose != nil {
+		body["account_purpose"] = *params.AccountPurpose
 	}
-	if params.Website != nil {
-		body["website"] = params.Website
+	if params.AddressLine1 != nil {
+		body["address_line_1"] = *params.AddressLine1
+	}
+	if params.AddressLine2 != nil {
+		body["address_line_2"] = *params.AddressLine2
+	}
+	if params.AlternateName != nil {
+		body["alternate_name"] = *params.AlternateName
+	}
+	if params.BusinessDescription != nil {
+		body["business_description"] = *params.BusinessDescription
+	}
+	if params.BusinessIndustry != nil {
+		body["business_industry"] = *params.BusinessIndustry
+	}
+	if params.BusinessType != nil {
+		body["business_type"] = *params.BusinessType
+	}
+	if params.City != nil {
+		body["city"] = *params.City
+	}
+	if params.EstimatedAnnualRevenue != nil {
+		body["estimated_annual_revenue"] = *params.EstimatedAnnualRevenue
 	}
 	if params.ExternalID != nil {
-		body["external_id"] = params.ExternalID
+		body["external_id"] = *params.ExternalID
+	}
+	if params.FormationDate != nil {
+		body["formation_date"] = *params.FormationDate
+	}
+	if params.ImageURL != nil {
+		body["image_url"] = *params.ImageURL
+	}
+	if params.IncorporationDocFile != nil {
+		body["incorporation_doc_file"] = *params.IncorporationDocFile
+	}
+	if params.IPAddress != nil {
+		body["ip_address"] = *params.IPAddress
+	}
+	if params.LegalName != nil {
+		body["legal_name"] = *params.LegalName
+	}
+	if params.Owners != nil {
+		body["owners"] = params.Owners
+	}
+	if params.PhoneNumber != nil {
+		body["phone_number"] = *params.PhoneNumber
+	}
+	if params.PostalCode != nil {
+		body["postal_code"] = *params.PostalCode
+	}
+	if params.ProofOfAddressDocFile != nil {
+		body["proof_of_address_doc_file"] = *params.ProofOfAddressDocFile
+	}
+	if params.ProofOfAddressDocType != nil {
+		body["proof_of_address_doc_type"] = *params.ProofOfAddressDocType
+	}
+	if params.ProofOfOwnershipDocFile != nil {
+		body["proof_of_ownership_doc_file"] = *params.ProofOfOwnershipDocFile
+	}
+	if params.PubliclyTraded != nil {
+		body["publicly_traded"] = *params.PubliclyTraded
+	}
+	if params.SourceOfFundsDocFile != nil {
+		body["source_of_funds_doc_file"] = *params.SourceOfFundsDocFile
+	}
+	if params.SourceOfFundsDocType != nil {
+		body["source_of_funds_doc_type"] = *params.SourceOfFundsDocType
+	}
+	if params.SourceOfWealth != nil {
+		body["source_of_wealth"] = *params.SourceOfWealth
+	}
+	if params.StateProvinceRegion != nil {
+		body["state_province_region"] = *params.StateProvinceRegion
+	}
+	if params.TaxID != nil {
+		body["tax_id"] = *params.TaxID
+	}
+	if params.TosID != nil {
+		body["tos_id"] = *params.TosID
+	}
+	if params.Website != nil {
+		body["website"] = *params.Website
 	}
 
 	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, body)
@@ -545,107 +842,128 @@ func (c *Client) Update(ctx context.Context, params *UpdateParams) error {
 	// Build the request body with only non-nil fields
 	body := make(map[string]any)
 
-	if params.Email != nil {
-		body["email"] = params.Email
-	}
-	if params.TaxID != nil {
-		body["tax_id"] = params.TaxID
+	if params.AccountPurpose != nil {
+		body["account_purpose"] = *params.AccountPurpose
 	}
 	if params.AddressLine1 != nil {
-		body["address_line_1"] = params.AddressLine1
+		body["address_line_1"] = *params.AddressLine1
 	}
 	if params.AddressLine2 != nil {
-		body["address_line_2"] = params.AddressLine2
-	}
-	if params.City != nil {
-		body["city"] = params.City
-	}
-	if params.StateProvinceRegion != nil {
-		body["state_province_region"] = params.StateProvinceRegion
-	}
-	if params.Country != nil {
-		body["country"] = params.Country
-	}
-	if params.PostalCode != nil {
-		body["postal_code"] = params.PostalCode
-	}
-	if params.IPAddress != nil {
-		body["ip_address"] = params.IPAddress
-	}
-	if params.ImageURL != nil {
-		body["image_url"] = params.ImageURL
-	}
-	if params.PhoneNumber != nil {
-		body["phone_number"] = params.PhoneNumber
-	}
-	if params.ProofOfAddressDocType != nil {
-		body["proof_of_address_doc_type"] = params.ProofOfAddressDocType
-	}
-	if params.ProofOfAddressDocFile != nil {
-		body["proof_of_address_doc_file"] = params.ProofOfAddressDocFile
-	}
-	if params.FirstName != nil {
-		body["first_name"] = params.FirstName
-	}
-	if params.LastName != nil {
-		body["last_name"] = params.LastName
-	}
-	if params.DateOfBirth != nil {
-		body["date_of_birth"] = params.DateOfBirth
-	}
-	if params.IDDocCountry != nil {
-		body["id_doc_country"] = params.IDDocCountry
-	}
-	if params.IDDocType != nil {
-		body["id_doc_type"] = params.IDDocType
-	}
-	if params.IDDocFrontFile != nil {
-		body["id_doc_front_file"] = params.IDDocFrontFile
-	}
-	if params.IDDocBackFile != nil {
-		body["id_doc_back_file"] = params.IDDocBackFile
-	}
-	if params.LegalName != nil {
-		body["legal_name"] = params.LegalName
+		body["address_line_2"] = *params.AddressLine2
 	}
 	if params.AlternateName != nil {
-		body["alternate_name"] = params.AlternateName
+		body["alternate_name"] = *params.AlternateName
+	}
+	if params.BusinessDescription != nil {
+		body["business_description"] = *params.BusinessDescription
+	}
+	if params.BusinessIndustry != nil {
+		body["business_industry"] = *params.BusinessIndustry
+	}
+	if params.BusinessType != nil {
+		body["business_type"] = *params.BusinessType
+	}
+	if params.City != nil {
+		body["city"] = *params.City
+	}
+	if params.Country != nil {
+		body["country"] = *params.Country
+	}
+	if params.DateOfBirth != nil {
+		body["date_of_birth"] = *params.DateOfBirth
+	}
+	if params.Email != nil {
+		body["email"] = *params.Email
+	}
+	if params.EstimatedAnnualRevenue != nil {
+		body["estimated_annual_revenue"] = *params.EstimatedAnnualRevenue
+	}
+	if params.ExternalID != nil {
+		body["external_id"] = *params.ExternalID
+	}
+	if params.FirstName != nil {
+		body["first_name"] = *params.FirstName
 	}
 	if params.FormationDate != nil {
-		body["formation_date"] = params.FormationDate
+		body["formation_date"] = *params.FormationDate
 	}
-	if params.Website != nil {
-		body["website"] = params.Website
+	if params.IDDocBackFile != nil {
+		body["id_doc_back_file"] = *params.IDDocBackFile
+	}
+	if params.IDDocCountry != nil {
+		body["id_doc_country"] = *params.IDDocCountry
+	}
+	if params.IDDocFrontFile != nil {
+		body["id_doc_front_file"] = *params.IDDocFrontFile
+	}
+	if params.IDDocType != nil {
+		body["id_doc_type"] = *params.IDDocType
+	}
+	if params.ImageURL != nil {
+		body["image_url"] = *params.ImageURL
+	}
+	if params.IncorporationDocFile != nil {
+		body["incorporation_doc_file"] = *params.IncorporationDocFile
+	}
+	if params.IPAddress != nil {
+		body["ip_address"] = *params.IPAddress
+	}
+	if params.LastName != nil {
+		body["last_name"] = *params.LastName
+	}
+	if params.LegalName != nil {
+		body["legal_name"] = *params.LegalName
 	}
 	if params.Owners != nil {
 		body["owners"] = params.Owners
 	}
-	if params.IncorporationDocFile != nil {
-		body["incorporation_doc_file"] = params.IncorporationDocFile
+	if params.PhoneNumber != nil {
+		body["phone_number"] = *params.PhoneNumber
+	}
+	if params.PostalCode != nil {
+		body["postal_code"] = *params.PostalCode
+	}
+	if params.ProofOfAddressDocFile != nil {
+		body["proof_of_address_doc_file"] = *params.ProofOfAddressDocFile
+	}
+	if params.ProofOfAddressDocType != nil {
+		body["proof_of_address_doc_type"] = *params.ProofOfAddressDocType
 	}
 	if params.ProofOfOwnershipDocFile != nil {
-		body["proof_of_ownership_doc_file"] = params.ProofOfOwnershipDocFile
+		body["proof_of_ownership_doc_file"] = *params.ProofOfOwnershipDocFile
 	}
-	if params.SourceOfFundsDocType != nil {
-		body["source_of_funds_doc_type"] = params.SourceOfFundsDocType
-	}
-	if params.SourceOfFundsDocFile != nil {
-		body["source_of_funds_doc_file"] = params.SourceOfFundsDocFile
-	}
-	if params.IndividualHoldingDocFrontFile != nil {
-		body["individual_holding_doc_front_file"] = params.IndividualHoldingDocFrontFile
+	if params.PubliclyTraded != nil {
+		body["publicly_traded"] = *params.PubliclyTraded
 	}
 	if params.PurposeOfTransactions != nil {
-		body["purpose_of_transactions"] = params.PurposeOfTransactions
+		body["purpose_of_transactions"] = *params.PurposeOfTransactions
 	}
 	if params.PurposeOfTransactionsExplanation != nil {
-		body["purpose_of_transactions_explanation"] = params.PurposeOfTransactionsExplanation
+		body["purpose_of_transactions_explanation"] = *params.PurposeOfTransactionsExplanation
 	}
-	if params.ExternalID != nil {
-		body["external_id"] = params.ExternalID
+	if params.SelfieFile != nil {
+		body["selfie_file"] = *params.SelfieFile
+	}
+	if params.SourceOfFundsDocFile != nil {
+		body["source_of_funds_doc_file"] = *params.SourceOfFundsDocFile
+	}
+	if params.SourceOfFundsDocType != nil {
+		body["source_of_funds_doc_type"] = *params.SourceOfFundsDocType
+	}
+	if params.SourceOfWealth != nil {
+		body["source_of_wealth"] = *params.SourceOfWealth
+	}
+	if params.StateProvinceRegion != nil {
+		body["state_province_region"] = *params.StateProvinceRegion
+	}
+	if params.TaxID != nil {
+		body["tax_id"] = *params.TaxID
 	}
 	if params.TosID != nil {
-		body["tos_id"] = params.TosID
+		body["tos_id"] = *params.TosID
+	}
+	if params.Website != nil {
+		body["website"] = *params.Website
 	}
 
 	_, err := request.Do[struct{}](c.cfg, ctx, "PATCH", path, body)

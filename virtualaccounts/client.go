@@ -9,6 +9,15 @@ import (
 	"github.com/blindpaylabs/blindpay-go/internal/types"
 )
 
+// BankingPartner represents the banking partner for a virtual account.
+type BankingPartner string
+
+const (
+	BankingPartnerJPMorgan BankingPartner = "jpmorgan"
+	BankingPartnerCiti     BankingPartner = "citi"
+	BankingPartnerHSBC     BankingPartner = "hsbc"
+)
+
 // VirtualAccountUS represents US-specific virtual account details.
 type VirtualAccountUS struct {
 	ACH struct {
@@ -48,8 +57,10 @@ type VirtualAccount struct {
 // CreateParams represents parameters for creating a virtual account.
 type CreateParams struct {
 	ReceiverID         string                `json:"-"`
+	BankingPartner     BankingPartner        `json:"banking_partner"`
 	BlockchainWalletID string                `json:"blockchain_wallet_id"`
 	Token              types.StablecoinToken `json:"token"`
+	SignedAgreementID  *string               `json:"signed_agreement_id,omitempty"`
 }
 
 // UpdateParams represents parameters for updating a virtual account.
@@ -89,12 +100,13 @@ func (c *Client) Create(ctx context.Context, params *CreateParams) (*VirtualAcco
 
 	path := fmt.Sprintf("/instances/%s/receivers/%s/virtual-accounts", c.instanceID, params.ReceiverID)
 
-	body := struct {
-		BlockchainWalletID string                `json:"blockchain_wallet_id"`
-		Token              types.StablecoinToken `json:"token"`
-	}{
-		BlockchainWalletID: params.BlockchainWalletID,
-		Token:              params.Token,
+	body := map[string]any{
+		"banking_partner":      params.BankingPartner,
+		"blockchain_wallet_id": params.BlockchainWalletID,
+		"token":                params.Token,
+	}
+	if params.SignedAgreementID != nil {
+		body["signed_agreement_id"] = *params.SignedAgreementID
 	}
 
 	return request.Do[*VirtualAccount](c.cfg, ctx, "POST", path, body)

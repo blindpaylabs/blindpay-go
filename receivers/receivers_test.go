@@ -152,6 +152,8 @@ func TestReceivers_List(t *testing.T) {
 								"id_doc_back_file":"https://example.com/image.png",
 								"proof_of_address_doc_type":"UTILITY_BILL",
 								"proof_of_address_doc_file":"https://example.com/image.png",
+								"ownership_percentage": 25,
+								"title": "CEO",
 								"id":"ub_000000000000",
 								"instance_id":"in_000000000000",
 								"receiver_id":"re_IOxAUL24LG7P"
@@ -211,29 +213,43 @@ func TestReceivers_CreateIndividualWithStandardKYC(t *testing.T) {
 	}
 
 	client := NewClient(cfg)
+	firstName := "Bernardo"
+	lastName := "Simonassi"
+	dateOfBirth := "1998-02-02T00:00:00.000Z"
+	taxID := "12345678900"
+	addressLine1 := "Av. Paulista, 1000"
 	addressLine2 := "Apto 101"
+	city := "São Paulo"
+	stateProvinceRegion := "SP"
+	postalCode := "01310-100"
 	phoneNumber := "+5511987654321"
+	idDocCountry := types.CountryBR
+	idDocType := IdentificationDocumentPassport
+	idDocFrontFile := "https://example.com/image.png"
 	idDocBackFile := "https://example.com/image.png"
+	proofOfAddressDocType := ProofOfAddressDocTypeUtilityBill
+	proofOfAddressDocFile := "https://example.com/image.png"
+	tosID := "to_tPiz4bM2nh5K"
 	response, err := client.CreateIndividualWithStandardKYC(context.Background(), &CreateIndividualStandardParams{
 		Email:                 "bernardo.simonassi@gmail.com",
-		FirstName:             "Bernardo",
-		LastName:              "Simonassi",
-		DateOfBirth:           "1998-02-02T00:00:00.000Z",
-		TaxID:                 "12345678900",
-		AddressLine1:          "Av. Paulista, 1000",
-		AddressLine2:          &addressLine2,
-		City:                  "São Paulo",
-		StateProvinceRegion:   "SP",
 		Country:               types.CountryBR,
-		PostalCode:            "01310-100",
+		FirstName:             &firstName,
+		LastName:              &lastName,
+		DateOfBirth:           &dateOfBirth,
+		TaxID:                 &taxID,
+		AddressLine1:          &addressLine1,
+		AddressLine2:          &addressLine2,
+		City:                  &city,
+		StateProvinceRegion:   &stateProvinceRegion,
+		PostalCode:            &postalCode,
 		PhoneNumber:           &phoneNumber,
-		IDDocCountry:          types.CountryBR,
-		IDDocType:             IdentificationDocumentPassport,
-		IDDocFrontFile:        "https://example.com/image.png",
+		IDDocCountry:          &idDocCountry,
+		IDDocType:             &idDocType,
+		IDDocFrontFile:        &idDocFrontFile,
 		IDDocBackFile:         &idDocBackFile,
-		ProofOfAddressDocType: ProofOfAddressDocTypeUtilityBill,
-		ProofOfAddressDocFile: "https://example.com/image.png",
-		TosID:                 "to_tPiz4bM2nh5K",
+		ProofOfAddressDocType: &proofOfAddressDocType,
+		ProofOfAddressDocFile: &proofOfAddressDocFile,
+		TosID:                 &tosID,
 	})
 	require.NoError(t, err)
 	require.Equal(t, receiverID, response.ID)
@@ -259,35 +275,53 @@ func TestReceivers_CreateIndividualWithEnhancedKYC(t *testing.T) {
 	}
 
 	client := NewClient(cfg)
+	firstName := "Bernardo"
+	lastName := "Simonassi"
+	dateOfBirth := "1998-02-02T00:00:00.000Z"
+	taxID := "12345678900"
+	addressLine1 := "Av. Paulista, 1000"
 	addressLine2 := "Apto 101"
+	city := "São Paulo"
+	stateProvinceRegion := "SP"
+	postalCode := "01310-100"
 	phoneNumber := "+5511987654321"
+	idDocCountry := types.CountryBR
+	idDocType := IdentificationDocumentPassport
+	idDocFrontFile := "https://example.com/image.png"
 	idDocBackFile := "https://example.com/image.png"
+	proofOfAddressDocType := ProofOfAddressDocTypeUtilityBill
+	proofOfAddressDocFile := "https://example.com/image.png"
+	selfieFile := "https://example.com/image.png"
+	purposeOfTransactions := PurposePersonalOrLivingExpenses
+	sourceOfFundsDocType := SourceOfFundsSavings
+	sourceOfFundsDocFile := "https://example.com/image.png"
 	purposeExplanation := "I am receiving salary payments from my employer"
+	tosID := "to_3ZZhllJkvo5Z"
 	response, err := client.CreateIndividualWithEnhancedKYC(context.Background(), &CreateIndividualEnhancedParams{
 		Email:                            "bernardo.simonassi@gmail.com",
-		FirstName:                        "Bernardo",
-		LastName:                         "Simonassi",
-		DateOfBirth:                      "1998-02-02T00:00:00.000Z",
-		TaxID:                            "12345678900",
-		AddressLine1:                     "Av. Paulista, 1000",
-		AddressLine2:                     &addressLine2,
-		City:                             "São Paulo",
-		StateProvinceRegion:              "SP",
 		Country:                          types.CountryBR,
-		PostalCode:                       "01310-100",
+		FirstName:                        &firstName,
+		LastName:                         &lastName,
+		DateOfBirth:                      &dateOfBirth,
+		TaxID:                            &taxID,
+		AddressLine1:                     &addressLine1,
+		AddressLine2:                     &addressLine2,
+		City:                             &city,
+		StateProvinceRegion:              &stateProvinceRegion,
+		PostalCode:                       &postalCode,
 		PhoneNumber:                      &phoneNumber,
-		IDDocCountry:                     types.CountryBR,
-		IDDocType:                        IdentificationDocumentPassport,
-		IDDocFrontFile:                   "https://example.com/image.png",
+		IDDocCountry:                     &idDocCountry,
+		IDDocType:                        &idDocType,
+		IDDocFrontFile:                   &idDocFrontFile,
 		IDDocBackFile:                    &idDocBackFile,
-		ProofOfAddressDocType:            ProofOfAddressDocTypeUtilityBill,
-		ProofOfAddressDocFile:            "https://example.com/image.png",
-		IndividualHoldingDocFrontFile:    "https://example.com/image.png",
-		PurposeOfTransactions:            PurposePersonalOrLivingExpenses,
-		SourceOfFundsDocType:             SourceOfFundsSavings,
+		ProofOfAddressDocType:            &proofOfAddressDocType,
+		ProofOfAddressDocFile:            &proofOfAddressDocFile,
+		SelfieFile:                       &selfieFile,
+		PurposeOfTransactions:            &purposeOfTransactions,
+		SourceOfFundsDocType:             &sourceOfFundsDocType,
+		SourceOfFundsDocFile:             &sourceOfFundsDocFile,
 		PurposeOfTransactionsExplanation: &purposeExplanation,
-		SourceOfFundsDocFile:             "https://example.com/image.png",
-		TosID:                            "to_3ZZhllJkvo5Z",
+		TosID:                            &tosID,
 	})
 	require.NoError(t, err)
 	require.Equal(t, receiverID, response.ID)
@@ -313,26 +347,56 @@ func TestReceivers_CreateBusinessWithStandardKYB(t *testing.T) {
 	}
 
 	client := NewClient(cfg)
+	taxID := "20096178000195"
+	addressLine1 := "Av. Brigadeiro Faria Lima, 400"
 	addressLine2 := "Sala 1201"
+	city := "São Paulo"
+	stateProvinceRegion := "SP"
+	postalCode := "04538-132"
+	legalName := "Empresa Exemplo Ltda"
+	alternateName := "Exemplo"
+	formationDate := "2010-05-20T00:00:00.000Z"
+	incorporationDocFile := "https://example.com/image.png"
+	proofOfAddressDocType := ProofOfAddressDocTypeUtilityBill
+	proofOfAddressDocFile := "https://example.com/image.png"
+	proofOfOwnershipDocFile := "https://example.com/image.png"
 	website := "https://site.com/"
+	tosID := "to_nppX66ntvtHs"
+	businessType := BusinessTypeCorporation
+	businessDescription := "Software development company"
+	businessIndustry := BusinessIndustry541511
+	estimatedAnnualRevenue := EstimatedAnnualRevenue1000000to9999999
+	sourceOfWealth := SourceOfWealthBusinessDividendsOrProfits
+	publiclyTraded := false
+	accountPurpose := AccountPurposeBusinessExpenses
 	ownerIDDocBackFile := "https://example.com/image.png"
+	ownerProofOfAddressDocFile := "https://example.com/image.png"
+	ownerOwnershipPercentage := 25.0
+	ownerTitle := "CEO"
 	response, err := client.CreateBusinessWithStandardKYB(context.Background(), &CreateBusinessStandardParams{
 		Email:                   "contato@empresa.com.br",
-		TaxID:                   "20096178000195",
-		AddressLine1:            "Av. Brigadeiro Faria Lima, 400",
-		AddressLine2:            &addressLine2,
-		City:                    "São Paulo",
-		StateProvinceRegion:     "SP",
 		Country:                 types.CountryBR,
-		PostalCode:              "04538-132",
-		LegalName:               "Empresa Exemplo Ltda",
-		AlternateName:           "Exemplo",
-		FormationDate:           "2010-05-20T00:00:00.000Z",
-		IncorporationDocFile:    "https://example.com/image.png",
-		ProofOfAddressDocType:   ProofOfAddressDocTypeUtilityBill,
-		ProofOfAddressDocFile:   "https://example.com/image.png",
-		ProofOfOwnershipDocFile: "https://example.com/image.png",
+		TaxID:                   &taxID,
+		AddressLine1:            &addressLine1,
+		AddressLine2:            &addressLine2,
+		City:                    &city,
+		StateProvinceRegion:     &stateProvinceRegion,
+		PostalCode:              &postalCode,
+		LegalName:               &legalName,
+		AlternateName:           &alternateName,
+		FormationDate:           &formationDate,
+		IncorporationDocFile:    &incorporationDocFile,
+		ProofOfAddressDocType:   &proofOfAddressDocType,
+		ProofOfAddressDocFile:   &proofOfAddressDocFile,
+		ProofOfOwnershipDocFile: &proofOfOwnershipDocFile,
 		Website:                 &website,
+		BusinessType:            &businessType,
+		BusinessDescription:     &businessDescription,
+		BusinessIndustry:        &businessIndustry,
+		EstimatedAnnualRevenue:  &estimatedAnnualRevenue,
+		SourceOfWealth:          &sourceOfWealth,
+		PubliclyTraded:          &publiclyTraded,
+		AccountPurpose:          &accountPurpose,
 		Owners: []Owner{
 			{
 				Role:                  "beneficial_owner",
@@ -351,13 +415,15 @@ func TestReceivers_CreateBusinessWithStandardKYB(t *testing.T) {
 				IDDocFrontFile:        "https://example.com/image.png",
 				IDDocBackFile:         &ownerIDDocBackFile,
 				ProofOfAddressDocType: ProofOfAddressDocTypeUtilityBill,
-				ProofOfAddressDocFile: "https://example.com/image.png",
+				ProofOfAddressDocFile: &ownerProofOfAddressDocFile,
+				OwnershipPercentage:   &ownerOwnershipPercentage,
+				Title:                 &ownerTitle,
 				ID:                    "ub_000000000000",
 				InstanceID:            "in_000000000000",
 				ReceiverID:            "re_IOxAUL24LG7P",
 			},
 		},
-		TosID: "to_nppX66ntvtHs",
+		TosID: &tosID,
 	})
 	require.NoError(t, err)
 	require.Equal(t, receiverID, response.ID)
