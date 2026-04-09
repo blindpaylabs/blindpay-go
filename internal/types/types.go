@@ -57,16 +57,16 @@ const (
 type RecipientRelationship string
 
 const (
-	RecipientRelationshipFirstParty             RecipientRelationship = "first_party"
-	RecipientRelationshipEmployee               RecipientRelationship = "employee"
-	RecipientRelationshipIndependentContractor  RecipientRelationship = "independent_contractor"
-	RecipientRelationshipVendorOrSupplier       RecipientRelationship = "vendor_or_supplier"
-	RecipientRelationshipSubsidiaryOrAffiliate  RecipientRelationship = "subsidiary_or_affiliate"
-	RecipientRelationshipMerchantOrPartner      RecipientRelationship = "merchant_or_partner"
-	RecipientRelationshipCustomer               RecipientRelationship = "customer"
-	RecipientRelationshipLandlord               RecipientRelationship = "landlord"
-	RecipientRelationshipFamily                 RecipientRelationship = "family"
-	RecipientRelationshipOther                  RecipientRelationship = "other"
+	RecipientRelationshipFirstParty            RecipientRelationship = "first_party"
+	RecipientRelationshipEmployee              RecipientRelationship = "employee"
+	RecipientRelationshipIndependentContractor RecipientRelationship = "independent_contractor"
+	RecipientRelationshipVendorOrSupplier      RecipientRelationship = "vendor_or_supplier"
+	RecipientRelationshipSubsidiaryOrAffiliate RecipientRelationship = "subsidiary_or_affiliate"
+	RecipientRelationshipMerchantOrPartner     RecipientRelationship = "merchant_or_partner"
+	RecipientRelationshipCustomer              RecipientRelationship = "customer"
+	RecipientRelationshipLandlord              RecipientRelationship = "landlord"
+	RecipientRelationshipFamily                RecipientRelationship = "family"
+	RecipientRelationshipOther                 RecipientRelationship = "other"
 )
 
 type PayinPaymentMethod string

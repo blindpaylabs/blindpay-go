@@ -352,14 +352,14 @@ const (
 )
 
 const (
-	WebhookEventReceiverNew         = types.WebhookEventReceiverNew
-	WebhookEventReceiverUpdate      = types.WebhookEventReceiverUpdate
-	WebhookEventBankAccountNew      = types.WebhookEventBankAccountNew
-	WebhookEventPayoutNew           = types.WebhookEventPayoutNew
-	WebhookEventPayoutUpdate        = types.WebhookEventPayoutUpdate
-	WebhookEventPayoutComplete      = types.WebhookEventPayoutComplete
-	WebhookEventPayoutPartnerFee    = types.WebhookEventPayoutPartnerFee
-	WebhookEventBlockchainWalletNew = types.WebhookEventBlockchainWalletNew
+	WebhookEventReceiverNew            = types.WebhookEventReceiverNew
+	WebhookEventReceiverUpdate         = types.WebhookEventReceiverUpdate
+	WebhookEventBankAccountNew         = types.WebhookEventBankAccountNew
+	WebhookEventPayoutNew              = types.WebhookEventPayoutNew
+	WebhookEventPayoutUpdate           = types.WebhookEventPayoutUpdate
+	WebhookEventPayoutComplete         = types.WebhookEventPayoutComplete
+	WebhookEventPayoutPartnerFee       = types.WebhookEventPayoutPartnerFee
+	WebhookEventBlockchainWalletNew    = types.WebhookEventBlockchainWalletNew
 	WebhookEventPayinNew               = types.WebhookEventPayinNew
 	WebhookEventPayinUpdate            = types.WebhookEventPayinUpdate
 	WebhookEventPayinComplete          = types.WebhookEventPayinComplete

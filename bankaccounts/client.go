@@ -175,29 +175,29 @@ type CreateColombiaAchResponse struct {
 
 // CreateAchResponse represents the response when creating an ACH bank account.
 type CreateAchResponse struct {
-	ID                         string                       `json:"id"`
-	Type                       string                       `json:"type"`
-	Name                       string                       `json:"name"`
-	BeneficiaryName            string                       `json:"beneficiary_name"`
-	RoutingNumber              string                       `json:"routing_number"`
-	AccountNumber              string                       `json:"account_number"`
-	AccountType                types.BankAccountType        `json:"account_type"`
-	AccountClass               types.AccountClass           `json:"account_class"`
-	RecipientRelationship      types.RecipientRelationship  `json:"recipient_relationship"`
-	AddressLine1               *string                      `json:"address_line_1"`
-	AddressLine2               *string                      `json:"address_line_2"`
-	City                       *string                      `json:"city"`
-	StateProvinceRegion        *string                      `json:"state_province_region"`
-	Country                    *types.Country               `json:"country"`
-	PostalCode                 *string                      `json:"postal_code"`
-	AchCopBeneficiaryFirstName *string                      `json:"ach_cop_beneficiary_first_name"`
-	AchCopBeneficiaryLastName  *string                      `json:"ach_cop_beneficiary_last_name"`
-	AchCopDocumentID           *string                      `json:"ach_cop_document_id"`
-	AchCopDocumentType         *AchCopDocument              `json:"ach_cop_document_type"`
-	AchCopEmail                *string                      `json:"ach_cop_email"`
-	AchCopBankCode             *string                      `json:"ach_cop_bank_code"`
-	AchCopBankAccount          *string                      `json:"ach_cop_bank_account"`
-	CreatedAt                  time.Time                    `json:"created_at"`
+	ID                         string                      `json:"id"`
+	Type                       string                      `json:"type"`
+	Name                       string                      `json:"name"`
+	BeneficiaryName            string                      `json:"beneficiary_name"`
+	RoutingNumber              string                      `json:"routing_number"`
+	AccountNumber              string                      `json:"account_number"`
+	AccountType                types.BankAccountType       `json:"account_type"`
+	AccountClass               types.AccountClass          `json:"account_class"`
+	RecipientRelationship      types.RecipientRelationship `json:"recipient_relationship"`
+	AddressLine1               *string                     `json:"address_line_1"`
+	AddressLine2               *string                     `json:"address_line_2"`
+	City                       *string                     `json:"city"`
+	StateProvinceRegion        *string                     `json:"state_province_region"`
+	Country                    *types.Country              `json:"country"`
+	PostalCode                 *string                     `json:"postal_code"`
+	AchCopBeneficiaryFirstName *string                     `json:"ach_cop_beneficiary_first_name"`
+	AchCopBeneficiaryLastName  *string                     `json:"ach_cop_beneficiary_last_name"`
+	AchCopDocumentID           *string                     `json:"ach_cop_document_id"`
+	AchCopDocumentType         *AchCopDocument             `json:"ach_cop_document_type"`
+	AchCopEmail                *string                     `json:"ach_cop_email"`
+	AchCopBankCode             *string                     `json:"ach_cop_bank_code"`
+	AchCopBankAccount          *string                     `json:"ach_cop_bank_account"`
+	CreatedAt                  time.Time                   `json:"created_at"`
 }
 
 // CreateWireResponse represents the response when creating a Wire bank account.
@@ -278,28 +278,28 @@ type CreateRtpResponse struct {
 
 // CreatePixSafeParams represents parameters for creating a PIX Safe bank account.
 type CreatePixSafeParams struct {
-	ReceiverID       string                `json:"-"`
-	Name             string                `json:"name"`
-	BeneficiaryName  string                `json:"beneficiary_name"`
-	AccountNumber    string                `json:"account_number"`
-	AccountType      types.BankAccountType `json:"account_type"`
-	PixSafeBankCode  string                `json:"pix_safe_bank_code"`
-	PixSafeBranchCode string               `json:"pix_safe_branch_code"`
-	PixSafeCpfCnpj   string               `json:"pix_safe_cpf_cnpj"`
+	ReceiverID        string                `json:"-"`
+	Name              string                `json:"name"`
+	BeneficiaryName   string                `json:"beneficiary_name"`
+	AccountNumber     string                `json:"account_number"`
+	AccountType       types.BankAccountType `json:"account_type"`
+	PixSafeBankCode   string                `json:"pix_safe_bank_code"`
+	PixSafeBranchCode string                `json:"pix_safe_branch_code"`
+	PixSafeCpfCnpj    string                `json:"pix_safe_cpf_cnpj"`
 }
 
 // CreatePixSafeResponse represents the response when creating a PIX Safe bank account.
 type CreatePixSafeResponse struct {
-	ID               string                `json:"id"`
-	Type             string                `json:"type"`
-	Name             string                `json:"name"`
-	BeneficiaryName  string                `json:"beneficiary_name"`
-	AccountNumber    string                `json:"account_number"`
-	AccountType      types.BankAccountType `json:"account_type"`
-	PixSafeBankCode  string                `json:"pix_safe_bank_code"`
-	PixSafeBranchCode string               `json:"pix_safe_branch_code"`
-	PixSafeCpfCnpj   string               `json:"pix_safe_cpf_cnpj"`
-	CreatedAt        time.Time             `json:"created_at"`
+	ID                string                `json:"id"`
+	Type              string                `json:"type"`
+	Name              string                `json:"name"`
+	BeneficiaryName   string                `json:"beneficiary_name"`
+	AccountNumber     string                `json:"account_number"`
+	AccountType       types.BankAccountType `json:"account_type"`
+	PixSafeBankCode   string                `json:"pix_safe_bank_code"`
+	PixSafeBranchCode string                `json:"pix_safe_branch_code"`
+	PixSafeCpfCnpj    string                `json:"pix_safe_cpf_cnpj"`
+	CreatedAt         time.Time             `json:"created_at"`
 }
 
 // ListParams represents parameters for listing bank accounts with optional filters.
@@ -314,24 +314,24 @@ type ListParams struct {
 
 // CreateAchParams represents parameters for creating an ACH bank account.
 type CreateAchParams struct {
-	ReceiverID            string                       `json:"-"`
-	Name                  string                       `json:"name"`
-	AccountClass          types.AccountClass           `json:"account_class"`
-	AccountNumber         string                       `json:"account_number"`
-	AccountType           types.BankAccountType        `json:"account_type"`
-	BeneficiaryName       string                       `json:"beneficiary_name"`
-	RoutingNumber         string                       `json:"routing_number"`
-	RecipientRelationship types.RecipientRelationship  `json:"recipient_relationship"`
-	AddressLine1          string                       `json:"address_line_1"`
-	City                  string                       `json:"city"`
-	StateProvinceRegion   string                       `json:"state_province_region"`
-	Country               types.Country                `json:"country"`
-	PostalCode            string                       `json:"postal_code"`
-	AddressLine2          string                       `json:"address_line_2,omitempty"`
-	BusinessIndustry      types.BusinessIndustry       `json:"business_industry,omitempty"`
-	PhoneNumber           string                       `json:"phone_number,omitempty"`
-	TaxID                 string                       `json:"tax_id,omitempty"`
-	DateOfBirth           string                       `json:"date_of_birth,omitempty"`
+	ReceiverID            string                      `json:"-"`
+	Name                  string                      `json:"name"`
+	AccountClass          types.AccountClass          `json:"account_class"`
+	AccountNumber         string                      `json:"account_number"`
+	AccountType           types.BankAccountType       `json:"account_type"`
+	BeneficiaryName       string                      `json:"beneficiary_name"`
+	RoutingNumber         string                      `json:"routing_number"`
+	RecipientRelationship types.RecipientRelationship `json:"recipient_relationship"`
+	AddressLine1          string                      `json:"address_line_1"`
+	City                  string                      `json:"city"`
+	StateProvinceRegion   string                      `json:"state_province_region"`
+	Country               types.Country               `json:"country"`
+	PostalCode            string                      `json:"postal_code"`
+	AddressLine2          string                      `json:"address_line_2,omitempty"`
+	BusinessIndustry      types.BusinessIndustry      `json:"business_industry,omitempty"`
+	PhoneNumber           string                      `json:"phone_number,omitempty"`
+	TaxID                 string                      `json:"tax_id,omitempty"`
+	DateOfBirth           string                      `json:"date_of_birth,omitempty"`
 }
 
 // CreateWireParams represents parameters for creating a Wire bank account.
@@ -780,7 +780,7 @@ func (c *Client) CreatePixSafe(ctx context.Context, params *CreatePixSafeParams)
 		"account_type":         params.AccountType,
 		"pix_safe_bank_code":   params.PixSafeBankCode,
 		"pix_safe_branch_code": params.PixSafeBranchCode,
-		"pix_safe_cpf_cnpj":   params.PixSafeCpfCnpj,
+		"pix_safe_cpf_cnpj":    params.PixSafeCpfCnpj,
 	}
 
 	return request.Do[*CreatePixSafeResponse](c.cfg, ctx, "POST", path, body)

@@ -22,37 +22,37 @@ type TrackingStep struct {
 
 // TrackingTransactionMonitoring represents transaction monitoring tracking.
 type TrackingTransactionMonitoring struct {
-	Step                 string   `json:"step"`
-	BlockchainScreening  *float64 `json:"blockchain_screening"`
-	RiskScore            *float64 `json:"risk_score"`
-	CompletedAt          *string  `json:"completed_at"`
+	Step                string   `json:"step"`
+	BlockchainScreening *float64 `json:"blockchain_screening"`
+	RiskScore           *float64 `json:"risk_score"`
+	CompletedAt         *string  `json:"completed_at"`
 }
 
 // Transfer represents a transfer transaction.
 type Transfer struct {
-	ID                              string                        `json:"id"`
-	Status                          types.TransactionStatus       `json:"status"`
-	TransferQuoteID                 string                        `json:"transfer_quote_id"`
-	InstanceID                      string                        `json:"instance_id"`
-	TrackingTransactionMonitoring   TrackingTransactionMonitoring `json:"tracking_transaction_monitoring"`
-	TrackingPaymaster               TrackingStep                  `json:"tracking_paymaster"`
-	TrackingBridgeSwap              TrackingStep                  `json:"tracking_bridge_swap"`
-	TrackingComplete                TrackingStep                  `json:"tracking_complete"`
-	TrackingPartnerFee              TrackingStep                  `json:"tracking_partner_fee"`
-	CreatedAt                       time.Time                     `json:"created_at"`
-	UpdatedAt                       time.Time                     `json:"updated_at"`
-	ImageURL                        string                        `json:"image_url,omitempty"`
-	FirstName                       string                        `json:"first_name,omitempty"`
-	LastName                        string                        `json:"last_name,omitempty"`
-	LegalName                       string                        `json:"legal_name,omitempty"`
-	WalletID                        string                        `json:"wallet_id"`
-	SenderToken                     types.StablecoinToken         `json:"sender_token"`
-	SenderAmount                    float64                       `json:"sender_amount"`
-	ReceiverAmount                  float64                       `json:"receiver_amount"`
-	ReceiverNetwork                 types.Network                 `json:"receiver_network"`
-	ReceiverToken                   types.StablecoinToken         `json:"receiver_token"`
-	ReceiverWalletAddress           string                        `json:"receiver_wallet_address"`
-	PartnerFeeAmount                *float64                      `json:"partner_fee_amount"`
+	ID                            string                        `json:"id"`
+	Status                        types.TransactionStatus       `json:"status"`
+	TransferQuoteID               string                        `json:"transfer_quote_id"`
+	InstanceID                    string                        `json:"instance_id"`
+	TrackingTransactionMonitoring TrackingTransactionMonitoring `json:"tracking_transaction_monitoring"`
+	TrackingPaymaster             TrackingStep                  `json:"tracking_paymaster"`
+	TrackingBridgeSwap            TrackingStep                  `json:"tracking_bridge_swap"`
+	TrackingComplete              TrackingStep                  `json:"tracking_complete"`
+	TrackingPartnerFee            TrackingStep                  `json:"tracking_partner_fee"`
+	CreatedAt                     time.Time                     `json:"created_at"`
+	UpdatedAt                     time.Time                     `json:"updated_at"`
+	ImageURL                      string                        `json:"image_url,omitempty"`
+	FirstName                     string                        `json:"first_name,omitempty"`
+	LastName                      string                        `json:"last_name,omitempty"`
+	LegalName                     string                        `json:"legal_name,omitempty"`
+	WalletID                      string                        `json:"wallet_id"`
+	SenderToken                   types.StablecoinToken         `json:"sender_token"`
+	SenderAmount                  float64                       `json:"sender_amount"`
+	ReceiverAmount                float64                       `json:"receiver_amount"`
+	ReceiverNetwork               types.Network                 `json:"receiver_network"`
+	ReceiverToken                 types.StablecoinToken         `json:"receiver_token"`
+	ReceiverWalletAddress         string                        `json:"receiver_wallet_address"`
+	PartnerFeeAmount              *float64                      `json:"partner_fee_amount"`
 }
 
 // CreateQuoteParams represents parameters for creating a transfer quote.
