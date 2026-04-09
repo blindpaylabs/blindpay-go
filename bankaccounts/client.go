@@ -3,6 +3,7 @@ package bankaccounts
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"time"
 
 	"github.com/blindpaylabs/blindpay-go/internal/config"
@@ -174,123 +175,184 @@ type CreateColombiaAchResponse struct {
 
 // CreateAchResponse represents the response when creating an ACH bank account.
 type CreateAchResponse struct {
-	ID                         string                `json:"id"`
-	Type                       string                `json:"type"`
-	Name                       string                `json:"name"`
-	BeneficiaryName            string                `json:"beneficiary_name"`
-	RoutingNumber              string                `json:"routing_number"`
-	AccountNumber              string                `json:"account_number"`
-	AccountType                types.BankAccountType `json:"account_type"`
-	AccountClass               types.AccountClass    `json:"account_class"`
-	AddressLine1               *string               `json:"address_line_1"`
-	AddressLine2               *string               `json:"address_line_2"`
-	City                       *string               `json:"city"`
-	StateProvinceRegion        *string               `json:"state_province_region"`
-	Country                    *types.Country        `json:"country"`
-	PostalCode                 *string               `json:"postal_code"`
-	AchCopBeneficiaryFirstName *string               `json:"ach_cop_beneficiary_first_name"`
-	AchCopBeneficiaryLastName  *string               `json:"ach_cop_beneficiary_last_name"`
-	AchCopDocumentID           *string               `json:"ach_cop_document_id"`
-	AchCopDocumentType         *AchCopDocument       `json:"ach_cop_document_type"`
-	AchCopEmail                *string               `json:"ach_cop_email"`
-	AchCopBankCode             *string               `json:"ach_cop_bank_code"`
-	AchCopBankAccount          *string               `json:"ach_cop_bank_account"`
-	CreatedAt                  time.Time             `json:"created_at"`
+	ID                         string                       `json:"id"`
+	Type                       string                       `json:"type"`
+	Name                       string                       `json:"name"`
+	BeneficiaryName            string                       `json:"beneficiary_name"`
+	RoutingNumber              string                       `json:"routing_number"`
+	AccountNumber              string                       `json:"account_number"`
+	AccountType                types.BankAccountType        `json:"account_type"`
+	AccountClass               types.AccountClass           `json:"account_class"`
+	RecipientRelationship      types.RecipientRelationship  `json:"recipient_relationship"`
+	AddressLine1               *string                      `json:"address_line_1"`
+	AddressLine2               *string                      `json:"address_line_2"`
+	City                       *string                      `json:"city"`
+	StateProvinceRegion        *string                      `json:"state_province_region"`
+	Country                    *types.Country               `json:"country"`
+	PostalCode                 *string                      `json:"postal_code"`
+	AchCopBeneficiaryFirstName *string                      `json:"ach_cop_beneficiary_first_name"`
+	AchCopBeneficiaryLastName  *string                      `json:"ach_cop_beneficiary_last_name"`
+	AchCopDocumentID           *string                      `json:"ach_cop_document_id"`
+	AchCopDocumentType         *AchCopDocument              `json:"ach_cop_document_type"`
+	AchCopEmail                *string                      `json:"ach_cop_email"`
+	AchCopBankCode             *string                      `json:"ach_cop_bank_code"`
+	AchCopBankAccount          *string                      `json:"ach_cop_bank_account"`
+	CreatedAt                  time.Time                    `json:"created_at"`
 }
 
 // CreateWireResponse represents the response when creating a Wire bank account.
 type CreateWireResponse struct {
-	ID                  string        `json:"id"`
-	Type                string        `json:"type"`
-	Name                string        `json:"name"`
-	BeneficiaryName     string        `json:"beneficiary_name"`
-	RoutingNumber       string        `json:"routing_number"`
-	AccountNumber       string        `json:"account_number"`
-	AddressLine1        string        `json:"address_line_1"`
-	AddressLine2        string        `json:"address_line_2"`
-	City                string        `json:"city"`
-	StateProvinceRegion string        `json:"state_province_region"`
-	Country             types.Country `json:"country"`
-	PostalCode          string        `json:"postal_code"`
-	CreatedAt           time.Time     `json:"created_at"`
+	ID                    string                      `json:"id"`
+	Type                  string                      `json:"type"`
+	Name                  string                      `json:"name"`
+	BeneficiaryName       string                      `json:"beneficiary_name"`
+	RoutingNumber         string                      `json:"routing_number"`
+	AccountNumber         string                      `json:"account_number"`
+	AccountClass          types.AccountClass          `json:"account_class"`
+	RecipientRelationship types.RecipientRelationship `json:"recipient_relationship"`
+	AddressLine1          string                      `json:"address_line_1"`
+	AddressLine2          *string                     `json:"address_line_2"`
+	City                  string                      `json:"city"`
+	StateProvinceRegion   string                      `json:"state_province_region"`
+	Country               types.Country               `json:"country"`
+	PostalCode            string                      `json:"postal_code"`
+	CreatedAt             time.Time                   `json:"created_at"`
 }
 
 // CreateInternationalSwiftResponse represents the response when creating an international SWIFT bank account.
 type CreateInternationalSwiftResponse struct {
-	ID                                     string         `json:"id"`
-	Type                                   string         `json:"type"`
-	Name                                   string         `json:"name"`
-	BeneficiaryName                        *string        `json:"beneficiary_name"`
-	AddressLine1                           *string        `json:"address_line_1"`
-	AddressLine2                           *string        `json:"address_line_2"`
-	City                                   *string        `json:"city"`
-	StateProvinceRegion                    *string        `json:"state_province_region"`
-	Country                                *types.Country `json:"country"`
-	PostalCode                             *string        `json:"postal_code"`
-	SwiftCodeBic                           string         `json:"swift_code_bic"`
-	SwiftAccountHolderName                 string         `json:"swift_account_holder_name"`
-	SwiftAccountNumberIban                 string         `json:"swift_account_number_iban"`
-	SwiftBeneficiaryAddressLine1           string         `json:"swift_beneficiary_address_line_1"`
-	SwiftBeneficiaryAddressLine2           *string        `json:"swift_beneficiary_address_line_2"`
-	SwiftBeneficiaryCountry                types.Country  `json:"swift_beneficiary_country"`
-	SwiftBeneficiaryCity                   string         `json:"swift_beneficiary_city"`
-	SwiftBeneficiaryStateProvinceRegion    string         `json:"swift_beneficiary_state_province_region"`
-	SwiftBeneficiaryPostalCode             string         `json:"swift_beneficiary_postal_code"`
-	SwiftBankName                          string         `json:"swift_bank_name"`
-	SwiftBankAddressLine1                  string         `json:"swift_bank_address_line_1"`
-	SwiftBankAddressLine2                  *string        `json:"swift_bank_address_line_2"`
-	SwiftBankCountry                       types.Country  `json:"swift_bank_country"`
-	SwiftBankCity                          string         `json:"swift_bank_city"`
-	SwiftBankStateProvinceRegion           string         `json:"swift_bank_state_province_region"`
-	SwiftBankPostalCode                    string         `json:"swift_bank_postal_code"`
-	SwiftIntermediaryBankSwiftCodeBic      *string        `json:"swift_intermediary_bank_swift_code_bic"`
-	SwiftIntermediaryBankAccountNumberIban *string        `json:"swift_intermediary_bank_account_number_iban"`
-	SwiftIntermediaryBankName              *string        `json:"swift_intermediary_bank_name"`
-	SwiftIntermediaryBankCountry           *types.Country `json:"swift_intermediary_bank_country"`
-	CreatedAt                              time.Time      `json:"created_at"`
+	ID                                     string                      `json:"id"`
+	Type                                   string                      `json:"type"`
+	Name                                   string                      `json:"name"`
+	BeneficiaryName                        *string                     `json:"beneficiary_name"`
+	AccountClass                           types.AccountClass          `json:"account_class"`
+	RecipientRelationship                  types.RecipientRelationship `json:"recipient_relationship"`
+	AddressLine1                           *string                     `json:"address_line_1"`
+	AddressLine2                           *string                     `json:"address_line_2"`
+	City                                   *string                     `json:"city"`
+	StateProvinceRegion                    *string                     `json:"state_province_region"`
+	Country                                *types.Country              `json:"country"`
+	PostalCode                             *string                     `json:"postal_code"`
+	SwiftCodeBic                           string                      `json:"swift_code_bic"`
+	SwiftAccountHolderName                 string                      `json:"swift_account_holder_name"`
+	SwiftAccountNumberIban                 string                      `json:"swift_account_number_iban"`
+	SwiftBeneficiaryAddressLine1           string                      `json:"swift_beneficiary_address_line_1"`
+	SwiftBeneficiaryAddressLine2           *string                     `json:"swift_beneficiary_address_line_2"`
+	SwiftBeneficiaryCountry                types.Country               `json:"swift_beneficiary_country"`
+	SwiftBeneficiaryCity                   string                      `json:"swift_beneficiary_city"`
+	SwiftBeneficiaryStateProvinceRegion    string                      `json:"swift_beneficiary_state_province_region"`
+	SwiftBeneficiaryPostalCode             string                      `json:"swift_beneficiary_postal_code"`
+	SwiftBankName                          string                      `json:"swift_bank_name"`
+	SwiftBankAddressLine1                  string                      `json:"swift_bank_address_line_1"`
+	SwiftBankAddressLine2                  *string                     `json:"swift_bank_address_line_2"`
+	SwiftBankCountry                       types.Country               `json:"swift_bank_country"`
+	SwiftBankCity                          string                      `json:"swift_bank_city"`
+	SwiftBankStateProvinceRegion           string                      `json:"swift_bank_state_province_region"`
+	SwiftBankPostalCode                    string                      `json:"swift_bank_postal_code"`
+	SwiftIntermediaryBankSwiftCodeBic      *string                     `json:"swift_intermediary_bank_swift_code_bic"`
+	SwiftIntermediaryBankAccountNumberIban *string                     `json:"swift_intermediary_bank_account_number_iban"`
+	SwiftIntermediaryBankName              *string                     `json:"swift_intermediary_bank_name"`
+	SwiftIntermediaryBankCountry           *types.Country              `json:"swift_intermediary_bank_country"`
+	SwiftPaymentCode                       *string                     `json:"swift_payment_code"`
+	CreatedAt                              time.Time                   `json:"created_at"`
 }
 
 // CreateRtpResponse represents the response when creating an RTP bank account.
 type CreateRtpResponse struct {
-	ID                  string        `json:"id"`
-	Type                string        `json:"type"`
-	Name                string        `json:"name"`
-	BeneficiaryName     string        `json:"beneficiary_name"`
-	RoutingNumber       string        `json:"routing_number"`
-	AccountNumber       string        `json:"account_number"`
-	AddressLine1        string        `json:"address_line_1"`
-	AddressLine2        *string       `json:"address_line_2"`
-	City                string        `json:"city"`
-	StateProvinceRegion string        `json:"state_province_region"`
-	Country             types.Country `json:"country"`
-	PostalCode          string        `json:"postal_code"`
-	CreatedAt           time.Time     `json:"created_at"`
+	ID                    string                      `json:"id"`
+	Type                  string                      `json:"type"`
+	Name                  string                      `json:"name"`
+	BeneficiaryName       string                      `json:"beneficiary_name"`
+	RoutingNumber         string                      `json:"routing_number"`
+	AccountNumber         string                      `json:"account_number"`
+	AccountClass          types.AccountClass          `json:"account_class"`
+	RecipientRelationship types.RecipientRelationship `json:"recipient_relationship"`
+	AddressLine1          string                      `json:"address_line_1"`
+	AddressLine2          *string                     `json:"address_line_2"`
+	City                  string                      `json:"city"`
+	StateProvinceRegion   string                      `json:"state_province_region"`
+	Country               types.Country               `json:"country"`
+	PostalCode            string                      `json:"postal_code"`
+	CreatedAt             time.Time                   `json:"created_at"`
+}
+
+// CreatePixSafeParams represents parameters for creating a PIX Safe bank account.
+type CreatePixSafeParams struct {
+	ReceiverID       string                `json:"-"`
+	Name             string                `json:"name"`
+	BeneficiaryName  string                `json:"beneficiary_name"`
+	AccountNumber    string                `json:"account_number"`
+	AccountType      types.BankAccountType `json:"account_type"`
+	PixSafeBankCode  string                `json:"pix_safe_bank_code"`
+	PixSafeBranchCode string               `json:"pix_safe_branch_code"`
+	PixSafeCpfCnpj   string               `json:"pix_safe_cpf_cnpj"`
+}
+
+// CreatePixSafeResponse represents the response when creating a PIX Safe bank account.
+type CreatePixSafeResponse struct {
+	ID               string                `json:"id"`
+	Type             string                `json:"type"`
+	Name             string                `json:"name"`
+	BeneficiaryName  string                `json:"beneficiary_name"`
+	AccountNumber    string                `json:"account_number"`
+	AccountType      types.BankAccountType `json:"account_type"`
+	PixSafeBankCode  string                `json:"pix_safe_bank_code"`
+	PixSafeBranchCode string               `json:"pix_safe_branch_code"`
+	PixSafeCpfCnpj   string               `json:"pix_safe_cpf_cnpj"`
+	CreatedAt        time.Time             `json:"created_at"`
+}
+
+// ListParams represents parameters for listing bank accounts with optional filters.
+type ListParams struct {
+	ReceiverID    string     `json:"-"`
+	Status        string     `json:"status,omitempty"`
+	Type          types.Rail `json:"type,omitempty"`
+	Name          string     `json:"name,omitempty"`
+	BankAccountID string     `json:"bank_account_id,omitempty"`
+	Country       string     `json:"country,omitempty"`
 }
 
 // CreateAchParams represents parameters for creating an ACH bank account.
 type CreateAchParams struct {
-	ReceiverID      string                `json:"-"`
-	Name            string                `json:"name"`
-	AccountClass    types.AccountClass    `json:"account_class"`
-	AccountNumber   string                `json:"account_number"`
-	AccountType     types.BankAccountType `json:"account_type"`
-	BeneficiaryName string                `json:"beneficiary_name"`
-	RoutingNumber   string                `json:"routing_number"`
+	ReceiverID            string                       `json:"-"`
+	Name                  string                       `json:"name"`
+	AccountClass          types.AccountClass           `json:"account_class"`
+	AccountNumber         string                       `json:"account_number"`
+	AccountType           types.BankAccountType        `json:"account_type"`
+	BeneficiaryName       string                       `json:"beneficiary_name"`
+	RoutingNumber         string                       `json:"routing_number"`
+	RecipientRelationship types.RecipientRelationship  `json:"recipient_relationship"`
+	AddressLine1          string                       `json:"address_line_1"`
+	City                  string                       `json:"city"`
+	StateProvinceRegion   string                       `json:"state_province_region"`
+	Country               types.Country                `json:"country"`
+	PostalCode            string                       `json:"postal_code"`
+	AddressLine2          string                       `json:"address_line_2,omitempty"`
+	BusinessIndustry      types.BusinessIndustry       `json:"business_industry,omitempty"`
+	PhoneNumber           string                       `json:"phone_number,omitempty"`
+	TaxID                 string                       `json:"tax_id,omitempty"`
+	DateOfBirth           string                       `json:"date_of_birth,omitempty"`
 }
 
 // CreateWireParams represents parameters for creating a Wire bank account.
 type CreateWireParams struct {
-	ReceiverID          string        `json:"-"`
-	Name                string        `json:"name"`
-	AccountNumber       string        `json:"account_number"`
-	BeneficiaryName     string        `json:"beneficiary_name"`
-	RoutingNumber       string        `json:"routing_number"`
-	AddressLine1        string        `json:"address_line_1"`
-	AddressLine2        string        `json:"address_line_2,omitempty"`
-	City                string        `json:"city"`
-	StateProvinceRegion string        `json:"state_province_region"`
-	Country             types.Country `json:"country"`
-	PostalCode          string        `json:"postal_code"`
+	ReceiverID            string                      `json:"-"`
+	Name                  string                      `json:"name"`
+	AccountClass          types.AccountClass          `json:"account_class"`
+	AccountNumber         string                      `json:"account_number"`
+	BeneficiaryName       string                      `json:"beneficiary_name"`
+	RoutingNumber         string                      `json:"routing_number"`
+	RecipientRelationship types.RecipientRelationship `json:"recipient_relationship"`
+	AddressLine1          string                      `json:"address_line_1"`
+	AddressLine2          string                      `json:"address_line_2,omitempty"`
+	City                  string                      `json:"city"`
+	StateProvinceRegion   string                      `json:"state_province_region"`
+	Country               types.Country               `json:"country"`
+	PostalCode            string                      `json:"postal_code"`
+	BusinessIndustry      types.BusinessIndustry      `json:"business_industry,omitempty"`
+	PhoneNumber           string                      `json:"phone_number,omitempty"`
+	TaxID                 string                      `json:"tax_id,omitempty"`
+	DateOfBirth           string                      `json:"date_of_birth,omitempty"`
 }
 
 // CreateArgentinaTransfersParams represents parameters for creating an Argentina transfers bank account.
@@ -328,43 +390,56 @@ type CreateColombiaAchParams struct {
 
 // CreateInternationalSwiftParams represents parameters for creating an international SWIFT bank account.
 type CreateInternationalSwiftParams struct {
-	ReceiverID                             string         `json:"-"`
-	Name                                   string         `json:"name"`
-	SwiftAccountHolderName                 string         `json:"swift_account_holder_name"`
-	SwiftAccountNumberIban                 string         `json:"swift_account_number_iban"`
-	SwiftBankAddressLine1                  string         `json:"swift_bank_address_line_1"`
-	SwiftBankAddressLine2                  string         `json:"swift_bank_address_line_2,omitempty"`
-	SwiftBankCity                          string         `json:"swift_bank_city"`
-	SwiftBankCountry                       types.Country  `json:"swift_bank_country"`
-	SwiftBankName                          string         `json:"swift_bank_name"`
-	SwiftBankPostalCode                    string         `json:"swift_bank_postal_code"`
-	SwiftBankStateProvinceRegion           string         `json:"swift_bank_state_province_region"`
-	SwiftBeneficiaryAddressLine1           string         `json:"swift_beneficiary_address_line_1"`
-	SwiftBeneficiaryAddressLine2           string         `json:"swift_beneficiary_address_line_2,omitempty"`
-	SwiftBeneficiaryCity                   string         `json:"swift_beneficiary_city"`
-	SwiftBeneficiaryCountry                types.Country  `json:"swift_beneficiary_country"`
-	SwiftBeneficiaryPostalCode             string         `json:"swift_beneficiary_postal_code"`
-	SwiftBeneficiaryStateProvinceRegion    string         `json:"swift_beneficiary_state_province_region"`
-	SwiftCodeBic                           string         `json:"swift_code_bic"`
-	SwiftIntermediaryBankAccountNumberIban *string        `json:"swift_intermediary_bank_account_number_iban"`
-	SwiftIntermediaryBankCountry           *types.Country `json:"swift_intermediary_bank_country"`
-	SwiftIntermediaryBankName              *string        `json:"swift_intermediary_bank_name"`
-	SwiftIntermediaryBankSwiftCodeBic      *string        `json:"swift_intermediary_bank_swift_code_bic"`
+	ReceiverID                             string                      `json:"-"`
+	Name                                   string                      `json:"name"`
+	AccountClass                           types.AccountClass          `json:"account_class"`
+	RecipientRelationship                  types.RecipientRelationship `json:"recipient_relationship"`
+	SwiftAccountHolderName                 string                      `json:"swift_account_holder_name"`
+	SwiftAccountNumberIban                 string                      `json:"swift_account_number_iban"`
+	SwiftBankAddressLine1                  string                      `json:"swift_bank_address_line_1"`
+	SwiftBankAddressLine2                  string                      `json:"swift_bank_address_line_2,omitempty"`
+	SwiftBankCity                          string                      `json:"swift_bank_city"`
+	SwiftBankCountry                       types.Country               `json:"swift_bank_country"`
+	SwiftBankName                          string                      `json:"swift_bank_name"`
+	SwiftBankPostalCode                    string                      `json:"swift_bank_postal_code"`
+	SwiftBankStateProvinceRegion           string                      `json:"swift_bank_state_province_region"`
+	SwiftBeneficiaryAddressLine1           string                      `json:"swift_beneficiary_address_line_1"`
+	SwiftBeneficiaryAddressLine2           string                      `json:"swift_beneficiary_address_line_2,omitempty"`
+	SwiftBeneficiaryCity                   string                      `json:"swift_beneficiary_city"`
+	SwiftBeneficiaryCountry                types.Country               `json:"swift_beneficiary_country"`
+	SwiftBeneficiaryPostalCode             string                      `json:"swift_beneficiary_postal_code"`
+	SwiftBeneficiaryStateProvinceRegion    string                      `json:"swift_beneficiary_state_province_region"`
+	SwiftCodeBic                           string                      `json:"swift_code_bic"`
+	SwiftIntermediaryBankAccountNumberIban *string                     `json:"swift_intermediary_bank_account_number_iban"`
+	SwiftIntermediaryBankCountry           *types.Country              `json:"swift_intermediary_bank_country"`
+	SwiftIntermediaryBankName              *string                     `json:"swift_intermediary_bank_name"`
+	SwiftIntermediaryBankSwiftCodeBic      *string                     `json:"swift_intermediary_bank_swift_code_bic"`
+	SwiftPaymentCode                       string                      `json:"swift_payment_code,omitempty"`
+	BusinessIndustry                       types.BusinessIndustry      `json:"business_industry,omitempty"`
+	PhoneNumber                            string                      `json:"phone_number,omitempty"`
+	TaxID                                  string                      `json:"tax_id,omitempty"`
+	DateOfBirth                            string                      `json:"date_of_birth,omitempty"`
 }
 
 // CreateRtpParams represents parameters for creating an RTP (Real-Time Payments) bank account.
 type CreateRtpParams struct {
-	ReceiverID          string        `json:"-"`
-	Name                string        `json:"name"`
-	BeneficiaryName     string        `json:"beneficiary_name"`
-	RoutingNumber       string        `json:"routing_number"`
-	AccountNumber       string        `json:"account_number"`
-	AddressLine1        string        `json:"address_line_1"`
-	AddressLine2        string        `json:"address_line_2,omitempty"`
-	City                string        `json:"city"`
-	StateProvinceRegion string        `json:"state_province_region"`
-	Country             types.Country `json:"country"`
-	PostalCode          string        `json:"postal_code"`
+	ReceiverID            string                      `json:"-"`
+	Name                  string                      `json:"name"`
+	AccountClass          types.AccountClass          `json:"account_class"`
+	BeneficiaryName       string                      `json:"beneficiary_name"`
+	RoutingNumber         string                      `json:"routing_number"`
+	AccountNumber         string                      `json:"account_number"`
+	RecipientRelationship types.RecipientRelationship `json:"recipient_relationship"`
+	AddressLine1          string                      `json:"address_line_1"`
+	AddressLine2          string                      `json:"address_line_2,omitempty"`
+	City                  string                      `json:"city"`
+	StateProvinceRegion   string                      `json:"state_province_region"`
+	Country               types.Country               `json:"country"`
+	PostalCode            string                      `json:"postal_code"`
+	BusinessIndustry      types.BusinessIndustry      `json:"business_industry,omitempty"`
+	PhoneNumber           string                      `json:"phone_number,omitempty"`
+	TaxID                 string                      `json:"tax_id,omitempty"`
+	DateOfBirth           string                      `json:"date_of_birth,omitempty"`
 }
 
 // Client handles bank account-related operations.
@@ -381,13 +456,37 @@ func NewClient(cfg *config.Config) *Client {
 	}
 }
 
-// List retrieves all bank accounts for a receiver.
-func (c *Client) List(ctx context.Context, receiverID string) ([]BankAccount, error) {
-	if receiverID == "" {
+// List retrieves all bank accounts for a receiver with optional filters.
+func (c *Client) List(ctx context.Context, params *ListParams) ([]BankAccount, error) {
+	if params == nil {
+		return nil, fmt.Errorf("params cannot be nil")
+	}
+	if params.ReceiverID == "" {
 		return nil, fmt.Errorf("receiver ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", c.instanceID, receiverID)
+	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", c.instanceID, params.ReceiverID)
+
+	q := url.Values{}
+	if params.Status != "" {
+		q.Set("status", params.Status)
+	}
+	if params.Type != "" {
+		q.Set("type", string(params.Type))
+	}
+	if params.Name != "" {
+		q.Set("name", params.Name)
+	}
+	if params.BankAccountID != "" {
+		q.Set("bank_account_id", params.BankAccountID)
+	}
+	if params.Country != "" {
+		q.Set("country", params.Country)
+	}
+	if len(q) > 0 {
+		path += "?" + q.Encode()
+	}
+
 	return request.Do[[]BankAccount](c.cfg, ctx, "GET", path, nil)
 }
 
@@ -450,13 +549,35 @@ func (c *Client) CreateAch(ctx context.Context, params *CreateAchParams) (*Creat
 	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", c.instanceID, params.ReceiverID)
 
 	body := map[string]any{
-		"type":             "ach",
-		"name":             params.Name,
-		"account_class":    params.AccountClass,
-		"account_number":   params.AccountNumber,
-		"account_type":     params.AccountType,
-		"beneficiary_name": params.BeneficiaryName,
-		"routing_number":   params.RoutingNumber,
+		"type":                   "ach",
+		"name":                   params.Name,
+		"account_class":          params.AccountClass,
+		"account_number":         params.AccountNumber,
+		"account_type":           params.AccountType,
+		"beneficiary_name":       params.BeneficiaryName,
+		"routing_number":         params.RoutingNumber,
+		"recipient_relationship": params.RecipientRelationship,
+		"address_line_1":         params.AddressLine1,
+		"city":                   params.City,
+		"state_province_region":  params.StateProvinceRegion,
+		"country":                params.Country,
+		"postal_code":            params.PostalCode,
+	}
+
+	if params.AddressLine2 != "" {
+		body["address_line_2"] = params.AddressLine2
+	}
+	if params.BusinessIndustry != "" {
+		body["business_industry"] = params.BusinessIndustry
+	}
+	if params.PhoneNumber != "" {
+		body["phone_number"] = params.PhoneNumber
+	}
+	if params.TaxID != "" {
+		body["tax_id"] = params.TaxID
+	}
+	if params.DateOfBirth != "" {
+		body["date_of_birth"] = params.DateOfBirth
 	}
 
 	return request.Do[*CreateAchResponse](c.cfg, ctx, "POST", path, body)
@@ -474,20 +595,34 @@ func (c *Client) CreateWire(ctx context.Context, params *CreateWireParams) (*Cre
 	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", c.instanceID, params.ReceiverID)
 
 	body := map[string]any{
-		"type":                  "wire",
-		"name":                  params.Name,
-		"account_number":        params.AccountNumber,
-		"beneficiary_name":      params.BeneficiaryName,
-		"routing_number":        params.RoutingNumber,
-		"address_line_1":        params.AddressLine1,
-		"city":                  params.City,
-		"state_province_region": params.StateProvinceRegion,
-		"country":               params.Country,
-		"postal_code":           params.PostalCode,
+		"type":                   "wire",
+		"name":                   params.Name,
+		"account_class":          params.AccountClass,
+		"account_number":         params.AccountNumber,
+		"beneficiary_name":       params.BeneficiaryName,
+		"routing_number":         params.RoutingNumber,
+		"recipient_relationship": params.RecipientRelationship,
+		"address_line_1":         params.AddressLine1,
+		"city":                   params.City,
+		"state_province_region":  params.StateProvinceRegion,
+		"country":                params.Country,
+		"postal_code":            params.PostalCode,
 	}
 
 	if params.AddressLine2 != "" {
 		body["address_line_2"] = params.AddressLine2
+	}
+	if params.BusinessIndustry != "" {
+		body["business_industry"] = params.BusinessIndustry
+	}
+	if params.PhoneNumber != "" {
+		body["phone_number"] = params.PhoneNumber
+	}
+	if params.TaxID != "" {
+		body["tax_id"] = params.TaxID
+	}
+	if params.DateOfBirth != "" {
+		body["date_of_birth"] = params.DateOfBirth
 	}
 
 	return request.Do[*CreateWireResponse](c.cfg, ctx, "POST", path, body)
@@ -579,6 +714,8 @@ func (c *Client) CreateInternationalSwift(ctx context.Context, params *CreateInt
 	body := map[string]any{
 		"type":                                        "international_swift",
 		"name":                                        params.Name,
+		"account_class":                               params.AccountClass,
+		"recipient_relationship":                      params.RecipientRelationship,
 		"swift_account_holder_name":                   params.SwiftAccountHolderName,
 		"swift_account_number_iban":                   params.SwiftAccountNumberIban,
 		"swift_bank_address_line_1":                   params.SwiftBankAddressLine1,
@@ -599,15 +736,54 @@ func (c *Client) CreateInternationalSwift(ctx context.Context, params *CreateInt
 		"swift_intermediary_bank_swift_code_bic":      params.SwiftIntermediaryBankSwiftCodeBic,
 	}
 
-	// Add optional address_line_2 fields only if not empty
 	if params.SwiftBankAddressLine2 != "" {
 		body["swift_bank_address_line_2"] = params.SwiftBankAddressLine2
 	}
 	if params.SwiftBeneficiaryAddressLine2 != "" {
 		body["swift_beneficiary_address_line_2"] = params.SwiftBeneficiaryAddressLine2
 	}
+	if params.SwiftPaymentCode != "" {
+		body["swift_payment_code"] = params.SwiftPaymentCode
+	}
+	if params.BusinessIndustry != "" {
+		body["business_industry"] = params.BusinessIndustry
+	}
+	if params.PhoneNumber != "" {
+		body["phone_number"] = params.PhoneNumber
+	}
+	if params.TaxID != "" {
+		body["tax_id"] = params.TaxID
+	}
+	if params.DateOfBirth != "" {
+		body["date_of_birth"] = params.DateOfBirth
+	}
 
 	return request.Do[*CreateInternationalSwiftResponse](c.cfg, ctx, "POST", path, body)
+}
+
+// CreatePixSafe creates a PIX Safe bank account.
+func (c *Client) CreatePixSafe(ctx context.Context, params *CreatePixSafeParams) (*CreatePixSafeResponse, error) {
+	if params == nil {
+		return nil, fmt.Errorf("params cannot be nil")
+	}
+	if params.ReceiverID == "" {
+		return nil, fmt.Errorf("receiver ID cannot be empty")
+	}
+
+	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", c.instanceID, params.ReceiverID)
+
+	body := map[string]any{
+		"type":                 "pix_safe",
+		"name":                 params.Name,
+		"beneficiary_name":     params.BeneficiaryName,
+		"account_number":       params.AccountNumber,
+		"account_type":         params.AccountType,
+		"pix_safe_bank_code":   params.PixSafeBankCode,
+		"pix_safe_branch_code": params.PixSafeBranchCode,
+		"pix_safe_cpf_cnpj":   params.PixSafeCpfCnpj,
+	}
+
+	return request.Do[*CreatePixSafeResponse](c.cfg, ctx, "POST", path, body)
 }
 
 // CreateRtp creates an RTP (Real-Time Payments) bank account.
@@ -622,20 +798,34 @@ func (c *Client) CreateRtp(ctx context.Context, params *CreateRtpParams) (*Creat
 	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", c.instanceID, params.ReceiverID)
 
 	body := map[string]any{
-		"type":                  "rtp",
-		"name":                  params.Name,
-		"beneficiary_name":      params.BeneficiaryName,
-		"routing_number":        params.RoutingNumber,
-		"account_number":        params.AccountNumber,
-		"address_line_1":        params.AddressLine1,
-		"city":                  params.City,
-		"state_province_region": params.StateProvinceRegion,
-		"country":               params.Country,
-		"postal_code":           params.PostalCode,
+		"type":                   "rtp",
+		"name":                   params.Name,
+		"account_class":          params.AccountClass,
+		"beneficiary_name":       params.BeneficiaryName,
+		"routing_number":         params.RoutingNumber,
+		"account_number":         params.AccountNumber,
+		"recipient_relationship": params.RecipientRelationship,
+		"address_line_1":         params.AddressLine1,
+		"city":                   params.City,
+		"state_province_region":  params.StateProvinceRegion,
+		"country":                params.Country,
+		"postal_code":            params.PostalCode,
 	}
 
 	if params.AddressLine2 != "" {
 		body["address_line_2"] = params.AddressLine2
+	}
+	if params.BusinessIndustry != "" {
+		body["business_industry"] = params.BusinessIndustry
+	}
+	if params.PhoneNumber != "" {
+		body["phone_number"] = params.PhoneNumber
+	}
+	if params.TaxID != "" {
+		body["tax_id"] = params.TaxID
+	}
+	if params.DateOfBirth != "" {
+		body["date_of_birth"] = params.DateOfBirth
 	}
 
 	return request.Do[*CreateRtpResponse](c.cfg, ctx, "POST", path, body)

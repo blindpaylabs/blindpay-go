@@ -28,6 +28,8 @@ const (
 	NetworkStellar         = types.NetworkStellar
 	NetworkStellarTestnet  = types.NetworkStellarTestnet
 	NetworkTron            = types.NetworkTron
+	NetworkSolana          = types.NetworkSolana
+	NetworkSolanaDevnet    = types.NetworkSolanaDevnet
 
 	StablecoinUSDC = types.StablecoinTokenUSDC
 	StablecoinUSDT = types.StablecoinTokenUSDT
@@ -341,6 +343,7 @@ const (
 	RailWire               = types.RailWire
 	RailACH                = types.RailACH
 	RailPix                = types.RailPix
+	RailPixSafe            = types.RailPixSafe
 	RailSpeiBitso          = types.RailSpeiBitso
 	RailTransfersBitso     = types.RailTransfersBitso
 	RailACHCopBitso        = types.RailACHCopBitso
@@ -357,8 +360,49 @@ const (
 	WebhookEventPayoutComplete      = types.WebhookEventPayoutComplete
 	WebhookEventPayoutPartnerFee    = types.WebhookEventPayoutPartnerFee
 	WebhookEventBlockchainWalletNew = types.WebhookEventBlockchainWalletNew
-	WebhookEventPayinNew            = types.WebhookEventPayinNew
-	WebhookEventPayinUpdate         = types.WebhookEventPayinUpdate
-	WebhookEventPayinComplete       = types.WebhookEventPayinComplete
-	WebhookEventPayinPartnerFee     = types.WebhookEventPayinPartnerFee
+	WebhookEventPayinNew               = types.WebhookEventPayinNew
+	WebhookEventPayinUpdate            = types.WebhookEventPayinUpdate
+	WebhookEventPayinComplete          = types.WebhookEventPayinComplete
+	WebhookEventPayinPartnerFee        = types.WebhookEventPayinPartnerFee
+	WebhookEventTosAccept              = types.WebhookEventTosAccept
+	WebhookEventLimitIncreaseNew       = types.WebhookEventLimitIncreaseNew
+	WebhookEventLimitIncreaseUpdate    = types.WebhookEventLimitIncreaseUpdate
+	WebhookEventVirtualAccountNew      = types.WebhookEventVirtualAccountNew
+	WebhookEventVirtualAccountComplete = types.WebhookEventVirtualAccountComplete
+	WebhookEventTransferNew            = types.WebhookEventTransferNew
+	WebhookEventTransferUpdate         = types.WebhookEventTransferUpdate
+	WebhookEventTransferComplete       = types.WebhookEventTransferComplete
+	WebhookEventWalletNew              = types.WebhookEventWalletNew
+	WebhookEventWalletInbound          = types.WebhookEventWalletInbound
+)
+
+type RecipientRelationship = types.RecipientRelationship
+type PayinPaymentMethod = types.PayinPaymentMethod
+type TrackingStatus = types.TrackingStatus
+type BusinessIndustry = types.BusinessIndustry
+
+const (
+	RecipientRelationshipFirstParty            = types.RecipientRelationshipFirstParty
+	RecipientRelationshipEmployee              = types.RecipientRelationshipEmployee
+	RecipientRelationshipIndependentContractor = types.RecipientRelationshipIndependentContractor
+	RecipientRelationshipVendorOrSupplier      = types.RecipientRelationshipVendorOrSupplier
+	RecipientRelationshipSubsidiaryOrAffiliate = types.RecipientRelationshipSubsidiaryOrAffiliate
+	RecipientRelationshipMerchantOrPartner     = types.RecipientRelationshipMerchantOrPartner
+	RecipientRelationshipCustomer              = types.RecipientRelationshipCustomer
+	RecipientRelationshipLandlord              = types.RecipientRelationshipLandlord
+	RecipientRelationshipFamily                = types.RecipientRelationshipFamily
+	RecipientRelationshipOther                 = types.RecipientRelationshipOther
+
+	PayinPaymentMethodACH                = types.PayinPaymentMethodACH
+	PayinPaymentMethodWire               = types.PayinPaymentMethodWire
+	PayinPaymentMethodPix                = types.PayinPaymentMethodPix
+	PayinPaymentMethodSpei               = types.PayinPaymentMethodSpei
+	PayinPaymentMethodTransfers          = types.PayinPaymentMethodTransfers
+	PayinPaymentMethodPSE                = types.PayinPaymentMethodPSE
+	PayinPaymentMethodInternationalSwift = types.PayinPaymentMethodInternationalSwift
+
+	TrackingStatusProcessing    = types.TrackingStatusProcessing
+	TrackingStatusOnHold        = types.TrackingStatusOnHold
+	TrackingStatusCompleted     = types.TrackingStatusCompleted
+	TrackingStatusPendingReview = types.TrackingStatusPendingReview
 )

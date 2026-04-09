@@ -643,7 +643,7 @@ func (c *Client) Update(ctx context.Context, params *UpdateParams) error {
 		body["tos_id"] = params.TosID
 	}
 
-	_, err := request.Do[struct{}](c.cfg, ctx, "PATCH", path, body)
+	_, err := request.Do[struct{}](c.cfg, ctx, "PUT", path, body)
 	return err
 }
 

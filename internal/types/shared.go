@@ -23,6 +23,8 @@ const (
 	NetworkStellar         Network = "stellar"
 	NetworkStellarTestnet  Network = "stellar_testnet"
 	NetworkTron            Network = "tron"
+	NetworkSolana          Network = "solana"
+	NetworkSolanaDevnet    Network = "solana_devnet"
 )
 
 type StablecoinToken string
