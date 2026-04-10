@@ -1,0 +1,620 @@
+package customers
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"testing"
+
+	"github.com/blindpaylabs/blindpay-go/internal/blindpaytest"
+	"github.com/blindpaylabs/blindpay-go/internal/config"
+	"github.com/blindpaylabs/blindpay-go/internal/types"
+	"github.com/stretchr/testify/require"
+)
+
+func TestReceivers_List(t *testing.T) {
+	instanceID := "in_000000000000"
+
+	cfg := &config.Config{
+		BaseURL:    "https://api.blindpay.com",
+		APIKey:     "test_key",
+		InstanceID: instanceID,
+		HTTPClient: &http.Client{
+			Transport: &blindpaytest.RoundTripper{
+				T: t,
+				Out: json.RawMessage(`[
+					{
+						"id":"re_Euw7HN4OdxPn",
+						"type":"individual",
+						"kyc_type":"standard",
+						"kyc_status":"verifying",
+						"kyc_warnings":[
+							{
+								"code":null,
+								"message":null,
+								"resolution_status":null,
+								"warning_id":null
+							}
+						],
+						"email":"bernardo@gmail.com",
+						"tax_id":"12345678900",
+						"address_line_1":"Av. Paulista, 1000",
+						"address_line_2":"Apto 101",
+						"city":"São Paulo",
+						"state_province_region":"SP",
+						"country":"BR",
+						"postal_code":"01310-100",
+						"ip_address":"127.0.0.1",
+						"image_url":"https://example.com/image.png",
+						"phone_number":"+5511987654321",
+						"proof_of_address_doc_type":"UTILITY_BILL",
+						"proof_of_address_doc_file":"https://example.com/image.png",
+						"first_name":"Bernardo",
+						"last_name":"Simonassi",
+						"date_of_birth":"1998-02-02T00:00:00.000Z",
+						"id_doc_country":"BR",
+						"id_doc_type":"PASSPORT",
+						"id_doc_front_file":"https://example.com/image.png",
+						"id_doc_back_file":"https://example.com/image.png",
+						"aiprise_validation_key":"",
+						"instance_id":"in_000000000000",
+						"tos_id":"to_3ZZhllJkvo5Z",
+						"created_at":"2021-01-01T00:00:00.000Z",
+						"updated_at":"2021-01-01T00:00:00.000Z",
+						"limit":{
+							"per_transaction":100000,
+							"daily":200000,
+							"monthly":1000000
+						}
+					},
+					{
+						"id":"re_YuaMcI2B8zbQ",
+						"type":"individual",
+						"kyc_type":"enhanced",
+						"kyc_status":"approved",
+						"kyc_warnings":null,
+						"email":"alice.johnson@example.com",
+						"tax_id":"98765432100",
+						"address_line_1":"123 Main St",
+						"address_line_2":null,
+						"city":"New York",
+						"state_province_region":"NY",
+						"country":"US",
+						"postal_code":"10001",
+						"ip_address":"192.168.1.1",
+						"image_url":null,
+						"phone_number":"+15555555555",
+						"proof_of_address_doc_type":"BANK_STATEMENT",
+						"proof_of_address_doc_file":"https://example.com/image.png",
+						"first_name":"Alice",
+						"last_name":"Johnson",
+						"date_of_birth":"1990-05-10T00:00:00.000Z",
+						"id_doc_country":"US",
+						"id_doc_type":"PASSPORT",
+						"id_doc_front_file":"https://example.com/image.png",
+						"id_doc_back_file":null,
+						"aiprise_validation_key":"enhanced-key",
+						"instance_id":"in_000000000001",
+						"source_of_funds_doc_type":"salary",
+						"source_of_funds_doc_file":"https://example.com/image.png",
+						"selfie_file":"https://example.com/image.png",
+						"purpose_of_transactions":"investment_purposes",
+						"purpose_of_transactions_explanation":"Investing in stocks",
+						"tos_id":"to_nppX66ntvtHs",
+						"created_at":"2022-02-02T00:00:00.000Z",
+						"updated_at":"2022-02-02T00:00:00.000Z",
+						"limit":{
+							"per_transaction":50000,
+							"daily":100000,
+							"monthly":500000
+						}
+					},
+					{
+						"id":"re_IOxAUL24LG7P",
+						"type":"business",
+						"kyc_type":"standard",
+						"kyc_status":"pending",
+						"kyc_warnings":null,
+						"email":"business@example.com",
+						"tax_id":"20096178000195",
+						"address_line_1":"1 King St W",
+						"address_line_2":"Suite 100",
+						"city":"Toronto",
+						"state_province_region":"ON",
+						"country":"CA",
+						"postal_code":"M5H 1A1",
+						"ip_address":null,
+						"image_url":null,
+						"phone_number":"+14165555555",
+						"proof_of_address_doc_type":"UTILITY_BILL",
+						"proof_of_address_doc_file":"https://example.com/image.png",
+						"legal_name":"Business Corp",
+						"alternate_name":"BizCo",
+						"formation_date":"2010-01-01T00:00:00.000Z",
+						"website":"https://businesscorp.com",
+						"owners":[
+							{
+								"role":"beneficial_owner",
+								"first_name":"Carlos",
+								"last_name":"Silva",
+								"date_of_birth":"1995-05-15T00:00:00.000Z",
+								"tax_id":"12345678901",
+								"address_line_1":"Rua Augusta, 1500",
+								"address_line_2":null,
+								"city":"São Paulo",
+								"state_province_region":"SP",
+								"country":"BR",
+								"postal_code":"01304-001",
+								"id_doc_country":"BR",
+								"id_doc_type":"PASSPORT",
+								"id_doc_front_file":"https://example.com/image.png",
+								"id_doc_back_file":"https://example.com/image.png",
+								"proof_of_address_doc_type":"UTILITY_BILL",
+								"proof_of_address_doc_file":"https://example.com/image.png",
+								"id":"ub_000000000000",
+								"instance_id":"in_000000000000",
+								"customer_id":"re_IOxAUL24LG7P"
+							}
+						],
+						"incorporation_doc_file":"https://example.com/image.png",
+						"proof_of_ownership_doc_file":"https://example.com/image.png",
+						"external_id":null,
+						"instance_id":"in_000000000002",
+						"tos_id":"to_nppX66ntvtHs",
+						"aiprise_validation_key":"",
+						"created_at":"2015-03-15T00:00:00.000Z",
+						"updated_at":"2015-03-15T00:00:00.000Z",
+						"limit":{
+							"per_transaction":200000,
+							"daily":400000,
+							"monthly":2000000
+						}
+					}
+				]`),
+				Method: http.MethodGet,
+				Path:   fmt.Sprintf("/instances/%s/customers", instanceID),
+			},
+		},
+		UserAgent: "test",
+	}
+
+	client := NewClient(cfg)
+	receivers, err := client.List(context.Background())
+	require.NoError(t, err)
+	require.Len(t, receivers, 3)
+	require.Equal(t, "re_Euw7HN4OdxPn", receivers[0].ID)
+	require.Equal(t, "Bernardo", receivers[0].FirstName)
+	require.Equal(t, "re_YuaMcI2B8zbQ", receivers[1].ID)
+	require.Equal(t, "Alice", receivers[1].FirstName)
+	require.Equal(t, "re_IOxAUL24LG7P", receivers[2].ID)
+	require.Equal(t, "Business Corp", receivers[2].LegalName)
+}
+
+func TestReceivers_CreateIndividualWithStandardKYC(t *testing.T) {
+	instanceID := "in_000000000000"
+	customerID := "re_Euw7HN4OdxPn"
+
+	cfg := &config.Config{
+		BaseURL:    "https://api.blindpay.com",
+		APIKey:     "test_key",
+		InstanceID: instanceID,
+		HTTPClient: &http.Client{
+			Transport: &blindpaytest.RoundTripper{
+				T:      t,
+				Out:    json.RawMessage(fmt.Sprintf(`{"id":"%s"}`, customerID)),
+				Method: http.MethodPost,
+				Path:   fmt.Sprintf("/instances/%s/customers", instanceID),
+			},
+		},
+		UserAgent: "test",
+	}
+
+	client := NewClient(cfg)
+	addressLine2 := "Apto 101"
+	phoneNumber := "+5511987654321"
+	idDocBackFile := "https://example.com/image.png"
+	response, err := client.CreateIndividualWithStandardKYC(context.Background(), &CreateIndividualStandardParams{
+		Email:                 "bernardo.simonassi@gmail.com",
+		FirstName:             "Bernardo",
+		LastName:              "Simonassi",
+		DateOfBirth:           "1998-02-02T00:00:00.000Z",
+		TaxID:                 "12345678900",
+		AddressLine1:          "Av. Paulista, 1000",
+		AddressLine2:          &addressLine2,
+		City:                  "São Paulo",
+		StateProvinceRegion:   "SP",
+		Country:               types.CountryBR,
+		PostalCode:            "01310-100",
+		PhoneNumber:           &phoneNumber,
+		IDDocCountry:          types.CountryBR,
+		IDDocType:             IdentificationDocumentPassport,
+		IDDocFrontFile:        "https://example.com/image.png",
+		IDDocBackFile:         &idDocBackFile,
+		ProofOfAddressDocType: ProofOfAddressDocTypeUtilityBill,
+		ProofOfAddressDocFile: "https://example.com/image.png",
+		TosID:                 "to_tPiz4bM2nh5K",
+	})
+	require.NoError(t, err)
+	require.Equal(t, customerID, response.ID)
+}
+
+func TestReceivers_CreateIndividualWithEnhancedKYC(t *testing.T) {
+	instanceID := "in_000000000000"
+	customerID := "re_YuaMcI2B8zbQ"
+
+	cfg := &config.Config{
+		BaseURL:    "https://api.blindpay.com",
+		APIKey:     "test_key",
+		InstanceID: instanceID,
+		HTTPClient: &http.Client{
+			Transport: &blindpaytest.RoundTripper{
+				T:      t,
+				Out:    json.RawMessage(fmt.Sprintf(`{"id":"%s"}`, customerID)),
+				Method: http.MethodPost,
+				Path:   fmt.Sprintf("/instances/%s/customers", instanceID),
+			},
+		},
+		UserAgent: "test",
+	}
+
+	client := NewClient(cfg)
+	addressLine2 := "Apto 101"
+	phoneNumber := "+5511987654321"
+	idDocBackFile := "https://example.com/image.png"
+	purposeExplanation := "I am receiving salary payments from my employer"
+	response, err := client.CreateIndividualWithEnhancedKYC(context.Background(), &CreateIndividualEnhancedParams{
+		Email:                            "bernardo.simonassi@gmail.com",
+		FirstName:                        "Bernardo",
+		LastName:                         "Simonassi",
+		DateOfBirth:                      "1998-02-02T00:00:00.000Z",
+		TaxID:                            "12345678900",
+		AddressLine1:                     "Av. Paulista, 1000",
+		AddressLine2:                     &addressLine2,
+		City:                             "São Paulo",
+		StateProvinceRegion:              "SP",
+		Country:                          types.CountryBR,
+		PostalCode:                       "01310-100",
+		PhoneNumber:                      &phoneNumber,
+		IDDocCountry:                     types.CountryBR,
+		IDDocType:                        IdentificationDocumentPassport,
+		IDDocFrontFile:                   "https://example.com/image.png",
+		IDDocBackFile:                    &idDocBackFile,
+		ProofOfAddressDocType:            ProofOfAddressDocTypeUtilityBill,
+		ProofOfAddressDocFile:            "https://example.com/image.png",
+		SelfieFile:                       "https://example.com/image.png",
+		PurposeOfTransactions:            PurposePersonalOrLivingExpenses,
+		SourceOfFundsDocType:             SourceOfFundsSavings,
+		PurposeOfTransactionsExplanation: &purposeExplanation,
+		SourceOfFundsDocFile:             "https://example.com/image.png",
+		TosID:                            "to_3ZZhllJkvo5Z",
+	})
+	require.NoError(t, err)
+	require.Equal(t, customerID, response.ID)
+}
+
+func TestReceivers_CreateBusinessWithStandardKYB(t *testing.T) {
+	instanceID := "in_000000000000"
+	customerID := "re_IOxAUL24LG7P"
+
+	cfg := &config.Config{
+		BaseURL:    "https://api.blindpay.com",
+		APIKey:     "test_key",
+		InstanceID: instanceID,
+		HTTPClient: &http.Client{
+			Transport: &blindpaytest.RoundTripper{
+				T:      t,
+				Out:    json.RawMessage(fmt.Sprintf(`{"id":"%s"}`, customerID)),
+				Method: http.MethodPost,
+				Path:   fmt.Sprintf("/instances/%s/customers", instanceID),
+			},
+		},
+		UserAgent: "test",
+	}
+
+	client := NewClient(cfg)
+	addressLine2 := "Sala 1201"
+	website := "https://site.com/"
+	ownerIDDocBackFile := "https://example.com/image.png"
+	response, err := client.CreateBusinessWithStandardKYB(context.Background(), &CreateBusinessStandardParams{
+		Email:                   "contato@empresa.com.br",
+		TaxID:                   "20096178000195",
+		AddressLine1:            "Av. Brigadeiro Faria Lima, 400",
+		AddressLine2:            &addressLine2,
+		City:                    "São Paulo",
+		StateProvinceRegion:     "SP",
+		Country:                 types.CountryBR,
+		PostalCode:              "04538-132",
+		LegalName:               "Empresa Exemplo Ltda",
+		AlternateName:           "Exemplo",
+		FormationDate:           "2010-05-20T00:00:00.000Z",
+		IncorporationDocFile:    "https://example.com/image.png",
+		ProofOfAddressDocType:   ProofOfAddressDocTypeUtilityBill,
+		ProofOfAddressDocFile:   "https://example.com/image.png",
+		ProofOfOwnershipDocFile: "https://example.com/image.png",
+		Website:                 &website,
+		Owners: []Owner{
+			{
+				Role:                  "beneficial_owner",
+				FirstName:             "Carlos",
+				LastName:              "Silva",
+				DateOfBirth:           "1995-05-15T00:00:00.000Z",
+				TaxID:                 "12345678901",
+				AddressLine1:          "Rua Augusta, 1500",
+				AddressLine2:          nil,
+				City:                  "São Paulo",
+				StateProvinceRegion:   "SP",
+				Country:               types.CountryBR,
+				PostalCode:            "01304-001",
+				IDDocCountry:          types.CountryBR,
+				IDDocType:             IdentificationDocumentPassport,
+				IDDocFrontFile:        "https://example.com/image.png",
+				IDDocBackFile:         &ownerIDDocBackFile,
+				ProofOfAddressDocType: ProofOfAddressDocTypeUtilityBill,
+				ProofOfAddressDocFile: "https://example.com/image.png",
+				ID:                    "ub_000000000000",
+				InstanceID:            "in_000000000000",
+				CustomerID:            "re_IOxAUL24LG7P",
+			},
+		},
+		TosID: "to_nppX66ntvtHs",
+	})
+	require.NoError(t, err)
+	require.Equal(t, customerID, response.ID)
+}
+
+func TestReceivers_Get(t *testing.T) {
+	instanceID := "in_000000000000"
+	customerID := "re_YuaMcI2B8zbQ"
+
+	cfg := &config.Config{
+		BaseURL:    "https://api.blindpay.com",
+		APIKey:     "test_key",
+		InstanceID: instanceID,
+		HTTPClient: &http.Client{
+			Transport: &blindpaytest.RoundTripper{
+				T: t,
+				Out: json.RawMessage(`{
+					"id":"re_YuaMcI2B8zbQ",
+					"type":"individual",
+					"kyc_type":"enhanced",
+					"kyc_status":"verifying",
+					"kyc_warnings":[
+						{
+							"code":null,
+							"message":null,
+							"resolution_status":null,
+							"warning_id":null
+						}
+					],
+					"email":"bernardo.simonassi@gmail.com",
+					"tax_id":"12345678900",
+					"address_line_1":"Av. Paulista, 1000",
+					"address_line_2":"Apto 101",
+					"city":"São Paulo",
+					"state_province_region":"SP",
+					"country":"BR",
+					"postal_code":"01310-100",
+					"ip_address":"127.0.0.1",
+					"image_url":"https://example.com/image.png",
+					"phone_number":"+5511987654321",
+					"proof_of_address_doc_type":"UTILITY_BILL",
+					"proof_of_address_doc_file":"https://example.com/image.png",
+					"first_name":"Bernardo",
+					"last_name":"Simonassi",
+					"date_of_birth":"1998-02-02T00:00:00.000Z",
+					"id_doc_country":"BR",
+					"id_doc_type":"PASSPORT",
+					"id_doc_front_file":"https://example.com/image.png",
+					"id_doc_back_file":"https://example.com/image.png",
+					"aiprise_validation_key":"",
+					"source_of_funds_doc_type":"savings",
+					"source_of_funds_doc_file":"https://example.com/image.png",
+					"selfie_file":"https://example.com/image.png",
+					"purpose_of_transactions":"personal_or_living_expenses",
+					"purpose_of_transactions_explanation":"I am receiving salary payments from my employer",
+					"instance_id":"in_000000000000",
+					"tos_id":"to_3ZZhllJkvo5Z",
+					"created_at":"2021-01-01T00:00:00.000Z",
+					"updated_at":"2021-01-01T00:00:00.000Z",
+					"limit":{
+						"per_transaction":100000,
+						"daily":200000,
+						"monthly":1000000
+					}
+				}`),
+				Method: http.MethodGet,
+				Path:   fmt.Sprintf("/instances/%s/customers/%s", instanceID, customerID),
+			},
+		},
+		UserAgent: "test",
+	}
+
+	client := NewClient(cfg)
+	receiver, err := client.Get(context.Background(), customerID)
+	require.NoError(t, err)
+	require.Equal(t, customerID, receiver.ID)
+	require.Equal(t, "Bernardo", receiver.FirstName)
+	require.Equal(t, "Simonassi", receiver.LastName)
+}
+
+func TestReceivers_Update(t *testing.T) {
+	instanceID := "in_000000000000"
+	customerID := "re_YuaMcI2B8zbQ"
+	newEmail := "bernardo.simonassi@gmail.com"
+
+	cfg := &config.Config{
+		BaseURL:    "https://api.blindpay.com",
+		APIKey:     "test_key",
+		InstanceID: instanceID,
+		HTTPClient: &http.Client{
+			Transport: &blindpaytest.RoundTripper{
+				T:      t,
+				Out:    json.RawMessage(`{"data":null}`),
+				Method: http.MethodPut,
+				Path:   fmt.Sprintf("/instances/%s/customers/%s", instanceID, customerID),
+			},
+		},
+		UserAgent: "test",
+	}
+
+	client := NewClient(cfg)
+	err := client.Update(context.Background(), &UpdateParams{
+		CustomerID: customerID,
+		Email:      &newEmail,
+	})
+	require.NoError(t, err)
+}
+
+func TestReceivers_Delete(t *testing.T) {
+	instanceID := "in_000000000000"
+	customerID := "re_YuaMcI2B8zbQ"
+
+	cfg := &config.Config{
+		BaseURL:    "https://api.blindpay.com",
+		APIKey:     "test_key",
+		InstanceID: instanceID,
+		HTTPClient: &http.Client{
+			Transport: &blindpaytest.RoundTripper{
+				T:      t,
+				Out:    json.RawMessage(`{"data":null}`),
+				Method: http.MethodDelete,
+				Path:   fmt.Sprintf("/instances/%s/customers/%s", instanceID, customerID),
+			},
+		},
+		UserAgent: "test",
+	}
+
+	client := NewClient(cfg)
+	err := client.Delete(context.Background(), customerID)
+	require.NoError(t, err)
+}
+
+func TestReceivers_GetLimits(t *testing.T) {
+	instanceID := "in_000000000000"
+	customerID := "re_YuaMcI2B8zbQ"
+
+	cfg := &config.Config{
+		BaseURL:    "https://api.blindpay.com",
+		APIKey:     "test_key",
+		InstanceID: instanceID,
+		HTTPClient: &http.Client{
+			Transport: &blindpaytest.RoundTripper{
+				T: t,
+				Out: json.RawMessage(`{
+					"limits":{
+						"payin":{
+							"daily":10000,
+							"monthly":50000
+						},
+						"payout":{
+							"daily":20000,
+							"monthly":100000
+						}
+					}
+				}`),
+				Method: http.MethodGet,
+				Path:   fmt.Sprintf("/instances/%s/limits/customers/%s", instanceID, customerID),
+			},
+		},
+		UserAgent: "test",
+	}
+
+	client := NewClient(cfg)
+	limits, err := client.GetLimits(context.Background(), customerID)
+	require.NoError(t, err)
+	require.Equal(t, 10000.0, limits.Limits.Payin.Daily)
+	require.Equal(t, 20000.0, limits.Limits.Payout.Daily)
+}
+
+func TestReceivers_GetLimitIncreaseRequests(t *testing.T) {
+	instanceID := "in_000000000000"
+	customerID := "re_YuaMcI2B8zbQ"
+
+	cfg := &config.Config{
+		BaseURL:    "https://api.blindpay.com",
+		APIKey:     "test_key",
+		InstanceID: instanceID,
+		HTTPClient: &http.Client{
+			Transport: &blindpaytest.RoundTripper{
+				T: t,
+				Out: json.RawMessage(`[
+					{
+						"id": "rl_000000000000",
+						"customer_id": "re_YuaMcI2B8zbQ",
+						"status": "in_review",
+						"daily": 50000,
+						"monthly": 250000,
+						"per_transaction": 25000,
+						"supporting_document_file": "https://example.com/bank-statement.pdf",
+						"supporting_document_type": "individual_bank_statement",
+						"created_at": "2025-01-15T10:30:00.000Z",
+						"updated_at": "2025-01-15T10:30:00.000Z"
+					},
+					{
+						"id": "rl_000000000001",
+						"customer_id": "re_YuaMcI2B8zbQ",
+						"status": "approved",
+						"daily": 30000,
+						"monthly": 150000,
+						"per_transaction": 15000,
+						"supporting_document_file": "https://example.com/proof-of-income.pdf",
+						"supporting_document_type": "individual_proof_of_income",
+						"created_at": "2024-12-10T14:20:00.000Z",
+						"updated_at": "2024-12-12T09:45:00.000Z"
+					}
+				]`),
+				Method: http.MethodGet,
+				Path:   fmt.Sprintf("/instances/%s/customers/%s/limit-increase", instanceID, customerID),
+			},
+		},
+		UserAgent: "test",
+	}
+
+	client := NewClient(cfg)
+	requests, err := client.GetLimitIncreaseRequests(context.Background(), customerID)
+	require.NoError(t, err)
+	require.Len(t, requests, 2)
+	require.Equal(t, "rl_000000000000", requests[0].ID)
+	require.Equal(t, customerID, requests[0].CustomerID)
+	require.Equal(t, LimitIncreaseRequestStatusInReview, requests[0].Status)
+	require.Equal(t, 50000.0, requests[0].Daily)
+	require.Equal(t, 250000.0, requests[0].Monthly)
+	require.Equal(t, 25000.0, requests[0].PerTransaction)
+	require.Equal(t, "https://example.com/bank-statement.pdf", requests[0].SupportingDocumentFile)
+	require.Equal(t, LimitIncreaseRequestSupportingDocumentTypeIndividualBankStatement, requests[0].SupportingDocumentType)
+	require.Equal(t, "rl_000000000001", requests[1].ID)
+	require.Equal(t, LimitIncreaseRequestStatusApproved, requests[1].Status)
+}
+
+func TestReceivers_RequestLimitIncrease(t *testing.T) {
+	instanceID := "in_000000000000"
+	customerID := "re_YuaMcI2B8zbQ"
+
+	cfg := &config.Config{
+		BaseURL:    "https://api.blindpay.com",
+		APIKey:     "test_key",
+		InstanceID: instanceID,
+		HTTPClient: &http.Client{
+			Transport: &blindpaytest.RoundTripper{
+				T:      t,
+				Out:    json.RawMessage(`{"id": "rl_000000000000"}`),
+				Method: http.MethodPost,
+				Path:   fmt.Sprintf("/instances/%s/customers/%s/limit-increase", instanceID, customerID),
+			},
+		},
+		UserAgent: "test",
+	}
+
+	client := NewClient(cfg)
+	response, err := client.RequestLimitIncrease(context.Background(), &RequestLimitIncreaseParams{
+		CustomerID:             customerID,
+		Daily:                  100000,
+		Monthly:                500000,
+		PerTransaction:         50000,
+		SupportingDocumentFile: "https://example.com/tax-return.pdf",
+		SupportingDocumentType: LimitIncreaseRequestSupportingDocumentTypeIndividualTaxReturn,
+	})
+	require.NoError(t, err)
+	require.Equal(t, "rl_000000000000", response.ID)
+}
