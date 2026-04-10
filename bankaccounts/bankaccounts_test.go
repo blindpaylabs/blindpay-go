@@ -229,7 +229,13 @@ func TestCreateAch(t *testing.T) {
 					"account_number":"1001001234",
 					"account_type":"checking",
 					"beneficiary_name":"Individual full name or business name",
-					"routing_number":"012345678"
+					"routing_number":"012345678",
+					"recipient_relationship":"first_party",
+					"address_line_1":"123 Main St",
+					"city":"New York",
+					"state_province_region":"NY",
+					"country":"US",
+					"postal_code":"10001"
 				}`),
 				Out: json.RawMessage(`{
 					"id":"ba_000000000000",
@@ -264,13 +270,19 @@ func TestCreateAch(t *testing.T) {
 
 	client := NewClient(cfg)
 	account, err := client.CreateAch(context.Background(), &CreateAchParams{
-		ReceiverID:      receiverID,
-		Name:            "ACH Account",
-		AccountClass:    types.AccountClassIndividual,
-		AccountNumber:   "1001001234",
-		AccountType:     types.BankAccountTypeChecking,
-		BeneficiaryName: "Individual full name or business name",
-		RoutingNumber:   "012345678",
+		ReceiverID:            receiverID,
+		Name:                  "ACH Account",
+		AccountClass:          types.AccountClassIndividual,
+		AccountNumber:         "1001001234",
+		AccountType:           types.BankAccountTypeChecking,
+		BeneficiaryName:       "Individual full name or business name",
+		RoutingNumber:         "012345678",
+		RecipientRelationship: types.RecipientRelationshipFirstParty,
+		AddressLine1:          "123 Main St",
+		City:                  "New York",
+		StateProvinceRegion:   "NY",
+		Country:               types.CountryUS,
+		PostalCode:            "10001",
 	})
 	require.NoError(t, err)
 	require.Equal(t, "ba_000000000000", account.ID)
@@ -290,9 +302,11 @@ func TestCreateWire(t *testing.T) {
 				In: json.RawMessage(`{
 					"type":"wire",
 					"name":"Wire Account",
+					"account_class":"individual",
 					"account_number":"1001001234",
 					"beneficiary_name":"Individual full name or business name",
 					"routing_number":"012345678",
+					"recipient_relationship":"first_party",
 					"address_line_1":"Address line 1",
 					"address_line_2":"Address line 2",
 					"city":"City",
@@ -324,17 +338,19 @@ func TestCreateWire(t *testing.T) {
 
 	client := NewClient(cfg)
 	account, err := client.CreateWire(context.Background(), &CreateWireParams{
-		ReceiverID:          receiverID,
-		Name:                "Wire Account",
-		AccountNumber:       "1001001234",
-		BeneficiaryName:     "Individual full name or business name",
-		RoutingNumber:       "012345678",
-		AddressLine1:        "Address line 1",
-		AddressLine2:        "Address line 2",
-		City:                "City",
-		StateProvinceRegion: "State/Province/Region",
-		Country:             types.CountryUS,
-		PostalCode:          "Postal code",
+		ReceiverID:            receiverID,
+		Name:                  "Wire Account",
+		AccountClass:          types.AccountClassIndividual,
+		AccountNumber:         "1001001234",
+		BeneficiaryName:       "Individual full name or business name",
+		RoutingNumber:         "012345678",
+		RecipientRelationship: types.RecipientRelationshipFirstParty,
+		AddressLine1:          "Address line 1",
+		AddressLine2:          "Address line 2",
+		City:                  "City",
+		StateProvinceRegion:   "State/Province/Region",
+		Country:               types.CountryUS,
+		PostalCode:            "Postal code",
 	})
 	require.NoError(t, err)
 	require.Equal(t, "ba_000000000000", account.ID)
@@ -354,6 +370,8 @@ func TestCreateInternationalSwift(t *testing.T) {
 				In: json.RawMessage(`{
 					"type":"international_swift",
 					"name":"International Swift Account",
+					"account_class":"individual",
+					"recipient_relationship":"first_party",
 					"swift_account_holder_name":"John Doe",
 					"swift_account_number_iban":"123456789",
 					"swift_bank_address_line_1":"123 Main Street, Suite 100, Downtown District, City Center CP 12345",
@@ -417,6 +435,8 @@ func TestCreateInternationalSwift(t *testing.T) {
 	account, err := client.CreateInternationalSwift(context.Background(), &CreateInternationalSwiftParams{
 		ReceiverID:                             receiverID,
 		Name:                                   "International Swift Account",
+		AccountClass:                           types.AccountClassIndividual,
+		RecipientRelationship:                  types.RecipientRelationshipFirstParty,
 		SwiftAccountHolderName:                 "John Doe",
 		SwiftAccountNumberIban:                 "123456789",
 		SwiftBankAddressLine1:                  "123 Main Street, Suite 100, Downtown District, City Center CP 12345",
@@ -454,9 +474,11 @@ func TestBankAccounts_CreateRtp(t *testing.T) {
 				In: json.RawMessage(`{
 					"type":"rtp",
 					"name":"John Doe RTP",
+					"account_class":"individual",
 					"beneficiary_name":"John Doe",
 					"routing_number":"121000358",
 					"account_number":"325203027578",
+					"recipient_relationship":"first_party",
 					"address_line_1":"Street of the fools",
 					"city":"Fools City",
 					"state_province_region":"FL",
@@ -487,16 +509,18 @@ func TestBankAccounts_CreateRtp(t *testing.T) {
 
 	client := NewClient(cfg)
 	account, err := client.CreateRtp(context.Background(), &CreateRtpParams{
-		ReceiverID:          receiverID,
-		Name:                "John Doe RTP",
-		BeneficiaryName:     "John Doe",
-		RoutingNumber:       "121000358",
-		AccountNumber:       "325203027578",
-		AddressLine1:        "Street of the fools",
-		City:                "Fools City",
-		StateProvinceRegion: "FL",
-		Country:             types.CountryUS,
-		PostalCode:          "22599",
+		ReceiverID:            receiverID,
+		Name:                  "John Doe RTP",
+		AccountClass:          types.AccountClassIndividual,
+		BeneficiaryName:       "John Doe",
+		RoutingNumber:         "121000358",
+		AccountNumber:         "325203027578",
+		RecipientRelationship: types.RecipientRelationshipFirstParty,
+		AddressLine1:          "Street of the fools",
+		City:                  "Fools City",
+		StateProvinceRegion:   "FL",
+		Country:               types.CountryUS,
+		PostalCode:            "22599",
 	})
 	require.NoError(t, err)
 	require.Equal(t, "ba_JW5ZtlKMlgS1", account.ID)
@@ -624,7 +648,7 @@ func TestBankAccounts_List(t *testing.T) {
 	}
 
 	client := NewClient(cfg)
-	bankAccounts, err := client.List(context.Background(), receiverID)
+	bankAccounts, err := client.List(context.Background(), &ListParams{ReceiverID: receiverID})
 	require.NoError(t, err)
 	require.Len(t, bankAccounts, 1)
 	require.Equal(t, "ba_000000000000", bankAccounts[0].ID)

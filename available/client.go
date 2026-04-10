@@ -48,6 +48,17 @@ func (c *Client) GetRails(ctx context.Context) ([]types.RailEntry, error) {
 	return request.Do[[]types.RailEntry](c.cfg, ctx, "GET", "/available/rails", nil)
 }
 
+// NaicsCode represents a NAICS business industry code.
+type NaicsCode struct {
+	Label string `json:"label"`
+	Value string `json:"value"`
+}
+
+// GetNaicsCodes retrieves the available NAICS business industry codes.
+func (c *Client) GetNaicsCodes(ctx context.Context) ([]NaicsCode, error) {
+	return request.Do[[]NaicsCode](c.cfg, ctx, "GET", "/available/naics", nil)
+}
+
 // GetSwiftCodeBankDetails retrieves the bank details of a specific swift code.
 func (c *Client) GetSwiftCodeBankDetails(ctx context.Context, swift string) ([]GetSwiftCodeBankDetailsResponse, error) {
 	if swift == "" {

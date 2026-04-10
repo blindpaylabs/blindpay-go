@@ -451,7 +451,7 @@ func TestReceivers_Update(t *testing.T) {
 			Transport: &blindpaytest.RoundTripper{
 				T:      t,
 				Out:    json.RawMessage(`{"data":null}`),
-				Method: http.MethodPatch,
+				Method: http.MethodPut,
 				Path:   fmt.Sprintf("/instances/%s/receivers/%s", instanceID, receiverID),
 			},
 		},

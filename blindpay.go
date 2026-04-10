@@ -8,6 +8,8 @@ import (
 	"github.com/blindpaylabs/blindpay-go/apikeys"
 	"github.com/blindpaylabs/blindpay-go/available"
 	"github.com/blindpaylabs/blindpay-go/bankaccounts"
+	"github.com/blindpaylabs/blindpay-go/custodialwallets"
+	"github.com/blindpaylabs/blindpay-go/fees"
 	"github.com/blindpaylabs/blindpay-go/instances"
 	"github.com/blindpaylabs/blindpay-go/internal/config"
 	"github.com/blindpaylabs/blindpay-go/partnerfees"
@@ -15,13 +17,15 @@ import (
 	"github.com/blindpaylabs/blindpay-go/payouts"
 	"github.com/blindpaylabs/blindpay-go/quotes"
 	"github.com/blindpaylabs/blindpay-go/receivers"
+	"github.com/blindpaylabs/blindpay-go/transfers"
+	"github.com/blindpaylabs/blindpay-go/upload"
 	"github.com/blindpaylabs/blindpay-go/virtualaccounts"
 	"github.com/blindpaylabs/blindpay-go/wallets"
 	"github.com/blindpaylabs/blindpay-go/webhookendpoints"
 )
 
 // Version is the current version of the SDK.
-const Version = "1.3.0"
+const Version = "1.4.0"
 
 // Client is the main BlindPay client.
 type Client struct {
@@ -33,12 +37,16 @@ type Client struct {
 	Available        *available.Client
 	APIKeys          *apikeys.Client
 	BankAccounts     *bankaccounts.Client
+	CustodialWallets *custodialwallets.Client
+	Fees             *fees.Client
 	Instances        *instances.Client
 	PartnerFees      *partnerfees.Client
 	Payins           *payins.Client
 	Payouts          *payouts.Client
 	Quotes           *quotes.Client
 	Receivers        *receivers.Client
+	Transfers        *transfers.Client
+	Upload           *upload.Client
 	VirtualAccounts  *virtualaccounts.Client
 	Wallets          *wallets.Client
 	OfframpWallets   *wallets.OfframpClient
@@ -79,12 +87,16 @@ func New(apiKey, instanceID string, opts ...Option) (*Client, error) {
 	c.Available = available.NewClient(cfg)
 	c.APIKeys = apikeys.NewClient(cfg)
 	c.BankAccounts = bankaccounts.NewClient(cfg)
+	c.CustodialWallets = custodialwallets.NewClient(cfg)
+	c.Fees = fees.NewClient(cfg)
 	c.Instances = instances.NewClient(cfg)
 	c.PartnerFees = partnerfees.NewClient(cfg)
 	c.Payins = payins.NewClient(cfg)
 	c.Payouts = payouts.NewClient(cfg)
 	c.Quotes = quotes.NewClient(cfg)
 	c.Receivers = receivers.NewClient(cfg)
+	c.Transfers = transfers.NewClient(cfg)
+	c.Upload = upload.NewClient(cfg)
 	c.VirtualAccounts = virtualaccounts.NewClient(cfg)
 	c.Wallets = wallets.NewClient(cfg)
 	c.OfframpWallets = wallets.NewOfframpClient(cfg)

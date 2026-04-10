@@ -116,10 +116,31 @@ type CreateStellarParams struct {
 	SignedTransaction   *string `json:"signed_transaction,omitempty"`
 }
 
+// CreateSolanaParams represents parameters for creating a Solana payout.
+type CreateSolanaParams struct {
+	QuoteID             string  `json:"quote_id"`
+	SenderWalletAddress string  `json:"sender_wallet_address"`
+	SignedTransaction   *string `json:"signed_transaction"`
+}
+
 // CreateEvmParams represents parameters for creating an EVM payout.
 type CreateEvmParams struct {
 	QuoteID             string `json:"quote_id"`
 	SenderWalletAddress string `json:"sender_wallet_address"`
+}
+
+// SubmitDocumentsParams represents parameters for submitting payout documents.
+type SubmitDocumentsParams struct {
+	PayoutID                string                        `json:"-"`
+	TransactionDocumentType types.TransactionDocumentType `json:"transaction_document_type"`
+	TransactionDocumentID   string                        `json:"transaction_document_id"`
+	TransactionDocumentFile string                        `json:"transaction_document_file"`
+	Description             string                        `json:"description,omitempty"`
+}
+
+// SubmitDocumentsResponse represents the response when submitting payout documents.
+type SubmitDocumentsResponse struct {
+	ID string `json:"id"`
 }
 
 // CreateResponse represents the response when creating a payout.
@@ -228,6 +249,40 @@ func (c *Client) CreateStellar(ctx context.Context, params *CreateStellarParams)
 
 	path := fmt.Sprintf("/instances/%s/payouts/stellar", c.instanceID)
 	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, params)
+}
+
+// CreateSolana creates a Solana payout.
+func (c *Client) CreateSolana(ctx context.Context, params *CreateSolanaParams) (*CreateResponse, error) {
+	if params == nil {
+		return nil, fmt.Errorf("params cannot be nil")
+	}
+
+	path := fmt.Sprintf("/instances/%s/payouts/solana", c.instanceID)
+	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, params)
+}
+
+// SubmitDocuments submits documents for a payout.
+func (c *Client) SubmitDocuments(ctx context.Context, params *SubmitDocumentsParams) (*SubmitDocumentsResponse, error) {
+	if params == nil {
+		return nil, fmt.Errorf("params cannot be nil")
+	}
+	if params.PayoutID == "" {
+		return nil, fmt.Errorf("payout ID cannot be empty")
+	}
+
+	path := fmt.Sprintf("/instances/%s/payouts/%s/documents", c.instanceID, params.PayoutID)
+
+	body := map[string]any{
+		"transaction_document_type": params.TransactionDocumentType,
+		"transaction_document_id":   params.TransactionDocumentID,
+		"transaction_document_file": params.TransactionDocumentFile,
+	}
+
+	if params.Description != "" {
+		body["description"] = params.Description
+	}
+
+	return request.Do[*SubmitDocumentsResponse](c.cfg, ctx, "POST", path, body)
 }
 
 // AuthorizeStellarToken authorizes a Stellar token for payout.
