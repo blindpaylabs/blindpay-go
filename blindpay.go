@@ -17,6 +17,7 @@ import (
 	"github.com/blindpaylabs/blindpay-go/payouts"
 	"github.com/blindpaylabs/blindpay-go/quotes"
 	"github.com/blindpaylabs/blindpay-go/receivers"
+	"github.com/blindpaylabs/blindpay-go/sandbox"
 	"github.com/blindpaylabs/blindpay-go/transfers"
 	"github.com/blindpaylabs/blindpay-go/upload"
 	"github.com/blindpaylabs/blindpay-go/virtualaccounts"
@@ -25,7 +26,7 @@ import (
 )
 
 // Version is the current version of the SDK.
-const Version = "1.4.0"
+const Version = "1.5.0"
 
 // Client is the main BlindPay client.
 type Client struct {
@@ -45,6 +46,7 @@ type Client struct {
 	Payouts          *payouts.Client
 	Quotes           *quotes.Client
 	Receivers        *receivers.Client
+	Sandbox          *sandbox.Client
 	Transfers        *transfers.Client
 	Upload           *upload.Client
 	VirtualAccounts  *virtualaccounts.Client
@@ -95,6 +97,7 @@ func New(apiKey, instanceID string, opts ...Option) (*Client, error) {
 	c.Payouts = payouts.NewClient(cfg)
 	c.Quotes = quotes.NewClient(cfg)
 	c.Receivers = receivers.NewClient(cfg)
+	c.Sandbox = sandbox.NewClient(cfg)
 	c.Transfers = transfers.NewClient(cfg)
 	c.Upload = upload.NewClient(cfg)
 	c.VirtualAccounts = virtualaccounts.NewClient(cfg)
