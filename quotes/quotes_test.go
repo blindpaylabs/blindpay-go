@@ -33,10 +33,7 @@ func TestQuotes_Create(t *testing.T) {
 					"token":"USDC",
 					"cover_fees":true,
 					"description":"Memo code or description, only works with USD and BRL",
-					"partner_fee_id":"pf_000000000000",
-					"transaction_document_file":null,
-					"transaction_document_id":null,
-					"transaction_document_type":"invoice"
+					"partner_fee_id":"pf_000000000000"
 				}`),
 				Out: json.RawMessage(`{
 					"id":"qu_000000000000",
@@ -69,28 +66,23 @@ func TestQuotes_Create(t *testing.T) {
 	}
 
 	client := NewClient(cfg)
-	network := types.Network("sepolia")
-	token := types.StablecoinToken("USDC")
 	coverFees := true
 	description := "Memo code or description, only works with USD and BRL"
 	partnerFeeID := "pf_000000000000"
 	quote, err := client.Create(context.Background(), &CreateParams{
-		BankAccountID:           bankAccountID,
-		CurrencyType:            types.CurrencyTypeSender,
-		Network:                 &network,
-		RequestAmount:           1000,
-		Token:                   &token,
-		CoverFees:               &coverFees,
-		Description:             &description,
-		PartnerFeeID:            &partnerFeeID,
-		TransactionDocumentFile: nil,
-		TransactionDocumentID:   nil,
-		TransactionDocumentType: types.TransactionDocumentTypeInvoice,
+		BankAccountID: bankAccountID,
+		CurrencyType:  types.CurrencyTypeSender,
+		Network:       types.Network("sepolia"),
+		RequestAmount: 1000,
+		Token:         types.StablecoinToken("USDC"),
+		CoverFees:     &coverFees,
+		Description:   &description,
+		PartnerFeeID:  &partnerFeeID,
 	})
 	require.NoError(t, err)
 	require.Equal(t, id, quote.ID)
-	require.Equal(t, 1010.0, quote.SenderAmount)
-	require.Equal(t, 5240.0, quote.ReceiverAmount)
+	require.Equal(t, 1010.0, *quote.SenderAmount)
+	require.Equal(t, 5240.0, *quote.ReceiverAmount)
 }
 
 func TestQuotes_GetFxRate(t *testing.T) {
@@ -131,6 +123,6 @@ func TestQuotes_GetFxRate(t *testing.T) {
 		RequestAmount: 1000,
 	})
 	require.NoError(t, err)
-	require.Equal(t, 495.0, response.CommercialQuotation)
+	require.Equal(t, 495.0, *response.CommercialQuotation)
 	require.Equal(t, 1.0, response.ResultAmount)
 }

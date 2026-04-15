@@ -52,6 +52,7 @@ func TestVirtualAccounts_Create(t *testing.T) {
 	}`
 
 	inJson := `{
+		"banking_partner": "",
 		"blockchain_wallet_id": "bw_000000000000",
 		"token": "USDC"
 	}`
@@ -80,16 +81,16 @@ func TestVirtualAccounts_Create(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.Equal(t, id, account.ID)
-	require.Equal(t, walletID, account.BlockchainWalletID)
+	require.Equal(t, walletID, *account.BlockchainWalletID)
 }
 
-func TestVirtualAccounts_Get(t *testing.T) {
+func TestVirtualAccounts_List(t *testing.T) {
 	receiverID := "re_000000000000"
 	instanceID := "in_000000000000"
 	id := "va_000000000000"
 	walletID := "bw_000000000000"
 
-	outJson := `{
+	outJson := `[{
 		"id": "va_000000000000",
 		"us": {
 			"ach": {
@@ -119,7 +120,7 @@ func TestVirtualAccounts_Get(t *testing.T) {
 		},
 		"token": "USDC",
 		"blockchain_wallet_id": "bw_000000000000"
-	}`
+	}]`
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
@@ -137,15 +138,17 @@ func TestVirtualAccounts_Get(t *testing.T) {
 	}
 
 	client := NewClient(cfg)
-	account, err := client.Get(context.Background(), receiverID)
+	accounts, err := client.List(context.Background(), receiverID)
 	require.NoError(t, err)
-	require.Equal(t, id, account.ID)
-	require.Equal(t, walletID, account.BlockchainWalletID)
+	require.Len(t, accounts, 1)
+	require.Equal(t, id, accounts[0].ID)
+	require.Equal(t, walletID, *accounts[0].BlockchainWalletID)
 }
 
 func TestVirtualAccounts_Update(t *testing.T) {
 	receiverID := "re_000000000000"
 	instanceID := "in_000000000000"
+	virtualAccountID := "va_000000000000"
 	newWalletID := "bw_000000000000"
 
 	inJson := `{
@@ -164,7 +167,7 @@ func TestVirtualAccounts_Update(t *testing.T) {
 				In:     json.RawMessage(inJson),
 				Out:    json.RawMessage(outJson),
 				Method: http.MethodPut,
-				Path:   fmt.Sprintf("/instances/%s/receivers/%s/virtual-accounts", instanceID, receiverID),
+				Path:   fmt.Sprintf("/instances/%s/receivers/%s/virtual-accounts/%s", instanceID, receiverID, virtualAccountID),
 			},
 		},
 		UserAgent: "test",
@@ -173,6 +176,7 @@ func TestVirtualAccounts_Update(t *testing.T) {
 	client := NewClient(cfg)
 	err := client.Update(context.Background(), &UpdateParams{
 		ReceiverID:         receiverID,
+		VirtualAccountID:   virtualAccountID,
 		BlockchainWalletID: newWalletID,
 		Token:              types.StablecoinTokenUSDC,
 	})

@@ -11,17 +11,14 @@ import (
 
 // CreateParams represents parameters for creating a quote.
 type CreateParams struct {
-	BankAccountID           string                        `json:"bank_account_id"`
-	CurrencyType            types.CurrencyType            `json:"currency_type"`
-	Network                 *types.Network                `json:"network,omitempty"`
-	RequestAmount           float64                       `json:"request_amount"`
-	Token                   *types.StablecoinToken        `json:"token,omitempty"`
-	CoverFees               *bool                         `json:"cover_fees,omitempty"`
-	Description             *string                       `json:"description,omitempty"`
-	PartnerFeeID            *string                       `json:"partner_fee_id,omitempty"`
-	TransactionDocumentFile *string                       `json:"transaction_document_file"`
-	TransactionDocumentID   *string                       `json:"transaction_document_id"`
-	TransactionDocumentType types.TransactionDocumentType `json:"transaction_document_type"`
+	BankAccountID string             `json:"bank_account_id"`
+	CurrencyType  types.CurrencyType `json:"currency_type"`
+	Network       types.Network      `json:"network"`
+	RequestAmount int                `json:"request_amount"`
+	Token         types.StablecoinToken `json:"token"`
+	CoverFees     *bool              `json:"cover_fees,omitempty"`
+	Description   *string            `json:"description,omitempty"`
+	PartnerFeeID  *string            `json:"partner_fee_id,omitempty"`
 }
 
 // QuoteContract represents contract information in a quote.
@@ -39,17 +36,18 @@ type QuoteContract struct {
 
 // CreateResponse represents the response when creating a quote.
 type CreateResponse struct {
-	ID                  string        `json:"id"`
-	ExpiresAt           int64         `json:"expires_at"`
-	CommercialQuotation float64       `json:"commercial_quotation"`
-	BlindpayQuotation   float64       `json:"blindpay_quotation"`
-	ReceiverAmount      float64       `json:"receiver_amount"`
-	SenderAmount        float64       `json:"sender_amount"`
-	PartnerFeeAmount    float64       `json:"partner_fee_amount"`
-	FlatFee             float64       `json:"flat_fee"`
-	Contract            QuoteContract `json:"contract"`
-	ReceiverLocalAmount float64       `json:"receiver_local_amount"`
-	Description         string        `json:"description"`
+	ID                  string         `json:"id"`
+	ExpiresAt           *float64       `json:"expires_at"`
+	CommercialQuotation *float64       `json:"commercial_quotation"`
+	BlindpayQuotation   *float64       `json:"blindpay_quotation"`
+	ReceiverAmount      *float64       `json:"receiver_amount"`
+	SenderAmount        *float64       `json:"sender_amount"`
+	PartnerFeeAmount    *float64       `json:"partner_fee_amount"`
+	FlatFee             *float64       `json:"flat_fee"`
+	BillingFeeAmount    *float64       `json:"billing_fee_amount"`
+	Contract            *QuoteContract `json:"contract"`
+	ReceiverLocalAmount *float64       `json:"receiver_local_amount"`
+	Description         *string        `json:"description"`
 }
 
 // GetFxRateParams represents parameters for getting FX rates.
@@ -57,16 +55,16 @@ type GetFxRateParams struct {
 	CurrencyType  types.CurrencyType `json:"currency_type"`
 	From          types.Currency     `json:"from"`
 	To            types.Currency     `json:"to"`
-	RequestAmount float64            `json:"request_amount"`
+	RequestAmount int                `json:"request_amount"`
 }
 
 // GetFxRateResponse represents the FX rate response.
 type GetFxRateResponse struct {
-	CommercialQuotation   float64 `json:"commercial_quotation"`
-	BlindpayQuotation     float64 `json:"blindpay_quotation"`
-	ResultAmount          float64 `json:"result_amount"`
-	InstanceFlatFee       float64 `json:"instance_flat_fee"`
-	InstancePercentageFee float64 `json:"instance_percentage_fee"`
+	CommercialQuotation   *float64 `json:"commercial_quotation"`
+	BlindpayQuotation     *float64 `json:"blindpay_quotation"`
+	ResultAmount          float64  `json:"result_amount"`
+	InstanceFlatFee       *float64 `json:"instance_flat_fee"`
+	InstancePercentageFee float64  `json:"instance_percentage_fee"`
 }
 
 // Client handles quote-related operations.

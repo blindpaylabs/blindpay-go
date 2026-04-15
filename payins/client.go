@@ -13,39 +13,47 @@ import (
 
 // Payin represents a payin transaction.
 type Payin struct {
-	ReceiverID          string                     `json:"receiver_id"`
-	ID                  string                     `json:"id"`
-	PixCode             string                     `json:"pix_code,omitempty"`
-	MemoCode            string                     `json:"memo_code,omitempty"`
-	Clabe               string                     `json:"clabe,omitempty"`
-	Status              types.TransactionStatus    `json:"status"`
-	PayinQuoteID        string                     `json:"payin_quote_id"`
-	InstanceID          string                     `json:"instance_id"`
-	TrackingTransaction *types.TrackingTransaction `json:"tracking_transaction,omitempty"`
-	TrackingPayment     *types.TrackingPayment     `json:"tracking_payment,omitempty"`
-	TrackingComplete    *types.TrackingComplete    `json:"tracking_complete,omitempty"`
-	TrackingPartnerFee  *types.TrackingPartnerFee  `json:"tracking_partner_fee,omitempty"`
-	CreatedAt           time.Time                  `json:"created_at"`
-	UpdatedAt           time.Time                  `json:"updated_at"`
-	ImageURL            string                     `json:"image_url,omitempty"`
-	FirstName           string                     `json:"first_name,omitempty"`
-	LastName            string                     `json:"last_name,omitempty"`
-	LegalName           string                     `json:"legal_name,omitempty"`
-	Type                string                     `json:"type"`
-	PaymentMethod       string                     `json:"payment_method"`
-	SenderAmount        float64                    `json:"sender_amount"`
-	ReceiverAmount      float64                    `json:"receiver_amount"`
-	Token               types.StablecoinToken      `json:"token"`
-	PartnerFeeAmount    float64                    `json:"partner_fee_amount"`
-	TotalFeeAmount      float64                    `json:"total_fee_amount"`
-	CommercialQuotation float64                    `json:"commercial_quotation"`
-	BlindpayQuotation   float64                    `json:"blindpay_quotation"`
-	Currency            string                     `json:"currency"`
-	BillingFee          float64                    `json:"billing_fee"`
-	Name                string                     `json:"name"`
-	Address             string                     `json:"address"`
-	Network             types.Network              `json:"network"`
-	BlindpayBankDetails BankDetails                `json:"blindpay_bank_details"`
+	ReceiverID           string                     `json:"receiver_id"`
+	ID                   string                     `json:"id"`
+	PixCode              *string                    `json:"pix_code"`
+	MemoCode             *string                    `json:"memo_code"`
+	Clabe                *string                    `json:"clabe"`
+	Status               types.TransactionStatus    `json:"status"`
+	PayinQuoteID         string                     `json:"payin_quote_id"`
+	InstanceID           string                     `json:"instance_id"`
+	PartnerFee           *int                       `json:"partner_fee"`
+	TrackingTransaction  *types.TrackingTransaction `json:"tracking_transaction,omitempty"`
+	TrackingPayment      *types.TrackingPayment     `json:"tracking_payment,omitempty"`
+	TrackingComplete     *types.TrackingComplete    `json:"tracking_complete,omitempty"`
+	TrackingPartnerFee   *types.TrackingPartnerFee  `json:"tracking_partner_fee,omitempty"`
+	CreatedAt            time.Time                  `json:"created_at"`
+	UpdatedAt            time.Time                  `json:"updated_at"`
+	ImageURL             *string                    `json:"image_url"`
+	FirstName            *string                    `json:"first_name"`
+	LastName             *string                    `json:"last_name"`
+	LegalName            *string                    `json:"legal_name"`
+	Type                 string                     `json:"type"`
+	PaymentMethod        string                     `json:"payment_method"`
+	SenderAmount         *float64                   `json:"sender_amount"`
+	ReceiverAmount       *float64                   `json:"receiver_amount"`
+	Token                types.StablecoinToken      `json:"token"`
+	PartnerFeeAmount     *float64                   `json:"partner_fee_amount"`
+	TotalFeeAmount       *float64                   `json:"total_fee_amount"`
+	CommercialQuotation  *float64                   `json:"commercial_quotation"`
+	BlindpayQuotation    *float64                   `json:"blindpay_quotation"`
+	Currency             string                     `json:"currency"`
+	BillingFeeAmount     *float64                   `json:"billing_fee_amount"`
+	TransactionFeeAmount *float64                   `json:"transaction_fee_amount"`
+	IsOtc                *bool                      `json:"is_otc"`
+	PayerRules           interface{}                `json:"payer_rules"`
+	Name                 string                     `json:"name"`
+	Address              *string                    `json:"address"`
+	Network              types.Network              `json:"network"`
+	BlindpayBankDetails  *BankDetails               `json:"blindpay_bank_details"`
+	PsePaymentLink       *string                    `json:"pse_payment_link"`
+	PseFullName          *string                    `json:"pse_full_name"`
+	PseTaxID             *string                    `json:"pse_tax_id"`
+	PseDocumentType      *string                    `json:"pse_document_type"`
 }
 
 // BankDetails represents bank details for a payin.
@@ -94,18 +102,23 @@ type ListResponse struct {
 
 // CreateEvmResponse represents the response when creating an EVM payin.
 type CreateEvmResponse struct {
-	ID                  string                     `json:"id"`
-	Status              types.TransactionStatus    `json:"status"`
-	PixCode             string                     `json:"pix_code,omitempty"`
-	MemoCode            string                     `json:"memo_code,omitempty"`
-	Clabe               string                     `json:"clabe,omitempty"`
-	TrackingComplete    *types.TrackingComplete    `json:"tracking_complete,omitempty"`
-	TrackingPayment     *types.TrackingPayment     `json:"tracking_payment,omitempty"`
-	TrackingTransaction *types.TrackingTransaction `json:"tracking_transaction,omitempty"`
-	TrackingPartnerFee  *types.TrackingPartnerFee  `json:"tracking_partner_fee,omitempty"`
-	BlindpayBankDetails BankDetails                `json:"blindpay_bank_details"`
-	ReceiverID          string                     `json:"receiver_id"`
-	ReceiverAmount      float64                    `json:"receiver_amount"`
+	ID                   string                     `json:"id"`
+	Status               types.TransactionStatus    `json:"status"`
+	PixCode              *string                    `json:"pix_code"`
+	MemoCode             *string                    `json:"memo_code"`
+	Clabe                *string                    `json:"clabe"`
+	PartnerFee           *int                       `json:"partner_fee"`
+	BillingFeeAmount     *float64                   `json:"billing_fee_amount"`
+	TransactionFeeAmount *float64                   `json:"transaction_fee_amount"`
+	TrackingComplete     *types.TrackingComplete    `json:"tracking_complete,omitempty"`
+	TrackingPayment      *types.TrackingPayment     `json:"tracking_payment,omitempty"`
+	TrackingTransaction  *types.TrackingTransaction `json:"tracking_transaction,omitempty"`
+	TrackingPartnerFee   *types.TrackingPartnerFee  `json:"tracking_partner_fee,omitempty"`
+	BlindpayBankDetails  BankDetails                `json:"blindpay_bank_details"`
+	ReceiverID           *string                    `json:"receiver_id"`
+	ReceiverAmount       *float64                   `json:"receiver_amount"`
+	SenderAmount         *float64                   `json:"sender_amount"`
+	PaymentMethod        *string                    `json:"payment_method"`
 }
 
 // Client handles payin-related operations.

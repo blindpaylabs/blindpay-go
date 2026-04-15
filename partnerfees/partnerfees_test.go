@@ -16,8 +16,6 @@ func TestPartnerFees_Create(t *testing.T) {
 	instanceID := "in_000000000000"
 	id := "fe_000000000000"
 	name := "Display Name"
-	evmWallet := "0x1234567890123456789012345678901234567890"
-	stellarWallet := "GAB22222222222222222222222222222222222222222222222222222222222222"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
@@ -31,9 +29,7 @@ func TestPartnerFees_Create(t *testing.T) {
 					"payout_percentage_fee":0,
 					"payout_flat_fee":0,
 					"payin_percentage_fee":0,
-					"payin_flat_fee":0,
-					"evm_wallet_address":"0x1234567890123456789012345678901234567890",
-					"stellar_wallet_address":"GAB22222222222222222222222222222222222222222222222222222222222222"
+					"payin_flat_fee":0
 				}`),
 				Out: json.RawMessage(fmt.Sprintf(
 					`{
@@ -43,10 +39,8 @@ func TestPartnerFees_Create(t *testing.T) {
 						"payout_percentage_fee":0,
 						"payout_flat_fee":0,
 						"payin_percentage_fee":0,
-						"payin_flat_fee":0,
-						"evm_wallet_address":"%s",
-						"stellar_wallet_address":"%s"
-					}`, id, instanceID, name, evmWallet, stellarWallet,
+						"payin_flat_fee":0
+					}`, id, instanceID, name,
 				)),
 				Method: http.MethodPost,
 				Path:   fmt.Sprintf("/instances/%s/partner-fees", instanceID),
@@ -57,13 +51,11 @@ func TestPartnerFees_Create(t *testing.T) {
 
 	client := NewClient(cfg)
 	fee, err := client.Create(context.Background(), &CreatePartnerFeeParams{
-		Name:                 name,
-		PayoutPercentageFee:  0,
-		PayoutFlatFee:        0,
-		PayinPercentageFee:   0,
-		PayinFlatFee:         0,
-		EVMWalletAddress:     evmWallet,
-		StellarWalletAddress: &stellarWallet,
+		Name:                name,
+		PayoutPercentageFee: 0,
+		PayoutFlatFee:       0,
+		PayinPercentageFee:  0,
+		PayinFlatFee:        0,
 	})
 	require.NoError(t, err)
 	require.Equal(t, id, fee.ID)

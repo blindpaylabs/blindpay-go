@@ -64,15 +64,16 @@ func TestQuotesClient_Create(t *testing.T) {
 		instanceID: instanceID,
 	}
 
+	coverFees1 := true
 	params := &CreateQuoteParams{
-		BlockchainWalletID: walletID,
+		BlockchainWalletID: &walletID,
 		CurrencyType:       types.CurrencyTypeSender,
-		CoverFees:          true,
+		CoverFees:          &coverFees1,
 		RequestAmount:      1000,
 		PaymentMethod:      "pix",
 		Token:              types.StablecoinTokenUSDC,
 		PartnerFeeID:       &partnerFeeID,
-		PayerRules: PayerRules{
+		PayerRules: &PayerRules{
 			PixAllowedTaxIDs: []string{"149.476.037-68"},
 		},
 	}
@@ -81,11 +82,16 @@ func TestQuotesClient_Create(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, quote)
 	require.Equal(t, "qu_000000000000", quote.ID)
-	require.Equal(t, int64(1712958191), quote.ExpiresAt)
-	require.Equal(t, float64(495), quote.CommercialQuotation)
-	require.Equal(t, float64(505), quote.BlindpayQuotation)
-	require.Equal(t, float64(1010), quote.ReceiverAmount)
-	require.Equal(t, float64(5240), quote.SenderAmount)
+	require.NotNil(t, quote.ExpiresAt)
+	require.Equal(t, float64(1712958191), *quote.ExpiresAt)
+	require.NotNil(t, quote.CommercialQuotation)
+	require.Equal(t, float64(495), *quote.CommercialQuotation)
+	require.NotNil(t, quote.BlindpayQuotation)
+	require.Equal(t, float64(505), *quote.BlindpayQuotation)
+	require.NotNil(t, quote.ReceiverAmount)
+	require.Equal(t, float64(1010), *quote.ReceiverAmount)
+	require.NotNil(t, quote.SenderAmount)
+	require.Equal(t, float64(5240), *quote.SenderAmount)
 	require.NotNil(t, quote.PartnerFeeAmount)
 	require.Equal(t, float64(150), *quote.PartnerFeeAmount)
 	require.NotNil(t, quote.FlatFee)
@@ -143,15 +149,16 @@ func TestQuotesClient_Create_WithPartnerFee(t *testing.T) {
 		instanceID: instanceID,
 	}
 
+	coverFees2 := true
 	params := &CreateQuoteParams{
-		BlockchainWalletID: walletID,
+		BlockchainWalletID: &walletID,
 		CurrencyType:       types.CurrencyTypeSender,
-		CoverFees:          true,
+		CoverFees:          &coverFees2,
 		RequestAmount:      1000,
 		PaymentMethod:      "pix",
 		Token:              types.StablecoinTokenUSDC,
 		PartnerFeeID:       &partnerFeeID,
-		PayerRules: PayerRules{
+		PayerRules: &PayerRules{
 			PixAllowedTaxIDs: []string{"149.476.037-68"},
 		},
 	}
@@ -228,10 +235,10 @@ func TestQuotesClient_GetFxRate(t *testing.T) {
 	fxRate, err := client.GetFxRate(context.Background(), params)
 	require.NoError(t, err)
 	require.NotNil(t, fxRate)
-	require.Equal(t, float64(495), fxRate.CommercialQuotation)
-	require.Equal(t, float64(505), fxRate.BlindpayQuotation)
+	require.Equal(t, float64(495), *fxRate.CommercialQuotation)
+	require.Equal(t, float64(505), *fxRate.BlindpayQuotation)
 	require.Equal(t, float64(1), fxRate.ResultAmount)
-	require.Equal(t, float64(50), fxRate.InstanceFlatFee)
+	require.Equal(t, float64(50), *fxRate.InstanceFlatFee)
 	require.Equal(t, float64(0), fxRate.InstancePercentageFee)
 }
 
@@ -286,8 +293,8 @@ func TestQuotesClient_GetFxRate_ReceiverCurrency(t *testing.T) {
 	fxRate, err := client.GetFxRate(context.Background(), params)
 	require.NoError(t, err)
 	require.NotNil(t, fxRate)
-	require.Equal(t, float64(495), fxRate.CommercialQuotation)
-	require.Equal(t, float64(505), fxRate.BlindpayQuotation)
+	require.Equal(t, float64(495), *fxRate.CommercialQuotation)
+	require.Equal(t, float64(505), *fxRate.BlindpayQuotation)
 	require.Equal(t, float64(1), fxRate.ResultAmount)
 }
 

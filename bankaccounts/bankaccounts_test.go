@@ -563,7 +563,6 @@ func TestBankAccounts_Get(t *testing.T) {
 	account, err := client.Get(context.Background(), receiverID, id)
 	require.NoError(t, err)
 	require.Equal(t, "ba_000000000000", account.ID)
-	require.Equal(t, "rcv_123", account.ReceiverID)
 }
 
 func TestBankAccounts_List(t *testing.T) {

@@ -377,7 +377,7 @@ func TestOfframpWallets_List(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, wallets, 1)
 	require.Equal(t, "ow_000000000000", wallets[0].ID)
-	require.Equal(t, "your_external_id", wallets[0].ExternalID)
+	require.Equal(t, "your_external_id", *wallets[0].ExternalID)
 	require.Equal(t, "in_000000000000", wallets[0].InstanceID)
 	require.Equal(t, "re_000000000000", wallets[0].ReceiverID)
 	require.Equal(t, "ba_000000000000", wallets[0].BankAccountID)
@@ -420,12 +420,12 @@ func TestOfframpWallets_Create(t *testing.T) {
 	wallet, err := client.Create(context.Background(), &CreateOfframpWalletParams{
 		ReceiverID:    receiverID,
 		BankAccountID: bankAccountID,
-		ExternalID:    externalID,
+		ExternalID:    &externalID,
 		Network:       "tron",
 	})
 	require.NoError(t, err)
 	require.Equal(t, "ow_000000000000", wallet.ID)
-	require.Equal(t, externalID, wallet.ExternalID)
+	require.Equal(t, externalID, *wallet.ExternalID)
 	require.Equal(t, "tron", wallet.Network)
 	require.Equal(t, address, wallet.Address)
 }
@@ -465,7 +465,7 @@ func TestOfframpWallets_Get(t *testing.T) {
 	wallet, err := client.Get(context.Background(), receiverID, bankAccountID, id)
 	require.NoError(t, err)
 	require.Equal(t, id, wallet.ID)
-	require.Equal(t, "your_external_id", wallet.ExternalID)
+	require.Equal(t, "your_external_id", *wallet.ExternalID)
 	require.Equal(t, "in_000000000000", wallet.InstanceID)
 	require.Equal(t, receiverID, wallet.ReceiverID)
 	require.Equal(t, bankAccountID, wallet.BankAccountID)

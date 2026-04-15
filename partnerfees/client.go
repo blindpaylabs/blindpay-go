@@ -10,27 +10,23 @@ import (
 
 // PartnerFee represents a partner fee configuration.
 type PartnerFee struct {
-	ID                   string  `json:"id"`
-	InstanceID           string  `json:"instance_id"`
-	Name                 string  `json:"name"`
-	PayoutPercentageFee  float64 `json:"payout_percentage_fee"`
-	PayoutFlatFee        float64 `json:"payout_flat_fee"`
-	PayinPercentageFee   float64 `json:"payin_percentage_fee"`
-	PayinFlatFee         float64 `json:"payin_flat_fee"`
-	EVMWalletAddress     string  `json:"evm_wallet_address,omitempty"`
-	StellarWalletAddress string  `json:"stellar_wallet_address,omitempty"`
+	ID                  string  `json:"id"`
+	InstanceID          string  `json:"instance_id"`
+	Name                string  `json:"name"`
+	PayoutPercentageFee float64 `json:"payout_percentage_fee"`
+	PayoutFlatFee       float64 `json:"payout_flat_fee"`
+	PayinPercentageFee  float64 `json:"payin_percentage_fee"`
+	PayinFlatFee        float64 `json:"payin_flat_fee"`
 }
 
 // CreatePartnerFeeParams represents parameters for creating a partner fee.
 type CreatePartnerFeeParams struct {
-	VirtualAccountSet    *bool   `json:"virtual_account_set,omitempty"`
-	EVMWalletAddress     string  `json:"evm_wallet_address"`
-	Name                 string  `json:"name"`
-	PayinFlatFee         float64 `json:"payin_flat_fee"`
-	PayinPercentageFee   float64 `json:"payin_percentage_fee"`
-	PayoutFlatFee        float64 `json:"payout_flat_fee"`
-	PayoutPercentageFee  float64 `json:"payout_percentage_fee"`
-	StellarWalletAddress *string `json:"stellar_wallet_address,omitempty"`
+	VirtualAccountSet  *bool   `json:"virtual_account_set,omitempty"`
+	Name               string  `json:"name"`
+	PayinFlatFee       float64 `json:"payin_flat_fee"`
+	PayinPercentageFee float64 `json:"payin_percentage_fee"`
+	PayoutFlatFee      float64 `json:"payout_flat_fee"`
+	PayoutPercentageFee float64 `json:"payout_percentage_fee"`
 }
 
 // Client handles partner fee-related operations.

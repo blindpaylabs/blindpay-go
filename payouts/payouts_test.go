@@ -604,7 +604,7 @@ func TestPayouts_AuthorizeStellarToken(t *testing.T) {
 					"transaction_hash":"string"
 				}`),
 				Method: http.MethodPost,
-				Path:   fmt.Sprintf("/instances/%s/payouts/stellar/authorize-token", instanceID),
+				Path:   fmt.Sprintf("/instances/%s/payouts/stellar/authorize", instanceID),
 			},
 		},
 		UserAgent: "test",

@@ -184,11 +184,11 @@ func TestReceivers_List(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, receivers, 3)
 	require.Equal(t, "re_Euw7HN4OdxPn", receivers[0].ID)
-	require.Equal(t, "Bernardo", receivers[0].FirstName)
+	require.Equal(t, "Bernardo", *receivers[0].FirstName)
 	require.Equal(t, "re_YuaMcI2B8zbQ", receivers[1].ID)
-	require.Equal(t, "Alice", receivers[1].FirstName)
+	require.Equal(t, "Alice", *receivers[1].FirstName)
 	require.Equal(t, "re_IOxAUL24LG7P", receivers[2].ID)
-	require.Equal(t, "Business Corp", receivers[2].LegalName)
+	require.Equal(t, "Business Corp", *receivers[2].LegalName)
 }
 
 func TestReceivers_CreateIndividualWithStandardKYC(t *testing.T) {
@@ -434,8 +434,8 @@ func TestReceivers_Get(t *testing.T) {
 	receiver, err := client.Get(context.Background(), receiverID)
 	require.NoError(t, err)
 	require.Equal(t, receiverID, receiver.ID)
-	require.Equal(t, "Bernardo", receiver.FirstName)
-	require.Equal(t, "Simonassi", receiver.LastName)
+	require.Equal(t, "Bernardo", *receiver.FirstName)
+	require.Equal(t, "Simonassi", *receiver.LastName)
 }
 
 func TestReceivers_Update(t *testing.T) {

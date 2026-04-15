@@ -277,16 +277,18 @@ func TestPayins_CreateQuote(t *testing.T) {
 	}
 
 	client := NewClient(cfg)
+	blockchainWalletID := "wallet_123"
+	coverFees := false
 	quote, err := client.Quotes.Create(context.Background(), &CreateQuoteParams{
-		BlockchainWalletID: "wallet_123",
+		BlockchainWalletID: &blockchainWalletID,
 		CurrencyType:       types.CurrencyTypeSender,
 		PaymentMethod:      "pix",
 		RequestAmount:      5240,
 		Token:              types.StablecoinTokenUSDC,
-		CoverFees:          false,
-		PayerRules:         PayerRules{},
+		CoverFees:          &coverFees,
+		PayerRules:         &PayerRules{},
 	})
 	require.NoError(t, err)
 	require.Equal(t, quoteID, quote.ID)
-	require.Equal(t, 5240.0, quote.SenderAmount)
+	require.Equal(t, 5240.0, *quote.SenderAmount)
 }

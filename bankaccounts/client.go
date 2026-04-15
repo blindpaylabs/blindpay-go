@@ -89,8 +89,14 @@ type BankAccount struct {
 	SwiftIntermediaryBankAccountNumberIban string                `json:"swift_intermediary_bank_account_number_iban,omitempty"`
 	SwiftIntermediaryBankName              string                `json:"swift_intermediary_bank_name,omitempty"`
 	SwiftIntermediaryBankCountry           types.Country         `json:"swift_intermediary_bank_country,omitempty"`
-	TronWalletHash                         string                `json:"tron_wallet_hash,omitempty"`
+	TronWalletHash                         *string               `json:"tron_wallet_hash,omitempty"`
 	OfframpWallets                         []OfframpWalletInfo   `json:"offramp_wallets,omitempty"`
+	PixSafeBankCode                        *string               `json:"pix_safe_bank_code,omitempty"`
+	PixSafeBranchCode                      *string               `json:"pix_safe_branch_code,omitempty"`
+	PixSafeCpfCnpj                         *string               `json:"pix_safe_cpf_cnpj,omitempty"`
+	Status                                 *string               `json:"status,omitempty"`
+	RecipientRelationship                  *string               `json:"recipient_relationship,omitempty"`
+	SwiftPaymentCode                       *string               `json:"swift_payment_code,omitempty"`
 	CreatedAt                              time.Time             `json:"created_at"`
 }
 
@@ -102,21 +108,6 @@ type OfframpWalletInfo struct {
 	ExternalID string `json:"external_id"`
 }
 
-// GetResponse represents a detailed bank account response.
-type GetResponse struct {
-	ID                string                `json:"id"`
-	ReceiverID        string                `json:"receiver_id"`
-	AccountHolderName string                `json:"account_holder_name"`
-	AccountNumber     string                `json:"account_number"`
-	RoutingNumber     string                `json:"routing_number"`
-	AccountType       types.BankAccountType `json:"account_type"`
-	BankName          string                `json:"bank_name"`
-	SwiftCode         *string               `json:"swift_code"`
-	IBAN              *string               `json:"iban"`
-	IsPrimary         bool                  `json:"is_primary"`
-	CreatedAt         time.Time             `json:"created_at"`
-	UpdatedAt         time.Time             `json:"updated_at"`
-}
 
 // CreatePixParams represents parameters for creating a PIX bank account.
 type CreatePixParams struct {
@@ -491,7 +482,7 @@ func (c *Client) List(ctx context.Context, params *ListParams) ([]BankAccount, e
 }
 
 // Get retrieves a specific bank account.
-func (c *Client) Get(ctx context.Context, receiverID, id string) (*GetResponse, error) {
+func (c *Client) Get(ctx context.Context, receiverID, id string) (*BankAccount, error) {
 	if receiverID == "" {
 		return nil, fmt.Errorf("receiver ID cannot be empty")
 	}
@@ -500,7 +491,7 @@ func (c *Client) Get(ctx context.Context, receiverID, id string) (*GetResponse, 
 	}
 
 	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts/%s", c.instanceID, receiverID, id)
-	return request.Do[*GetResponse](c.cfg, ctx, "GET", path, nil)
+	return request.Do[*BankAccount](c.cfg, ctx, "GET", path, nil)
 }
 
 // Delete deletes a bank account.

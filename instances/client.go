@@ -28,10 +28,11 @@ type InstanceMember struct {
 	ID         string             `json:"id"`
 	Email      string             `json:"email"`
 	FirstName  string             `json:"first_name"`
-	MiddleName string             `json:"middle_name"`
+	MiddleName *string            `json:"middle_name"`
 	LastName   string             `json:"last_name"`
 	ImageURL   string             `json:"image_url"`
 	CreatedAt  time.Time          `json:"created_at"`
+	HasPasskey *bool              `json:"has_passkey"`
 	Role       InstanceMemberRole `json:"role"`
 }
 
@@ -39,6 +40,8 @@ type InstanceMember struct {
 type UpdateParams struct {
 	Name                      string  `json:"name"`
 	ReceiverInviteRedirectURL *string `json:"receiver_invite_redirect_url,omitempty"`
+	EmailNotifications        bool    `json:"email_notifications,omitempty"`
+	RequirePasskey            bool    `json:"require_passkey,omitempty"`
 }
 
 // UpdateMemberRoleParams represents parameters for updating a member's role.
@@ -86,6 +89,12 @@ func (c *Client) Update(ctx context.Context, params *UpdateParams) error {
 	if params.ReceiverInviteRedirectURL != nil {
 		body["receiver_invite_redirect_url"] = params.ReceiverInviteRedirectURL
 	}
+	if params.EmailNotifications {
+		body["email_notifications"] = params.EmailNotifications
+	}
+	if params.RequirePasskey {
+		body["require_passkey"] = params.RequirePasskey
+	}
 
 	_, err := request.Do[struct{}](c.cfg, ctx, "PUT", path, body)
 	return err
@@ -121,7 +130,7 @@ func (c *Client) UpdateMemberRole(ctx context.Context, params *UpdateMemberRoleP
 	path := fmt.Sprintf("/instances/%s/members/%s", c.instanceID, params.MemberID)
 
 	body := map[string]any{
-		"role": params.Role,
+		"user_role": params.Role,
 	}
 
 	_, err := request.Do[struct{}](c.cfg, ctx, "PUT", path, body)

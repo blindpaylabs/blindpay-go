@@ -40,21 +40,28 @@ type VirtualAccountUS struct {
 // VirtualAccount represents a virtual account.
 type VirtualAccount struct {
 	ID                 string                `json:"id"`
+	BankingPartner     string                `json:"banking_partner"`
+	KycStatus          string                `json:"kyc_status"`
 	US                 VirtualAccountUS      `json:"us"`
 	Token              types.StablecoinToken `json:"token"`
-	BlockchainWalletID string                `json:"blockchain_wallet_id"`
+	BlockchainWalletID *string               `json:"blockchain_wallet_id"`
+	BlockchainWallet   interface{}           `json:"blockchain_wallet"`
 }
 
 // CreateParams represents parameters for creating a virtual account.
 type CreateParams struct {
-	ReceiverID         string                `json:"-"`
-	BlockchainWalletID string                `json:"blockchain_wallet_id"`
-	Token              types.StablecoinToken `json:"token"`
+	ReceiverID              string                `json:"-"`
+	BankingPartner          string                `json:"banking_partner"`
+	BlockchainWalletID      string                `json:"blockchain_wallet_id"`
+	Token                   types.StablecoinToken `json:"token"`
+	SoleProprietorDocType   *string               `json:"sole_proprietor_doc_type,omitempty"`
+	SoleProprietorDocFile   *string               `json:"sole_proprietor_doc_file,omitempty"`
 }
 
 // UpdateParams represents parameters for updating a virtual account.
 type UpdateParams struct {
 	ReceiverID         string                `json:"-"`
+	VirtualAccountID   string                `json:"-"`
 	BlockchainWalletID string                `json:"blockchain_wallet_id"`
 	Token              types.StablecoinToken `json:"token"`
 }
@@ -84,24 +91,42 @@ func (c *Client) Create(ctx context.Context, params *CreateParams) (*VirtualAcco
 
 	path := fmt.Sprintf("/instances/%s/receivers/%s/virtual-accounts", c.instanceID, params.ReceiverID)
 
-	body := struct {
-		BlockchainWalletID string                `json:"blockchain_wallet_id"`
-		Token              types.StablecoinToken `json:"token"`
-	}{
-		BlockchainWalletID: params.BlockchainWalletID,
-		Token:              params.Token,
+	body := map[string]any{
+		"banking_partner":      params.BankingPartner,
+		"blockchain_wallet_id": params.BlockchainWalletID,
+		"token":                params.Token,
+	}
+
+	if params.SoleProprietorDocType != nil {
+		body["sole_proprietor_doc_type"] = *params.SoleProprietorDocType
+	}
+	if params.SoleProprietorDocFile != nil {
+		body["sole_proprietor_doc_file"] = *params.SoleProprietorDocFile
 	}
 
 	return request.Do[*VirtualAccount](c.cfg, ctx, "POST", path, body)
 }
 
-// Get retrieves a virtual account for a receiver.
-func (c *Client) Get(ctx context.Context, receiverID string) (*VirtualAccount, error) {
+// List retrieves all virtual accounts for a receiver.
+func (c *Client) List(ctx context.Context, receiverID string) ([]VirtualAccount, error) {
 	if receiverID == "" {
 		return nil, fmt.Errorf("receiver ID cannot be empty")
 	}
 
 	path := fmt.Sprintf("/instances/%s/receivers/%s/virtual-accounts", c.instanceID, receiverID)
+	return request.Do[[]VirtualAccount](c.cfg, ctx, "GET", path, nil)
+}
+
+// Get retrieves a specific virtual account by ID.
+func (c *Client) Get(ctx context.Context, receiverID, id string) (*VirtualAccount, error) {
+	if receiverID == "" {
+		return nil, fmt.Errorf("receiver ID cannot be empty")
+	}
+	if id == "" {
+		return nil, fmt.Errorf("id cannot be empty")
+	}
+
+	path := fmt.Sprintf("/instances/%s/receivers/%s/virtual-accounts/%s", c.instanceID, receiverID, id)
 	return request.Do[*VirtualAccount](c.cfg, ctx, "GET", path, nil)
 }
 
@@ -113,8 +138,11 @@ func (c *Client) Update(ctx context.Context, params *UpdateParams) error {
 	if params.ReceiverID == "" {
 		return fmt.Errorf("receiver ID cannot be empty")
 	}
+	if params.VirtualAccountID == "" {
+		return fmt.Errorf("virtual account ID cannot be empty")
+	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/virtual-accounts", c.instanceID, params.ReceiverID)
+	path := fmt.Sprintf("/instances/%s/receivers/%s/virtual-accounts/%s", c.instanceID, params.ReceiverID, params.VirtualAccountID)
 
 	body := struct {
 		BlockchainWalletID string                `json:"blockchain_wallet_id"`

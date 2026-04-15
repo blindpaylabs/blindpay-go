@@ -41,6 +41,7 @@ func TestTransfers_CreateQuote(t *testing.T) {
 	}
 
 	client := NewClient(cfg)
+	coverFees := true
 	response, err := client.Quotes.Create(context.Background(), &CreateQuoteParams{
 		WalletID:              "wl_000000000000",
 		SenderToken:           types.StablecoinTokenUSDC,
@@ -48,7 +49,7 @@ func TestTransfers_CreateQuote(t *testing.T) {
 		ReceiverToken:         types.StablecoinTokenUSDC,
 		ReceiverNetwork:       types.NetworkBase,
 		RequestAmount:         100,
-		CoverFees:             true,
+		CoverFees:             &coverFees,
 		AmountReference:       "sender",
 	})
 	require.NoError(t, err)

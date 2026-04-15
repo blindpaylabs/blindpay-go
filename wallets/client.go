@@ -242,31 +242,33 @@ func (c *Client) PrepareSolanaDelegationTransaction(ctx context.Context, params 
 
 // OfframpWallet represents an offramp wallet.
 type OfframpWallet struct {
-	ID            string    `json:"id"`
-	ExternalID    string    `json:"external_id"`
-	InstanceID    string    `json:"instance_id"`
-	ReceiverID    string    `json:"receiver_id"`
-	BankAccountID string    `json:"bank_account_id"`
-	Network       string    `json:"network"`
-	Address       string    `json:"address"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
+	ID             string    `json:"id"`
+	ExternalID     *string   `json:"external_id"`
+	CircleWalletID *string   `json:"circle_wallet_id"`
+	InstanceID     string    `json:"instance_id"`
+	ReceiverID     string    `json:"receiver_id"`
+	BankAccountID  string    `json:"bank_account_id"`
+	Network        string    `json:"network"`
+	Address        string    `json:"address"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
 }
 
 // CreateOfframpWalletParams represents parameters for creating an offramp wallet.
 type CreateOfframpWalletParams struct {
-	ReceiverID    string `json:"receiver_id"`
-	BankAccountID string `json:"bank_account_id"`
-	ExternalID    string `json:"external_id"`
-	Network       string `json:"network"`
+	ReceiverID    string  `json:"receiver_id"`
+	BankAccountID string  `json:"bank_account_id"`
+	ExternalID    *string `json:"external_id,omitempty"`
+	Network       string  `json:"network"`
 }
 
 // CreateOfframpWalletResponse represents the response when creating an offramp wallet.
 type CreateOfframpWalletResponse struct {
-	ID         string `json:"id"`
-	ExternalID string `json:"external_id"`
-	Network    string `json:"network"`
-	Address    string `json:"address"`
+	ID             string  `json:"id"`
+	ExternalID     *string `json:"external_id"`
+	CircleWalletID *string `json:"circle_wallet_id"`
+	Network        string  `json:"network"`
+	Address        string  `json:"address"`
 }
 
 // OfframpClient handles offramp wallet-related operations.
@@ -313,8 +315,8 @@ func (c *OfframpClient) Create(ctx context.Context, params *CreateOfframpWalletP
 		c.instanceID, params.ReceiverID, params.BankAccountID)
 
 	body := struct {
-		ExternalID string `json:"external_id"`
-		Network    string `json:"network"`
+		ExternalID *string `json:"external_id,omitempty"`
+		Network    string  `json:"network"`
 	}{
 		ExternalID: params.ExternalID,
 		Network:    params.Network,
