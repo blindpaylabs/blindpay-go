@@ -21,11 +21,11 @@ type PartnerFee struct {
 
 // CreatePartnerFeeParams represents parameters for creating a partner fee.
 type CreatePartnerFeeParams struct {
-	VirtualAccountSet  *bool   `json:"virtual_account_set,omitempty"`
-	Name               string  `json:"name"`
-	PayinFlatFee       float64 `json:"payin_flat_fee"`
-	PayinPercentageFee float64 `json:"payin_percentage_fee"`
-	PayoutFlatFee      float64 `json:"payout_flat_fee"`
+	VirtualAccountSet   *bool   `json:"virtual_account_set,omitempty"`
+	Name                string  `json:"name"`
+	PayinFlatFee        float64 `json:"payin_flat_fee"`
+	PayinPercentageFee  float64 `json:"payin_percentage_fee"`
+	PayoutFlatFee       float64 `json:"payout_flat_fee"`
 	PayoutPercentageFee float64 `json:"payout_percentage_fee"`
 }
 

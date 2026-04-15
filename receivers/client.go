@@ -145,42 +145,42 @@ type Limits struct {
 
 // Receiver represents a receiver with KYC information.
 type Receiver struct {
-	ID                    string                `json:"id"`
-	Type                  types.AccountClass    `json:"type"`
-	KycType               KycType               `json:"kyc_type"`
-	KycStatus             string                `json:"kyc_status"`
-	KycWarnings           []KycWarning          `json:"kyc_warnings"`
-	FraudWarnings         []KycWarning          `json:"fraud_warnings"`
-	Email                 string                `json:"email"`
-	TaxID                 *string               `json:"tax_id"`
-	AddressLine1          *string               `json:"address_line_1"`
-	AddressLine2          *string               `json:"address_line_2"`
-	City                  *string               `json:"city"`
-	StateProvinceRegion   *string               `json:"state_province_region"`
-	Country               types.Country         `json:"country"`
-	PostalCode            *string               `json:"postal_code"`
-	IPAddress             *string               `json:"ip_address"`
-	ImageURL              *string               `json:"image_url"`
-	PhoneNumber           *string               `json:"phone_number"`
+	ID                    string                 `json:"id"`
+	Type                  types.AccountClass     `json:"type"`
+	KycType               KycType                `json:"kyc_type"`
+	KycStatus             string                 `json:"kyc_status"`
+	KycWarnings           []KycWarning           `json:"kyc_warnings"`
+	FraudWarnings         []KycWarning           `json:"fraud_warnings"`
+	Email                 string                 `json:"email"`
+	TaxID                 *string                `json:"tax_id"`
+	AddressLine1          *string                `json:"address_line_1"`
+	AddressLine2          *string                `json:"address_line_2"`
+	City                  *string                `json:"city"`
+	StateProvinceRegion   *string                `json:"state_province_region"`
+	Country               types.Country          `json:"country"`
+	PostalCode            *string                `json:"postal_code"`
+	IPAddress             *string                `json:"ip_address"`
+	ImageURL              *string                `json:"image_url"`
+	PhoneNumber           *string                `json:"phone_number"`
 	ProofOfAddressDocType *ProofOfAddressDocType `json:"proof_of_address_doc_type"`
-	ProofOfAddressDocFile *string               `json:"proof_of_address_doc_file"`
-	InstanceID            string                `json:"instance_id"`
-	TosID                 *string               `json:"tos_id"`
-	AmlStatus             *string               `json:"aml_status"`
-	AmlHits               interface{}           `json:"aml_hits"`
-	IsTosAccepted         *bool                 `json:"is_tos_accepted"`
-	IsFbo                 *bool                 `json:"is_fbo"`
-	CreatedAt             time.Time             `json:"created_at"`
-	UpdatedAt             time.Time             `json:"updated_at"`
-	Limit                 Limits                `json:"limit"`
+	ProofOfAddressDocFile *string                `json:"proof_of_address_doc_file"`
+	InstanceID            string                 `json:"instance_id"`
+	TosID                 *string                `json:"tos_id"`
+	AmlStatus             *string                `json:"aml_status"`
+	AmlHits               interface{}            `json:"aml_hits"`
+	IsTosAccepted         *bool                  `json:"is_tos_accepted"`
+	IsFbo                 *bool                  `json:"is_fbo"`
+	CreatedAt             time.Time              `json:"created_at"`
+	UpdatedAt             time.Time              `json:"updated_at"`
+	Limit                 Limits                 `json:"limit"`
 	// Individual fields
-	FirstName      *string                `json:"first_name,omitempty"`
-	LastName       *string                `json:"last_name,omitempty"`
-	DateOfBirth    *string                `json:"date_of_birth,omitempty"`
-	IDDocCountry   *types.Country         `json:"id_doc_country,omitempty"`
+	FirstName      *string                 `json:"first_name,omitempty"`
+	LastName       *string                 `json:"last_name,omitempty"`
+	DateOfBirth    *string                 `json:"date_of_birth,omitempty"`
+	IDDocCountry   *types.Country          `json:"id_doc_country,omitempty"`
 	IDDocType      *IdentificationDocument `json:"id_doc_type,omitempty"`
-	IDDocFrontFile *string                `json:"id_doc_front_file,omitempty"`
-	IDDocBackFile  *string                `json:"id_doc_back_file,omitempty"`
+	IDDocFrontFile *string                 `json:"id_doc_front_file,omitempty"`
+	IDDocBackFile  *string                 `json:"id_doc_back_file,omitempty"`
 	// Enhanced KYC fields
 	SourceOfFundsDocType             *string                `json:"source_of_funds_doc_type,omitempty"`
 	SourceOfFundsDocFile             *string                `json:"source_of_funds_doc_file,omitempty"`

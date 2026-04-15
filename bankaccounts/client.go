@@ -108,7 +108,6 @@ type OfframpWalletInfo struct {
 	ExternalID string `json:"external_id"`
 }
 
-
 // CreatePixParams represents parameters for creating a PIX bank account.
 type CreatePixParams struct {
 	ReceiverID string `json:"-"`

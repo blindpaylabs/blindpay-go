@@ -11,14 +11,14 @@ import (
 
 // CreateParams represents parameters for creating a quote.
 type CreateParams struct {
-	BankAccountID string             `json:"bank_account_id"`
-	CurrencyType  types.CurrencyType `json:"currency_type"`
-	Network       types.Network      `json:"network"`
-	RequestAmount int                `json:"request_amount"`
+	BankAccountID string                `json:"bank_account_id"`
+	CurrencyType  types.CurrencyType    `json:"currency_type"`
+	Network       types.Network         `json:"network"`
+	RequestAmount int                   `json:"request_amount"`
 	Token         types.StablecoinToken `json:"token"`
-	CoverFees     *bool              `json:"cover_fees,omitempty"`
-	Description   *string            `json:"description,omitempty"`
-	PartnerFeeID  *string            `json:"partner_fee_id,omitempty"`
+	CoverFees     *bool                 `json:"cover_fees,omitempty"`
+	Description   *string               `json:"description,omitempty"`
+	PartnerFeeID  *string               `json:"partner_fee_id,omitempty"`
 }
 
 // QuoteContract represents contract information in a quote.

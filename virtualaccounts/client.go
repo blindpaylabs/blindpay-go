@@ -50,12 +50,12 @@ type VirtualAccount struct {
 
 // CreateParams represents parameters for creating a virtual account.
 type CreateParams struct {
-	ReceiverID              string                `json:"-"`
-	BankingPartner          string                `json:"banking_partner"`
-	BlockchainWalletID      string                `json:"blockchain_wallet_id"`
-	Token                   types.StablecoinToken `json:"token"`
-	SoleProprietorDocType   *string               `json:"sole_proprietor_doc_type,omitempty"`
-	SoleProprietorDocFile   *string               `json:"sole_proprietor_doc_file,omitempty"`
+	ReceiverID            string                `json:"-"`
+	BankingPartner        string                `json:"banking_partner"`
+	BlockchainWalletID    string                `json:"blockchain_wallet_id"`
+	Token                 types.StablecoinToken `json:"token"`
+	SoleProprietorDocType *string               `json:"sole_proprietor_doc_type,omitempty"`
+	SoleProprietorDocFile *string               `json:"sole_proprietor_doc_file,omitempty"`
 }
 
 // UpdateParams represents parameters for updating a virtual account.
