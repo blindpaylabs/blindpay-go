@@ -74,32 +74,32 @@ const (
 type AccountPurpose string
 
 const (
-	AccountPurposeCharitableDonations                  AccountPurpose = "charitable_donations"
-	AccountPurposeEcommerceRetailPayments               AccountPurpose = "ecommerce_retail_payments"
-	AccountPurposeInvestmentPurposes                    AccountPurpose = "investment_purposes"
-	AccountPurposeBusinessExpenses                      AccountPurpose = "business_expenses"
-	AccountPurposePaymentsToFriendsOrFamilyAbroad       AccountPurpose = "payments_to_friends_or_family_abroad"
-	AccountPurposePersonalOrLivingExpenses              AccountPurpose = "personal_or_living_expenses"
-	AccountPurposeProtectWealth                         AccountPurpose = "protect_wealth"
-	AccountPurposePurchaseGoodsAndServices              AccountPurpose = "purchase_goods_and_services"
-	AccountPurposeReceivePaymentsForGoodsAndServices    AccountPurpose = "receive_payments_for_goods_and_services"
-	AccountPurposeTaxOptimization                       AccountPurpose = "tax_optimization"
-	AccountPurposeThirdPartyMoneyTransmission           AccountPurpose = "third_party_money_transmission"
-	AccountPurposePayroll                               AccountPurpose = "payroll"
-	AccountPurposeTreasuryManagement                    AccountPurpose = "treasury_management"
-	AccountPurposeOther                                 AccountPurpose = "other"
+	AccountPurposeCharitableDonations                AccountPurpose = "charitable_donations"
+	AccountPurposeEcommerceRetailPayments            AccountPurpose = "ecommerce_retail_payments"
+	AccountPurposeInvestmentPurposes                 AccountPurpose = "investment_purposes"
+	AccountPurposeBusinessExpenses                   AccountPurpose = "business_expenses"
+	AccountPurposePaymentsToFriendsOrFamilyAbroad    AccountPurpose = "payments_to_friends_or_family_abroad"
+	AccountPurposePersonalOrLivingExpenses           AccountPurpose = "personal_or_living_expenses"
+	AccountPurposeProtectWealth                      AccountPurpose = "protect_wealth"
+	AccountPurposePurchaseGoodsAndServices           AccountPurpose = "purchase_goods_and_services"
+	AccountPurposeReceivePaymentsForGoodsAndServices AccountPurpose = "receive_payments_for_goods_and_services"
+	AccountPurposeTaxOptimization                    AccountPurpose = "tax_optimization"
+	AccountPurposeThirdPartyMoneyTransmission        AccountPurpose = "third_party_money_transmission"
+	AccountPurposePayroll                            AccountPurpose = "payroll"
+	AccountPurposeTreasuryManagement                 AccountPurpose = "treasury_management"
+	AccountPurposeOther                              AccountPurpose = "other"
 )
 
 // BusinessType represents the type of business entity.
 type BusinessType string
 
 const (
-	BusinessTypeCorporation      BusinessType = "corporation"
-	BusinessTypeLLC              BusinessType = "llc"
-	BusinessTypePartnership      BusinessType = "partnership"
+	BusinessTypeCorporation        BusinessType = "corporation"
+	BusinessTypeLLC                BusinessType = "llc"
+	BusinessTypePartnership        BusinessType = "partnership"
 	BusinessTypeSoleProprietorship BusinessType = "sole_proprietorship"
-	BusinessTypeTrust            BusinessType = "trust"
-	BusinessTypeNonProfit        BusinessType = "non_profit"
+	BusinessTypeTrust              BusinessType = "trust"
+	BusinessTypeNonProfit          BusinessType = "non_profit"
 )
 
 // BusinessIndustry represents a NAICS industry code for a business.
@@ -109,12 +109,12 @@ type BusinessIndustry string
 type EstimatedAnnualRevenue string
 
 const (
-	EstimatedAnnualRevenue0to99999         EstimatedAnnualRevenue = "0_99999"
-	EstimatedAnnualRevenue100000to999999   EstimatedAnnualRevenue = "100000_999999"
-	EstimatedAnnualRevenue1Mto9999999      EstimatedAnnualRevenue = "1000000_9999999"
-	EstimatedAnnualRevenue10Mto49999999    EstimatedAnnualRevenue = "10000000_49999999"
-	EstimatedAnnualRevenue50Mto249999999   EstimatedAnnualRevenue = "50000000_249999999"
-	EstimatedAnnualRevenue2500MPlus        EstimatedAnnualRevenue = "2500000000_plus"
+	EstimatedAnnualRevenue0to99999       EstimatedAnnualRevenue = "0_99999"
+	EstimatedAnnualRevenue100000to999999 EstimatedAnnualRevenue = "100000_999999"
+	EstimatedAnnualRevenue1Mto9999999    EstimatedAnnualRevenue = "1000000_9999999"
+	EstimatedAnnualRevenue10Mto49999999  EstimatedAnnualRevenue = "10000000_49999999"
+	EstimatedAnnualRevenue50Mto249999999 EstimatedAnnualRevenue = "50000000_249999999"
+	EstimatedAnnualRevenue2500MPlus      EstimatedAnnualRevenue = "2500000000_plus"
 )
 
 // AMLStatus represents the AML screening status.
@@ -357,33 +357,33 @@ type CreateIndividualEnhancedParams struct {
 
 // CreateBusinessStandardParams represents parameters for creating a business with standard KYB.
 type CreateBusinessStandardParams struct {
-	ExternalID              *string               `json:"external_id,omitempty"`
-	AddressLine1            string                `json:"address_line_1"`
-	AddressLine2            *string               `json:"address_line_2,omitempty"`
-	AlternateName           string                `json:"alternate_name"`
-	City                    string                `json:"city"`
-	Country                 types.Country         `json:"country"`
-	Email                   string                `json:"email"`
-	FormationDate           string                `json:"formation_date"`
-	IncorporationDocFile    string                `json:"incorporation_doc_file"`
-	LegalName               string                `json:"legal_name"`
-	Owners                  []Owner               `json:"owners"`
-	PostalCode              string                `json:"postal_code"`
-	ProofOfAddressDocFile   string                `json:"proof_of_address_doc_file"`
-	ProofOfAddressDocType   ProofOfAddressDocType `json:"proof_of_address_doc_type"`
-	ProofOfOwnershipDocFile string                `json:"proof_of_ownership_doc_file"`
-	StateProvinceRegion     string                `json:"state_province_region"`
-	TaxID                   string                `json:"tax_id"`
-	TosID                   string                `json:"tos_id"`
-	Website                 *string               `json:"website,omitempty"`
-	AccountPurpose          *AccountPurpose       `json:"account_purpose,omitempty"`
-	AccountPurposeOther     *string               `json:"account_purpose_other,omitempty"`
-	BusinessType            *BusinessType         `json:"business_type,omitempty"`
-	BusinessIndustry        *BusinessIndustry     `json:"business_industry,omitempty"`
-	BusinessDescription     *string               `json:"business_description,omitempty"`
+	ExternalID              *string                 `json:"external_id,omitempty"`
+	AddressLine1            string                  `json:"address_line_1"`
+	AddressLine2            *string                 `json:"address_line_2,omitempty"`
+	AlternateName           string                  `json:"alternate_name"`
+	City                    string                  `json:"city"`
+	Country                 types.Country           `json:"country"`
+	Email                   string                  `json:"email"`
+	FormationDate           string                  `json:"formation_date"`
+	IncorporationDocFile    string                  `json:"incorporation_doc_file"`
+	LegalName               string                  `json:"legal_name"`
+	Owners                  []Owner                 `json:"owners"`
+	PostalCode              string                  `json:"postal_code"`
+	ProofOfAddressDocFile   string                  `json:"proof_of_address_doc_file"`
+	ProofOfAddressDocType   ProofOfAddressDocType   `json:"proof_of_address_doc_type"`
+	ProofOfOwnershipDocFile string                  `json:"proof_of_ownership_doc_file"`
+	StateProvinceRegion     string                  `json:"state_province_region"`
+	TaxID                   string                  `json:"tax_id"`
+	TosID                   string                  `json:"tos_id"`
+	Website                 *string                 `json:"website,omitempty"`
+	AccountPurpose          *AccountPurpose         `json:"account_purpose,omitempty"`
+	AccountPurposeOther     *string                 `json:"account_purpose_other,omitempty"`
+	BusinessType            *BusinessType           `json:"business_type,omitempty"`
+	BusinessIndustry        *BusinessIndustry       `json:"business_industry,omitempty"`
+	BusinessDescription     *string                 `json:"business_description,omitempty"`
 	EstimatedAnnualRevenue  *EstimatedAnnualRevenue `json:"estimated_annual_revenue,omitempty"`
-	PubliclyTraded          *bool                 `json:"publicly_traded,omitempty"`
-	SourceOfWealth          *SourceOfWealth       `json:"source_of_wealth,omitempty"`
+	PubliclyTraded          *bool                   `json:"publicly_traded,omitempty"`
+	SourceOfWealth          *SourceOfWealth         `json:"source_of_wealth,omitempty"`
 }
 
 // CreateResponse represents the response when creating a receiver.
