@@ -3,6 +3,7 @@ package receivers
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"time"
 
 	"github.com/blindpaylabs/blindpay-go/internal/config"
@@ -104,6 +105,109 @@ const (
 	OwnerRoleControllingPerson     OwnerRole = "controlling_person"
 )
 
+// KycStatus represents KYC verification status.
+type KycStatus string
+
+const (
+	KycStatusVerifying     KycStatus = "verifying"
+	KycStatusApproved      KycStatus = "approved"
+	KycStatusRejected      KycStatus = "rejected"
+	KycStatusDeprecated    KycStatus = "deprecated"
+	KycStatusPendingReview KycStatus = "pending_review"
+)
+
+// AccountPurpose represents the purpose of the account.
+type AccountPurpose string
+
+const (
+	AccountPurposeCharitableDonations                AccountPurpose = "charitable_donations"
+	AccountPurposeEcommerceRetailPayments            AccountPurpose = "ecommerce_retail_payments"
+	AccountPurposeInvestmentPurposes                 AccountPurpose = "investment_purposes"
+	AccountPurposeBusinessExpenses                   AccountPurpose = "business_expenses"
+	AccountPurposePaymentsToFriendsOrFamilyAbroad    AccountPurpose = "payments_to_friends_or_family_abroad"
+	AccountPurposePersonalOrLivingExpenses           AccountPurpose = "personal_or_living_expenses"
+	AccountPurposeProtectWealth                      AccountPurpose = "protect_wealth"
+	AccountPurposePurchaseGoodsAndServices           AccountPurpose = "purchase_goods_and_services"
+	AccountPurposeReceivePaymentsForGoodsAndServices AccountPurpose = "receive_payments_for_goods_and_services"
+	AccountPurposeTaxOptimization                    AccountPurpose = "tax_optimization"
+	AccountPurposeThirdPartyMoneyTransmission        AccountPurpose = "third_party_money_transmission"
+	AccountPurposePayroll                            AccountPurpose = "payroll"
+	AccountPurposeTreasuryManagement                 AccountPurpose = "treasury_management"
+	AccountPurposeOther                              AccountPurpose = "other"
+)
+
+// BusinessType represents the type of business entity.
+type BusinessType string
+
+const (
+	BusinessTypeCorporation        BusinessType = "corporation"
+	BusinessTypeLLC                BusinessType = "llc"
+	BusinessTypePartnership        BusinessType = "partnership"
+	BusinessTypeSoleProprietorship BusinessType = "sole_proprietorship"
+	BusinessTypeTrust              BusinessType = "trust"
+	BusinessTypeNonProfit          BusinessType = "non_profit"
+)
+
+// EstimatedAnnualRevenue represents estimated annual revenue ranges.
+type EstimatedAnnualRevenue string
+
+const (
+	EstimatedAnnualRevenue0To99999            EstimatedAnnualRevenue = "0_99999"
+	EstimatedAnnualRevenue100000To999999      EstimatedAnnualRevenue = "100000_999999"
+	EstimatedAnnualRevenue1000000To9999999    EstimatedAnnualRevenue = "1000000_9999999"
+	EstimatedAnnualRevenue10000000To49999999  EstimatedAnnualRevenue = "10000000_49999999"
+	EstimatedAnnualRevenue50000000To249999999 EstimatedAnnualRevenue = "50000000_249999999"
+	EstimatedAnnualRevenue2500000000Plus      EstimatedAnnualRevenue = "2500000000_plus"
+)
+
+// SourceOfWealth represents the source of wealth for a receiver.
+type SourceOfWealth string
+
+const (
+	SourceOfWealthBusinessDividendsOrProfits  SourceOfWealth = "business_dividends_or_profits"
+	SourceOfWealthInvestments                 SourceOfWealth = "investments"
+	SourceOfWealthAssetSales                  SourceOfWealth = "asset_sales"
+	SourceOfWealthClientInvestorContributions SourceOfWealth = "client_investor_contributions"
+	SourceOfWealthGambling                    SourceOfWealth = "gambling"
+	SourceOfWealthCharitableContributions     SourceOfWealth = "charitable_contributions"
+	SourceOfWealthInheritance                 SourceOfWealth = "inheritance"
+	SourceOfWealthAffiliateOrRoyaltyIncome    SourceOfWealth = "affiliate_or_royalty_income"
+)
+
+// AmlStatus represents AML screening status.
+type AmlStatus string
+
+const (
+	AmlStatusClear AmlStatus = "clear"
+	AmlStatusHit   AmlStatus = "hit"
+	AmlStatusError AmlStatus = "error"
+)
+
+// TaxType represents tax identifier types.
+type TaxType string
+
+const (
+	TaxTypeSSN  TaxType = "SSN"
+	TaxTypeITIN TaxType = "ITIN"
+)
+
+// FraudWarning represents a fraud warning.
+type FraudWarning struct {
+	ID        *string  `json:"id"`
+	Name      *string  `json:"name"`
+	Operation *string  `json:"operation"`
+	Score     *float64 `json:"score"`
+}
+
+// AmlHits represents AML screening match details.
+type AmlHits struct {
+	HasSanctionMatch     bool `json:"has_sanction_match"`
+	HasPepMatch          bool `json:"has_pep_match"`
+	HasWatchlistMatch    bool `json:"has_watchlist_match"`
+	HasCrimelistMatch    bool `json:"has_crimelist_match"`
+	HasAdversemediaMatch bool `json:"has_adversemedia_match"`
+}
+
 // Owner represents a business owner.
 type Owner struct {
 	ID                    string                 `json:"id,omitempty"`
@@ -126,6 +230,9 @@ type Owner struct {
 	IDDocBackFile         *string                `json:"id_doc_back_file"`
 	ProofOfAddressDocType ProofOfAddressDocType  `json:"proof_of_address_doc_type"`
 	ProofOfAddressDocFile string                 `json:"proof_of_address_doc_file"`
+	OwnershipPercentage   *int                   `json:"ownership_percentage,omitempty"`
+	Title                 *string                `json:"title,omitempty"`
+	TaxType               TaxType                `json:"tax_type,omitempty"`
 }
 
 // KycWarning represents a KYC warning.
@@ -184,14 +291,28 @@ type Receiver struct {
 	PurposeOfTransactions            PurposeOfTransactions `json:"purpose_of_transactions,omitempty"`
 	PurposeOfTransactionsExplanation *string               `json:"purpose_of_transactions_explanation,omitempty"`
 	// Business fields
-	LegalName               string  `json:"legal_name,omitempty"`
-	AlternateName           *string `json:"alternate_name,omitempty"`
-	FormationDate           string  `json:"formation_date,omitempty"`
-	Website                 *string `json:"website,omitempty"`
-	Owners                  []Owner `json:"owners,omitempty"`
-	IncorporationDocFile    string  `json:"incorporation_doc_file,omitempty"`
-	ProofOfOwnershipDocFile string  `json:"proof_of_ownership_doc_file,omitempty"`
-	ExternalID              *string `json:"external_id,omitempty"`
+	LegalName               string                 `json:"legal_name,omitempty"`
+	AlternateName           *string                `json:"alternate_name,omitempty"`
+	FormationDate           string                 `json:"formation_date,omitempty"`
+	Website                 *string                `json:"website,omitempty"`
+	Owners                  []Owner                `json:"owners,omitempty"`
+	IncorporationDocFile    string                 `json:"incorporation_doc_file,omitempty"`
+	ProofOfOwnershipDocFile string                 `json:"proof_of_ownership_doc_file,omitempty"`
+	ExternalID              *string                `json:"external_id,omitempty"`
+	FraudWarnings           []FraudWarning         `json:"fraud_warnings,omitempty"`
+	IsFbo                   *bool                  `json:"is_fbo,omitempty"`
+	AccountPurpose          AccountPurpose         `json:"account_purpose,omitempty"`
+	AccountPurposeOther     *string                `json:"account_purpose_other,omitempty"`
+	BusinessType            BusinessType           `json:"business_type,omitempty"`
+	BusinessDescription     *string                `json:"business_description,omitempty"`
+	BusinessIndustry        types.BusinessIndustry `json:"business_industry,omitempty"`
+	EstimatedAnnualRevenue  EstimatedAnnualRevenue `json:"estimated_annual_revenue,omitempty"`
+	SourceOfWealth          SourceOfWealth         `json:"source_of_wealth,omitempty"`
+	PubliclyTraded          *bool                  `json:"publicly_traded,omitempty"`
+	Occupation              *string                `json:"occupation,omitempty"`
+	AmlStatus               AmlStatus              `json:"aml_status,omitempty"`
+	AmlHitsData             *AmlHits               `json:"aml_hits,omitempty"`
+	IsTosAccepted           *bool                  `json:"is_tos_accepted,omitempty"`
 }
 
 // CreateIndividualStandardParams represents parameters for creating an individual with standard KYC.
@@ -216,6 +337,9 @@ type CreateIndividualStandardParams struct {
 	StateProvinceRegion   string                 `json:"state_province_region"`
 	TaxID                 string                 `json:"tax_id"`
 	TosID                 string                 `json:"tos_id"`
+	IPAddress             *string                `json:"ip_address,omitempty"`
+	ImageURL              *string                `json:"image_url,omitempty"`
+	Occupation            *string                `json:"occupation,omitempty"`
 }
 
 // CreateIndividualEnhancedParams represents parameters for creating an individual with enhanced KYC.
@@ -245,29 +369,43 @@ type CreateIndividualEnhancedParams struct {
 	StateProvinceRegion              string                 `json:"state_province_region"`
 	TaxID                            string                 `json:"tax_id"`
 	TosID                            string                 `json:"tos_id"`
+	IPAddress                        *string                `json:"ip_address,omitempty"`
+	ImageURL                         *string                `json:"image_url,omitempty"`
+	Occupation                       *string                `json:"occupation,omitempty"`
 }
 
 // CreateBusinessStandardParams represents parameters for creating a business with standard KYB.
 type CreateBusinessStandardParams struct {
-	ExternalID              *string               `json:"external_id,omitempty"`
-	AddressLine1            string                `json:"address_line_1"`
-	AddressLine2            *string               `json:"address_line_2,omitempty"`
-	AlternateName           string                `json:"alternate_name"`
-	City                    string                `json:"city"`
-	Country                 types.Country         `json:"country"`
-	Email                   string                `json:"email"`
-	FormationDate           string                `json:"formation_date"`
-	IncorporationDocFile    string                `json:"incorporation_doc_file"`
-	LegalName               string                `json:"legal_name"`
-	Owners                  []Owner               `json:"owners"`
-	PostalCode              string                `json:"postal_code"`
-	ProofOfAddressDocFile   string                `json:"proof_of_address_doc_file"`
-	ProofOfAddressDocType   ProofOfAddressDocType `json:"proof_of_address_doc_type"`
-	ProofOfOwnershipDocFile string                `json:"proof_of_ownership_doc_file"`
-	StateProvinceRegion     string                `json:"state_province_region"`
-	TaxID                   string                `json:"tax_id"`
-	TosID                   string                `json:"tos_id"`
-	Website                 *string               `json:"website,omitempty"`
+	ExternalID              *string                 `json:"external_id,omitempty"`
+	AddressLine1            string                  `json:"address_line_1"`
+	AddressLine2            *string                 `json:"address_line_2,omitempty"`
+	AlternateName           string                  `json:"alternate_name"`
+	City                    string                  `json:"city"`
+	Country                 types.Country           `json:"country"`
+	Email                   string                  `json:"email"`
+	FormationDate           string                  `json:"formation_date"`
+	IncorporationDocFile    string                  `json:"incorporation_doc_file"`
+	LegalName               string                  `json:"legal_name"`
+	Owners                  []Owner                 `json:"owners"`
+	PostalCode              string                  `json:"postal_code"`
+	ProofOfAddressDocFile   string                  `json:"proof_of_address_doc_file"`
+	ProofOfAddressDocType   ProofOfAddressDocType   `json:"proof_of_address_doc_type"`
+	ProofOfOwnershipDocFile string                  `json:"proof_of_ownership_doc_file"`
+	StateProvinceRegion     string                  `json:"state_province_region"`
+	TaxID                   string                  `json:"tax_id"`
+	TosID                   string                  `json:"tos_id"`
+	Website                 *string                 `json:"website,omitempty"`
+	PhoneNumber             *string                 `json:"phone_number,omitempty"`
+	IPAddress               *string                 `json:"ip_address,omitempty"`
+	ImageURL                *string                 `json:"image_url,omitempty"`
+	AccountPurpose          *AccountPurpose         `json:"account_purpose,omitempty"`
+	AccountPurposeOther     *string                 `json:"account_purpose_other,omitempty"`
+	BusinessTypeField       *BusinessType           `json:"business_type,omitempty"`
+	BusinessDescription     *string                 `json:"business_description,omitempty"`
+	BusinessIndustry        *types.BusinessIndustry `json:"business_industry,omitempty"`
+	EstimatedAnnualRevenue  *EstimatedAnnualRevenue `json:"estimated_annual_revenue,omitempty"`
+	SourceOfWealth          *SourceOfWealth         `json:"source_of_wealth,omitempty"`
+	PubliclyTraded          *bool                   `json:"publicly_traded,omitempty"`
 }
 
 // CreateResponse represents the response when creating a receiver.
@@ -312,6 +450,15 @@ type UpdateParams struct {
 	PurposeOfTransactionsExplanation *string                 `json:"purpose_of_transactions_explanation,omitempty"`
 	ExternalID                       *string                 `json:"external_id,omitempty"`
 	TosID                            *string                 `json:"tos_id,omitempty"`
+	AccountPurpose                   *AccountPurpose         `json:"account_purpose,omitempty"`
+	AccountPurposeOther              *string                 `json:"account_purpose_other,omitempty"`
+	BusinessTypeField                *BusinessType           `json:"business_type,omitempty"`
+	BusinessDescription              *string                 `json:"business_description,omitempty"`
+	BusinessIndustry                 *types.BusinessIndustry `json:"business_industry,omitempty"`
+	EstimatedAnnualRevenue           *EstimatedAnnualRevenue `json:"estimated_annual_revenue,omitempty"`
+	SourceOfWealth                   *SourceOfWealth         `json:"source_of_wealth,omitempty"`
+	PubliclyTraded                   *bool                   `json:"publicly_traded,omitempty"`
+	Occupation                       *string                 `json:"occupation,omitempty"`
 }
 
 // LimitsResponse represents receiver limits.
@@ -357,6 +504,26 @@ type RequestLimitIncreaseResponse struct {
 	ID string `json:"id"`
 }
 
+// ListParams represents parameters for listing receivers with pagination.
+type ListParams struct {
+	Limit         string    `json:"-"`
+	Offset        string    `json:"-"`
+	StartingAfter string    `json:"-"`
+	EndingBefore  string    `json:"-"`
+	FullName      string    `json:"-"`
+	ReceiverName  string    `json:"-"`
+	Status        KycStatus `json:"-"`
+	ReceiverID    string    `json:"-"`
+	BankAccountID string    `json:"-"`
+	Country       string    `json:"-"`
+}
+
+// ListResponse represents a paginated list of receivers.
+type ListResponse struct {
+	Data       []Receiver               `json:"data"`
+	Pagination types.PaginationMetadata `json:"pagination"`
+}
+
 // Client handles receiver-related operations.
 type Client struct {
 	cfg        *request.Config
@@ -375,6 +542,50 @@ func NewClient(cfg *config.Config) *Client {
 func (c *Client) List(ctx context.Context) ([]Receiver, error) {
 	path := fmt.Sprintf("/instances/%s/receivers", c.instanceID)
 	return request.Do[[]Receiver](c.cfg, ctx, "GET", path, nil)
+}
+
+// ListWithParams retrieves receivers with pagination and filtering.
+func (c *Client) ListWithParams(ctx context.Context, params *ListParams) (*ListResponse, error) {
+	path := fmt.Sprintf("/instances/%s/receivers", c.instanceID)
+
+	if params != nil {
+		q := url.Values{}
+		if params.Limit != "" {
+			q.Set("limit", params.Limit)
+		}
+		if params.Offset != "" {
+			q.Set("offset", params.Offset)
+		}
+		if params.StartingAfter != "" {
+			q.Set("starting_after", params.StartingAfter)
+		}
+		if params.EndingBefore != "" {
+			q.Set("ending_before", params.EndingBefore)
+		}
+		if params.FullName != "" {
+			q.Set("full_name", params.FullName)
+		}
+		if params.ReceiverName != "" {
+			q.Set("receiver_name", params.ReceiverName)
+		}
+		if params.Status != "" {
+			q.Set("status", string(params.Status))
+		}
+		if params.ReceiverID != "" {
+			q.Set("receiver_id", params.ReceiverID)
+		}
+		if params.BankAccountID != "" {
+			q.Set("bank_account_id", params.BankAccountID)
+		}
+		if params.Country != "" {
+			q.Set("country", params.Country)
+		}
+		if len(q) > 0 {
+			path += "?" + q.Encode()
+		}
+	}
+
+	return request.Do[*ListResponse](c.cfg, ctx, "GET", path, nil)
 }
 
 // CreateIndividualWithStandardKYC creates an individual receiver with standard KYC.
@@ -417,6 +628,15 @@ func (c *Client) CreateIndividualWithStandardKYC(ctx context.Context, params *Cr
 	}
 	if params.ExternalID != nil {
 		body["external_id"] = params.ExternalID
+	}
+	if params.IPAddress != nil {
+		body["ip_address"] = params.IPAddress
+	}
+	if params.ImageURL != nil {
+		body["image_url"] = params.ImageURL
+	}
+	if params.Occupation != nil {
+		body["occupation"] = params.Occupation
 	}
 
 	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, body)
@@ -470,6 +690,15 @@ func (c *Client) CreateIndividualWithEnhancedKYC(ctx context.Context, params *Cr
 	if params.ExternalID != nil {
 		body["external_id"] = params.ExternalID
 	}
+	if params.IPAddress != nil {
+		body["ip_address"] = params.IPAddress
+	}
+	if params.ImageURL != nil {
+		body["image_url"] = params.ImageURL
+	}
+	if params.Occupation != nil {
+		body["occupation"] = params.Occupation
+	}
 
 	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, body)
 }
@@ -511,6 +740,39 @@ func (c *Client) CreateBusinessWithStandardKYB(ctx context.Context, params *Crea
 	}
 	if params.ExternalID != nil {
 		body["external_id"] = params.ExternalID
+	}
+	if params.PhoneNumber != nil {
+		body["phone_number"] = params.PhoneNumber
+	}
+	if params.IPAddress != nil {
+		body["ip_address"] = params.IPAddress
+	}
+	if params.ImageURL != nil {
+		body["image_url"] = params.ImageURL
+	}
+	if params.AccountPurpose != nil {
+		body["account_purpose"] = params.AccountPurpose
+	}
+	if params.AccountPurposeOther != nil {
+		body["account_purpose_other"] = params.AccountPurposeOther
+	}
+	if params.BusinessTypeField != nil {
+		body["business_type"] = params.BusinessTypeField
+	}
+	if params.BusinessDescription != nil {
+		body["business_description"] = params.BusinessDescription
+	}
+	if params.BusinessIndustry != nil {
+		body["business_industry"] = params.BusinessIndustry
+	}
+	if params.EstimatedAnnualRevenue != nil {
+		body["estimated_annual_revenue"] = params.EstimatedAnnualRevenue
+	}
+	if params.SourceOfWealth != nil {
+		body["source_of_wealth"] = params.SourceOfWealth
+	}
+	if params.PubliclyTraded != nil {
+		body["publicly_traded"] = params.PubliclyTraded
 	}
 
 	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, body)
@@ -641,6 +903,33 @@ func (c *Client) Update(ctx context.Context, params *UpdateParams) error {
 	}
 	if params.TosID != nil {
 		body["tos_id"] = params.TosID
+	}
+	if params.AccountPurpose != nil {
+		body["account_purpose"] = params.AccountPurpose
+	}
+	if params.AccountPurposeOther != nil {
+		body["account_purpose_other"] = params.AccountPurposeOther
+	}
+	if params.BusinessTypeField != nil {
+		body["business_type"] = params.BusinessTypeField
+	}
+	if params.BusinessDescription != nil {
+		body["business_description"] = params.BusinessDescription
+	}
+	if params.BusinessIndustry != nil {
+		body["business_industry"] = params.BusinessIndustry
+	}
+	if params.EstimatedAnnualRevenue != nil {
+		body["estimated_annual_revenue"] = params.EstimatedAnnualRevenue
+	}
+	if params.SourceOfWealth != nil {
+		body["source_of_wealth"] = params.SourceOfWealth
+	}
+	if params.PubliclyTraded != nil {
+		body["publicly_traded"] = params.PubliclyTraded
+	}
+	if params.Occupation != nil {
+		body["occupation"] = params.Occupation
 	}
 
 	_, err := request.Do[struct{}](c.cfg, ctx, "PUT", path, body)

@@ -618,3 +618,54 @@ func TestReceivers_RequestLimitIncrease(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "rl_000000000000", response.ID)
 }
+
+func TestReceivers_ListWithParams(t *testing.T) {
+	instanceID := "in_000000000000"
+
+	cfg := &config.Config{
+		BaseURL:    "https://api.blindpay.com",
+		APIKey:     "test_key",
+		InstanceID: instanceID,
+		HTTPClient: &http.Client{
+			Transport: &blindpaytest.RoundTripper{
+				T: t,
+				Out: json.RawMessage(`{
+					"data": [
+						{
+							"id":"re_Euw7HN4OdxPn",
+							"type":"individual",
+							"kyc_type":"standard",
+							"kyc_status":"approved",
+							"email":"bernardo@gmail.com",
+							"country":"BR",
+							"instance_id":"in_000000000000",
+							"limit":{
+								"per_transaction":100000,
+								"daily":200000,
+								"monthly":1000000
+							}
+						}
+					],
+					"pagination": {
+						"has_more": false,
+						"next_page": 0,
+						"prev_page": 0
+					}
+				}`),
+				Method: http.MethodGet,
+				Path:   fmt.Sprintf("/instances/%s/receivers", instanceID),
+			},
+		},
+		UserAgent: "test",
+	}
+
+	client := NewClient(cfg)
+	result, err := client.ListWithParams(context.Background(), &ListParams{
+		Limit:  "10",
+		Status: KycStatusApproved,
+	})
+	require.NoError(t, err)
+	require.Len(t, result.Data, 1)
+	require.Equal(t, "re_Euw7HN4OdxPn", result.Data[0].ID)
+	require.Equal(t, false, result.Pagination.HasMore)
+}
