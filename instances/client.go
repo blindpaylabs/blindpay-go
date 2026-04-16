@@ -39,6 +39,8 @@ type InstanceMember struct {
 type UpdateParams struct {
 	Name                      string  `json:"name"`
 	ReceiverInviteRedirectURL *string `json:"receiver_invite_redirect_url,omitempty"`
+	EmailNotifications        *bool   `json:"email_notifications,omitempty"`
+	RequirePasskey            *bool   `json:"require_passkey,omitempty"`
 }
 
 // UpdateMemberRoleParams represents parameters for updating a member's role.
@@ -85,6 +87,12 @@ func (c *Client) Update(ctx context.Context, params *UpdateParams) error {
 
 	if params.ReceiverInviteRedirectURL != nil {
 		body["receiver_invite_redirect_url"] = params.ReceiverInviteRedirectURL
+	}
+	if params.EmailNotifications != nil {
+		body["email_notifications"] = *params.EmailNotifications
+	}
+	if params.RequirePasskey != nil {
+		body["require_passkey"] = *params.RequirePasskey
 	}
 
 	_, err := request.Do[struct{}](c.cfg, ctx, "PUT", path, body)

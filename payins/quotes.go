@@ -18,6 +18,8 @@ type CreateQuoteParams struct {
 	CoverFees          bool                  `json:"cover_fees"`
 	PartnerFeeID       *string               `json:"partner_fee_id,omitempty"`
 	PayerRules         PayerRules            `json:"payer_rules"`
+	IsOtc              *bool                 `json:"is_otc,omitempty"`
+	WalletID           *string               `json:"wallet_id,omitempty"`
 }
 
 // PayerRules represents payer rules for payin quotes.
