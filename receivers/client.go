@@ -291,121 +291,129 @@ type Receiver struct {
 	PurposeOfTransactions            PurposeOfTransactions `json:"purpose_of_transactions,omitempty"`
 	PurposeOfTransactionsExplanation *string               `json:"purpose_of_transactions_explanation,omitempty"`
 	// Business fields
-	LegalName               string                 `json:"legal_name,omitempty"`
-	AlternateName           *string                `json:"alternate_name,omitempty"`
-	FormationDate           string                 `json:"formation_date,omitempty"`
-	Website                 *string                `json:"website,omitempty"`
-	Owners                  []Owner                `json:"owners,omitempty"`
-	IncorporationDocFile    string                 `json:"incorporation_doc_file,omitempty"`
-	ProofOfOwnershipDocFile string                 `json:"proof_of_ownership_doc_file,omitempty"`
-	ExternalID              *string                `json:"external_id,omitempty"`
-	FraudWarnings           []FraudWarning         `json:"fraud_warnings,omitempty"`
-	IsFbo                   *bool                  `json:"is_fbo,omitempty"`
-	AccountPurpose          AccountPurpose         `json:"account_purpose,omitempty"`
-	AccountPurposeOther     *string                `json:"account_purpose_other,omitempty"`
-	BusinessType            BusinessType           `json:"business_type,omitempty"`
-	BusinessDescription     *string                `json:"business_description,omitempty"`
-	BusinessIndustry        types.BusinessIndustry `json:"business_industry,omitempty"`
-	EstimatedAnnualRevenue  EstimatedAnnualRevenue `json:"estimated_annual_revenue,omitempty"`
-	SourceOfWealth          SourceOfWealth         `json:"source_of_wealth,omitempty"`
-	PubliclyTraded          *bool                  `json:"publicly_traded,omitempty"`
-	Occupation              *string                `json:"occupation,omitempty"`
-	AmlStatus               AmlStatus              `json:"aml_status,omitempty"`
-	AmlHitsData             *AmlHits               `json:"aml_hits,omitempty"`
-	IsTosAccepted           *bool                  `json:"is_tos_accepted,omitempty"`
+	LegalName               string                       `json:"legal_name,omitempty"`
+	AlternateName           *string                      `json:"alternate_name,omitempty"`
+	FormationDate           string                       `json:"formation_date,omitempty"`
+	Website                 *string                      `json:"website,omitempty"`
+	Owners                  []Owner                      `json:"owners,omitempty"`
+	IncorporationDocFile    string                       `json:"incorporation_doc_file,omitempty"`
+	ProofOfOwnershipDocFile string                       `json:"proof_of_ownership_doc_file,omitempty"`
+	ExternalID              *string                      `json:"external_id,omitempty"`
+	FraudWarnings           []FraudWarning               `json:"fraud_warnings,omitempty"`
+	IsFbo                   *bool                        `json:"is_fbo,omitempty"`
+	AccountPurpose          AccountPurpose               `json:"account_purpose,omitempty"`
+	AccountPurposeOther     *string                      `json:"account_purpose_other,omitempty"`
+	BusinessType            BusinessType                 `json:"business_type,omitempty"`
+	BusinessDescription     *string                      `json:"business_description,omitempty"`
+	BusinessIndustry        types.BusinessIndustry       `json:"business_industry,omitempty"`
+	EstimatedAnnualRevenue  EstimatedAnnualRevenue       `json:"estimated_annual_revenue,omitempty"`
+	SourceOfWealth          SourceOfWealth               `json:"source_of_wealth,omitempty"`
+	PubliclyTraded          *bool                        `json:"publicly_traded,omitempty"`
+	Occupation              *string                      `json:"occupation,omitempty"`
+	RecipientRelationship   *types.RecipientRelationship `json:"recipient_relationship,omitempty"`
+	SoleProprietorDocType   *types.SoleProprietorDocType `json:"sole_proprietor_doc_type,omitempty"`
+	AmlStatus               AmlStatus                    `json:"aml_status,omitempty"`
+	AmlHitsData             *AmlHits                     `json:"aml_hits,omitempty"`
+	IsTosAccepted           *bool                        `json:"is_tos_accepted,omitempty"`
 }
 
 // CreateIndividualStandardParams represents parameters for creating an individual with standard KYC.
 type CreateIndividualStandardParams struct {
-	ExternalID            *string                `json:"external_id,omitempty"`
-	AddressLine1          string                 `json:"address_line_1"`
-	AddressLine2          *string                `json:"address_line_2,omitempty"`
-	City                  string                 `json:"city"`
-	Country               types.Country          `json:"country"`
-	DateOfBirth           string                 `json:"date_of_birth"`
-	Email                 string                 `json:"email"`
-	FirstName             string                 `json:"first_name"`
-	PhoneNumber           *string                `json:"phone_number"`
-	IDDocCountry          types.Country          `json:"id_doc_country"`
-	IDDocFrontFile        string                 `json:"id_doc_front_file"`
-	IDDocType             IdentificationDocument `json:"id_doc_type"`
-	IDDocBackFile         *string                `json:"id_doc_back_file,omitempty"`
-	LastName              string                 `json:"last_name"`
-	PostalCode            string                 `json:"postal_code"`
-	ProofOfAddressDocFile string                 `json:"proof_of_address_doc_file"`
-	ProofOfAddressDocType ProofOfAddressDocType  `json:"proof_of_address_doc_type"`
-	StateProvinceRegion   string                 `json:"state_province_region"`
-	TaxID                 string                 `json:"tax_id"`
-	TosID                 string                 `json:"tos_id"`
-	IPAddress             *string                `json:"ip_address,omitempty"`
-	ImageURL              *string                `json:"image_url,omitempty"`
-	Occupation            *string                `json:"occupation,omitempty"`
+	ExternalID            *string                      `json:"external_id,omitempty"`
+	AddressLine1          string                       `json:"address_line_1"`
+	AddressLine2          *string                      `json:"address_line_2,omitempty"`
+	City                  string                       `json:"city"`
+	Country               types.Country                `json:"country"`
+	DateOfBirth           string                       `json:"date_of_birth"`
+	Email                 string                       `json:"email"`
+	FirstName             string                       `json:"first_name"`
+	PhoneNumber           *string                      `json:"phone_number"`
+	IDDocCountry          types.Country                `json:"id_doc_country"`
+	IDDocFrontFile        string                       `json:"id_doc_front_file"`
+	IDDocType             IdentificationDocument       `json:"id_doc_type"`
+	IDDocBackFile         *string                      `json:"id_doc_back_file,omitempty"`
+	LastName              string                       `json:"last_name"`
+	PostalCode            string                       `json:"postal_code"`
+	ProofOfAddressDocFile string                       `json:"proof_of_address_doc_file"`
+	ProofOfAddressDocType ProofOfAddressDocType        `json:"proof_of_address_doc_type"`
+	StateProvinceRegion   string                       `json:"state_province_region"`
+	TaxID                 string                       `json:"tax_id"`
+	TosID                 string                       `json:"tos_id"`
+	IPAddress             *string                      `json:"ip_address,omitempty"`
+	ImageURL              *string                      `json:"image_url,omitempty"`
+	Occupation            *string                      `json:"occupation,omitempty"`
+	RecipientRelationship *types.RecipientRelationship `json:"recipient_relationship,omitempty"`
+	SoleProprietorDocType *types.SoleProprietorDocType `json:"sole_proprietor_doc_type,omitempty"`
 }
 
 // CreateIndividualEnhancedParams represents parameters for creating an individual with enhanced KYC.
 type CreateIndividualEnhancedParams struct {
-	ExternalID                       *string                `json:"external_id,omitempty"`
-	AddressLine1                     string                 `json:"address_line_1"`
-	AddressLine2                     *string                `json:"address_line_2,omitempty"`
-	City                             string                 `json:"city"`
-	Country                          types.Country          `json:"country"`
-	DateOfBirth                      string                 `json:"date_of_birth"`
-	Email                            string                 `json:"email"`
-	FirstName                        string                 `json:"first_name"`
-	IDDocCountry                     types.Country          `json:"id_doc_country"`
-	IDDocFrontFile                   string                 `json:"id_doc_front_file"`
-	IDDocType                        IdentificationDocument `json:"id_doc_type"`
-	IDDocBackFile                    *string                `json:"id_doc_back_file,omitempty"`
-	SelfieFile                       string                 `json:"selfie_file"`
-	LastName                         string                 `json:"last_name"`
-	PostalCode                       string                 `json:"postal_code"`
-	PhoneNumber                      *string                `json:"phone_number"`
-	ProofOfAddressDocFile            string                 `json:"proof_of_address_doc_file"`
-	ProofOfAddressDocType            ProofOfAddressDocType  `json:"proof_of_address_doc_type"`
-	PurposeOfTransactions            PurposeOfTransactions  `json:"purpose_of_transactions"`
-	SourceOfFundsDocFile             string                 `json:"source_of_funds_doc_file"`
-	SourceOfFundsDocType             SourceOfFundsDocType   `json:"source_of_funds_doc_type"`
-	PurposeOfTransactionsExplanation *string                `json:"purpose_of_transactions_explanation,omitempty"`
-	StateProvinceRegion              string                 `json:"state_province_region"`
-	TaxID                            string                 `json:"tax_id"`
-	TosID                            string                 `json:"tos_id"`
-	IPAddress                        *string                `json:"ip_address,omitempty"`
-	ImageURL                         *string                `json:"image_url,omitempty"`
-	Occupation                       *string                `json:"occupation,omitempty"`
+	ExternalID                       *string                      `json:"external_id,omitempty"`
+	AddressLine1                     string                       `json:"address_line_1"`
+	AddressLine2                     *string                      `json:"address_line_2,omitempty"`
+	City                             string                       `json:"city"`
+	Country                          types.Country                `json:"country"`
+	DateOfBirth                      string                       `json:"date_of_birth"`
+	Email                            string                       `json:"email"`
+	FirstName                        string                       `json:"first_name"`
+	IDDocCountry                     types.Country                `json:"id_doc_country"`
+	IDDocFrontFile                   string                       `json:"id_doc_front_file"`
+	IDDocType                        IdentificationDocument       `json:"id_doc_type"`
+	IDDocBackFile                    *string                      `json:"id_doc_back_file,omitempty"`
+	SelfieFile                       string                       `json:"selfie_file"`
+	LastName                         string                       `json:"last_name"`
+	PostalCode                       string                       `json:"postal_code"`
+	PhoneNumber                      *string                      `json:"phone_number"`
+	ProofOfAddressDocFile            string                       `json:"proof_of_address_doc_file"`
+	ProofOfAddressDocType            ProofOfAddressDocType        `json:"proof_of_address_doc_type"`
+	PurposeOfTransactions            PurposeOfTransactions        `json:"purpose_of_transactions"`
+	SourceOfFundsDocFile             string                       `json:"source_of_funds_doc_file"`
+	SourceOfFundsDocType             SourceOfFundsDocType         `json:"source_of_funds_doc_type"`
+	PurposeOfTransactionsExplanation *string                      `json:"purpose_of_transactions_explanation,omitempty"`
+	StateProvinceRegion              string                       `json:"state_province_region"`
+	TaxID                            string                       `json:"tax_id"`
+	TosID                            string                       `json:"tos_id"`
+	IPAddress                        *string                      `json:"ip_address,omitempty"`
+	ImageURL                         *string                      `json:"image_url,omitempty"`
+	Occupation                       *string                      `json:"occupation,omitempty"`
+	RecipientRelationship            *types.RecipientRelationship `json:"recipient_relationship,omitempty"`
+	SoleProprietorDocType            *types.SoleProprietorDocType `json:"sole_proprietor_doc_type,omitempty"`
 }
 
 // CreateBusinessStandardParams represents parameters for creating a business with standard KYB.
 type CreateBusinessStandardParams struct {
-	ExternalID              *string                 `json:"external_id,omitempty"`
-	AddressLine1            string                  `json:"address_line_1"`
-	AddressLine2            *string                 `json:"address_line_2,omitempty"`
-	AlternateName           string                  `json:"alternate_name"`
-	City                    string                  `json:"city"`
-	Country                 types.Country           `json:"country"`
-	Email                   string                  `json:"email"`
-	FormationDate           string                  `json:"formation_date"`
-	IncorporationDocFile    string                  `json:"incorporation_doc_file"`
-	LegalName               string                  `json:"legal_name"`
-	Owners                  []Owner                 `json:"owners"`
-	PostalCode              string                  `json:"postal_code"`
-	ProofOfAddressDocFile   string                  `json:"proof_of_address_doc_file"`
-	ProofOfAddressDocType   ProofOfAddressDocType   `json:"proof_of_address_doc_type"`
-	ProofOfOwnershipDocFile string                  `json:"proof_of_ownership_doc_file"`
-	StateProvinceRegion     string                  `json:"state_province_region"`
-	TaxID                   string                  `json:"tax_id"`
-	TosID                   string                  `json:"tos_id"`
-	Website                 *string                 `json:"website,omitempty"`
-	PhoneNumber             *string                 `json:"phone_number,omitempty"`
-	IPAddress               *string                 `json:"ip_address,omitempty"`
-	ImageURL                *string                 `json:"image_url,omitempty"`
-	AccountPurpose          *AccountPurpose         `json:"account_purpose,omitempty"`
-	AccountPurposeOther     *string                 `json:"account_purpose_other,omitempty"`
-	BusinessTypeField       *BusinessType           `json:"business_type,omitempty"`
-	BusinessDescription     *string                 `json:"business_description,omitempty"`
-	BusinessIndustry        *types.BusinessIndustry `json:"business_industry,omitempty"`
-	EstimatedAnnualRevenue  *EstimatedAnnualRevenue `json:"estimated_annual_revenue,omitempty"`
-	SourceOfWealth          *SourceOfWealth         `json:"source_of_wealth,omitempty"`
-	PubliclyTraded          *bool                   `json:"publicly_traded,omitempty"`
+	ExternalID              *string                      `json:"external_id,omitempty"`
+	AddressLine1            string                       `json:"address_line_1"`
+	AddressLine2            *string                      `json:"address_line_2,omitempty"`
+	AlternateName           string                       `json:"alternate_name"`
+	City                    string                       `json:"city"`
+	Country                 types.Country                `json:"country"`
+	Email                   string                       `json:"email"`
+	FormationDate           string                       `json:"formation_date"`
+	IncorporationDocFile    string                       `json:"incorporation_doc_file"`
+	LegalName               string                       `json:"legal_name"`
+	Owners                  []Owner                      `json:"owners"`
+	PostalCode              string                       `json:"postal_code"`
+	ProofOfAddressDocFile   string                       `json:"proof_of_address_doc_file"`
+	ProofOfAddressDocType   ProofOfAddressDocType        `json:"proof_of_address_doc_type"`
+	ProofOfOwnershipDocFile string                       `json:"proof_of_ownership_doc_file"`
+	StateProvinceRegion     string                       `json:"state_province_region"`
+	TaxID                   string                       `json:"tax_id"`
+	TosID                   string                       `json:"tos_id"`
+	Website                 *string                      `json:"website,omitempty"`
+	PhoneNumber             *string                      `json:"phone_number,omitempty"`
+	IPAddress               *string                      `json:"ip_address,omitempty"`
+	ImageURL                *string                      `json:"image_url,omitempty"`
+	AccountPurpose          *AccountPurpose              `json:"account_purpose,omitempty"`
+	AccountPurposeOther     *string                      `json:"account_purpose_other,omitempty"`
+	BusinessTypeField       *BusinessType                `json:"business_type,omitempty"`
+	BusinessDescription     *string                      `json:"business_description,omitempty"`
+	BusinessIndustry        *types.BusinessIndustry      `json:"business_industry,omitempty"`
+	EstimatedAnnualRevenue  *EstimatedAnnualRevenue      `json:"estimated_annual_revenue,omitempty"`
+	SourceOfWealth          *SourceOfWealth              `json:"source_of_wealth,omitempty"`
+	PubliclyTraded          *bool                        `json:"publicly_traded,omitempty"`
+	RecipientRelationship   *types.RecipientRelationship `json:"recipient_relationship,omitempty"`
+	SoleProprietorDocType   *types.SoleProprietorDocType `json:"sole_proprietor_doc_type,omitempty"`
 }
 
 // CreateResponse represents the response when creating a receiver.
@@ -415,50 +423,52 @@ type CreateResponse struct {
 
 // UpdateParams represents parameters for updating a receiver.
 type UpdateParams struct {
-	ReceiverID                       string                  `json:"-"`
-	Email                            *string                 `json:"email,omitempty"`
-	TaxID                            *string                 `json:"tax_id,omitempty"`
-	AddressLine1                     *string                 `json:"address_line_1,omitempty"`
-	AddressLine2                     *string                 `json:"address_line_2,omitempty"`
-	City                             *string                 `json:"city,omitempty"`
-	StateProvinceRegion              *string                 `json:"state_province_region,omitempty"`
-	Country                          *types.Country          `json:"country,omitempty"`
-	PostalCode                       *string                 `json:"postal_code,omitempty"`
-	IPAddress                        *string                 `json:"ip_address,omitempty"`
-	ImageURL                         *string                 `json:"image_url,omitempty"`
-	PhoneNumber                      *string                 `json:"phone_number,omitempty"`
-	ProofOfAddressDocType            *ProofOfAddressDocType  `json:"proof_of_address_doc_type,omitempty"`
-	ProofOfAddressDocFile            *string                 `json:"proof_of_address_doc_file,omitempty"`
-	FirstName                        *string                 `json:"first_name,omitempty"`
-	LastName                         *string                 `json:"last_name,omitempty"`
-	DateOfBirth                      *string                 `json:"date_of_birth,omitempty"`
-	IDDocCountry                     *types.Country          `json:"id_doc_country,omitempty"`
-	IDDocType                        *IdentificationDocument `json:"id_doc_type,omitempty"`
-	IDDocFrontFile                   *string                 `json:"id_doc_front_file,omitempty"`
-	IDDocBackFile                    *string                 `json:"id_doc_back_file,omitempty"`
-	LegalName                        *string                 `json:"legal_name,omitempty"`
-	AlternateName                    *string                 `json:"alternate_name,omitempty"`
-	FormationDate                    *string                 `json:"formation_date,omitempty"`
-	Website                          *string                 `json:"website,omitempty"`
-	Owners                           []Owner                 `json:"owners,omitempty"`
-	IncorporationDocFile             *string                 `json:"incorporation_doc_file,omitempty"`
-	ProofOfOwnershipDocFile          *string                 `json:"proof_of_ownership_doc_file,omitempty"`
-	SourceOfFundsDocType             *SourceOfFundsDocType   `json:"source_of_funds_doc_type,omitempty"`
-	SourceOfFundsDocFile             *string                 `json:"source_of_funds_doc_file,omitempty"`
-	SelfieFile                       *string                 `json:"selfie_file,omitempty"`
-	PurposeOfTransactions            *PurposeOfTransactions  `json:"purpose_of_transactions,omitempty"`
-	PurposeOfTransactionsExplanation *string                 `json:"purpose_of_transactions_explanation,omitempty"`
-	ExternalID                       *string                 `json:"external_id,omitempty"`
-	TosID                            *string                 `json:"tos_id,omitempty"`
-	AccountPurpose                   *AccountPurpose         `json:"account_purpose,omitempty"`
-	AccountPurposeOther              *string                 `json:"account_purpose_other,omitempty"`
-	BusinessTypeField                *BusinessType           `json:"business_type,omitempty"`
-	BusinessDescription              *string                 `json:"business_description,omitempty"`
-	BusinessIndustry                 *types.BusinessIndustry `json:"business_industry,omitempty"`
-	EstimatedAnnualRevenue           *EstimatedAnnualRevenue `json:"estimated_annual_revenue,omitempty"`
-	SourceOfWealth                   *SourceOfWealth         `json:"source_of_wealth,omitempty"`
-	PubliclyTraded                   *bool                   `json:"publicly_traded,omitempty"`
-	Occupation                       *string                 `json:"occupation,omitempty"`
+	ReceiverID                       string                       `json:"-"`
+	Email                            *string                      `json:"email,omitempty"`
+	TaxID                            *string                      `json:"tax_id,omitempty"`
+	AddressLine1                     *string                      `json:"address_line_1,omitempty"`
+	AddressLine2                     *string                      `json:"address_line_2,omitempty"`
+	City                             *string                      `json:"city,omitempty"`
+	StateProvinceRegion              *string                      `json:"state_province_region,omitempty"`
+	Country                          *types.Country               `json:"country,omitempty"`
+	PostalCode                       *string                      `json:"postal_code,omitempty"`
+	IPAddress                        *string                      `json:"ip_address,omitempty"`
+	ImageURL                         *string                      `json:"image_url,omitempty"`
+	PhoneNumber                      *string                      `json:"phone_number,omitempty"`
+	ProofOfAddressDocType            *ProofOfAddressDocType       `json:"proof_of_address_doc_type,omitempty"`
+	ProofOfAddressDocFile            *string                      `json:"proof_of_address_doc_file,omitempty"`
+	FirstName                        *string                      `json:"first_name,omitempty"`
+	LastName                         *string                      `json:"last_name,omitempty"`
+	DateOfBirth                      *string                      `json:"date_of_birth,omitempty"`
+	IDDocCountry                     *types.Country               `json:"id_doc_country,omitempty"`
+	IDDocType                        *IdentificationDocument      `json:"id_doc_type,omitempty"`
+	IDDocFrontFile                   *string                      `json:"id_doc_front_file,omitempty"`
+	IDDocBackFile                    *string                      `json:"id_doc_back_file,omitempty"`
+	LegalName                        *string                      `json:"legal_name,omitempty"`
+	AlternateName                    *string                      `json:"alternate_name,omitempty"`
+	FormationDate                    *string                      `json:"formation_date,omitempty"`
+	Website                          *string                      `json:"website,omitempty"`
+	Owners                           []Owner                      `json:"owners,omitempty"`
+	IncorporationDocFile             *string                      `json:"incorporation_doc_file,omitempty"`
+	ProofOfOwnershipDocFile          *string                      `json:"proof_of_ownership_doc_file,omitempty"`
+	SourceOfFundsDocType             *SourceOfFundsDocType        `json:"source_of_funds_doc_type,omitempty"`
+	SourceOfFundsDocFile             *string                      `json:"source_of_funds_doc_file,omitempty"`
+	SelfieFile                       *string                      `json:"selfie_file,omitempty"`
+	PurposeOfTransactions            *PurposeOfTransactions       `json:"purpose_of_transactions,omitempty"`
+	PurposeOfTransactionsExplanation *string                      `json:"purpose_of_transactions_explanation,omitempty"`
+	ExternalID                       *string                      `json:"external_id,omitempty"`
+	TosID                            *string                      `json:"tos_id,omitempty"`
+	AccountPurpose                   *AccountPurpose              `json:"account_purpose,omitempty"`
+	AccountPurposeOther              *string                      `json:"account_purpose_other,omitempty"`
+	BusinessTypeField                *BusinessType                `json:"business_type,omitempty"`
+	BusinessDescription              *string                      `json:"business_description,omitempty"`
+	BusinessIndustry                 *types.BusinessIndustry      `json:"business_industry,omitempty"`
+	EstimatedAnnualRevenue           *EstimatedAnnualRevenue      `json:"estimated_annual_revenue,omitempty"`
+	SourceOfWealth                   *SourceOfWealth              `json:"source_of_wealth,omitempty"`
+	PubliclyTraded                   *bool                        `json:"publicly_traded,omitempty"`
+	Occupation                       *string                      `json:"occupation,omitempty"`
+	RecipientRelationship            *types.RecipientRelationship `json:"recipient_relationship,omitempty"`
+	SoleProprietorDocType            *types.SoleProprietorDocType `json:"sole_proprietor_doc_type,omitempty"`
 }
 
 // LimitsResponse represents receiver limits.
@@ -641,6 +651,12 @@ func (c *Client) CreateIndividualWithStandardKYC(ctx context.Context, params *Cr
 	if params.Occupation != nil {
 		body["occupation"] = params.Occupation
 	}
+	if params.RecipientRelationship != nil {
+		body["recipient_relationship"] = params.RecipientRelationship
+	}
+	if params.SoleProprietorDocType != nil {
+		body["sole_proprietor_doc_type"] = params.SoleProprietorDocType
+	}
 
 	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, body)
 }
@@ -701,6 +717,12 @@ func (c *Client) CreateIndividualWithEnhancedKYC(ctx context.Context, params *Cr
 	}
 	if params.Occupation != nil {
 		body["occupation"] = params.Occupation
+	}
+	if params.RecipientRelationship != nil {
+		body["recipient_relationship"] = params.RecipientRelationship
+	}
+	if params.SoleProprietorDocType != nil {
+		body["sole_proprietor_doc_type"] = params.SoleProprietorDocType
 	}
 
 	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, body)
@@ -776,6 +798,12 @@ func (c *Client) CreateBusinessWithStandardKYB(ctx context.Context, params *Crea
 	}
 	if params.PubliclyTraded != nil {
 		body["publicly_traded"] = params.PubliclyTraded
+	}
+	if params.RecipientRelationship != nil {
+		body["recipient_relationship"] = params.RecipientRelationship
+	}
+	if params.SoleProprietorDocType != nil {
+		body["sole_proprietor_doc_type"] = params.SoleProprietorDocType
 	}
 
 	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, body)
@@ -933,6 +961,12 @@ func (c *Client) Update(ctx context.Context, params *UpdateParams) error {
 	}
 	if params.Occupation != nil {
 		body["occupation"] = params.Occupation
+	}
+	if params.RecipientRelationship != nil {
+		body["recipient_relationship"] = params.RecipientRelationship
+	}
+	if params.SoleProprietorDocType != nil {
+		body["sole_proprietor_doc_type"] = params.SoleProprietorDocType
 	}
 
 	_, err := request.Do[struct{}](c.cfg, ctx, "PUT", path, body)

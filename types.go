@@ -66,9 +66,20 @@ const (
 	TransactionStatusOnHold     = types.TransactionStatusOnHold
 )
 
+type BankingPartner = types.BankingPartner
+type SoleProprietorDocType = types.SoleProprietorDocType
 type Country = types.Country
 
 const (
+	BankingPartnerCfsb     = types.BankingPartnerCfsb
+	BankingPartnerCiti     = types.BankingPartnerCiti
+	BankingPartnerHsbc     = types.BankingPartnerHsbc
+	BankingPartnerJpmorgan = types.BankingPartnerJpmorgan
+
+	SoleProprietorDocTypeBankStatement          = types.SoleProprietorDocTypeBankStatement
+	SoleProprietorDocTypeMasterServiceAgreement = types.SoleProprietorDocTypeMasterServiceAgreement
+	SoleProprietorDocTypeSalarySlip             = types.SoleProprietorDocTypeSalarySlip
+
 	CountryAF = types.CountryAF
 	CountryAL = types.CountryAL
 	CountryDZ = types.CountryDZ
