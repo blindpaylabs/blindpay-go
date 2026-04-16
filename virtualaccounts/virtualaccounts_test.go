@@ -53,7 +53,8 @@ func TestVirtualAccounts_Create(t *testing.T) {
 
 	inJson := `{
 		"blockchain_wallet_id": "bw_000000000000",
-		"token": "USDC"
+		"token": "USDC",
+		"banking_partner": "cfsb"
 	}`
 
 	cfg := &config.Config{
@@ -77,6 +78,7 @@ func TestVirtualAccounts_Create(t *testing.T) {
 		ReceiverID:         receiverID,
 		BlockchainWalletID: walletID,
 		Token:              types.StablecoinTokenUSDC,
+		BankingPartner:     types.BankingPartnerCfsb,
 	})
 	require.NoError(t, err)
 	require.Equal(t, id, account.ID)
@@ -130,14 +132,14 @@ func TestVirtualAccounts_Get(t *testing.T) {
 				T:      t,
 				Out:    json.RawMessage(outJson),
 				Method: http.MethodGet,
-				Path:   fmt.Sprintf("/instances/%s/receivers/%s/virtual-accounts", instanceID, receiverID),
+				Path:   fmt.Sprintf("/instances/%s/receivers/%s/virtual-accounts/%s", instanceID, receiverID, id),
 			},
 		},
 		UserAgent: "test",
 	}
 
 	client := NewClient(cfg)
-	account, err := client.Get(context.Background(), receiverID)
+	account, err := client.Get(context.Background(), receiverID, id)
 	require.NoError(t, err)
 	require.Equal(t, id, account.ID)
 	require.Equal(t, walletID, account.BlockchainWalletID)
@@ -146,6 +148,7 @@ func TestVirtualAccounts_Get(t *testing.T) {
 func TestVirtualAccounts_Update(t *testing.T) {
 	receiverID := "re_000000000000"
 	instanceID := "in_000000000000"
+	virtualAccountID := "va_000000000000"
 	newWalletID := "bw_000000000000"
 
 	inJson := `{
@@ -164,7 +167,7 @@ func TestVirtualAccounts_Update(t *testing.T) {
 				In:     json.RawMessage(inJson),
 				Out:    json.RawMessage(outJson),
 				Method: http.MethodPut,
-				Path:   fmt.Sprintf("/instances/%s/receivers/%s/virtual-accounts", instanceID, receiverID),
+				Path:   fmt.Sprintf("/instances/%s/receivers/%s/virtual-accounts/%s", instanceID, receiverID, virtualAccountID),
 			},
 		},
 		UserAgent: "test",
@@ -173,6 +176,7 @@ func TestVirtualAccounts_Update(t *testing.T) {
 	client := NewClient(cfg)
 	err := client.Update(context.Background(), &UpdateParams{
 		ReceiverID:         receiverID,
+		VirtualAccountID:   virtualAccountID,
 		BlockchainWalletID: newWalletID,
 		Token:              types.StablecoinTokenUSDC,
 	})

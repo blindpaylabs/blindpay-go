@@ -53,6 +53,7 @@ type Transfer struct {
 	ReceiverToken                 types.StablecoinToken         `json:"receiver_token"`
 	ReceiverWalletAddress         string                        `json:"receiver_wallet_address"`
 	PartnerFeeAmount              *float64                      `json:"partner_fee_amount"`
+	ExternalID                    *string                       `json:"external_id,omitempty"`
 }
 
 // CreateQuoteParams represents parameters for creating a transfer quote.
