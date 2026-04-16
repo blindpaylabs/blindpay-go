@@ -136,6 +136,23 @@ type TrackingPartnerFee struct {
 	CompletedAt     time.Time `json:"completed_at"`
 }
 
+type BankingPartner string
+
+const (
+	BankingPartnerCfsb     BankingPartner = "cfsb"
+	BankingPartnerCiti     BankingPartner = "citi"
+	BankingPartnerHsbc     BankingPartner = "hsbc"
+	BankingPartnerJpmorgan BankingPartner = "jpmorgan"
+)
+
+type SoleProprietorDocType string
+
+const (
+	SoleProprietorDocTypeBankStatement           SoleProprietorDocType = "bank_statement"
+	SoleProprietorDocTypeMasterServiceAgreement  SoleProprietorDocType = "master_service_agreement"
+	SoleProprietorDocTypeSalarySlip              SoleProprietorDocType = "salary_slip"
+)
+
 type Country string
 
 const (
