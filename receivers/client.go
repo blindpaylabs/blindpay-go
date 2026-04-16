@@ -120,7 +120,7 @@ const (
 type AccountPurpose string
 
 const (
-	AccountPurposeCharitableDonations               AccountPurpose = "charitable_donations"
+	AccountPurposeCharitableDonations                AccountPurpose = "charitable_donations"
 	AccountPurposeEcommerceRetailPayments            AccountPurpose = "ecommerce_retail_payments"
 	AccountPurposeInvestmentPurposes                 AccountPurpose = "investment_purposes"
 	AccountPurposeBusinessExpenses                   AccountPurpose = "business_expenses"
@@ -291,13 +291,13 @@ type Receiver struct {
 	PurposeOfTransactions            PurposeOfTransactions `json:"purpose_of_transactions,omitempty"`
 	PurposeOfTransactionsExplanation *string               `json:"purpose_of_transactions_explanation,omitempty"`
 	// Business fields
-	LegalName               string  `json:"legal_name,omitempty"`
-	AlternateName           *string `json:"alternate_name,omitempty"`
-	FormationDate           string  `json:"formation_date,omitempty"`
-	Website                 *string `json:"website,omitempty"`
-	Owners                  []Owner `json:"owners,omitempty"`
-	IncorporationDocFile    string  `json:"incorporation_doc_file,omitempty"`
-	ProofOfOwnershipDocFile string  `json:"proof_of_ownership_doc_file,omitempty"`
+	LegalName               string                 `json:"legal_name,omitempty"`
+	AlternateName           *string                `json:"alternate_name,omitempty"`
+	FormationDate           string                 `json:"formation_date,omitempty"`
+	Website                 *string                `json:"website,omitempty"`
+	Owners                  []Owner                `json:"owners,omitempty"`
+	IncorporationDocFile    string                 `json:"incorporation_doc_file,omitempty"`
+	ProofOfOwnershipDocFile string                 `json:"proof_of_ownership_doc_file,omitempty"`
 	ExternalID              *string                `json:"external_id,omitempty"`
 	FraudWarnings           []FraudWarning         `json:"fraud_warnings,omitempty"`
 	IsFbo                   *bool                  `json:"is_fbo,omitempty"`
@@ -376,22 +376,22 @@ type CreateIndividualEnhancedParams struct {
 
 // CreateBusinessStandardParams represents parameters for creating a business with standard KYB.
 type CreateBusinessStandardParams struct {
-	ExternalID              *string               `json:"external_id,omitempty"`
-	AddressLine1            string                `json:"address_line_1"`
-	AddressLine2            *string               `json:"address_line_2,omitempty"`
-	AlternateName           string                `json:"alternate_name"`
-	City                    string                `json:"city"`
-	Country                 types.Country         `json:"country"`
-	Email                   string                `json:"email"`
-	FormationDate           string                `json:"formation_date"`
-	IncorporationDocFile    string                `json:"incorporation_doc_file"`
-	LegalName               string                `json:"legal_name"`
-	Owners                  []Owner               `json:"owners"`
-	PostalCode              string                `json:"postal_code"`
-	ProofOfAddressDocFile   string                `json:"proof_of_address_doc_file"`
-	ProofOfAddressDocType   ProofOfAddressDocType `json:"proof_of_address_doc_type"`
-	ProofOfOwnershipDocFile string                `json:"proof_of_ownership_doc_file"`
-	StateProvinceRegion     string                `json:"state_province_region"`
+	ExternalID              *string                 `json:"external_id,omitempty"`
+	AddressLine1            string                  `json:"address_line_1"`
+	AddressLine2            *string                 `json:"address_line_2,omitempty"`
+	AlternateName           string                  `json:"alternate_name"`
+	City                    string                  `json:"city"`
+	Country                 types.Country           `json:"country"`
+	Email                   string                  `json:"email"`
+	FormationDate           string                  `json:"formation_date"`
+	IncorporationDocFile    string                  `json:"incorporation_doc_file"`
+	LegalName               string                  `json:"legal_name"`
+	Owners                  []Owner                 `json:"owners"`
+	PostalCode              string                  `json:"postal_code"`
+	ProofOfAddressDocFile   string                  `json:"proof_of_address_doc_file"`
+	ProofOfAddressDocType   ProofOfAddressDocType   `json:"proof_of_address_doc_type"`
+	ProofOfOwnershipDocFile string                  `json:"proof_of_ownership_doc_file"`
+	StateProvinceRegion     string                  `json:"state_province_region"`
 	TaxID                   string                  `json:"tax_id"`
 	TosID                   string                  `json:"tos_id"`
 	Website                 *string                 `json:"website,omitempty"`
@@ -402,10 +402,10 @@ type CreateBusinessStandardParams struct {
 	AccountPurposeOther     *string                 `json:"account_purpose_other,omitempty"`
 	BusinessTypeField       *BusinessType           `json:"business_type,omitempty"`
 	BusinessDescription     *string                 `json:"business_description,omitempty"`
-	BusinessIndustry        *types.BusinessIndustry  `json:"business_industry,omitempty"`
-	EstimatedAnnualRevenue  *EstimatedAnnualRevenue  `json:"estimated_annual_revenue,omitempty"`
-	SourceOfWealth          *SourceOfWealth          `json:"source_of_wealth,omitempty"`
-	PubliclyTraded          *bool                    `json:"publicly_traded,omitempty"`
+	BusinessIndustry        *types.BusinessIndustry `json:"business_industry,omitempty"`
+	EstimatedAnnualRevenue  *EstimatedAnnualRevenue `json:"estimated_annual_revenue,omitempty"`
+	SourceOfWealth          *SourceOfWealth         `json:"source_of_wealth,omitempty"`
+	PubliclyTraded          *bool                   `json:"publicly_traded,omitempty"`
 }
 
 // CreateResponse represents the response when creating a receiver.
@@ -454,11 +454,11 @@ type UpdateParams struct {
 	AccountPurposeOther              *string                 `json:"account_purpose_other,omitempty"`
 	BusinessTypeField                *BusinessType           `json:"business_type,omitempty"`
 	BusinessDescription              *string                 `json:"business_description,omitempty"`
-	BusinessIndustry                 *types.BusinessIndustry  `json:"business_industry,omitempty"`
-	EstimatedAnnualRevenue           *EstimatedAnnualRevenue  `json:"estimated_annual_revenue,omitempty"`
-	SourceOfWealth                   *SourceOfWealth          `json:"source_of_wealth,omitempty"`
-	PubliclyTraded                   *bool                    `json:"publicly_traded,omitempty"`
-	Occupation                       *string                  `json:"occupation,omitempty"`
+	BusinessIndustry                 *types.BusinessIndustry `json:"business_industry,omitempty"`
+	EstimatedAnnualRevenue           *EstimatedAnnualRevenue `json:"estimated_annual_revenue,omitempty"`
+	SourceOfWealth                   *SourceOfWealth         `json:"source_of_wealth,omitempty"`
+	PubliclyTraded                   *bool                   `json:"publicly_traded,omitempty"`
+	Occupation                       *string                 `json:"occupation,omitempty"`
 }
 
 // LimitsResponse represents receiver limits.
