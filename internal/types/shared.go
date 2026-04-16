@@ -92,20 +92,20 @@ type PaginationMetadata struct {
 }
 
 type TrackingTransaction struct {
-	Step                    string    `json:"step"`
-	Status                  string    `json:"status"`
-	TransactionHash         string    `json:"transaction_hash,omitempty"`
-	ExternalID              string    `json:"external_id,omitempty"`
-	CompletedAt             time.Time `json:"completed_at"`
-	SenderName              string    `json:"sender_name,omitempty"`
-	SenderTaxID             string    `json:"sender_tax_id,omitempty"`
-	SenderBankCode          string    `json:"sender_bank_code,omitempty"`
-	SenderAccountNumber     string    `json:"sender_account_number,omitempty"`
-	TraceNumber             string    `json:"trace_number,omitempty"`
-	TransactionReference    string    `json:"transaction_reference,omitempty"`
-	Description             string    `json:"description,omitempty"`
-	LedgerInTransactionID   *string   `json:"ledger_in_transaction_id,omitempty"`
-	LedgerOutTransactionID  *string   `json:"ledger_out_transaction_id,omitempty"`
+	Step                   string    `json:"step"`
+	Status                 string    `json:"status"`
+	TransactionHash        string    `json:"transaction_hash,omitempty"`
+	ExternalID             string    `json:"external_id,omitempty"`
+	CompletedAt            time.Time `json:"completed_at"`
+	SenderName             string    `json:"sender_name,omitempty"`
+	SenderTaxID            string    `json:"sender_tax_id,omitempty"`
+	SenderBankCode         string    `json:"sender_bank_code,omitempty"`
+	SenderAccountNumber    string    `json:"sender_account_number,omitempty"`
+	TraceNumber            string    `json:"trace_number,omitempty"`
+	TransactionReference   string    `json:"transaction_reference,omitempty"`
+	Description            string    `json:"description,omitempty"`
+	LedgerInTransactionID  *string   `json:"ledger_in_transaction_id,omitempty"`
+	LedgerOutTransactionID *string   `json:"ledger_out_transaction_id,omitempty"`
 }
 
 type TrackingPayment struct {

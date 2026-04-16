@@ -22,15 +22,15 @@ const (
 
 // JpmTrackData represents JPMorgan tracking data for a payout.
 type JpmTrackData struct {
-	JpmTraceNumber          *string `json:"jpm_trace_number,omitempty"`
-	JpmProcessingStatus     *string `json:"jpm_processing_status,omitempty"`
-	ExtendedTrackingStatus  *string `json:"extended_tracking_status,omitempty"`
-	JpmReferenceNumber      *string `json:"jpm_reference_number,omitempty"`
-	Uetr                    *string `json:"uetr,omitempty"`
-	FedImad                 *string `json:"fed_imad,omitempty"`
-	PaymentDate             *string `json:"payment_date,omitempty"`
-	PaymentAmount           *string `json:"payment_amount,omitempty"`
-	PaymentCurrency         *string `json:"payment_currency,omitempty"`
+	JpmTraceNumber         *string `json:"jpm_trace_number,omitempty"`
+	JpmProcessingStatus    *string `json:"jpm_processing_status,omitempty"`
+	ExtendedTrackingStatus *string `json:"extended_tracking_status,omitempty"`
+	JpmReferenceNumber     *string `json:"jpm_reference_number,omitempty"`
+	Uetr                   *string `json:"uetr,omitempty"`
+	FedImad                *string `json:"fed_imad,omitempty"`
+	PaymentDate            *string `json:"payment_date,omitempty"`
+	PaymentAmount          *string `json:"payment_amount,omitempty"`
+	PaymentCurrency        *string `json:"payment_currency,omitempty"`
 }
 
 // Payout represents a payout transaction.
@@ -48,7 +48,7 @@ type Payout struct {
 	TrackingComplete           *types.TrackingComplete         `json:"tracking_complete"`
 	TrackingPartnerFee         *types.TrackingPartnerFee       `json:"tracking_partner_fee"`
 	TrackingDocuments          *types.TrackingDocuments        `json:"tracking_documents,omitempty"`
-	JpmTrackData               *JpmTrackData                  `json:"jpm_track_data,omitempty"`
+	JpmTrackData               *JpmTrackData                   `json:"jpm_track_data,omitempty"`
 	PartnerFee                 int                             `json:"partner_fee,omitempty"`
 	TransactionFeeAmount       *float64                        `json:"transaction_fee_amount,omitempty"`
 	CreatedAt                  time.Time                       `json:"created_at"`
@@ -109,18 +109,18 @@ type Payout struct {
 
 // ListParams represents parameters for listing payouts.
 type ListParams struct {
-	ReceiverID    string                 `json:"receiver_id,omitempty"`
-	Limit         int                    `json:"limit,omitempty"`
-	Offset        int                    `json:"offset,omitempty"`
-	StartingAfter string                 `json:"starting_after,omitempty"`
-	EndingBefore  string                 `json:"ending_before,omitempty"`
+	ReceiverID    string                  `json:"receiver_id,omitempty"`
+	Limit         int                     `json:"limit,omitempty"`
+	Offset        int                     `json:"offset,omitempty"`
+	StartingAfter string                  `json:"starting_after,omitempty"`
+	EndingBefore  string                  `json:"ending_before,omitempty"`
 	Status        types.TransactionStatus `json:"status,omitempty"`
-	ReceiverName  string                 `json:"receiver_name,omitempty"`
-	BankAccountID string                 `json:"bank_account_id,omitempty"`
-	Country       string                 `json:"country,omitempty"`
-	PaymentMethod types.Rail             `json:"payment_method,omitempty"`
-	Network       string                 `json:"network,omitempty"`
-	Token         string                 `json:"token,omitempty"`
+	ReceiverName  string                  `json:"receiver_name,omitempty"`
+	BankAccountID string                  `json:"bank_account_id,omitempty"`
+	Country       string                  `json:"country,omitempty"`
+	PaymentMethod types.Rail              `json:"payment_method,omitempty"`
+	Network       string                  `json:"network,omitempty"`
+	Token         string                  `json:"token,omitempty"`
 }
 
 // ListResponse represents the response when listing payouts.
@@ -193,7 +193,7 @@ type CreateResponse struct {
 	TrackingLiquidity    *types.TrackingLiquidity   `json:"tracking_liquidity,omitempty"`
 	TrackingComplete     *types.TrackingComplete    `json:"tracking_complete,omitempty"`
 	TrackingPartnerFee   *types.TrackingPartnerFee  `json:"tracking_partner_fee,omitempty"`
-	TrackingDocuments    *types.TrackingDocuments    `json:"tracking_documents,omitempty"`
+	TrackingDocuments    *types.TrackingDocuments   `json:"tracking_documents,omitempty"`
 	ReceiverID           *string                    `json:"receiver_id,omitempty"`
 	BankAccountID        *string                    `json:"bank_account_id,omitempty"`
 	OfframpWalletID      *string                    `json:"offramp_wallet_id,omitempty"`
