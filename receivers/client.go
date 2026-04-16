@@ -477,19 +477,19 @@ type LimitsResponse struct {
 
 // LimitIncreaseRequest represents a limit increase request for a receiver.
 type LimitIncreaseRequest struct {
-	ID                      string                                     `json:"id"`
-	ReceiverID              string                                     `json:"receiver_id"`
-	Status                  LimitIncreaseRequestStatus                 `json:"status"`
-	Daily                   float64                                    `json:"daily"`
-	Monthly                 float64                                    `json:"monthly"`
-	PerTransaction          float64                                    `json:"per_transaction"`
-	ApprovedPerTransaction  *int                                       `json:"approved_per_transaction,omitempty"`
-	ApprovedDaily           *int                                       `json:"approved_daily,omitempty"`
-	ApprovedMonthly         *int                                       `json:"approved_monthly,omitempty"`
-	SupportingDocumentFile  string                                     `json:"supporting_document_file"`
-	SupportingDocumentType  LimitIncreaseRequestSupportingDocumentType `json:"supporting_document_type"`
-	CreatedAt               string                                     `json:"created_at"`
-	UpdatedAt               string                                     `json:"updated_at"`
+	ID                     string                                     `json:"id"`
+	ReceiverID             string                                     `json:"receiver_id"`
+	Status                 LimitIncreaseRequestStatus                 `json:"status"`
+	Daily                  float64                                    `json:"daily"`
+	Monthly                float64                                    `json:"monthly"`
+	PerTransaction         float64                                    `json:"per_transaction"`
+	ApprovedPerTransaction *int                                       `json:"approved_per_transaction,omitempty"`
+	ApprovedDaily          *int                                       `json:"approved_daily,omitempty"`
+	ApprovedMonthly        *int                                       `json:"approved_monthly,omitempty"`
+	SupportingDocumentFile string                                     `json:"supporting_document_file"`
+	SupportingDocumentType LimitIncreaseRequestSupportingDocumentType `json:"supporting_document_type"`
+	CreatedAt              string                                     `json:"created_at"`
+	UpdatedAt              string                                     `json:"updated_at"`
 }
 
 // RequestLimitIncreaseParams represents parameters for requesting a limit increase.
