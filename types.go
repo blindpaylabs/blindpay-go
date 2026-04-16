@@ -333,6 +333,7 @@ type TrackingPayment = types.TrackingPayment
 type TrackingLiquidity = types.TrackingLiquidity
 type TrackingComplete = types.TrackingComplete
 type TrackingPartnerFee = types.TrackingPartnerFee
+type TrackingDocuments = types.TrackingDocuments
 
 type Rail = types.Rail
 type BankDetail = types.BankDetail

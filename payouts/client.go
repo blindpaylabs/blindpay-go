@@ -12,6 +12,27 @@ import (
 	"github.com/blindpaylabs/blindpay-go/internal/types"
 )
 
+// TrackingDocumentsStatus represents the status of payout document tracking.
+type TrackingDocumentsStatus string
+
+const (
+	TrackingDocumentsStatusWaitingDocuments    TrackingDocumentsStatus = "waiting_documents"
+	TrackingDocumentsStatusComplianceReviewing TrackingDocumentsStatus = "compliance_reviewing"
+)
+
+// JpmTrackData represents JPMorgan tracking data for a payout.
+type JpmTrackData struct {
+	JpmTraceNumber          *string `json:"jpm_trace_number,omitempty"`
+	JpmProcessingStatus     *string `json:"jpm_processing_status,omitempty"`
+	ExtendedTrackingStatus  *string `json:"extended_tracking_status,omitempty"`
+	JpmReferenceNumber      *string `json:"jpm_reference_number,omitempty"`
+	Uetr                    *string `json:"uetr,omitempty"`
+	FedImad                 *string `json:"fed_imad,omitempty"`
+	PaymentDate             *string `json:"payment_date,omitempty"`
+	PaymentAmount           *string `json:"payment_amount,omitempty"`
+	PaymentCurrency         *string `json:"payment_currency,omitempty"`
+}
+
 // Payout represents a payout transaction.
 type Payout struct {
 	ReceiverID                 string                          `json:"receiver_id"`
@@ -26,6 +47,10 @@ type Payout struct {
 	TrackingLiquidity          *types.TrackingLiquidity        `json:"tracking_liquidity"`
 	TrackingComplete           *types.TrackingComplete         `json:"tracking_complete"`
 	TrackingPartnerFee         *types.TrackingPartnerFee       `json:"tracking_partner_fee"`
+	TrackingDocuments          *types.TrackingDocuments        `json:"tracking_documents,omitempty"`
+	JpmTrackData               *JpmTrackData                  `json:"jpm_track_data,omitempty"`
+	PartnerFee                 int                             `json:"partner_fee,omitempty"`
+	TransactionFeeAmount       *float64                        `json:"transaction_fee_amount,omitempty"`
 	CreatedAt                  time.Time                       `json:"created_at"`
 	UpdatedAt                  time.Time                       `json:"updated_at"`
 	ImageURL                   string                          `json:"image_url"`
@@ -49,6 +74,9 @@ type Payout struct {
 	Name                       string                          `json:"name"`
 	Type                       types.Rail                      `json:"type"`
 	PixKey                     string                          `json:"pix_key,omitempty"`
+	PixSafeBankCode            string                          `json:"pix_safe_bank_code,omitempty"`
+	PixSafeBranchCode          string                          `json:"pix_safe_branch_code,omitempty"`
+	PixSafeCpfCnpj             string                          `json:"pix_safe_cpf_cnpj,omitempty"`
 	AccountNumber              string                          `json:"account_number,omitempty"`
 	RoutingNumber              string                          `json:"routing_number,omitempty"`
 	Country                    types.Country                   `json:"country,omitempty"`
@@ -81,9 +109,18 @@ type Payout struct {
 
 // ListParams represents parameters for listing payouts.
 type ListParams struct {
-	ReceiverID string `json:"receiver_id,omitempty"`
-	Limit      int    `json:"limit,omitempty"`
-	Offset     int    `json:"offset,omitempty"`
+	ReceiverID    string                 `json:"receiver_id,omitempty"`
+	Limit         int                    `json:"limit,omitempty"`
+	Offset        int                    `json:"offset,omitempty"`
+	StartingAfter string                 `json:"starting_after,omitempty"`
+	EndingBefore  string                 `json:"ending_before,omitempty"`
+	Status        types.TransactionStatus `json:"status,omitempty"`
+	ReceiverName  string                 `json:"receiver_name,omitempty"`
+	BankAccountID string                 `json:"bank_account_id,omitempty"`
+	Country       string                 `json:"country,omitempty"`
+	PaymentMethod types.Rail             `json:"payment_method,omitempty"`
+	Network       string                 `json:"network,omitempty"`
+	Token         string                 `json:"token,omitempty"`
 }
 
 // ListResponse represents the response when listing payouts.
@@ -145,13 +182,21 @@ type SubmitDocumentsResponse struct {
 
 // CreateResponse represents the response when creating a payout.
 type CreateResponse struct {
-	ID                  string                     `json:"id"`
-	Status              types.TransactionStatus    `json:"status"`
-	TrackingTransaction *types.TrackingTransaction `json:"tracking_transaction,omitempty"`
-	TrackingPayment     *types.TrackingPayment     `json:"tracking_payment,omitempty"`
-	TrackingLiquidity   *types.TrackingLiquidity   `json:"tracking_liquidity,omitempty"`
-	TrackingComplete    *types.TrackingComplete    `json:"tracking_complete,omitempty"`
-	TrackingPartnerFee  *types.TrackingPartnerFee  `json:"tracking_partner_fee,omitempty"`
+	ID                   string                     `json:"id"`
+	Status               types.TransactionStatus    `json:"status"`
+	SenderWalletAddress  string                     `json:"sender_wallet_address,omitempty"`
+	BillingFeeAmount     *float64                   `json:"billing_fee_amount,omitempty"`
+	TransactionFeeAmount *float64                   `json:"transaction_fee_amount,omitempty"`
+	PartnerFee           int                        `json:"partner_fee,omitempty"`
+	TrackingTransaction  *types.TrackingTransaction `json:"tracking_transaction,omitempty"`
+	TrackingPayment      *types.TrackingPayment     `json:"tracking_payment,omitempty"`
+	TrackingLiquidity    *types.TrackingLiquidity   `json:"tracking_liquidity,omitempty"`
+	TrackingComplete     *types.TrackingComplete    `json:"tracking_complete,omitempty"`
+	TrackingPartnerFee   *types.TrackingPartnerFee  `json:"tracking_partner_fee,omitempty"`
+	TrackingDocuments    *types.TrackingDocuments    `json:"tracking_documents,omitempty"`
+	ReceiverID           *string                    `json:"receiver_id,omitempty"`
+	BankAccountID        *string                    `json:"bank_account_id,omitempty"`
+	OfframpWalletID      *string                    `json:"offramp_wallet_id,omitempty"`
 }
 
 // Client handles payout-related operations.
@@ -182,6 +227,33 @@ func (c *Client) List(ctx context.Context, params *ListParams) (*ListResponse, e
 		}
 		if params.Offset > 0 {
 			q.Set("offset", fmt.Sprintf("%d", params.Offset))
+		}
+		if params.StartingAfter != "" {
+			q.Set("starting_after", params.StartingAfter)
+		}
+		if params.EndingBefore != "" {
+			q.Set("ending_before", params.EndingBefore)
+		}
+		if params.Status != "" {
+			q.Set("status", string(params.Status))
+		}
+		if params.ReceiverName != "" {
+			q.Set("receiver_name", params.ReceiverName)
+		}
+		if params.BankAccountID != "" {
+			q.Set("bank_account_id", params.BankAccountID)
+		}
+		if params.Country != "" {
+			q.Set("country", params.Country)
+		}
+		if params.PaymentMethod != "" {
+			q.Set("payment_method", string(params.PaymentMethod))
+		}
+		if params.Network != "" {
+			q.Set("network", params.Network)
+		}
+		if params.Token != "" {
+			q.Set("token", params.Token)
 		}
 		if len(q) > 0 {
 			path += "?" + q.Encode()

@@ -92,18 +92,20 @@ type PaginationMetadata struct {
 }
 
 type TrackingTransaction struct {
-	Step                 string    `json:"step"`
-	Status               string    `json:"status"`
-	TransactionHash      string    `json:"transaction_hash,omitempty"`
-	ExternalID           string    `json:"external_id,omitempty"`
-	CompletedAt          time.Time `json:"completed_at"`
-	SenderName           string    `json:"sender_name,omitempty"`
-	SenderTaxID          string    `json:"sender_tax_id,omitempty"`
-	SenderBankCode       string    `json:"sender_bank_code,omitempty"`
-	SenderAccountNumber  string    `json:"sender_account_number,omitempty"`
-	TraceNumber          string    `json:"trace_number,omitempty"`
-	TransactionReference string    `json:"transaction_reference,omitempty"`
-	Description          string    `json:"description,omitempty"`
+	Step                    string    `json:"step"`
+	Status                  string    `json:"status"`
+	TransactionHash         string    `json:"transaction_hash,omitempty"`
+	ExternalID              string    `json:"external_id,omitempty"`
+	CompletedAt             time.Time `json:"completed_at"`
+	SenderName              string    `json:"sender_name,omitempty"`
+	SenderTaxID             string    `json:"sender_tax_id,omitempty"`
+	SenderBankCode          string    `json:"sender_bank_code,omitempty"`
+	SenderAccountNumber     string    `json:"sender_account_number,omitempty"`
+	TraceNumber             string    `json:"trace_number,omitempty"`
+	TransactionReference    string    `json:"transaction_reference,omitempty"`
+	Description             string    `json:"description,omitempty"`
+	LedgerInTransactionID   *string   `json:"ledger_in_transaction_id,omitempty"`
+	LedgerOutTransactionID  *string   `json:"ledger_out_transaction_id,omitempty"`
 }
 
 type TrackingPayment struct {
@@ -111,6 +113,16 @@ type TrackingPayment struct {
 	ProviderName           string    `json:"provider_name"`
 	ProviderTransactionID  string    `json:"provider_transaction_id,omitempty"`
 	ProviderStatus         string    `json:"provider_status,omitempty"`
+	ProviderErrorReason    *string   `json:"provider_error_reason,omitempty"`
+	ProviderUetr           *string   `json:"provider_uetr,omitempty"`
+	RecipientName          *string   `json:"recipient_name,omitempty"`
+	RecipientTaxID         *string   `json:"recipient_tax_id,omitempty"`
+	RecipientBankCode      *string   `json:"recipient_bank_code,omitempty"`
+	RecipientBranchCode    *string   `json:"recipient_branch_code,omitempty"`
+	RecipientAccountNumber *string   `json:"recipient_account_number,omitempty"`
+	RecipientAccountType   *string   `json:"recipient_account_type,omitempty"`
+	CoelsaID               *string   `json:"coelsa_id,omitempty"`
+	EndToEndID             *string   `json:"end_to_end_id,omitempty"`
 	EstimatedTimeOfArrival string    `json:"estimated_time_of_arrival,omitempty"`
 	CompletedAt            time.Time `json:"completed_at"`
 }
@@ -126,8 +138,17 @@ type TrackingLiquidity struct {
 type TrackingComplete struct {
 	Step            string    `json:"step"`
 	Status          string    `json:"status"`
+	RefundReason    *string   `json:"refund_reason,omitempty"`
 	TransactionHash string    `json:"transaction_hash"`
 	CompletedAt     time.Time `json:"completed_at"`
+}
+
+// TrackingDocuments represents tracking information for payout documents.
+type TrackingDocuments struct {
+	Step        string    `json:"step"`
+	Status      *string   `json:"status,omitempty"`
+	ReviewedBy  *string   `json:"reviewed_by,omitempty"`
+	CompletedAt time.Time `json:"completed_at"`
 }
 
 type TrackingPartnerFee struct {
