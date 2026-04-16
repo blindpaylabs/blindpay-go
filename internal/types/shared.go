@@ -148,9 +148,9 @@ const (
 type SoleProprietorDocType string
 
 const (
-	SoleProprietorDocTypeBankStatement           SoleProprietorDocType = "bank_statement"
-	SoleProprietorDocTypeMasterServiceAgreement  SoleProprietorDocType = "master_service_agreement"
-	SoleProprietorDocTypeSalarySlip              SoleProprietorDocType = "salary_slip"
+	SoleProprietorDocTypeBankStatement          SoleProprietorDocType = "bank_statement"
+	SoleProprietorDocTypeMasterServiceAgreement SoleProprietorDocType = "master_service_agreement"
+	SoleProprietorDocTypeSalarySlip             SoleProprietorDocType = "salary_slip"
 )
 
 type Country string
