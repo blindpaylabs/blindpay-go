@@ -90,6 +90,15 @@ const (
 	TrackingStatusPendingReview TrackingStatus = "pending_review"
 )
 
+type BankingPartner string
+
+const (
+	BankingPartnerCFSB     BankingPartner = "cfsb"
+	BankingPartnerCiti     BankingPartner = "citi"
+	BankingPartnerHSBC     BankingPartner = "hsbc"
+	BankingPartnerJPMorgan BankingPartner = "jpmorgan"
+)
+
 type BusinessIndustry string
 
 const (

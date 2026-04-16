@@ -183,6 +183,15 @@ const (
 	AmlStatusError AmlStatus = "error"
 )
 
+// SoleProprietorDocType represents sole proprietor supporting document types.
+type SoleProprietorDocType string
+
+const (
+	SoleProprietorDocTypeBankStatement          SoleProprietorDocType = "bank_statement"
+	SoleProprietorDocTypeMasterServiceAgreement SoleProprietorDocType = "master_service_agreement"
+	SoleProprietorDocTypeSalarySlip             SoleProprietorDocType = "salary_slip"
+)
+
 // TaxType represents tax identifier types.
 type TaxType string
 
@@ -310,6 +319,8 @@ type Receiver struct {
 	SourceOfWealth          SourceOfWealth         `json:"source_of_wealth,omitempty"`
 	PubliclyTraded          *bool                  `json:"publicly_traded,omitempty"`
 	Occupation              *string                `json:"occupation,omitempty"`
+	RecipientRelationship   types.RecipientRelationship `json:"recipient_relationship,omitempty"`
+	SoleProprietorDocType   SoleProprietorDocType  `json:"sole_proprietor_doc_type,omitempty"`
 	AmlStatus               AmlStatus              `json:"aml_status,omitempty"`
 	AmlHitsData             *AmlHits               `json:"aml_hits,omitempty"`
 	IsTosAccepted           *bool                  `json:"is_tos_accepted,omitempty"`
@@ -340,6 +351,10 @@ type CreateIndividualStandardParams struct {
 	IPAddress             *string                `json:"ip_address,omitempty"`
 	ImageURL              *string                `json:"image_url,omitempty"`
 	Occupation            *string                `json:"occupation,omitempty"`
+	AccountPurpose        *AccountPurpose        `json:"account_purpose,omitempty"`
+	AccountPurposeOther   *string                `json:"account_purpose_other,omitempty"`
+	SourceOfWealth        *SourceOfWealth        `json:"source_of_wealth,omitempty"`
+	RecipientRelationship *types.RecipientRelationship `json:"recipient_relationship,omitempty"`
 }
 
 // CreateIndividualEnhancedParams represents parameters for creating an individual with enhanced KYC.
@@ -372,6 +387,10 @@ type CreateIndividualEnhancedParams struct {
 	IPAddress                        *string                `json:"ip_address,omitempty"`
 	ImageURL                         *string                `json:"image_url,omitempty"`
 	Occupation                       *string                `json:"occupation,omitempty"`
+	AccountPurpose                   *AccountPurpose        `json:"account_purpose,omitempty"`
+	AccountPurposeOther              *string                `json:"account_purpose_other,omitempty"`
+	SourceOfWealth                   *SourceOfWealth        `json:"source_of_wealth,omitempty"`
+	RecipientRelationship            *types.RecipientRelationship `json:"recipient_relationship,omitempty"`
 }
 
 // CreateBusinessStandardParams represents parameters for creating a business with standard KYB.
@@ -406,6 +425,9 @@ type CreateBusinessStandardParams struct {
 	EstimatedAnnualRevenue  *EstimatedAnnualRevenue `json:"estimated_annual_revenue,omitempty"`
 	SourceOfWealth          *SourceOfWealth         `json:"source_of_wealth,omitempty"`
 	PubliclyTraded          *bool                   `json:"publicly_traded,omitempty"`
+	Occupation              *string                 `json:"occupation,omitempty"`
+	RecipientRelationship   *types.RecipientRelationship `json:"recipient_relationship,omitempty"`
+	SoleProprietorDocType   *SoleProprietorDocType  `json:"sole_proprietor_doc_type,omitempty"`
 }
 
 // CreateResponse represents the response when creating a receiver.
@@ -459,6 +481,8 @@ type UpdateParams struct {
 	SourceOfWealth                   *SourceOfWealth         `json:"source_of_wealth,omitempty"`
 	PubliclyTraded                   *bool                   `json:"publicly_traded,omitempty"`
 	Occupation                       *string                 `json:"occupation,omitempty"`
+	RecipientRelationship            *types.RecipientRelationship `json:"recipient_relationship,omitempty"`
+	SoleProprietorDocType            *SoleProprietorDocType  `json:"sole_proprietor_doc_type,omitempty"`
 }
 
 // LimitsResponse represents receiver limits.
@@ -641,6 +665,18 @@ func (c *Client) CreateIndividualWithStandardKYC(ctx context.Context, params *Cr
 	if params.Occupation != nil {
 		body["occupation"] = params.Occupation
 	}
+	if params.AccountPurpose != nil {
+		body["account_purpose"] = params.AccountPurpose
+	}
+	if params.AccountPurposeOther != nil {
+		body["account_purpose_other"] = params.AccountPurposeOther
+	}
+	if params.SourceOfWealth != nil {
+		body["source_of_wealth"] = params.SourceOfWealth
+	}
+	if params.RecipientRelationship != nil {
+		body["recipient_relationship"] = params.RecipientRelationship
+	}
 
 	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, body)
 }
@@ -701,6 +737,18 @@ func (c *Client) CreateIndividualWithEnhancedKYC(ctx context.Context, params *Cr
 	}
 	if params.Occupation != nil {
 		body["occupation"] = params.Occupation
+	}
+	if params.AccountPurpose != nil {
+		body["account_purpose"] = params.AccountPurpose
+	}
+	if params.AccountPurposeOther != nil {
+		body["account_purpose_other"] = params.AccountPurposeOther
+	}
+	if params.SourceOfWealth != nil {
+		body["source_of_wealth"] = params.SourceOfWealth
+	}
+	if params.RecipientRelationship != nil {
+		body["recipient_relationship"] = params.RecipientRelationship
 	}
 
 	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, body)
@@ -776,6 +824,15 @@ func (c *Client) CreateBusinessWithStandardKYB(ctx context.Context, params *Crea
 	}
 	if params.PubliclyTraded != nil {
 		body["publicly_traded"] = params.PubliclyTraded
+	}
+	if params.Occupation != nil {
+		body["occupation"] = params.Occupation
+	}
+	if params.RecipientRelationship != nil {
+		body["recipient_relationship"] = params.RecipientRelationship
+	}
+	if params.SoleProprietorDocType != nil {
+		body["sole_proprietor_doc_type"] = params.SoleProprietorDocType
 	}
 
 	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, body)
@@ -933,6 +990,12 @@ func (c *Client) Update(ctx context.Context, params *UpdateParams) error {
 	}
 	if params.Occupation != nil {
 		body["occupation"] = params.Occupation
+	}
+	if params.RecipientRelationship != nil {
+		body["recipient_relationship"] = params.RecipientRelationship
+	}
+	if params.SoleProprietorDocType != nil {
+		body["sole_proprietor_doc_type"] = params.SoleProprietorDocType
 	}
 
 	_, err := request.Do[struct{}](c.cfg, ctx, "PUT", path, body)

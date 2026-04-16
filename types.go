@@ -380,6 +380,7 @@ type RecipientRelationship = types.RecipientRelationship
 type PayinPaymentMethod = types.PayinPaymentMethod
 type TrackingStatus = types.TrackingStatus
 type BusinessIndustry = types.BusinessIndustry
+type BankingPartner = types.BankingPartner
 
 const (
 	RecipientRelationshipFirstParty            = types.RecipientRelationshipFirstParty
@@ -405,4 +406,9 @@ const (
 	TrackingStatusOnHold        = types.TrackingStatusOnHold
 	TrackingStatusCompleted     = types.TrackingStatusCompleted
 	TrackingStatusPendingReview = types.TrackingStatusPendingReview
+
+	BankingPartnerCFSB     = types.BankingPartnerCFSB
+	BankingPartnerCiti     = types.BankingPartnerCiti
+	BankingPartnerHSBC     = types.BankingPartnerHSBC
+	BankingPartnerJPMorgan = types.BankingPartnerJPMorgan
 )
