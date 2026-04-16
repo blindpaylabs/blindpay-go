@@ -558,6 +558,9 @@ func TestReceivers_GetLimitIncreaseRequests(t *testing.T) {
 						"daily": 30000,
 						"monthly": 150000,
 						"per_transaction": 15000,
+						"approved_per_transaction": 10000,
+						"approved_daily": 20000,
+						"approved_monthly": 100000,
 						"supporting_document_file": "https://example.com/proof-of-income.pdf",
 						"supporting_document_type": "individual_proof_of_income",
 						"created_at": "2024-12-10T14:20:00.000Z",
@@ -585,6 +588,15 @@ func TestReceivers_GetLimitIncreaseRequests(t *testing.T) {
 	require.Equal(t, LimitIncreaseRequestSupportingDocumentTypeIndividualBankStatement, requests[0].SupportingDocumentType)
 	require.Equal(t, "rl_000000000001", requests[1].ID)
 	require.Equal(t, LimitIncreaseRequestStatusApproved, requests[1].Status)
+	require.NotNil(t, requests[1].ApprovedPerTransaction)
+	require.Equal(t, 10000, *requests[1].ApprovedPerTransaction)
+	require.NotNil(t, requests[1].ApprovedDaily)
+	require.Equal(t, 20000, *requests[1].ApprovedDaily)
+	require.NotNil(t, requests[1].ApprovedMonthly)
+	require.Equal(t, 100000, *requests[1].ApprovedMonthly)
+	require.Nil(t, requests[0].ApprovedPerTransaction)
+	require.Nil(t, requests[0].ApprovedDaily)
+	require.Nil(t, requests[0].ApprovedMonthly)
 }
 
 func TestReceivers_RequestLimitIncrease(t *testing.T) {

@@ -483,6 +483,9 @@ type LimitIncreaseRequest struct {
 	Daily                  float64                                    `json:"daily"`
 	Monthly                float64                                    `json:"monthly"`
 	PerTransaction         float64                                    `json:"per_transaction"`
+	ApprovedPerTransaction *int                                       `json:"approved_per_transaction,omitempty"`
+	ApprovedDaily          *int                                       `json:"approved_daily,omitempty"`
+	ApprovedMonthly        *int                                       `json:"approved_monthly,omitempty"`
 	SupportingDocumentFile string                                     `json:"supporting_document_file"`
 	SupportingDocumentType LimitIncreaseRequestSupportingDocumentType `json:"supporting_document_type"`
 	CreatedAt              string                                     `json:"created_at"`
