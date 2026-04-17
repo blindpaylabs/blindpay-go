@@ -54,6 +54,9 @@ type Transfer struct {
 	ReceiverWalletAddress         string                        `json:"receiver_wallet_address"`
 	PartnerFeeAmount              *float64                      `json:"partner_fee_amount"`
 	ExternalID                    *string                       `json:"external_id,omitempty"`
+	ReceiverID                    string                        `json:"receiver_id"`
+	Address                       string                        `json:"address"`
+	Network                       types.Network                 `json:"network"`
 }
 
 // CreateQuoteParams represents parameters for creating a transfer quote.
@@ -72,9 +75,9 @@ type CreateQuoteParams struct {
 // CreateQuoteResponse represents the response when creating a transfer quote.
 type CreateQuoteResponse struct {
 	ID                  string   `json:"id"`
-	ExpiresAt           int64    `json:"expires_at"`
-	CommercialQuotation float64  `json:"commercial_quotation"`
-	BlindpayQuotation   float64  `json:"blindpay_quotation"`
+	ExpiresAt           *float64 `json:"expires_at"`
+	CommercialQuotation *float64 `json:"commercial_quotation"`
+	BlindpayQuotation   *float64 `json:"blindpay_quotation"`
 	ReceiverAmount      float64  `json:"receiver_amount"`
 	SenderAmount        float64  `json:"sender_amount"`
 	PartnerFeeAmount    *float64 `json:"partner_fee_amount"`
