@@ -46,8 +46,6 @@ const (
 	BankAccountTypeChecking = types.BankAccountTypeChecking
 	BankAccountTypeSaving   = types.BankAccountTypeSaving
 
-	CurrencyUSDC = types.CurrencyUSDC
-	CurrencyUSDT = types.CurrencyUSDT
 	CurrencyUSDB = types.CurrencyUSDB
 	CurrencyBRL  = types.CurrencyBRL
 	CurrencyUSD  = types.CurrencyUSD
@@ -360,6 +358,7 @@ const (
 	RailACHCopBitso        = types.RailACHCopBitso
 	RailInternationalSwift = types.RailInternationalSwift
 	RailRTP                = types.RailRTP
+	RailTED                = types.RailTED
 )
 
 const (
@@ -391,6 +390,9 @@ type RecipientRelationship = types.RecipientRelationship
 type PayinPaymentMethod = types.PayinPaymentMethod
 type TrackingStatus = types.TrackingStatus
 type BusinessIndustry = types.BusinessIndustry
+type ActorType = types.ActorType
+type Operation = types.Operation
+type SwiftPaymentCode = types.SwiftPaymentCode
 
 const (
 	RecipientRelationshipFirstParty            = types.RecipientRelationshipFirstParty
@@ -411,9 +413,54 @@ const (
 	PayinPaymentMethodTransfers          = types.PayinPaymentMethodTransfers
 	PayinPaymentMethodPSE                = types.PayinPaymentMethodPSE
 	PayinPaymentMethodInternationalSwift = types.PayinPaymentMethodInternationalSwift
+	PayinPaymentMethodRTP                = types.PayinPaymentMethodRTP
+	PayinPaymentMethodTED                = types.PayinPaymentMethodTED
 
 	TrackingStatusProcessing    = types.TrackingStatusProcessing
 	TrackingStatusOnHold        = types.TrackingStatusOnHold
 	TrackingStatusCompleted     = types.TrackingStatusCompleted
 	TrackingStatusPendingReview = types.TrackingStatusPendingReview
+
+	ActorTypeAPIKey = types.ActorTypeAPIKey
+	ActorTypeUser   = types.ActorTypeUser
+
+	OperationCreate = types.OperationCreate
+	OperationDelete = types.OperationDelete
+	OperationUpdate = types.OperationUpdate
+
+	SwiftPaymentCodeBEN  = types.SwiftPaymentCodeBEN
+	SwiftPaymentCodeOUR  = types.SwiftPaymentCodeOUR
+	SwiftPaymentCodeSHA  = types.SwiftPaymentCodeSHA
+	SwiftPaymentCodeCHAR = types.SwiftPaymentCodeCHAR
+	SwiftPaymentCodeCRED = types.SwiftPaymentCodeCRED
+	SwiftPaymentCodeDEBT = types.SwiftPaymentCodeDEBT
+	SwiftPaymentCodeINTV = types.SwiftPaymentCodeINTV
+	SwiftPaymentCodeLIMA = types.SwiftPaymentCodeLIMA
+	SwiftPaymentCodeNORG = types.SwiftPaymentCodeNORG
+	SwiftPaymentCodePHOB = types.SwiftPaymentCodePHOB
+	SwiftPaymentCodePHOI = types.SwiftPaymentCodePHOI
+	SwiftPaymentCodePHON = types.SwiftPaymentCodePHON
+	SwiftPaymentCodeREPA = types.SwiftPaymentCodeREPA
+	SwiftPaymentCodeSDVA = types.SwiftPaymentCodeSDVA
+	SwiftPaymentCodeTELE = types.SwiftPaymentCodeTELE
+	SwiftPaymentCodeTRFE = types.SwiftPaymentCodeTRFE
+	SwiftPaymentCodeUNDT = types.SwiftPaymentCodeUNDT
+	SwiftPaymentCodeHOLD = types.SwiftPaymentCodeHOLD
+	SwiftPaymentCodeNETC = types.SwiftPaymentCodeNETC
+	SwiftPaymentCodeNORM = types.SwiftPaymentCodeNORM
+	SwiftPaymentCodeSAME = types.SwiftPaymentCodeSAME
+	SwiftPaymentCodeFOLL = types.SwiftPaymentCodeFOLL
+	SwiftPaymentCodeISDA = types.SwiftPaymentCodeISDA
+	SwiftPaymentCodeSLEV = types.SwiftPaymentCodeSLEV
+	SwiftPaymentCodeTYPE = types.SwiftPaymentCodeTYPE
+	SwiftPaymentCodeUNKN = types.SwiftPaymentCodeUNKN
+	SwiftPaymentCodeURGT = types.SwiftPaymentCodeURGT
+	SwiftPaymentCodeNURP = types.SwiftPaymentCodeNURP
+	SwiftPaymentCodeCOMP = types.SwiftPaymentCodeCOMP
+	SwiftPaymentCodeMULT = types.SwiftPaymentCodeMULT
+	SwiftPaymentCodePRTY = types.SwiftPaymentCodePRTY
+	SwiftPaymentCodeSPLT = types.SwiftPaymentCodeSPLT
+	SwiftPaymentCodeBACK = types.SwiftPaymentCodeBACK
+	SwiftPaymentCodeCANC = types.SwiftPaymentCodeCANC
+	SwiftPaymentCodeCOVR = types.SwiftPaymentCodeCOVR
 )

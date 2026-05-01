@@ -76,6 +76,10 @@ type Payout struct {
 	SwiftAccountNumberIban     string                          `json:"swift_account_number_iban,omitempty"`
 	TransfersAccount           string                          `json:"transfers_account,omitempty"`
 	TransfersType              bankaccounts.ArgentinaTransfers `json:"transfers_type,omitempty"`
+	PartnerFeeID               *string                         `json:"partner_fee_id,omitempty"`
+	TedBankCode                *string                         `json:"ted_bank_code,omitempty"`
+	TedBranchCode              *string                         `json:"ted_branch_code,omitempty"`
+	TedCpfCnpj                 *string                         `json:"ted_cpf_cnpj,omitempty"`
 	HasVirtualAccount          bool                            `json:"has_virtual_account"`
 }
 

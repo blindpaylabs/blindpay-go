@@ -89,6 +89,9 @@ type BankAccount struct {
 	SwiftIntermediaryBankAccountNumberIban string                `json:"swift_intermediary_bank_account_number_iban,omitempty"`
 	SwiftIntermediaryBankName              string                `json:"swift_intermediary_bank_name,omitempty"`
 	SwiftIntermediaryBankCountry           types.Country         `json:"swift_intermediary_bank_country,omitempty"`
+	TedBankCode                            *string               `json:"ted_bank_code,omitempty"`
+	TedBranchCode                          *string               `json:"ted_branch_code,omitempty"`
+	TedCpfCnpj                             *string               `json:"ted_cpf_cnpj,omitempty"`
 	TronWalletHash                         string                `json:"tron_wallet_hash,omitempty"`
 	OfframpWallets                         []OfframpWalletInfo   `json:"offramp_wallets,omitempty"`
 	CreatedAt                              time.Time             `json:"created_at"`
@@ -440,6 +443,34 @@ type CreateRtpParams struct {
 	PhoneNumber           string                      `json:"phone_number,omitempty"`
 	TaxID                 string                      `json:"tax_id,omitempty"`
 	DateOfBirth           string                      `json:"date_of_birth,omitempty"`
+}
+
+// CreateTedParams represents parameters for creating a TED bank account.
+type CreateTedParams struct {
+	ReceiverID      string                      `json:"-"`
+	Name            string                      `json:"name"`
+	BeneficiaryName string                      `json:"beneficiary_name"`
+	TedBankCode     string                      `json:"ted_bank_code"`
+	TedBranchCode   string                      `json:"ted_branch_code"`
+	TedCpfCnpj      string                      `json:"ted_cpf_cnpj"`
+	AccountNumber   string                      `json:"account_number"`
+	AccountType     types.BankAccountType       `json:"account_type"`
+	AccountClass    types.AccountClass          `json:"account_class"`
+}
+
+// CreateTedResponse represents the response when creating a TED bank account.
+type CreateTedResponse struct {
+	ID              string                `json:"id"`
+	Type            string                `json:"type"`
+	Name            string                `json:"name"`
+	BeneficiaryName string                `json:"beneficiary_name"`
+	TedBankCode     string                `json:"ted_bank_code"`
+	TedBranchCode   string                `json:"ted_branch_code"`
+	TedCpfCnpj      string                `json:"ted_cpf_cnpj"`
+	AccountNumber   string                `json:"account_number"`
+	AccountType     types.BankAccountType `json:"account_type"`
+	AccountClass    types.AccountClass    `json:"account_class"`
+	CreatedAt       time.Time             `json:"created_at"`
 }
 
 // Client handles bank account-related operations.
@@ -829,4 +860,30 @@ func (c *Client) CreateRtp(ctx context.Context, params *CreateRtpParams) (*Creat
 	}
 
 	return request.Do[*CreateRtpResponse](c.cfg, ctx, "POST", path, body)
+}
+
+// CreateTed creates a TED bank account.
+func (c *Client) CreateTed(ctx context.Context, params *CreateTedParams) (*CreateTedResponse, error) {
+	if params == nil {
+		return nil, fmt.Errorf("params cannot be nil")
+	}
+	if params.ReceiverID == "" {
+		return nil, fmt.Errorf("receiver ID cannot be empty")
+	}
+
+	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", c.instanceID, params.ReceiverID)
+
+	body := map[string]any{
+		"type":             "ted",
+		"name":             params.Name,
+		"beneficiary_name": params.BeneficiaryName,
+		"ted_bank_code":    params.TedBankCode,
+		"ted_branch_code":  params.TedBranchCode,
+		"ted_cpf_cnpj":     params.TedCpfCnpj,
+		"account_number":   params.AccountNumber,
+		"account_type":     params.AccountType,
+		"account_class":    params.AccountClass,
+	}
+
+	return request.Do[*CreateTedResponse](c.cfg, ctx, "POST", path, body)
 }

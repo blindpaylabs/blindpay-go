@@ -57,8 +57,6 @@ const (
 type Currency string
 
 const (
-	CurrencyUSDC Currency = "USDC"
-	CurrencyUSDT Currency = "USDT"
 	CurrencyUSDB Currency = "USDB"
 	CurrencyBRL  Currency = "BRL"
 	CurrencyUSD  Currency = "USD"
