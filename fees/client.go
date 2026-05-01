@@ -37,6 +37,7 @@ type GetResponse struct {
 	Arbitrum           FeeOptions `json:"arbitrum"`
 	Stellar            FeeOptions `json:"stellar"`
 	Solana             FeeOptions `json:"solana"`
+	TED                *interface{} `json:"ted,omitempty"`
 	CreatedAt          time.Time  `json:"created_at"`
 	UpdatedAt          time.Time  `json:"updated_at"`
 }

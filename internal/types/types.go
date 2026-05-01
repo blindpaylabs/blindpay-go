@@ -12,6 +12,7 @@ const (
 	RailACHCopBitso        Rail = "ach_cop_bitso"
 	RailInternationalSwift Rail = "international_swift"
 	RailRTP                Rail = "rtp"
+	RailTED                Rail = "ted"
 )
 
 type BankDetail struct {
@@ -79,6 +80,8 @@ const (
 	PayinPaymentMethodTransfers          PayinPaymentMethod = "transfers"
 	PayinPaymentMethodPSE                PayinPaymentMethod = "pse"
 	PayinPaymentMethodInternationalSwift PayinPaymentMethod = "international_swift"
+	PayinPaymentMethodRTP                PayinPaymentMethod = "rtp"
+	PayinPaymentMethodTED                PayinPaymentMethod = "ted"
 )
 
 type TrackingStatus string
@@ -88,6 +91,61 @@ const (
 	TrackingStatusOnHold        TrackingStatus = "on_hold"
 	TrackingStatusCompleted     TrackingStatus = "completed"
 	TrackingStatusPendingReview TrackingStatus = "pending_review"
+)
+
+type ActorType string
+
+const (
+	ActorTypeAPIKey ActorType = "api_key"
+	ActorTypeUser   ActorType = "user"
+)
+
+type Operation string
+
+const (
+	OperationCreate Operation = "create"
+	OperationDelete Operation = "delete"
+	OperationUpdate Operation = "update"
+)
+
+type SwiftPaymentCode string
+
+const (
+	SwiftPaymentCodeBEN  SwiftPaymentCode = "BEN"
+	SwiftPaymentCodeOUR  SwiftPaymentCode = "OUR"
+	SwiftPaymentCodeSHA  SwiftPaymentCode = "SHA"
+	SwiftPaymentCodeCHAR SwiftPaymentCode = "CHAR"
+	SwiftPaymentCodeCRED SwiftPaymentCode = "CRED"
+	SwiftPaymentCodeDEBT SwiftPaymentCode = "DEBT"
+	SwiftPaymentCodeINTV SwiftPaymentCode = "INTV"
+	SwiftPaymentCodeLIMA SwiftPaymentCode = "LIMA"
+	SwiftPaymentCodeNORG SwiftPaymentCode = "NORG"
+	SwiftPaymentCodePHOB SwiftPaymentCode = "PHOB"
+	SwiftPaymentCodePHOI SwiftPaymentCode = "PHOI"
+	SwiftPaymentCodePHON SwiftPaymentCode = "PHON"
+	SwiftPaymentCodeREPA SwiftPaymentCode = "REPA"
+	SwiftPaymentCodeSDVA SwiftPaymentCode = "SDVA"
+	SwiftPaymentCodeTELE SwiftPaymentCode = "TELE"
+	SwiftPaymentCodeTRFE SwiftPaymentCode = "TRFE"
+	SwiftPaymentCodeUNDT SwiftPaymentCode = "UNDT"
+	SwiftPaymentCodeHOLD SwiftPaymentCode = "HOLD"
+	SwiftPaymentCodeNETC SwiftPaymentCode = "NETC"
+	SwiftPaymentCodeNORM SwiftPaymentCode = "NORM"
+	SwiftPaymentCodeSAME SwiftPaymentCode = "SAME"
+	SwiftPaymentCodeFOLL SwiftPaymentCode = "FOLL"
+	SwiftPaymentCodeISDA SwiftPaymentCode = "ISDA"
+	SwiftPaymentCodeSLEV SwiftPaymentCode = "SLEV"
+	SwiftPaymentCodeTYPE SwiftPaymentCode = "TYPE"
+	SwiftPaymentCodeUNKN SwiftPaymentCode = "UNKN"
+	SwiftPaymentCodeURGT SwiftPaymentCode = "URGT"
+	SwiftPaymentCodeNURP SwiftPaymentCode = "NURP"
+	SwiftPaymentCodeCOMP SwiftPaymentCode = "COMP"
+	SwiftPaymentCodeMULT SwiftPaymentCode = "MULT"
+	SwiftPaymentCodePRTY SwiftPaymentCode = "PRTY"
+	SwiftPaymentCodeSPLT SwiftPaymentCode = "SPLT"
+	SwiftPaymentCodeBACK SwiftPaymentCode = "BACK"
+	SwiftPaymentCodeCANC SwiftPaymentCode = "CANC"
+	SwiftPaymentCodeCOVR SwiftPaymentCode = "COVR"
 )
 
 type BusinessIndustry string
