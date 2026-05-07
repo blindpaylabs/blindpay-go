@@ -77,6 +77,10 @@ type Payout struct {
 	TransfersAccount           string                          `json:"transfers_account,omitempty"`
 	TransfersType              bankaccounts.ArgentinaTransfers `json:"transfers_type,omitempty"`
 	HasVirtualAccount          bool                            `json:"has_virtual_account"`
+	PartnerFeeID               *string                         `json:"partner_fee_id,omitempty"`
+	TedBankCode                *string                         `json:"ted_bank_code,omitempty"`
+	TedBranchCode              *string                         `json:"ted_branch_code,omitempty"`
+	TedCpfCnpj                 *string                         `json:"ted_cpf_cnpj,omitempty"`
 }
 
 // ListParams represents parameters for listing payouts.

@@ -12,6 +12,7 @@ const (
 	RailACHCopBitso        Rail = "ach_cop_bitso"
 	RailInternationalSwift Rail = "international_swift"
 	RailRTP                Rail = "rtp"
+	RailTed                Rail = "ted"
 )
 
 type BankDetail struct {
@@ -79,6 +80,8 @@ const (
 	PayinPaymentMethodTransfers          PayinPaymentMethod = "transfers"
 	PayinPaymentMethodPSE                PayinPaymentMethod = "pse"
 	PayinPaymentMethodInternationalSwift PayinPaymentMethod = "international_swift"
+	PayinPaymentMethodRTP                PayinPaymentMethod = "rtp"
+	PayinPaymentMethodTed                PayinPaymentMethod = "ted"
 )
 
 type TrackingStatus string

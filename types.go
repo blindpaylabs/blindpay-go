@@ -360,6 +360,7 @@ const (
 	RailACHCopBitso        = types.RailACHCopBitso
 	RailInternationalSwift = types.RailInternationalSwift
 	RailRTP                = types.RailRTP
+	RailTed                = types.RailTed
 )
 
 const (
@@ -411,6 +412,8 @@ const (
 	PayinPaymentMethodTransfers          = types.PayinPaymentMethodTransfers
 	PayinPaymentMethodPSE                = types.PayinPaymentMethodPSE
 	PayinPaymentMethodInternationalSwift = types.PayinPaymentMethodInternationalSwift
+	PayinPaymentMethodRTP                = types.PayinPaymentMethodRTP
+	PayinPaymentMethodTed                = types.PayinPaymentMethodTed
 
 	TrackingStatusProcessing    = types.TrackingStatusProcessing
 	TrackingStatusOnHold        = types.TrackingStatusOnHold

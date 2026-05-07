@@ -52,6 +52,7 @@ type Payin struct {
 	PseFullName         *string                    `json:"pse_full_name,omitempty"`
 	PsePaymentLink      *string                    `json:"pse_payment_link,omitempty"`
 	PseTaxId            *string                    `json:"pse_tax_id,omitempty"`
+	PartnerFeeID        *string                    `json:"partner_fee_id,omitempty"`
 }
 
 // BankDetails represents bank details for a payin.

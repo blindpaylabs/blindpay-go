@@ -109,11 +109,13 @@ const (
 type KycStatus string
 
 const (
-	KycStatusVerifying     KycStatus = "verifying"
-	KycStatusApproved      KycStatus = "approved"
-	KycStatusRejected      KycStatus = "rejected"
-	KycStatusDeprecated    KycStatus = "deprecated"
-	KycStatusPendingReview KycStatus = "pending_review"
+	KycStatusVerifying         KycStatus = "verifying"
+	KycStatusApproved          KycStatus = "approved"
+	KycStatusRejected          KycStatus = "rejected"
+	KycStatusDeprecated        KycStatus = "deprecated"
+	KycStatusPendingReview     KycStatus = "pending_review"
+	KycStatusAwaitingContract  KycStatus = "awaiting_contract"
+	KycStatusComplianceRequest KycStatus = "compliance_request"
 )
 
 // AccountPurpose represents the purpose of the account.
