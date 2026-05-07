@@ -46,6 +46,8 @@ const (
 	BankAccountTypeChecking = types.BankAccountTypeChecking
 	BankAccountTypeSaving   = types.BankAccountTypeSaving
 
+	CurrencyUSDC = types.CurrencyUSDC
+	CurrencyUSDT = types.CurrencyUSDT
 	CurrencyUSDB = types.CurrencyUSDB
 	CurrencyBRL  = types.CurrencyBRL
 	CurrencyUSD  = types.CurrencyUSD
