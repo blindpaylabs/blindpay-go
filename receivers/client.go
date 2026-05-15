@@ -193,6 +193,52 @@ const (
 	TaxTypeITIN TaxType = "ITIN"
 )
 
+// RfiStatus represents the status of an RFI.
+type RfiStatus string
+
+const (
+	RfiStatusPending   RfiStatus = "pending"
+	RfiStatusSubmitted RfiStatus = "submitted"
+	RfiStatusExpired   RfiStatus = "expired"
+	RfiStatusCancelled RfiStatus = "cancelled"
+)
+
+// RfiSection represents a section of an RFI request.
+type RfiSection struct {
+	// This struct would be defined based on actual API response structure
+	// Since it's not detailed in the changelog, defining as a generic object
+	ID     string      `json:"id,omitempty"`
+	Type   string      `json:"type,omitempty"`
+	Fields interface{} `json:"fields,omitempty"`
+}
+
+// Rfi represents an RFI (Request for Information).
+type Rfi struct {
+	ID                       string       `json:"id"`
+	ReceiverID               string       `json:"receiver_id"`
+	InstanceID               string       `json:"instance_id"`
+	Status                   RfiStatus    `json:"status"`
+	Request                  []RfiSection `json:"request"`
+	Response                 interface{}  `json:"response"`
+	ExpiresAt                time.Time    `json:"expires_at"`
+	SubmittedAt              *time.Time   `json:"submitted_at"`
+	CreatedAt                time.Time    `json:"created_at"`
+	ReceiverType             string       `json:"receiver_type"`
+	ReceiverAipriseSessionID *string      `json:"receiver_aiprise_session_id"`
+	ReceiverKycStatus        string       `json:"receiver_kyc_status"`
+}
+
+// RfiSubmitResponse represents the response when submitting an RFI.
+type RfiSubmitResponse struct {
+	Success bool `json:"success"`
+}
+
+// RfiSubmitParams represents parameters for submitting an RFI response.
+type RfiSubmitParams struct {
+	ReceiverID string      `json:"-"`
+	Response   interface{} `json:"response"`
+}
+
 // FraudWarning represents a fraud warning.
 type FraudWarning struct {
 	ID        *string  `json:"id"`
@@ -1026,4 +1072,32 @@ func (c *Client) RequestLimitIncrease(ctx context.Context, params *RequestLimitI
 	}
 
 	return request.Do[*RequestLimitIncreaseResponse](c.cfg, ctx, "POST", path, body)
+}
+
+// GetRfi retrieves an open RFI for a receiver.
+func (c *Client) GetRfi(ctx context.Context, receiverID string) (*Rfi, error) {
+	if receiverID == "" {
+		return nil, fmt.Errorf("receiver ID cannot be empty")
+	}
+
+	path := fmt.Sprintf("/instances/%s/receivers/%s/rfi", c.instanceID, receiverID)
+	return request.Do[*Rfi](c.cfg, ctx, "GET", path, nil)
+}
+
+// SubmitRfi submits an RFI response for a receiver.
+func (c *Client) SubmitRfi(ctx context.Context, params *RfiSubmitParams) (*RfiSubmitResponse, error) {
+	if params == nil {
+		return nil, fmt.Errorf("params cannot be nil")
+	}
+	if params.ReceiverID == "" {
+		return nil, fmt.Errorf("receiver ID cannot be empty")
+	}
+
+	path := fmt.Sprintf("/instances/%s/receivers/%s/rfi", c.instanceID, params.ReceiverID)
+
+	body := map[string]any{
+		"response": params.Response,
+	}
+
+	return request.Do[*RfiSubmitResponse](c.cfg, ctx, "POST", path, body)
 }

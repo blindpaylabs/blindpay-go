@@ -250,4 +250,28 @@ const (
 	BusinessIndustrySaas        BusinessIndustry = "saas"
 	BusinessIndustrySocial      BusinessIndustry = "social"
 	BusinessIndustryWallet      BusinessIndustry = "wallet"
+	BusinessIndustry446120      BusinessIndustry = "446120"
+)
+
+type Decision string
+
+const (
+	DecisionApproved Decision = "approved"
+	DecisionRejected Decision = "rejected"
+)
+
+type ReceiverType string
+
+const (
+	ReceiverTypeBusiness   ReceiverType = "business"
+	ReceiverTypeIndividual ReceiverType = "individual"
+)
+
+type SwiftPaymentCode string
+
+const (
+	SwiftPaymentCodeHkSwiftCharitableDonation SwiftPaymentCode = "hk_swift_charitabledonation"
+	SwiftPaymentCodeHkSwiftGoods              SwiftPaymentCode = "hk_swift_goods"
+	SwiftPaymentCodeHkSwiftPersonal           SwiftPaymentCode = "hk_swift_personal"
+	SwiftPaymentCodeHkSwiftServices           SwiftPaymentCode = "hk_swift_services"
 )
