@@ -89,6 +89,7 @@ type BankAccount struct {
 	SwiftIntermediaryBankAccountNumberIban string                `json:"swift_intermediary_bank_account_number_iban,omitempty"`
 	SwiftIntermediaryBankName              string                `json:"swift_intermediary_bank_name,omitempty"`
 	SwiftIntermediaryBankCountry           types.Country         `json:"swift_intermediary_bank_country,omitempty"`
+	SwiftIfscBranchCode                    *string               `json:"swift_ifsc_branch_code,omitempty"`
 	TronWalletHash                         string                `json:"tron_wallet_hash,omitempty"`
 	OfframpWallets                         []OfframpWalletInfo   `json:"offramp_wallets,omitempty"`
 	TedBankCode                            *string               `json:"ted_bank_code,omitempty"`
@@ -257,6 +258,7 @@ type CreateInternationalSwiftResponse struct {
 	SwiftIntermediaryBankName              *string                     `json:"swift_intermediary_bank_name"`
 	SwiftIntermediaryBankCountry           *types.Country              `json:"swift_intermediary_bank_country"`
 	SwiftPaymentCode                       *string                     `json:"swift_payment_code"`
+	SwiftIfscBranchCode                    *string                     `json:"swift_ifsc_branch_code"`
 	CreatedAt                              time.Time                   `json:"created_at"`
 }
 
@@ -460,6 +462,7 @@ type CreateInternationalSwiftParams struct {
 	SwiftIntermediaryBankName              *string                     `json:"swift_intermediary_bank_name"`
 	SwiftIntermediaryBankSwiftCodeBic      *string                     `json:"swift_intermediary_bank_swift_code_bic"`
 	SwiftPaymentCode                       string                      `json:"swift_payment_code,omitempty"`
+	SwiftIfscBranchCode                    *string                     `json:"swift_ifsc_branch_code,omitempty"`
 	BusinessIndustry                       types.BusinessIndustry      `json:"business_industry,omitempty"`
 	PhoneNumber                            string                      `json:"phone_number,omitempty"`
 	TaxID                                  string                      `json:"tax_id,omitempty"`
@@ -789,6 +792,9 @@ func (c *Client) CreateInternationalSwift(ctx context.Context, params *CreateInt
 	}
 	if params.SwiftPaymentCode != "" {
 		body["swift_payment_code"] = params.SwiftPaymentCode
+	}
+	if params.SwiftIfscBranchCode != nil {
+		body["swift_ifsc_branch_code"] = params.SwiftIfscBranchCode
 	}
 	if params.BusinessIndustry != "" {
 		body["business_industry"] = params.BusinessIndustry

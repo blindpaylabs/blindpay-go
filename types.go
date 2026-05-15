@@ -392,6 +392,9 @@ type RecipientRelationship = types.RecipientRelationship
 type PayinPaymentMethod = types.PayinPaymentMethod
 type TrackingStatus = types.TrackingStatus
 type BusinessIndustry = types.BusinessIndustry
+type Decision = types.Decision
+type ReceiverType = types.ReceiverType
+type SwiftPaymentCode = types.SwiftPaymentCode
 
 const (
 	RecipientRelationshipFirstParty            = types.RecipientRelationshipFirstParty
@@ -419,4 +422,17 @@ const (
 	TrackingStatusOnHold        = types.TrackingStatusOnHold
 	TrackingStatusCompleted     = types.TrackingStatusCompleted
 	TrackingStatusPendingReview = types.TrackingStatusPendingReview
+
+	BusinessIndustry446120 = types.BusinessIndustry446120
+
+	DecisionApproved = types.DecisionApproved
+	DecisionRejected = types.DecisionRejected
+
+	ReceiverTypeBusiness   = types.ReceiverTypeBusiness
+	ReceiverTypeIndividual = types.ReceiverTypeIndividual
+
+	SwiftPaymentCodeHkSwiftCharitableDonation = types.SwiftPaymentCodeHkSwiftCharitableDonation
+	SwiftPaymentCodeHkSwiftGoods              = types.SwiftPaymentCodeHkSwiftGoods
+	SwiftPaymentCodeHkSwiftPersonal           = types.SwiftPaymentCodeHkSwiftPersonal
+	SwiftPaymentCodeHkSwiftServices           = types.SwiftPaymentCodeHkSwiftServices
 )
