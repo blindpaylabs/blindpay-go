@@ -366,6 +366,7 @@ const (
 const (
 	WebhookEventReceiverNew            = types.WebhookEventReceiverNew
 	WebhookEventReceiverUpdate         = types.WebhookEventReceiverUpdate
+	WebhookEventReceiverDelete         = types.WebhookEventReceiverDelete
 	WebhookEventBankAccountNew         = types.WebhookEventBankAccountNew
 	WebhookEventPayoutNew              = types.WebhookEventPayoutNew
 	WebhookEventPayoutUpdate           = types.WebhookEventPayoutUpdate
@@ -392,6 +393,7 @@ type RecipientRelationship = types.RecipientRelationship
 type PayinPaymentMethod = types.PayinPaymentMethod
 type TrackingStatus = types.TrackingStatus
 type BusinessIndustry = types.BusinessIndustry
+type ManualExecutionStatus = types.ManualExecutionStatus
 
 const (
 	RecipientRelationshipFirstParty            = types.RecipientRelationshipFirstParty
@@ -419,4 +421,6 @@ const (
 	TrackingStatusOnHold        = types.TrackingStatusOnHold
 	TrackingStatusCompleted     = types.TrackingStatusCompleted
 	TrackingStatusPendingReview = types.TrackingStatusPendingReview
+
+	ManualExecutionStatusFailed = types.ManualExecutionStatusFailed
 )

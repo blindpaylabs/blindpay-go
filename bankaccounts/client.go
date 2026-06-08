@@ -94,6 +94,7 @@ type BankAccount struct {
 	TedBankCode                            *string               `json:"ted_bank_code,omitempty"`
 	TedBranchCode                          *string               `json:"ted_branch_code,omitempty"`
 	TedCpfCnpj                             *string               `json:"ted_cpf_cnpj,omitempty"`
+	SepaBeneficiaryBic                     *string               `json:"sepa_beneficiary_bic,omitempty"`
 	CreatedAt                              time.Time             `json:"created_at"`
 }
 
@@ -117,6 +118,7 @@ type GetResponse struct {
 	SwiftCode         *string               `json:"swift_code"`
 	IBAN              *string               `json:"iban"`
 	IsPrimary         bool                  `json:"is_primary"`
+	SepaBeneficiaryBic *string               `json:"sepa_beneficiary_bic,omitempty"`
 	CreatedAt         time.Time             `json:"created_at"`
 	UpdatedAt         time.Time             `json:"updated_at"`
 }
@@ -257,6 +259,7 @@ type CreateInternationalSwiftResponse struct {
 	SwiftIntermediaryBankName              *string                     `json:"swift_intermediary_bank_name"`
 	SwiftIntermediaryBankCountry           *types.Country              `json:"swift_intermediary_bank_country"`
 	SwiftPaymentCode                       *string                     `json:"swift_payment_code"`
+	SepaBeneficiaryBic                     *string                     `json:"sepa_beneficiary_bic,omitempty"`
 	CreatedAt                              time.Time                   `json:"created_at"`
 }
 
@@ -464,6 +467,7 @@ type CreateInternationalSwiftParams struct {
 	PhoneNumber                            string                      `json:"phone_number,omitempty"`
 	TaxID                                  string                      `json:"tax_id,omitempty"`
 	DateOfBirth                            string                      `json:"date_of_birth,omitempty"`
+	SepaBeneficiaryBic                     *string                     `json:"sepa_beneficiary_bic,omitempty"`
 }
 
 // CreateRtpParams represents parameters for creating an RTP (Real-Time Payments) bank account.
@@ -802,6 +806,9 @@ func (c *Client) CreateInternationalSwift(ctx context.Context, params *CreateInt
 	if params.DateOfBirth != "" {
 		body["date_of_birth"] = params.DateOfBirth
 	}
+	if params.SepaBeneficiaryBic != nil {
+		body["sepa_beneficiary_bic"] = params.SepaBeneficiaryBic
+	}
 
 	return request.Do[*CreateInternationalSwiftResponse](c.cfg, ctx, "POST", path, body)
 }
@@ -920,4 +927,73 @@ func (c *Client) CreateTed(ctx context.Context, params *CreateTedParams) (*Creat
 	}
 
 	return request.Do[*CreateTedResponse](c.cfg, ctx, "POST", path, body)
+}
+
+// CreateSepaParams represents parameters for creating a SEPA bank account.
+type CreateSepaParams struct {
+	CustomerID                        string                `json:"-"`
+	Name                              string                `json:"name"`
+	AccountClass                      types.AccountClass    `json:"account_class"`
+	SepaIban                          string                `json:"sepa_iban"`
+	SepaBeneficiaryBic                string                `json:"sepa_beneficiary_bic"`
+	SepaBeneficiaryLegalName          string                `json:"sepa_beneficiary_legal_name"`
+	SepaBeneficiaryAddressLine1       string                `json:"sepa_beneficiary_address_line_1"`
+	SepaBeneficiaryAddressLine2       *string               `json:"sepa_beneficiary_address_line_2,omitempty"`
+	SepaBeneficiaryCity               string                `json:"sepa_beneficiary_city"`
+	SepaBeneficiaryStateProvinceRegion *string              `json:"sepa_beneficiary_state_province_region,omitempty"`
+	SepaBeneficiaryPostalCode         string                `json:"sepa_beneficiary_postal_code"`
+	SepaBeneficiaryCountry            types.Country         `json:"sepa_beneficiary_country"`
+}
+
+// CreateSepaResponse represents the response when creating a SEPA bank account.
+type CreateSepaResponse struct {
+	ID                                 string                       `json:"id"`
+	Type                               string                       `json:"type"`
+	Name                               string                       `json:"name"`
+	AccountClass                       types.AccountClass           `json:"account_class"`
+	RecipientRelationship              *types.RecipientRelationship `json:"recipient_relationship"`
+	SepaIban                           string                       `json:"sepa_iban"`
+	SepaBeneficiaryBic                 string                       `json:"sepa_beneficiary_bic"`
+	SepaBeneficiaryLegalName           string                       `json:"sepa_beneficiary_legal_name"`
+	SepaBeneficiaryAddressLine1        string                       `json:"sepa_beneficiary_address_line_1"`
+	SepaBeneficiaryAddressLine2        *string                      `json:"sepa_beneficiary_address_line_2"`
+	SepaBeneficiaryCity                string                       `json:"sepa_beneficiary_city"`
+	SepaBeneficiaryStateProvinceRegion *string                      `json:"sepa_beneficiary_state_province_region"`
+	SepaBeneficiaryPostalCode          string                       `json:"sepa_beneficiary_postal_code"`
+	SepaBeneficiaryCountry             types.Country                `json:"sepa_beneficiary_country"`
+	CreatedAt                          time.Time                    `json:"created_at"`
+}
+
+// CreateSepa creates a SEPA bank account.
+func (c *Client) CreateSepa(ctx context.Context, params *CreateSepaParams) (*CreateSepaResponse, error) {
+	if params == nil {
+		return nil, fmt.Errorf("params cannot be nil")
+	}
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
+	}
+
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
+
+	body := map[string]any{
+		"type":                            "sepa",
+		"name":                            params.Name,
+		"account_class":                   params.AccountClass,
+		"sepa_iban":                       params.SepaIban,
+		"sepa_beneficiary_bic":            params.SepaBeneficiaryBic,
+		"sepa_beneficiary_legal_name":     params.SepaBeneficiaryLegalName,
+		"sepa_beneficiary_address_line_1": params.SepaBeneficiaryAddressLine1,
+		"sepa_beneficiary_city":           params.SepaBeneficiaryCity,
+		"sepa_beneficiary_postal_code":    params.SepaBeneficiaryPostalCode,
+		"sepa_beneficiary_country":        params.SepaBeneficiaryCountry,
+	}
+
+	if params.SepaBeneficiaryAddressLine2 != nil {
+		body["sepa_beneficiary_address_line_2"] = *params.SepaBeneficiaryAddressLine2
+	}
+	if params.SepaBeneficiaryStateProvinceRegion != nil {
+		body["sepa_beneficiary_state_province_region"] = *params.SepaBeneficiaryStateProvinceRegion
+	}
+
+	return request.Do[*CreateSepaResponse](c.cfg, ctx, "POST", path, body)
 }

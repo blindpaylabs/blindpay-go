@@ -33,6 +33,7 @@ type WebhookEvent string
 const (
 	WebhookEventReceiverNew            WebhookEvent = "receiver.new"
 	WebhookEventReceiverUpdate         WebhookEvent = "receiver.update"
+	WebhookEventReceiverDelete         WebhookEvent = "receiver.delete"
 	WebhookEventBankAccountNew         WebhookEvent = "bankAccount.new"
 	WebhookEventPayoutNew              WebhookEvent = "payout.new"
 	WebhookEventPayoutUpdate           WebhookEvent = "payout.update"
@@ -250,4 +251,10 @@ const (
 	BusinessIndustrySaas        BusinessIndustry = "saas"
 	BusinessIndustrySocial      BusinessIndustry = "social"
 	BusinessIndustryWallet      BusinessIndustry = "wallet"
+)
+
+type ManualExecutionStatus string
+
+const (
+	ManualExecutionStatusFailed ManualExecutionStatus = "failed"
 )
