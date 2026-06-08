@@ -50,7 +50,7 @@ type VirtualAccount struct {
 
 // CreateParams represents parameters for creating a virtual account.
 type CreateParams struct {
-	ReceiverID            string                `json:"-"`
+	CustomerID            string                `json:"-"`
 	BlockchainWalletID    string                `json:"blockchain_wallet_id"`
 	Token                 types.StablecoinToken `json:"token"`
 	BankingPartner        types.BankingPartner  `json:"banking_partner"`
@@ -60,7 +60,7 @@ type CreateParams struct {
 
 // UpdateParams represents parameters for updating a virtual account.
 type UpdateParams struct {
-	ReceiverID         string                `json:"-"`
+	CustomerID         string                `json:"-"`
 	VirtualAccountID   string                `json:"-"`
 	BlockchainWalletID string                `json:"blockchain_wallet_id"`
 	Token              types.StablecoinToken `json:"token"`
@@ -91,11 +91,11 @@ func (c *Client) Create(ctx context.Context, params *CreateParams) (*VirtualAcco
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
-	if params.ReceiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/virtual-accounts", c.instanceID, params.ReceiverID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/virtual-accounts", c.instanceID, params.CustomerID)
 
 	body := struct {
 		BlockchainWalletID    string                `json:"blockchain_wallet_id"`
@@ -115,25 +115,25 @@ func (c *Client) Create(ctx context.Context, params *CreateParams) (*VirtualAcco
 }
 
 // Get retrieves a virtual account by ID.
-func (c *Client) Get(ctx context.Context, receiverID, virtualAccountID string) (*VirtualAccount, error) {
-	if receiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+func (c *Client) Get(ctx context.Context, customerID, virtualAccountID string) (*VirtualAccount, error) {
+	if customerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 	if virtualAccountID == "" {
 		return nil, fmt.Errorf("virtual account ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/virtual-accounts/%s", c.instanceID, receiverID, virtualAccountID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/virtual-accounts/%s", c.instanceID, customerID, virtualAccountID)
 	return request.Do[*VirtualAccount](c.cfg, ctx, "GET", path, nil)
 }
 
-// List retrieves all virtual accounts for a receiver.
-func (c *Client) List(ctx context.Context, receiverID string) ([]VirtualAccount, error) {
-	if receiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+// List retrieves all virtual accounts for a customer.
+func (c *Client) List(ctx context.Context, customerID string) ([]VirtualAccount, error) {
+	if customerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/virtual-accounts", c.instanceID, receiverID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/virtual-accounts", c.instanceID, customerID)
 	return request.Do[[]VirtualAccount](c.cfg, ctx, "GET", path, nil)
 }
 
@@ -142,14 +142,14 @@ func (c *Client) Update(ctx context.Context, params *UpdateParams) error {
 	if params == nil {
 		return fmt.Errorf("params cannot be nil")
 	}
-	if params.ReceiverID == "" {
-		return fmt.Errorf("receiver ID cannot be empty")
+	if params.CustomerID == "" {
+		return fmt.Errorf("customer ID cannot be empty")
 	}
 	if params.VirtualAccountID == "" {
 		return fmt.Errorf("virtual account ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/virtual-accounts/%s", c.instanceID, params.ReceiverID, params.VirtualAccountID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/virtual-accounts/%s", c.instanceID, params.CustomerID, params.VirtualAccountID)
 
 	body := struct {
 		BlockchainWalletID string                `json:"blockchain_wallet_id"`

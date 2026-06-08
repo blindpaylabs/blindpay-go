@@ -108,7 +108,7 @@ type OfframpWalletInfo struct {
 // GetResponse represents a detailed bank account response.
 type GetResponse struct {
 	ID                string                `json:"id"`
-	ReceiverID        string                `json:"receiver_id"`
+	CustomerID        string                `json:"customer_id"`
 	AccountHolderName string                `json:"account_holder_name"`
 	AccountNumber     string                `json:"account_number"`
 	RoutingNumber     string                `json:"routing_number"`
@@ -123,7 +123,7 @@ type GetResponse struct {
 
 // CreatePixParams represents parameters for creating a PIX bank account.
 type CreatePixParams struct {
-	ReceiverID string `json:"-"`
+	CustomerID string `json:"-"`
 	Name       string `json:"name"`
 	PixKey     string `json:"pix_key"`
 }
@@ -281,7 +281,7 @@ type CreateRtpResponse struct {
 
 // CreateTedParams represents parameters for creating a TED bank account.
 type CreateTedParams struct {
-	ReceiverID            string                      `json:"-"`
+	CustomerID            string                      `json:"-"`
 	Name                  string                      `json:"name"`
 	BeneficiaryName       string                      `json:"beneficiary_name"`
 	TedBankCode           string                      `json:"ted_bank_code"`
@@ -323,7 +323,7 @@ type CreateTedResponse struct {
 
 // CreatePixSafeParams represents parameters for creating a PIX Safe bank account.
 type CreatePixSafeParams struct {
-	ReceiverID        string                `json:"-"`
+	CustomerID        string                `json:"-"`
 	Name              string                `json:"name"`
 	BeneficiaryName   string                `json:"beneficiary_name"`
 	AccountNumber     string                `json:"account_number"`
@@ -349,7 +349,7 @@ type CreatePixSafeResponse struct {
 
 // ListParams represents parameters for listing bank accounts with optional filters.
 type ListParams struct {
-	ReceiverID    string     `json:"-"`
+	CustomerID    string     `json:"-"`
 	Status        string     `json:"status,omitempty"`
 	Type          types.Rail `json:"type,omitempty"`
 	Name          string     `json:"name,omitempty"`
@@ -359,7 +359,7 @@ type ListParams struct {
 
 // CreateAchParams represents parameters for creating an ACH bank account.
 type CreateAchParams struct {
-	ReceiverID            string                      `json:"-"`
+	CustomerID            string                      `json:"-"`
 	Name                  string                      `json:"name"`
 	AccountClass          types.AccountClass          `json:"account_class"`
 	AccountNumber         string                      `json:"account_number"`
@@ -381,7 +381,7 @@ type CreateAchParams struct {
 
 // CreateWireParams represents parameters for creating a Wire bank account.
 type CreateWireParams struct {
-	ReceiverID            string                      `json:"-"`
+	CustomerID            string                      `json:"-"`
 	Name                  string                      `json:"name"`
 	AccountClass          types.AccountClass          `json:"account_class"`
 	AccountNumber         string                      `json:"account_number"`
@@ -402,7 +402,7 @@ type CreateWireParams struct {
 
 // CreateArgentinaTransfersParams represents parameters for creating an Argentina transfers bank account.
 type CreateArgentinaTransfersParams struct {
-	ReceiverID       string             `json:"-"`
+	CustomerID       string             `json:"-"`
 	Name             string             `json:"name"`
 	BeneficiaryName  string             `json:"beneficiary_name"`
 	TransfersAccount string             `json:"transfers_account"`
@@ -411,7 +411,7 @@ type CreateArgentinaTransfersParams struct {
 
 // CreateSpeiParams represents parameters for creating a SPEI bank account.
 type CreateSpeiParams struct {
-	ReceiverID          string       `json:"-"`
+	CustomerID          string       `json:"-"`
 	BeneficiaryName     string       `json:"beneficiary_name"`
 	Name                string       `json:"name"`
 	SpeiClabe           string       `json:"spei_clabe"`
@@ -421,7 +421,7 @@ type CreateSpeiParams struct {
 
 // CreateColombiaAchParams represents parameters for creating a Colombia ACH bank account.
 type CreateColombiaAchParams struct {
-	ReceiverID                 string                `json:"-"`
+	CustomerID                 string                `json:"-"`
 	Name                       string                `json:"name"`
 	AccountType                types.BankAccountType `json:"account_type"`
 	AchCopBeneficiaryFirstName string                `json:"ach_cop_beneficiary_first_name"`
@@ -435,7 +435,7 @@ type CreateColombiaAchParams struct {
 
 // CreateInternationalSwiftParams represents parameters for creating an international SWIFT bank account.
 type CreateInternationalSwiftParams struct {
-	ReceiverID                             string                      `json:"-"`
+	CustomerID                             string                      `json:"-"`
 	Name                                   string                      `json:"name"`
 	AccountClass                           types.AccountClass          `json:"account_class"`
 	RecipientRelationship                  types.RecipientRelationship `json:"recipient_relationship"`
@@ -468,7 +468,7 @@ type CreateInternationalSwiftParams struct {
 
 // CreateRtpParams represents parameters for creating an RTP (Real-Time Payments) bank account.
 type CreateRtpParams struct {
-	ReceiverID            string                      `json:"-"`
+	CustomerID            string                      `json:"-"`
 	Name                  string                      `json:"name"`
 	AccountClass          types.AccountClass          `json:"account_class"`
 	BeneficiaryName       string                      `json:"beneficiary_name"`
@@ -501,16 +501,16 @@ func NewClient(cfg *config.Config) *Client {
 	}
 }
 
-// List retrieves all bank accounts for a receiver with optional filters.
+// List retrieves all bank accounts for a customer with optional filters.
 func (c *Client) List(ctx context.Context, params *ListParams) ([]BankAccount, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
-	if params.ReceiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", c.instanceID, params.ReceiverID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	q := url.Values{}
 	if params.Status != "" {
@@ -536,28 +536,28 @@ func (c *Client) List(ctx context.Context, params *ListParams) ([]BankAccount, e
 }
 
 // Get retrieves a specific bank account.
-func (c *Client) Get(ctx context.Context, receiverID, id string) (*GetResponse, error) {
-	if receiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+func (c *Client) Get(ctx context.Context, customerID, id string) (*GetResponse, error) {
+	if customerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 	if id == "" {
 		return nil, fmt.Errorf("id cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts/%s", c.instanceID, receiverID, id)
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts/%s", c.instanceID, customerID, id)
 	return request.Do[*GetResponse](c.cfg, ctx, "GET", path, nil)
 }
 
 // Delete deletes a bank account.
-func (c *Client) Delete(ctx context.Context, receiverID, id string) error {
-	if receiverID == "" {
-		return fmt.Errorf("receiver ID cannot be empty")
+func (c *Client) Delete(ctx context.Context, customerID, id string) error {
+	if customerID == "" {
+		return fmt.Errorf("customer ID cannot be empty")
 	}
 	if id == "" {
 		return fmt.Errorf("id cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts/%s", c.instanceID, receiverID, id)
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts/%s", c.instanceID, customerID, id)
 	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil)
 	return err
 }
@@ -567,11 +567,11 @@ func (c *Client) CreatePix(ctx context.Context, params *CreatePixParams) (*Creat
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
-	if params.ReceiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", c.instanceID, params.ReceiverID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":    "pix",
@@ -587,11 +587,11 @@ func (c *Client) CreateAch(ctx context.Context, params *CreateAchParams) (*Creat
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
-	if params.ReceiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", c.instanceID, params.ReceiverID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":                   "ach",
@@ -633,11 +633,11 @@ func (c *Client) CreateWire(ctx context.Context, params *CreateWireParams) (*Cre
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
-	if params.ReceiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", c.instanceID, params.ReceiverID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":                   "wire",
@@ -678,11 +678,11 @@ func (c *Client) CreateArgentinaTransfers(ctx context.Context, params *CreateArg
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
-	if params.ReceiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", c.instanceID, params.ReceiverID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":              "transfers_bitso",
@@ -700,11 +700,11 @@ func (c *Client) CreateSpei(ctx context.Context, params *CreateSpeiParams) (*Cre
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
-	if params.ReceiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", c.instanceID, params.ReceiverID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":                  "spei_bitso",
@@ -723,11 +723,11 @@ func (c *Client) CreateColombiaAch(ctx context.Context, params *CreateColombiaAc
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
-	if params.ReceiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", c.instanceID, params.ReceiverID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":                           "ach_cop_bitso",
@@ -750,11 +750,11 @@ func (c *Client) CreateInternationalSwift(ctx context.Context, params *CreateInt
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
-	if params.ReceiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", c.instanceID, params.ReceiverID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":                                        "international_swift",
@@ -811,11 +811,11 @@ func (c *Client) CreatePixSafe(ctx context.Context, params *CreatePixSafeParams)
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
-	if params.ReceiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", c.instanceID, params.ReceiverID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":                 "pix_safe",
@@ -836,11 +836,11 @@ func (c *Client) CreateRtp(ctx context.Context, params *CreateRtpParams) (*Creat
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
-	if params.ReceiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", c.instanceID, params.ReceiverID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":                   "rtp",
@@ -881,11 +881,11 @@ func (c *Client) CreateTed(ctx context.Context, params *CreateTedParams) (*Creat
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
-	if params.ReceiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", c.instanceID, params.ReceiverID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":                   "ted",

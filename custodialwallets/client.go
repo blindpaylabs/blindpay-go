@@ -22,7 +22,7 @@ type CustodialWallet struct {
 
 // CreateParams represents parameters for creating a custodial wallet.
 type CreateParams struct {
-	ReceiverID string        `json:"-"`
+	CustomerID string        `json:"-"`
 	Name       string        `json:"name"`
 	Network    types.Network `json:"network"`
 	ExternalID *string       `json:"external_id,omitempty"`
@@ -57,26 +57,26 @@ func NewClient(cfg *config.Config) *Client {
 	}
 }
 
-// List retrieves all custodial wallets for a receiver.
-func (c *Client) List(ctx context.Context, receiverID string) ([]CustodialWallet, error) {
-	if receiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+// List retrieves all custodial wallets for a customer.
+func (c *Client) List(ctx context.Context, customerID string) ([]CustodialWallet, error) {
+	if customerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/wallets", c.instanceID, receiverID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/wallets", c.instanceID, customerID)
 	return request.Do[[]CustodialWallet](c.cfg, ctx, "GET", path, nil)
 }
 
 // Get retrieves a specific custodial wallet.
-func (c *Client) Get(ctx context.Context, receiverID, id string) (*CustodialWallet, error) {
-	if receiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+func (c *Client) Get(ctx context.Context, customerID, id string) (*CustodialWallet, error) {
+	if customerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 	if id == "" {
 		return nil, fmt.Errorf("id cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/wallets/%s", c.instanceID, receiverID, id)
+	path := fmt.Sprintf("/instances/%s/customers/%s/wallets/%s", c.instanceID, customerID, id)
 	return request.Do[*CustodialWallet](c.cfg, ctx, "GET", path, nil)
 }
 
@@ -85,11 +85,11 @@ func (c *Client) Create(ctx context.Context, params *CreateParams) (*CustodialWa
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
-	if params.ReceiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/wallets", c.instanceID, params.ReceiverID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/wallets", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"name":    params.Name,
@@ -104,28 +104,28 @@ func (c *Client) Create(ctx context.Context, params *CreateParams) (*CustodialWa
 }
 
 // GetBalance retrieves the balance of a custodial wallet.
-func (c *Client) GetBalance(ctx context.Context, receiverID, id string) (*GetBalanceResponse, error) {
-	if receiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+func (c *Client) GetBalance(ctx context.Context, customerID, id string) (*GetBalanceResponse, error) {
+	if customerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 	if id == "" {
 		return nil, fmt.Errorf("id cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/wallets/%s/balance", c.instanceID, receiverID, id)
+	path := fmt.Sprintf("/instances/%s/customers/%s/wallets/%s/balance", c.instanceID, customerID, id)
 	return request.Do[*GetBalanceResponse](c.cfg, ctx, "GET", path, nil)
 }
 
 // Delete deletes a custodial wallet.
-func (c *Client) Delete(ctx context.Context, receiverID, id string) error {
-	if receiverID == "" {
-		return fmt.Errorf("receiver ID cannot be empty")
+func (c *Client) Delete(ctx context.Context, customerID, id string) error {
+	if customerID == "" {
+		return fmt.Errorf("customer ID cannot be empty")
 	}
 	if id == "" {
 		return fmt.Errorf("id cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/wallets/%s", c.instanceID, receiverID, id)
+	path := fmt.Sprintf("/instances/%s/customers/%s/wallets/%s", c.instanceID, customerID, id)
 	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil)
 	return err
 }
