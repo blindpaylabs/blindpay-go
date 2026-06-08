@@ -15,7 +15,7 @@ import (
 
 func TestBankAccounts_CreatePix(t *testing.T) {
 	instanceID := "in_000000000000"
-	receiverID := "re_000000000000"
+	customerID := "re_000000000000"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
@@ -37,7 +37,7 @@ func TestBankAccounts_CreatePix(t *testing.T) {
 					"created_at": "2021-01-01T00:00:00Z"
 				}`),
 				Method: http.MethodPost,
-				Path:   fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", instanceID, receiverID),
+				Path:   fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", instanceID, customerID),
 			},
 		},
 		UserAgent: "test",
@@ -45,7 +45,7 @@ func TestBankAccounts_CreatePix(t *testing.T) {
 
 	client := NewClient(cfg)
 	account, err := client.CreatePix(context.Background(), &CreatePixParams{
-		ReceiverID: receiverID,
+		CustomerID: customerID,
 		Name:       "PIX Account",
 		PixKey:     "14947677768",
 	})
@@ -57,7 +57,7 @@ func TestBankAccounts_CreatePix(t *testing.T) {
 
 func TestBankAccounts_CreateArgentinaTransfers(t *testing.T) {
 	instanceID := "in_000000000000"
-	receiverID := "re_000000000000"
+	customerID := "re_000000000000"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
@@ -83,7 +83,7 @@ func TestBankAccounts_CreateArgentinaTransfers(t *testing.T) {
 					"created_at":"2021-01-01T00:00:00Z"
 				}`),
 				Method: http.MethodPost,
-				Path:   fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", instanceID, receiverID),
+				Path:   fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", instanceID, customerID),
 			},
 		},
 		UserAgent: "test",
@@ -91,7 +91,7 @@ func TestBankAccounts_CreateArgentinaTransfers(t *testing.T) {
 
 	client := NewClient(cfg)
 	account, err := client.CreateArgentinaTransfers(context.Background(), &CreateArgentinaTransfersParams{
-		ReceiverID:       receiverID,
+		CustomerID:       customerID,
 		Name:             "Argentina Transfers Account",
 		BeneficiaryName:  "Individual full name or business name",
 		TransfersType:    ArgentinaTransfersCVU,
@@ -103,7 +103,7 @@ func TestBankAccounts_CreateArgentinaTransfers(t *testing.T) {
 
 func TestCreateSpei(t *testing.T) {
 	instanceID := "in_000000000000"
-	receiverID := "re_000000000000"
+	customerID := "re_000000000000"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
@@ -131,7 +131,7 @@ func TestCreateSpei(t *testing.T) {
 					"created_at":"2021-01-01T00:00:00Z"
 				}`),
 				Method: http.MethodPost,
-				Path:   fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", instanceID, receiverID),
+				Path:   fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", instanceID, customerID),
 			},
 		},
 		UserAgent: "test",
@@ -139,7 +139,7 @@ func TestCreateSpei(t *testing.T) {
 
 	client := NewClient(cfg)
 	account, err := client.CreateSpei(context.Background(), &CreateSpeiParams{
-		ReceiverID:          receiverID,
+		CustomerID:          customerID,
 		BeneficiaryName:     "Individual full name or business name",
 		Name:                "SPEI Account",
 		SpeiClabe:           "5482347403740546",
@@ -152,7 +152,7 @@ func TestCreateSpei(t *testing.T) {
 
 func TestCreateColombiaAch(t *testing.T) {
 	instanceID := "in_000000000000"
-	receiverID := "re_000000000000"
+	customerID := "re_000000000000"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
@@ -188,7 +188,7 @@ func TestCreateColombiaAch(t *testing.T) {
 					"created_at":"2021-01-01T00:00:00Z"
 				}`),
 				Method: http.MethodPost,
-				Path:   fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", instanceID, receiverID),
+				Path:   fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", instanceID, customerID),
 			},
 		},
 		UserAgent: "test",
@@ -196,7 +196,7 @@ func TestCreateColombiaAch(t *testing.T) {
 
 	client := NewClient(cfg)
 	account, err := client.CreateColombiaAch(context.Background(), &CreateColombiaAchParams{
-		ReceiverID:                 receiverID,
+		CustomerID:                 customerID,
 		Name:                       "Colombia ACH Account",
 		AccountType:                types.BankAccountTypeChecking,
 		AchCopBeneficiaryFirstName: "Fernando",
@@ -213,7 +213,7 @@ func TestCreateColombiaAch(t *testing.T) {
 
 func TestCreateAch(t *testing.T) {
 	instanceID := "in_000000000000"
-	receiverID := "re_000000000000"
+	customerID := "re_000000000000"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
@@ -262,7 +262,7 @@ func TestCreateAch(t *testing.T) {
 					"created_at":"2021-01-01T00:00:00Z"
 				}`),
 				Method: http.MethodPost,
-				Path:   fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", instanceID, receiverID),
+				Path:   fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", instanceID, customerID),
 			},
 		},
 		UserAgent: "test",
@@ -270,7 +270,7 @@ func TestCreateAch(t *testing.T) {
 
 	client := NewClient(cfg)
 	account, err := client.CreateAch(context.Background(), &CreateAchParams{
-		ReceiverID:            receiverID,
+		CustomerID:            customerID,
 		Name:                  "ACH Account",
 		AccountClass:          types.AccountClassIndividual,
 		AccountNumber:         "1001001234",
@@ -290,7 +290,7 @@ func TestCreateAch(t *testing.T) {
 
 func TestCreateWire(t *testing.T) {
 	instanceID := "in_000000000000"
-	receiverID := "re_000000000000"
+	customerID := "re_000000000000"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
@@ -330,7 +330,7 @@ func TestCreateWire(t *testing.T) {
 					"created_at":"2021-01-01T00:00:00Z"
 				}`),
 				Method: http.MethodPost,
-				Path:   fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", instanceID, receiverID),
+				Path:   fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", instanceID, customerID),
 			},
 		},
 		UserAgent: "test",
@@ -338,7 +338,7 @@ func TestCreateWire(t *testing.T) {
 
 	client := NewClient(cfg)
 	account, err := client.CreateWire(context.Background(), &CreateWireParams{
-		ReceiverID:            receiverID,
+		CustomerID:            customerID,
 		Name:                  "Wire Account",
 		AccountClass:          types.AccountClassIndividual,
 		AccountNumber:         "1001001234",
@@ -358,7 +358,7 @@ func TestCreateWire(t *testing.T) {
 
 func TestCreateInternationalSwift(t *testing.T) {
 	instanceID := "in_000000000000"
-	receiverID := "re_000000000000"
+	customerID := "re_000000000000"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
@@ -425,7 +425,7 @@ func TestCreateInternationalSwift(t *testing.T) {
 					"created_at":"2021-01-01T00:00:00Z"
 				}`),
 				Method: http.MethodPost,
-				Path:   fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", instanceID, receiverID),
+				Path:   fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", instanceID, customerID),
 			},
 		},
 		UserAgent: "test",
@@ -433,7 +433,7 @@ func TestCreateInternationalSwift(t *testing.T) {
 
 	client := NewClient(cfg)
 	account, err := client.CreateInternationalSwift(context.Background(), &CreateInternationalSwiftParams{
-		ReceiverID:                             receiverID,
+		CustomerID:                             customerID,
 		Name:                                   "International Swift Account",
 		AccountClass:                           types.AccountClassIndividual,
 		RecipientRelationship:                  types.RecipientRelationshipFirstParty,
@@ -462,7 +462,7 @@ func TestCreateInternationalSwift(t *testing.T) {
 
 func TestBankAccounts_CreateRtp(t *testing.T) {
 	instanceID := "in_000000000000"
-	receiverID := "re_000000000000"
+	customerID := "re_000000000000"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
@@ -501,7 +501,7 @@ func TestBankAccounts_CreateRtp(t *testing.T) {
 					"created_at":"2025-09-30T04:23:30.823Z"
 				}`),
 				Method: http.MethodPost,
-				Path:   fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", instanceID, receiverID),
+				Path:   fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", instanceID, customerID),
 			},
 		},
 		UserAgent: "test",
@@ -509,7 +509,7 @@ func TestBankAccounts_CreateRtp(t *testing.T) {
 
 	client := NewClient(cfg)
 	account, err := client.CreateRtp(context.Background(), &CreateRtpParams{
-		ReceiverID:            receiverID,
+		CustomerID:            customerID,
 		Name:                  "John Doe RTP",
 		AccountClass:          types.AccountClassIndividual,
 		BeneficiaryName:       "John Doe",
@@ -528,7 +528,7 @@ func TestBankAccounts_CreateRtp(t *testing.T) {
 
 func TestBankAccounts_Get(t *testing.T) {
 	instanceID := "in_000000000000"
-	receiverID := "re_000000000000"
+	customerID := "re_000000000000"
 	id := "ba_000000000000"
 
 	cfg := &config.Config{
@@ -540,7 +540,7 @@ func TestBankAccounts_Get(t *testing.T) {
 				T: t,
 				Out: json.RawMessage(`{
 					"id":"ba_000000000000",
-					"receiver_id":"rcv_123",
+					"customer_id":"rcv_123",
 					"account_holder_name":"Individual full name or business name",
 					"account_number":"1001001234",
 					"routing_number":"012345678",
@@ -553,22 +553,22 @@ func TestBankAccounts_Get(t *testing.T) {
 					"updated_at":"2021-01-01T00:00:00Z"
 				}`),
 				Method: http.MethodGet,
-				Path:   fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts/%s", instanceID, receiverID, id),
+				Path:   fmt.Sprintf("/instances/%s/customers/%s/bank-accounts/%s", instanceID, customerID, id),
 			},
 		},
 		UserAgent: "test",
 	}
 
 	client := NewClient(cfg)
-	account, err := client.Get(context.Background(), receiverID, id)
+	account, err := client.Get(context.Background(), customerID, id)
 	require.NoError(t, err)
 	require.Equal(t, "ba_000000000000", account.ID)
-	require.Equal(t, "rcv_123", account.ReceiverID)
+	require.Equal(t, "rcv_123", account.CustomerID)
 }
 
 func TestBankAccounts_List(t *testing.T) {
 	instanceID := "in_000000000000"
-	receiverID := "re_000000000000"
+	customerID := "re_000000000000"
 
 	mockOut := `[
 		{
@@ -641,14 +641,14 @@ func TestBankAccounts_List(t *testing.T) {
 				T:      t,
 				Out:    json.RawMessage(mockOut),
 				Method: http.MethodGet,
-				Path:   fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", instanceID, receiverID),
+				Path:   fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", instanceID, customerID),
 			},
 		},
 		UserAgent: "test",
 	}
 
 	client := NewClient(cfg)
-	bankAccounts, err := client.List(context.Background(), &ListParams{ReceiverID: receiverID})
+	bankAccounts, err := client.List(context.Background(), &ListParams{CustomerID: customerID})
 	require.NoError(t, err)
 	require.Len(t, bankAccounts, 1)
 	require.Equal(t, "ba_000000000000", bankAccounts[0].ID)
@@ -656,7 +656,7 @@ func TestBankAccounts_List(t *testing.T) {
 
 func TestBankAccounts_Delete(t *testing.T) {
 	instanceID := "in_000000000000"
-	receiverID := "re_000000000000"
+	customerID := "re_000000000000"
 	id := "ba_000000000000"
 
 	cfg := &config.Config{
@@ -668,13 +668,13 @@ func TestBankAccounts_Delete(t *testing.T) {
 				T:      t,
 				Out:    json.RawMessage(`{"data": null}`),
 				Method: http.MethodDelete,
-				Path:   fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts/%s", instanceID, receiverID, id),
+				Path:   fmt.Sprintf("/instances/%s/customers/%s/bank-accounts/%s", instanceID, customerID, id),
 			},
 		},
 		UserAgent: "test",
 	}
 
 	client := NewClient(cfg)
-	err := client.Delete(context.Background(), receiverID, id)
+	err := client.Delete(context.Background(), customerID, id)
 	require.NoError(t, err)
 }

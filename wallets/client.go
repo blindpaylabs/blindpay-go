@@ -18,7 +18,7 @@ type BlockchainWallet struct {
 	Address              string        `json:"address,omitempty"`
 	SignatureTxHash      string        `json:"signature_tx_hash,omitempty"`
 	IsAccountAbstraction bool          `json:"is_account_abstraction"`
-	ReceiverID           string        `json:"receiver_id"`
+	CustomerID           string        `json:"customer_id"`
 }
 
 // GetMessageResponse represents the wallet message response.
@@ -28,7 +28,7 @@ type GetMessageResponse struct {
 
 // CreateWithAddressParams represents parameters for creating a wallet with address.
 type CreateWithAddressParams struct {
-	ReceiverID string        `json:"receiver_id"`
+	CustomerID string        `json:"customer_id"`
 	Name       string        `json:"name"`
 	Network    types.Network `json:"network"`
 	Address    string        `json:"address"`
@@ -36,7 +36,7 @@ type CreateWithAddressParams struct {
 
 // CreateWithHashParams represents parameters for creating a wallet with hash.
 type CreateWithHashParams struct {
-	ReceiverID      string        `json:"receiver_id"`
+	CustomerID      string        `json:"customer_id"`
 	Name            string        `json:"name"`
 	Network         types.Network `json:"network"`
 	SignatureTxHash string        `json:"signature_tx_hash"`
@@ -94,13 +94,13 @@ func NewClient(cfg *config.Config) *Client {
 	}
 }
 
-// List retrieves all blockchain wallets for a receiver.
-func (c *Client) List(ctx context.Context, receiverID string) ([]BlockchainWallet, error) {
-	if receiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+// List retrieves all blockchain wallets for a customer.
+func (c *Client) List(ctx context.Context, customerID string) ([]BlockchainWallet, error) {
+	if customerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/blockchain-wallets", c.instanceID, receiverID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/blockchain-wallets", c.instanceID, customerID)
 	return request.Do[[]BlockchainWallet](c.cfg, ctx, "GET", path, nil)
 }
 
@@ -109,11 +109,11 @@ func (c *Client) CreateWithAddress(ctx context.Context, params *CreateWithAddres
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
-	if params.ReceiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/blockchain-wallets", c.instanceID, params.ReceiverID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/blockchain-wallets", c.instanceID, params.CustomerID)
 
 	body := struct {
 		Name                 string        `json:"name"`
@@ -135,11 +135,11 @@ func (c *Client) CreateWithHash(ctx context.Context, params *CreateWithHashParam
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
-	if params.ReceiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/blockchain-wallets", c.instanceID, params.ReceiverID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/blockchain-wallets", c.instanceID, params.CustomerID)
 
 	body := struct {
 		Name                 string        `json:"name"`
@@ -157,38 +157,38 @@ func (c *Client) CreateWithHash(ctx context.Context, params *CreateWithHashParam
 }
 
 // GetWalletMessage retrieves the wallet message for signing.
-func (c *Client) GetWalletMessage(ctx context.Context, receiverID string) (*GetMessageResponse, error) {
-	if receiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+func (c *Client) GetWalletMessage(ctx context.Context, customerID string) (*GetMessageResponse, error) {
+	if customerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/blockchain-wallets/sign-message", c.instanceID, receiverID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/blockchain-wallets/sign-message", c.instanceID, customerID)
 	return request.Do[*GetMessageResponse](c.cfg, ctx, "GET", path, nil)
 }
 
 // Get retrieves a specific blockchain wallet.
-func (c *Client) Get(ctx context.Context, receiverID, id string) (*BlockchainWallet, error) {
-	if receiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+func (c *Client) Get(ctx context.Context, customerID, id string) (*BlockchainWallet, error) {
+	if customerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 	if id == "" {
 		return nil, fmt.Errorf("id cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/blockchain-wallets/%s", c.instanceID, receiverID, id)
+	path := fmt.Sprintf("/instances/%s/customers/%s/blockchain-wallets/%s", c.instanceID, customerID, id)
 	return request.Do[*BlockchainWallet](c.cfg, ctx, "GET", path, nil)
 }
 
 // Delete deletes a blockchain wallet.
-func (c *Client) Delete(ctx context.Context, receiverID, id string) error {
-	if receiverID == "" {
-		return fmt.Errorf("receiver ID cannot be empty")
+func (c *Client) Delete(ctx context.Context, customerID, id string) error {
+	if customerID == "" {
+		return fmt.Errorf("customer ID cannot be empty")
 	}
 	if id == "" {
 		return fmt.Errorf("id cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/blockchain-wallets/%s", c.instanceID, receiverID, id)
+	path := fmt.Sprintf("/instances/%s/customers/%s/blockchain-wallets/%s", c.instanceID, customerID, id)
 	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil)
 	return err
 }
@@ -245,7 +245,7 @@ type OfframpWallet struct {
 	ID            string    `json:"id"`
 	ExternalID    string    `json:"external_id"`
 	InstanceID    string    `json:"instance_id"`
-	ReceiverID    string    `json:"receiver_id"`
+	CustomerID    string    `json:"customer_id"`
 	BankAccountID string    `json:"bank_account_id"`
 	Network       string    `json:"network"`
 	Address       string    `json:"address"`
@@ -255,7 +255,7 @@ type OfframpWallet struct {
 
 // CreateOfframpWalletParams represents parameters for creating an offramp wallet.
 type CreateOfframpWalletParams struct {
-	ReceiverID    string `json:"receiver_id"`
+	CustomerID    string `json:"customer_id"`
 	BankAccountID string `json:"bank_account_id"`
 	ExternalID    string `json:"external_id"`
 	Network       string `json:"network"`
@@ -284,16 +284,16 @@ func NewOfframpClient(cfg *config.Config) *OfframpClient {
 }
 
 // List retrieves all offramp wallets for a bank account.
-func (c *OfframpClient) List(ctx context.Context, receiverID, bankAccountID string) ([]OfframpWallet, error) {
-	if receiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+func (c *OfframpClient) List(ctx context.Context, customerID, bankAccountID string) ([]OfframpWallet, error) {
+	if customerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 	if bankAccountID == "" {
 		return nil, fmt.Errorf("bank account ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts/%s/offramp-wallets",
-		c.instanceID, receiverID, bankAccountID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts/%s/offramp-wallets",
+		c.instanceID, customerID, bankAccountID)
 	return request.Do[[]OfframpWallet](c.cfg, ctx, "GET", path, nil)
 }
 
@@ -302,15 +302,15 @@ func (c *OfframpClient) Create(ctx context.Context, params *CreateOfframpWalletP
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
-	if params.ReceiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 	if params.BankAccountID == "" {
 		return nil, fmt.Errorf("bank account ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts/%s/offramp-wallets",
-		c.instanceID, params.ReceiverID, params.BankAccountID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts/%s/offramp-wallets",
+		c.instanceID, params.CustomerID, params.BankAccountID)
 
 	body := struct {
 		ExternalID string `json:"external_id"`
@@ -324,9 +324,9 @@ func (c *OfframpClient) Create(ctx context.Context, params *CreateOfframpWalletP
 }
 
 // Get retrieves a specific offramp wallet.
-func (c *OfframpClient) Get(ctx context.Context, receiverID, bankAccountID, id string) (*OfframpWallet, error) {
-	if receiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+func (c *OfframpClient) Get(ctx context.Context, customerID, bankAccountID, id string) (*OfframpWallet, error) {
+	if customerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 	if bankAccountID == "" {
 		return nil, fmt.Errorf("bank account ID cannot be empty")
@@ -335,7 +335,7 @@ func (c *OfframpClient) Get(ctx context.Context, receiverID, bankAccountID, id s
 		return nil, fmt.Errorf("id cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts/%s/offramp-wallets/%s",
-		c.instanceID, receiverID, bankAccountID, id)
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts/%s/offramp-wallets/%s",
+		c.instanceID, customerID, bankAccountID, id)
 	return request.Do[*OfframpWallet](c.cfg, ctx, "GET", path, nil)
 }

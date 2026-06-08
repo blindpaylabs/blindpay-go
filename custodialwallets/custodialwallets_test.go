@@ -15,7 +15,7 @@ import (
 
 func TestCustodialWallets_List(t *testing.T) {
 	instanceID := "in_000000000000"
-	receiverID := "re_000000000000"
+	customerID := "re_000000000000"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
@@ -33,14 +33,14 @@ func TestCustodialWallets_List(t *testing.T) {
 					"created_at":"2021-01-01T00:00:00Z"
 				}]`),
 				Method: http.MethodGet,
-				Path:   fmt.Sprintf("/instances/%s/receivers/%s/wallets", instanceID, receiverID),
+				Path:   fmt.Sprintf("/instances/%s/customers/%s/wallets", instanceID, customerID),
 			},
 		},
 		UserAgent: "test",
 	}
 
 	client := NewClient(cfg)
-	wallets, err := client.List(context.Background(), receiverID)
+	wallets, err := client.List(context.Background(), customerID)
 	require.NoError(t, err)
 	require.Len(t, wallets, 1)
 	require.Equal(t, "cw_000000000000", wallets[0].ID)
@@ -48,7 +48,7 @@ func TestCustodialWallets_List(t *testing.T) {
 
 func TestCustodialWallets_Create(t *testing.T) {
 	instanceID := "in_000000000000"
-	receiverID := "re_000000000000"
+	customerID := "re_000000000000"
 
 	cfg := &config.Config{
 		BaseURL:    "https://api.blindpay.com",
@@ -66,7 +66,7 @@ func TestCustodialWallets_Create(t *testing.T) {
 					"created_at":"2021-01-01T00:00:00Z"
 				}`),
 				Method: http.MethodPost,
-				Path:   fmt.Sprintf("/instances/%s/receivers/%s/wallets", instanceID, receiverID),
+				Path:   fmt.Sprintf("/instances/%s/customers/%s/wallets", instanceID, customerID),
 			},
 		},
 		UserAgent: "test",
@@ -74,7 +74,7 @@ func TestCustodialWallets_Create(t *testing.T) {
 
 	client := NewClient(cfg)
 	wallet, err := client.Create(context.Background(), &CreateParams{
-		ReceiverID: receiverID,
+		CustomerID: customerID,
 		Name:       "My Wallet",
 		Network:    types.NetworkBase,
 	})
@@ -85,7 +85,7 @@ func TestCustodialWallets_Create(t *testing.T) {
 
 func TestCustodialWallets_GetBalance(t *testing.T) {
 	instanceID := "in_000000000000"
-	receiverID := "re_000000000000"
+	customerID := "re_000000000000"
 	walletID := "cw_000000000000"
 
 	cfg := &config.Config{
@@ -101,14 +101,14 @@ func TestCustodialWallets_GetBalance(t *testing.T) {
 					"USDB":{"address":"0x789","id":"tok_3","symbol":"USDB","amount":0}
 				}`),
 				Method: http.MethodGet,
-				Path:   fmt.Sprintf("/instances/%s/receivers/%s/wallets/%s/balance", instanceID, receiverID, walletID),
+				Path:   fmt.Sprintf("/instances/%s/customers/%s/wallets/%s/balance", instanceID, customerID, walletID),
 			},
 		},
 		UserAgent: "test",
 	}
 
 	client := NewClient(cfg)
-	balance, err := client.GetBalance(context.Background(), receiverID, walletID)
+	balance, err := client.GetBalance(context.Background(), customerID, walletID)
 	require.NoError(t, err)
 	require.Equal(t, 100.5, balance.USDC.Amount)
 	require.Equal(t, 50.25, balance.USDT.Amount)

@@ -14,7 +14,7 @@ import (
 )
 
 func TestWallets_CreateWithAddress(t *testing.T) {
-	receiverID := "re_000000000000"
+	customerID := "re_000000000000"
 	instanceID := "in_000000000000"
 	id := "bw_000000000000"
 	address := "0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C"
@@ -39,10 +39,10 @@ func TestWallets_CreateWithAddress(t *testing.T) {
 					"address":"0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C",
 					"signature_tx_hash":null,
 					"is_account_abstraction":true,
-					"receiver_id":"re_000000000000"
+					"customer_id":"re_000000000000"
 				}`),
 				Method: http.MethodPost,
-				Path:   fmt.Sprintf("/instances/%s/receivers/%s/blockchain-wallets", instanceID, receiverID),
+				Path:   fmt.Sprintf("/instances/%s/customers/%s/blockchain-wallets", instanceID, customerID),
 			},
 		},
 		UserAgent: "test",
@@ -50,7 +50,7 @@ func TestWallets_CreateWithAddress(t *testing.T) {
 
 	client := NewClient(cfg)
 	wallet, err := client.CreateWithAddress(context.Background(), &CreateWithAddressParams{
-		ReceiverID: receiverID,
+		CustomerID: customerID,
 		Name:       "Wallet Display Name",
 		Network:    types.NetworkPolygon,
 		Address:    address,
@@ -62,7 +62,7 @@ func TestWallets_CreateWithAddress(t *testing.T) {
 }
 
 func TestWallets_List(t *testing.T) {
-	receiverID := "re_000000000000"
+	customerID := "re_000000000000"
 	instanceID := "in_000000000000"
 
 	cfg := &config.Config{
@@ -80,18 +80,18 @@ func TestWallets_List(t *testing.T) {
 						"address":"0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C",
 						"signature_tx_hash":"0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
 						"is_account_abstraction":false,
-						"receiver_id":"re_000000000000"
+						"customer_id":"re_000000000000"
 					}
 				]`),
 				Method: http.MethodGet,
-				Path:   fmt.Sprintf("/instances/%s/receivers/%s/blockchain-wallets", instanceID, receiverID),
+				Path:   fmt.Sprintf("/instances/%s/customers/%s/blockchain-wallets", instanceID, customerID),
 			},
 		},
 		UserAgent: "test",
 	}
 
 	client := NewClient(cfg)
-	wallets, err := client.List(context.Background(), receiverID)
+	wallets, err := client.List(context.Background(), customerID)
 	require.NoError(t, err)
 	require.Len(t, wallets, 1)
 	require.Equal(t, "bw_000000000000", wallets[0].ID)
@@ -100,11 +100,11 @@ func TestWallets_List(t *testing.T) {
 	require.Equal(t, "0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C", wallets[0].Address)
 	require.Equal(t, "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359", wallets[0].SignatureTxHash)
 	require.False(t, wallets[0].IsAccountAbstraction)
-	require.Equal(t, "re_000000000000", wallets[0].ReceiverID)
+	require.Equal(t, "re_000000000000", wallets[0].CustomerID)
 }
 
 func TestWallets_Get(t *testing.T) {
-	receiverID := "re_000000000000"
+	customerID := "re_000000000000"
 	id := "bw_000000000000"
 	instanceID := "in_000000000000"
 
@@ -122,17 +122,17 @@ func TestWallets_Get(t *testing.T) {
 					"address":"0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C",
 					"signature_tx_hash":"0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
 					"is_account_abstraction":false,
-					"receiver_id":"re_000000000000"
+					"customer_id":"re_000000000000"
 				}`),
 				Method: http.MethodGet,
-				Path:   fmt.Sprintf("/instances/%s/receivers/%s/blockchain-wallets/%s", instanceID, receiverID, id),
+				Path:   fmt.Sprintf("/instances/%s/customers/%s/blockchain-wallets/%s", instanceID, customerID, id),
 			},
 		},
 		UserAgent: "test",
 	}
 
 	client := NewClient(cfg)
-	wallet, err := client.Get(context.Background(), receiverID, id)
+	wallet, err := client.Get(context.Background(), customerID, id)
 	require.NoError(t, err)
 	require.Equal(t, id, wallet.ID)
 	require.Equal(t, "Wallet Display Name", wallet.Name)
@@ -140,11 +140,11 @@ func TestWallets_Get(t *testing.T) {
 	require.Equal(t, "0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C", wallet.Address)
 	require.Equal(t, "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359", wallet.SignatureTxHash)
 	require.False(t, wallet.IsAccountAbstraction)
-	require.Equal(t, "re_000000000000", wallet.ReceiverID)
+	require.Equal(t, "re_000000000000", wallet.CustomerID)
 }
 
 func TestWallets_Delete(t *testing.T) {
-	receiverID := "re_000000000000"
+	customerID := "re_000000000000"
 	id := "bw_000000000000"
 	instanceID := "in_000000000000"
 
@@ -157,19 +157,19 @@ func TestWallets_Delete(t *testing.T) {
 				T:      t,
 				Out:    json.RawMessage(`{"data":null}`),
 				Method: http.MethodDelete,
-				Path:   fmt.Sprintf("/instances/%s/receivers/%s/blockchain-wallets/%s", instanceID, receiverID, id),
+				Path:   fmt.Sprintf("/instances/%s/customers/%s/blockchain-wallets/%s", instanceID, customerID, id),
 			},
 		},
 		UserAgent: "test",
 	}
 
 	client := NewClient(cfg)
-	err := client.Delete(context.Background(), receiverID, id)
+	err := client.Delete(context.Background(), customerID, id)
 	require.NoError(t, err)
 }
 
 func TestWallets_GetWalletMessage(t *testing.T) {
-	receiverID := "re_000000000000"
+	customerID := "re_000000000000"
 	instanceID := "in_000000000000"
 
 	cfg := &config.Config{
@@ -181,14 +181,14 @@ func TestWallets_GetWalletMessage(t *testing.T) {
 				T:      t,
 				Out:    json.RawMessage(`{"message":"random"}`),
 				Method: http.MethodGet,
-				Path:   fmt.Sprintf("/instances/%s/receivers/%s/blockchain-wallets/sign-message", instanceID, receiverID),
+				Path:   fmt.Sprintf("/instances/%s/customers/%s/blockchain-wallets/sign-message", instanceID, customerID),
 			},
 		},
 		UserAgent: "test",
 	}
 
 	client := NewClient(cfg)
-	response, err := client.GetWalletMessage(context.Background(), receiverID)
+	response, err := client.GetWalletMessage(context.Background(), customerID)
 	require.NoError(t, err)
 	require.Equal(t, "random", response.Message)
 }
@@ -341,7 +341,7 @@ func TestWallets_PrepareSolanaDelegationTransaction(t *testing.T) {
 }
 
 func TestOfframpWallets_List(t *testing.T) {
-	receiverID := "re_000000000000"
+	customerID := "re_000000000000"
 	bankAccountID := "ba_000000000000"
 	instanceID := "in_000000000000"
 
@@ -357,7 +357,7 @@ func TestOfframpWallets_List(t *testing.T) {
 						"id":"ow_000000000000",
 						"external_id":"your_external_id",
 						"instance_id":"in_000000000000",
-						"receiver_id":"re_000000000000",
+						"customer_id":"re_000000000000",
 						"bank_account_id":"ba_000000000000",
 						"network":"tron",
 						"address":"TALJN9zTTEL9TVBb4WuTt6wLvPqJZr3hvb",
@@ -366,27 +366,27 @@ func TestOfframpWallets_List(t *testing.T) {
 					}
 				]`),
 				Method: http.MethodGet,
-				Path:   fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts/%s/offramp-wallets", instanceID, receiverID, bankAccountID),
+				Path:   fmt.Sprintf("/instances/%s/customers/%s/bank-accounts/%s/offramp-wallets", instanceID, customerID, bankAccountID),
 			},
 		},
 		UserAgent: "test",
 	}
 
 	client := NewOfframpClient(cfg)
-	wallets, err := client.List(context.Background(), receiverID, bankAccountID)
+	wallets, err := client.List(context.Background(), customerID, bankAccountID)
 	require.NoError(t, err)
 	require.Len(t, wallets, 1)
 	require.Equal(t, "ow_000000000000", wallets[0].ID)
 	require.Equal(t, "your_external_id", wallets[0].ExternalID)
 	require.Equal(t, "in_000000000000", wallets[0].InstanceID)
-	require.Equal(t, "re_000000000000", wallets[0].ReceiverID)
+	require.Equal(t, "re_000000000000", wallets[0].CustomerID)
 	require.Equal(t, "ba_000000000000", wallets[0].BankAccountID)
 	require.Equal(t, "tron", wallets[0].Network)
 	require.Equal(t, "TALJN9zTTEL9TVBb4WuTt6wLvPqJZr3hvb", wallets[0].Address)
 }
 
 func TestOfframpWallets_Create(t *testing.T) {
-	receiverID := "re_000000000000"
+	customerID := "re_000000000000"
 	bankAccountID := "ba_000000000000"
 	instanceID := "in_000000000000"
 	externalID := "your_external_id"
@@ -410,7 +410,7 @@ func TestOfframpWallets_Create(t *testing.T) {
 					"address":"TALJN9zTTEL9TVBb4WuTt6wLvPqJZr3hvb"
 				}`),
 				Method: http.MethodPost,
-				Path:   fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts/%s/offramp-wallets", instanceID, receiverID, bankAccountID),
+				Path:   fmt.Sprintf("/instances/%s/customers/%s/bank-accounts/%s/offramp-wallets", instanceID, customerID, bankAccountID),
 			},
 		},
 		UserAgent: "test",
@@ -418,7 +418,7 @@ func TestOfframpWallets_Create(t *testing.T) {
 
 	client := NewOfframpClient(cfg)
 	wallet, err := client.Create(context.Background(), &CreateOfframpWalletParams{
-		ReceiverID:    receiverID,
+		CustomerID:    customerID,
 		BankAccountID: bankAccountID,
 		ExternalID:    externalID,
 		Network:       "tron",
@@ -431,7 +431,7 @@ func TestOfframpWallets_Create(t *testing.T) {
 }
 
 func TestOfframpWallets_Get(t *testing.T) {
-	receiverID := "re_000000000000"
+	customerID := "re_000000000000"
 	bankAccountID := "ba_000000000000"
 	id := "ow_000000000000"
 	instanceID := "in_000000000000"
@@ -447,7 +447,7 @@ func TestOfframpWallets_Get(t *testing.T) {
 					"id":"ow_000000000000",
 					"external_id":"your_external_id",
 					"instance_id":"in_000000000000",
-					"receiver_id":"re_000000000000",
+					"customer_id":"re_000000000000",
 					"bank_account_id":"ba_000000000000",
 					"network":"tron",
 					"address":"TALJN9zTTEL9TVBb4WuTt6wLvPqJZr3hvb",
@@ -455,19 +455,19 @@ func TestOfframpWallets_Get(t *testing.T) {
 					"updated_at":"2021-01-01T00:00:00Z"
 				}`),
 				Method: http.MethodGet,
-				Path:   fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts/%s/offramp-wallets/%s", instanceID, receiverID, bankAccountID, id),
+				Path:   fmt.Sprintf("/instances/%s/customers/%s/bank-accounts/%s/offramp-wallets/%s", instanceID, customerID, bankAccountID, id),
 			},
 		},
 		UserAgent: "test",
 	}
 
 	client := NewOfframpClient(cfg)
-	wallet, err := client.Get(context.Background(), receiverID, bankAccountID, id)
+	wallet, err := client.Get(context.Background(), customerID, bankAccountID, id)
 	require.NoError(t, err)
 	require.Equal(t, id, wallet.ID)
 	require.Equal(t, "your_external_id", wallet.ExternalID)
 	require.Equal(t, "in_000000000000", wallet.InstanceID)
-	require.Equal(t, receiverID, wallet.ReceiverID)
+	require.Equal(t, customerID, wallet.CustomerID)
 	require.Equal(t, bankAccountID, wallet.BankAccountID)
 	require.Equal(t, "tron", wallet.Network)
 	require.Equal(t, "TALJN9zTTEL9TVBb4WuTt6wLvPqJZr3hvb", wallet.Address)
