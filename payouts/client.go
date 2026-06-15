@@ -93,11 +93,6 @@ type ListParams struct {
 	Offset     int    `json:"offset,omitempty"`
 }
 
-// ListResponse represents the response when listing payouts.
-type ListResponse struct {
-	Data       []Payout                 `json:"data"`
-	Pagination types.PaginationMetadata `json:"pagination"`
-}
 
 // ExportParams represents parameters for exporting payouts.
 type ExportParams struct {
@@ -176,7 +171,7 @@ func NewClient(cfg *config.Config) *Client {
 }
 
 // List retrieves all payouts with optional filters.
-func (c *Client) List(ctx context.Context, params *ListParams) (*ListResponse, error) {
+func (c *Client) List(ctx context.Context, params *ListParams) ([]Payout, error) {
 	path := fmt.Sprintf("/instances/%s/payouts", c.instanceID)
 
 	if params != nil {
@@ -195,7 +190,7 @@ func (c *Client) List(ctx context.Context, params *ListParams) (*ListResponse, e
 		}
 	}
 
-	return request.Do[*ListResponse](c.cfg, ctx, "GET", path, nil)
+	return request.Do[[]Payout](c.cfg, ctx, "GET", path, nil)
 }
 
 // Export retrieves all payouts for export with optional pagination.
