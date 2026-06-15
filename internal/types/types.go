@@ -33,6 +33,7 @@ type WebhookEvent string
 const (
 	WebhookEventReceiverNew            WebhookEvent = "receiver.new"
 	WebhookEventReceiverUpdate         WebhookEvent = "receiver.update"
+	WebhookEventReceiverDelete         WebhookEvent = "receiver.delete"
 	WebhookEventBankAccountNew         WebhookEvent = "bankAccount.new"
 	WebhookEventPayoutNew              WebhookEvent = "payout.new"
 	WebhookEventPayoutUpdate           WebhookEvent = "payout.update"
@@ -250,4 +251,30 @@ const (
 	BusinessIndustrySaas        BusinessIndustry = "saas"
 	BusinessIndustrySocial      BusinessIndustry = "social"
 	BusinessIndustryWallet      BusinessIndustry = "wallet"
+)
+
+type AipriseDocumentType string
+
+const (
+	AipriseDocumentTypeAddressProofDocument  AipriseDocumentType = "ADDRESS_PROOF_DOCUMENT"
+	AipriseDocumentTypeBankStatementDocument AipriseDocumentType = "BANK_STATEMENT_DOCUMENT"
+	AipriseDocumentTypeOther                 AipriseDocumentType = "OTHER"
+	AipriseDocumentTypeSourceOfFundsDocument AipriseDocumentType = "SOURCE_OF_FUNDS_DOCUMENT"
+	AipriseDocumentTypeTaxCertificate        AipriseDocumentType = "TAX_CERTIFICATE"
+	AipriseDocumentTypeUserSelfie            AipriseDocumentType = "USER_SELFIE"
+	AipriseDocumentTypeVisaDocument          AipriseDocumentType = "VISA_DOCUMENT"
+)
+
+type ApprovalRate string
+
+const (
+	ApprovalRateHigh   ApprovalRate = "high"
+	ApprovalRateLow    ApprovalRate = "low"
+	ApprovalRateMedium ApprovalRate = "medium"
+)
+
+type ManualExecutionStatus string
+
+const (
+	ManualExecutionStatusFailed ManualExecutionStatus = "failed"
 )

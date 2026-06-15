@@ -81,6 +81,9 @@ type Payout struct {
 	TedBankCode                *string                         `json:"ted_bank_code,omitempty"`
 	TedBranchCode              *string                         `json:"ted_branch_code,omitempty"`
 	TedCpfCnpj                 *string                         `json:"ted_cpf_cnpj,omitempty"`
+	BillingFeeAmount           *float64                        `json:"billing_fee_amount,omitempty"`
+	CpnPaymentID               *string                         `json:"cpn_payment_id,omitempty"`
+	SenderLegalName            *string                         `json:"sender_legal_name,omitempty"`
 }
 
 // ListParams represents parameters for listing payouts.
