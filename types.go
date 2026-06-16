@@ -366,6 +366,7 @@ const (
 const (
 	WebhookEventReceiverNew            = types.WebhookEventReceiverNew
 	WebhookEventReceiverUpdate         = types.WebhookEventReceiverUpdate
+	WebhookEventReceiverDelete         = types.WebhookEventReceiverDelete
 	WebhookEventBankAccountNew         = types.WebhookEventBankAccountNew
 	WebhookEventPayoutNew              = types.WebhookEventPayoutNew
 	WebhookEventPayoutUpdate           = types.WebhookEventPayoutUpdate
@@ -392,6 +393,9 @@ type RecipientRelationship = types.RecipientRelationship
 type PayinPaymentMethod = types.PayinPaymentMethod
 type TrackingStatus = types.TrackingStatus
 type BusinessIndustry = types.BusinessIndustry
+type AipriseDocumentType = types.AipriseDocumentType
+type ApprovalRate = types.ApprovalRate
+type ManualExecutionStatus = types.ManualExecutionStatus
 
 const (
 	RecipientRelationshipFirstParty            = types.RecipientRelationshipFirstParty
@@ -419,4 +423,18 @@ const (
 	TrackingStatusOnHold        = types.TrackingStatusOnHold
 	TrackingStatusCompleted     = types.TrackingStatusCompleted
 	TrackingStatusPendingReview = types.TrackingStatusPendingReview
+
+	AipriseDocumentTypeAddressProofDocument  = types.AipriseDocumentTypeAddressProofDocument
+	AipriseDocumentTypeBankStatementDocument = types.AipriseDocumentTypeBankStatementDocument
+	AipriseDocumentTypeOther                 = types.AipriseDocumentTypeOther
+	AipriseDocumentTypeSourceOfFundsDocument = types.AipriseDocumentTypeSourceOfFundsDocument
+	AipriseDocumentTypeTaxCertificate        = types.AipriseDocumentTypeTaxCertificate
+	AipriseDocumentTypeUserSelfie            = types.AipriseDocumentTypeUserSelfie
+	AipriseDocumentTypeVisaDocument          = types.AipriseDocumentTypeVisaDocument
+
+	ApprovalRateHigh   = types.ApprovalRateHigh
+	ApprovalRateLow    = types.ApprovalRateLow
+	ApprovalRateMedium = types.ApprovalRateMedium
+
+	ManualExecutionStatusFailed = types.ManualExecutionStatusFailed
 )

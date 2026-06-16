@@ -26,7 +26,7 @@ import (
 )
 
 // Version is the current version of the SDK.
-const Version = "1.12.0"
+const Version = "1.13.0"
 
 // Client is the main BlindPay client.
 type Client struct {
