@@ -49,8 +49,8 @@ type Client struct {
 	Quotes           *quotes.Client
 	// Deprecated: use Customers instead. The receivers resource will be removed in a future major version.
 	// See https://www.blindpay.com/changelog/2026-06-04-customers-rename
-	Receivers *receivers.Client
-	Tos       *termsofservice.Client
+	Receivers        *receivers.Client
+	Tos              *termsofservice.Client
 	Transfers        *transfers.Client
 	Upload           *upload.Client
 	VirtualAccounts  *virtualaccounts.Client

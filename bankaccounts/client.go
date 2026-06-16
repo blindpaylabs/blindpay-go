@@ -108,19 +108,19 @@ type OfframpWalletInfo struct {
 
 // GetResponse represents a detailed bank account response.
 type GetResponse struct {
-	ID                string                `json:"id"`
-	CustomerID        string                `json:"customer_id"`
-	AccountHolderName string                `json:"account_holder_name"`
-	AccountNumber     string                `json:"account_number"`
-	RoutingNumber     string                `json:"routing_number"`
-	AccountType       types.BankAccountType `json:"account_type"`
-	BankName          string                `json:"bank_name"`
-	SwiftCode         *string               `json:"swift_code"`
-	IBAN              *string               `json:"iban"`
-	IsPrimary         bool                  `json:"is_primary"`
+	ID                 string                `json:"id"`
+	CustomerID         string                `json:"customer_id"`
+	AccountHolderName  string                `json:"account_holder_name"`
+	AccountNumber      string                `json:"account_number"`
+	RoutingNumber      string                `json:"routing_number"`
+	AccountType        types.BankAccountType `json:"account_type"`
+	BankName           string                `json:"bank_name"`
+	SwiftCode          *string               `json:"swift_code"`
+	IBAN               *string               `json:"iban"`
+	IsPrimary          bool                  `json:"is_primary"`
 	SepaBeneficiaryBic *string               `json:"sepa_beneficiary_bic,omitempty"`
-	CreatedAt         time.Time             `json:"created_at"`
-	UpdatedAt         time.Time             `json:"updated_at"`
+	CreatedAt          time.Time             `json:"created_at"`
+	UpdatedAt          time.Time             `json:"updated_at"`
 }
 
 // CreatePixParams represents parameters for creating a PIX bank account.
@@ -931,18 +931,18 @@ func (c *Client) CreateTed(ctx context.Context, params *CreateTedParams) (*Creat
 
 // CreateSepaParams represents parameters for creating a SEPA bank account.
 type CreateSepaParams struct {
-	CustomerID                        string                `json:"-"`
-	Name                              string                `json:"name"`
-	AccountClass                      types.AccountClass    `json:"account_class"`
-	SepaIban                          string                `json:"sepa_iban"`
-	SepaBeneficiaryBic                string                `json:"sepa_beneficiary_bic"`
-	SepaBeneficiaryLegalName          string                `json:"sepa_beneficiary_legal_name"`
-	SepaBeneficiaryAddressLine1       string                `json:"sepa_beneficiary_address_line_1"`
-	SepaBeneficiaryAddressLine2       *string               `json:"sepa_beneficiary_address_line_2,omitempty"`
-	SepaBeneficiaryCity               string                `json:"sepa_beneficiary_city"`
-	SepaBeneficiaryStateProvinceRegion *string              `json:"sepa_beneficiary_state_province_region,omitempty"`
-	SepaBeneficiaryPostalCode         string                `json:"sepa_beneficiary_postal_code"`
-	SepaBeneficiaryCountry            types.Country         `json:"sepa_beneficiary_country"`
+	CustomerID                         string             `json:"-"`
+	Name                               string             `json:"name"`
+	AccountClass                       types.AccountClass `json:"account_class"`
+	SepaIban                           string             `json:"sepa_iban"`
+	SepaBeneficiaryBic                 string             `json:"sepa_beneficiary_bic"`
+	SepaBeneficiaryLegalName           string             `json:"sepa_beneficiary_legal_name"`
+	SepaBeneficiaryAddressLine1        string             `json:"sepa_beneficiary_address_line_1"`
+	SepaBeneficiaryAddressLine2        *string            `json:"sepa_beneficiary_address_line_2,omitempty"`
+	SepaBeneficiaryCity                string             `json:"sepa_beneficiary_city"`
+	SepaBeneficiaryStateProvinceRegion *string            `json:"sepa_beneficiary_state_province_region,omitempty"`
+	SepaBeneficiaryPostalCode          string             `json:"sepa_beneficiary_postal_code"`
+	SepaBeneficiaryCountry             types.Country      `json:"sepa_beneficiary_country"`
 }
 
 // CreateSepaResponse represents the response when creating a SEPA bank account.

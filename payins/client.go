@@ -94,7 +94,6 @@ type ListParams struct {
 	Offset     int                     `json:"offset,omitempty"`
 }
 
-
 // CreateEvmResponse represents the response when creating an EVM payin.
 type CreateEvmResponse struct {
 	ID                  string                     `json:"id"`

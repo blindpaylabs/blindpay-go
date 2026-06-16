@@ -93,7 +93,6 @@ type ListParams struct {
 	Offset     int    `json:"offset,omitempty"`
 }
 
-
 // ExportParams represents parameters for exporting payouts.
 type ExportParams struct {
 	Limit  int `json:"limit,omitempty"`
