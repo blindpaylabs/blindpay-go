@@ -94,6 +94,7 @@ type BankAccount struct {
 	TedBankCode                            *string               `json:"ted_bank_code,omitempty"`
 	TedBranchCode                          *string               `json:"ted_branch_code,omitempty"`
 	TedCpfCnpj                             *string               `json:"ted_cpf_cnpj,omitempty"`
+	SepaBeneficiaryBic                     *string               `json:"sepa_beneficiary_bic,omitempty"`
 	CreatedAt                              time.Time             `json:"created_at"`
 }
 
@@ -107,23 +108,24 @@ type OfframpWalletInfo struct {
 
 // GetResponse represents a detailed bank account response.
 type GetResponse struct {
-	ID                string                `json:"id"`
-	ReceiverID        string                `json:"receiver_id"`
-	AccountHolderName string                `json:"account_holder_name"`
-	AccountNumber     string                `json:"account_number"`
-	RoutingNumber     string                `json:"routing_number"`
-	AccountType       types.BankAccountType `json:"account_type"`
-	BankName          string                `json:"bank_name"`
-	SwiftCode         *string               `json:"swift_code"`
-	IBAN              *string               `json:"iban"`
-	IsPrimary         bool                  `json:"is_primary"`
-	CreatedAt         time.Time             `json:"created_at"`
-	UpdatedAt         time.Time             `json:"updated_at"`
+	ID                 string                `json:"id"`
+	CustomerID         string                `json:"customer_id"`
+	AccountHolderName  string                `json:"account_holder_name"`
+	AccountNumber      string                `json:"account_number"`
+	RoutingNumber      string                `json:"routing_number"`
+	AccountType        types.BankAccountType `json:"account_type"`
+	BankName           string                `json:"bank_name"`
+	SwiftCode          *string               `json:"swift_code"`
+	IBAN               *string               `json:"iban"`
+	IsPrimary          bool                  `json:"is_primary"`
+	SepaBeneficiaryBic *string               `json:"sepa_beneficiary_bic,omitempty"`
+	CreatedAt          time.Time             `json:"created_at"`
+	UpdatedAt          time.Time             `json:"updated_at"`
 }
 
 // CreatePixParams represents parameters for creating a PIX bank account.
 type CreatePixParams struct {
-	ReceiverID string `json:"-"`
+	CustomerID string `json:"-"`
 	Name       string `json:"name"`
 	PixKey     string `json:"pix_key"`
 }
@@ -257,6 +259,7 @@ type CreateInternationalSwiftResponse struct {
 	SwiftIntermediaryBankName              *string                     `json:"swift_intermediary_bank_name"`
 	SwiftIntermediaryBankCountry           *types.Country              `json:"swift_intermediary_bank_country"`
 	SwiftPaymentCode                       *string                     `json:"swift_payment_code"`
+	SepaBeneficiaryBic                     *string                     `json:"sepa_beneficiary_bic,omitempty"`
 	CreatedAt                              time.Time                   `json:"created_at"`
 }
 
@@ -281,7 +284,7 @@ type CreateRtpResponse struct {
 
 // CreateTedParams represents parameters for creating a TED bank account.
 type CreateTedParams struct {
-	ReceiverID            string                      `json:"-"`
+	CustomerID            string                      `json:"-"`
 	Name                  string                      `json:"name"`
 	BeneficiaryName       string                      `json:"beneficiary_name"`
 	TedBankCode           string                      `json:"ted_bank_code"`
@@ -323,7 +326,7 @@ type CreateTedResponse struct {
 
 // CreatePixSafeParams represents parameters for creating a PIX Safe bank account.
 type CreatePixSafeParams struct {
-	ReceiverID        string                `json:"-"`
+	CustomerID        string                `json:"-"`
 	Name              string                `json:"name"`
 	BeneficiaryName   string                `json:"beneficiary_name"`
 	AccountNumber     string                `json:"account_number"`
@@ -349,7 +352,7 @@ type CreatePixSafeResponse struct {
 
 // ListParams represents parameters for listing bank accounts with optional filters.
 type ListParams struct {
-	ReceiverID    string     `json:"-"`
+	CustomerID    string     `json:"-"`
 	Status        string     `json:"status,omitempty"`
 	Type          types.Rail `json:"type,omitempty"`
 	Name          string     `json:"name,omitempty"`
@@ -359,7 +362,7 @@ type ListParams struct {
 
 // CreateAchParams represents parameters for creating an ACH bank account.
 type CreateAchParams struct {
-	ReceiverID            string                      `json:"-"`
+	CustomerID            string                      `json:"-"`
 	Name                  string                      `json:"name"`
 	AccountClass          types.AccountClass          `json:"account_class"`
 	AccountNumber         string                      `json:"account_number"`
@@ -381,7 +384,7 @@ type CreateAchParams struct {
 
 // CreateWireParams represents parameters for creating a Wire bank account.
 type CreateWireParams struct {
-	ReceiverID            string                      `json:"-"`
+	CustomerID            string                      `json:"-"`
 	Name                  string                      `json:"name"`
 	AccountClass          types.AccountClass          `json:"account_class"`
 	AccountNumber         string                      `json:"account_number"`
@@ -402,7 +405,7 @@ type CreateWireParams struct {
 
 // CreateArgentinaTransfersParams represents parameters for creating an Argentina transfers bank account.
 type CreateArgentinaTransfersParams struct {
-	ReceiverID       string             `json:"-"`
+	CustomerID       string             `json:"-"`
 	Name             string             `json:"name"`
 	BeneficiaryName  string             `json:"beneficiary_name"`
 	TransfersAccount string             `json:"transfers_account"`
@@ -411,7 +414,7 @@ type CreateArgentinaTransfersParams struct {
 
 // CreateSpeiParams represents parameters for creating a SPEI bank account.
 type CreateSpeiParams struct {
-	ReceiverID          string       `json:"-"`
+	CustomerID          string       `json:"-"`
 	BeneficiaryName     string       `json:"beneficiary_name"`
 	Name                string       `json:"name"`
 	SpeiClabe           string       `json:"spei_clabe"`
@@ -421,7 +424,7 @@ type CreateSpeiParams struct {
 
 // CreateColombiaAchParams represents parameters for creating a Colombia ACH bank account.
 type CreateColombiaAchParams struct {
-	ReceiverID                 string                `json:"-"`
+	CustomerID                 string                `json:"-"`
 	Name                       string                `json:"name"`
 	AccountType                types.BankAccountType `json:"account_type"`
 	AchCopBeneficiaryFirstName string                `json:"ach_cop_beneficiary_first_name"`
@@ -435,7 +438,7 @@ type CreateColombiaAchParams struct {
 
 // CreateInternationalSwiftParams represents parameters for creating an international SWIFT bank account.
 type CreateInternationalSwiftParams struct {
-	ReceiverID                             string                      `json:"-"`
+	CustomerID                             string                      `json:"-"`
 	Name                                   string                      `json:"name"`
 	AccountClass                           types.AccountClass          `json:"account_class"`
 	RecipientRelationship                  types.RecipientRelationship `json:"recipient_relationship"`
@@ -464,11 +467,12 @@ type CreateInternationalSwiftParams struct {
 	PhoneNumber                            string                      `json:"phone_number,omitempty"`
 	TaxID                                  string                      `json:"tax_id,omitempty"`
 	DateOfBirth                            string                      `json:"date_of_birth,omitempty"`
+	SepaBeneficiaryBic                     *string                     `json:"sepa_beneficiary_bic,omitempty"`
 }
 
 // CreateRtpParams represents parameters for creating an RTP (Real-Time Payments) bank account.
 type CreateRtpParams struct {
-	ReceiverID            string                      `json:"-"`
+	CustomerID            string                      `json:"-"`
 	Name                  string                      `json:"name"`
 	AccountClass          types.AccountClass          `json:"account_class"`
 	BeneficiaryName       string                      `json:"beneficiary_name"`
@@ -501,16 +505,16 @@ func NewClient(cfg *config.Config) *Client {
 	}
 }
 
-// List retrieves all bank accounts for a receiver with optional filters.
+// List retrieves all bank accounts for a customer with optional filters.
 func (c *Client) List(ctx context.Context, params *ListParams) ([]BankAccount, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
-	if params.ReceiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", c.instanceID, params.ReceiverID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	q := url.Values{}
 	if params.Status != "" {
@@ -536,28 +540,28 @@ func (c *Client) List(ctx context.Context, params *ListParams) ([]BankAccount, e
 }
 
 // Get retrieves a specific bank account.
-func (c *Client) Get(ctx context.Context, receiverID, id string) (*GetResponse, error) {
-	if receiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+func (c *Client) Get(ctx context.Context, customerID, id string) (*GetResponse, error) {
+	if customerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 	if id == "" {
 		return nil, fmt.Errorf("id cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts/%s", c.instanceID, receiverID, id)
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts/%s", c.instanceID, customerID, id)
 	return request.Do[*GetResponse](c.cfg, ctx, "GET", path, nil)
 }
 
 // Delete deletes a bank account.
-func (c *Client) Delete(ctx context.Context, receiverID, id string) error {
-	if receiverID == "" {
-		return fmt.Errorf("receiver ID cannot be empty")
+func (c *Client) Delete(ctx context.Context, customerID, id string) error {
+	if customerID == "" {
+		return fmt.Errorf("customer ID cannot be empty")
 	}
 	if id == "" {
 		return fmt.Errorf("id cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts/%s", c.instanceID, receiverID, id)
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts/%s", c.instanceID, customerID, id)
 	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil)
 	return err
 }
@@ -567,11 +571,11 @@ func (c *Client) CreatePix(ctx context.Context, params *CreatePixParams) (*Creat
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
-	if params.ReceiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", c.instanceID, params.ReceiverID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":    "pix",
@@ -587,11 +591,11 @@ func (c *Client) CreateAch(ctx context.Context, params *CreateAchParams) (*Creat
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
-	if params.ReceiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", c.instanceID, params.ReceiverID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":                   "ach",
@@ -633,11 +637,11 @@ func (c *Client) CreateWire(ctx context.Context, params *CreateWireParams) (*Cre
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
-	if params.ReceiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", c.instanceID, params.ReceiverID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":                   "wire",
@@ -678,11 +682,11 @@ func (c *Client) CreateArgentinaTransfers(ctx context.Context, params *CreateArg
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
-	if params.ReceiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", c.instanceID, params.ReceiverID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":              "transfers_bitso",
@@ -700,11 +704,11 @@ func (c *Client) CreateSpei(ctx context.Context, params *CreateSpeiParams) (*Cre
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
-	if params.ReceiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", c.instanceID, params.ReceiverID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":                  "spei_bitso",
@@ -723,11 +727,11 @@ func (c *Client) CreateColombiaAch(ctx context.Context, params *CreateColombiaAc
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
-	if params.ReceiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", c.instanceID, params.ReceiverID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":                           "ach_cop_bitso",
@@ -750,11 +754,11 @@ func (c *Client) CreateInternationalSwift(ctx context.Context, params *CreateInt
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
-	if params.ReceiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", c.instanceID, params.ReceiverID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":                                        "international_swift",
@@ -802,6 +806,9 @@ func (c *Client) CreateInternationalSwift(ctx context.Context, params *CreateInt
 	if params.DateOfBirth != "" {
 		body["date_of_birth"] = params.DateOfBirth
 	}
+	if params.SepaBeneficiaryBic != nil {
+		body["sepa_beneficiary_bic"] = params.SepaBeneficiaryBic
+	}
 
 	return request.Do[*CreateInternationalSwiftResponse](c.cfg, ctx, "POST", path, body)
 }
@@ -811,11 +818,11 @@ func (c *Client) CreatePixSafe(ctx context.Context, params *CreatePixSafeParams)
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
-	if params.ReceiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", c.instanceID, params.ReceiverID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":                 "pix_safe",
@@ -836,11 +843,11 @@ func (c *Client) CreateRtp(ctx context.Context, params *CreateRtpParams) (*Creat
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
-	if params.ReceiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", c.instanceID, params.ReceiverID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":                   "rtp",
@@ -881,11 +888,11 @@ func (c *Client) CreateTed(ctx context.Context, params *CreateTedParams) (*Creat
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
-	if params.ReceiverID == "" {
-		return nil, fmt.Errorf("receiver ID cannot be empty")
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/receivers/%s/bank-accounts", c.instanceID, params.ReceiverID)
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":                   "ted",
@@ -920,4 +927,73 @@ func (c *Client) CreateTed(ctx context.Context, params *CreateTedParams) (*Creat
 	}
 
 	return request.Do[*CreateTedResponse](c.cfg, ctx, "POST", path, body)
+}
+
+// CreateSepaParams represents parameters for creating a SEPA bank account.
+type CreateSepaParams struct {
+	CustomerID                         string             `json:"-"`
+	Name                               string             `json:"name"`
+	AccountClass                       types.AccountClass `json:"account_class"`
+	SepaIban                           string             `json:"sepa_iban"`
+	SepaBeneficiaryBic                 string             `json:"sepa_beneficiary_bic"`
+	SepaBeneficiaryLegalName           string             `json:"sepa_beneficiary_legal_name"`
+	SepaBeneficiaryAddressLine1        string             `json:"sepa_beneficiary_address_line_1"`
+	SepaBeneficiaryAddressLine2        *string            `json:"sepa_beneficiary_address_line_2,omitempty"`
+	SepaBeneficiaryCity                string             `json:"sepa_beneficiary_city"`
+	SepaBeneficiaryStateProvinceRegion *string            `json:"sepa_beneficiary_state_province_region,omitempty"`
+	SepaBeneficiaryPostalCode          string             `json:"sepa_beneficiary_postal_code"`
+	SepaBeneficiaryCountry             types.Country      `json:"sepa_beneficiary_country"`
+}
+
+// CreateSepaResponse represents the response when creating a SEPA bank account.
+type CreateSepaResponse struct {
+	ID                                 string                       `json:"id"`
+	Type                               string                       `json:"type"`
+	Name                               string                       `json:"name"`
+	AccountClass                       types.AccountClass           `json:"account_class"`
+	RecipientRelationship              *types.RecipientRelationship `json:"recipient_relationship"`
+	SepaIban                           string                       `json:"sepa_iban"`
+	SepaBeneficiaryBic                 string                       `json:"sepa_beneficiary_bic"`
+	SepaBeneficiaryLegalName           string                       `json:"sepa_beneficiary_legal_name"`
+	SepaBeneficiaryAddressLine1        string                       `json:"sepa_beneficiary_address_line_1"`
+	SepaBeneficiaryAddressLine2        *string                      `json:"sepa_beneficiary_address_line_2"`
+	SepaBeneficiaryCity                string                       `json:"sepa_beneficiary_city"`
+	SepaBeneficiaryStateProvinceRegion *string                      `json:"sepa_beneficiary_state_province_region"`
+	SepaBeneficiaryPostalCode          string                       `json:"sepa_beneficiary_postal_code"`
+	SepaBeneficiaryCountry             types.Country                `json:"sepa_beneficiary_country"`
+	CreatedAt                          time.Time                    `json:"created_at"`
+}
+
+// CreateSepa creates a SEPA bank account.
+func (c *Client) CreateSepa(ctx context.Context, params *CreateSepaParams) (*CreateSepaResponse, error) {
+	if params == nil {
+		return nil, fmt.Errorf("params cannot be nil")
+	}
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
+	}
+
+	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
+
+	body := map[string]any{
+		"type":                            "sepa",
+		"name":                            params.Name,
+		"account_class":                   params.AccountClass,
+		"sepa_iban":                       params.SepaIban,
+		"sepa_beneficiary_bic":            params.SepaBeneficiaryBic,
+		"sepa_beneficiary_legal_name":     params.SepaBeneficiaryLegalName,
+		"sepa_beneficiary_address_line_1": params.SepaBeneficiaryAddressLine1,
+		"sepa_beneficiary_city":           params.SepaBeneficiaryCity,
+		"sepa_beneficiary_postal_code":    params.SepaBeneficiaryPostalCode,
+		"sepa_beneficiary_country":        params.SepaBeneficiaryCountry,
+	}
+
+	if params.SepaBeneficiaryAddressLine2 != nil {
+		body["sepa_beneficiary_address_line_2"] = *params.SepaBeneficiaryAddressLine2
+	}
+	if params.SepaBeneficiaryStateProvinceRegion != nil {
+		body["sepa_beneficiary_state_province_region"] = *params.SepaBeneficiaryStateProvinceRegion
+	}
+
+	return request.Do[*CreateSepaResponse](c.cfg, ctx, "POST", path, body)
 }

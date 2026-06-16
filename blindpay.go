@@ -9,6 +9,7 @@ import (
 	"github.com/blindpaylabs/blindpay-go/available"
 	"github.com/blindpaylabs/blindpay-go/bankaccounts"
 	"github.com/blindpaylabs/blindpay-go/custodialwallets"
+	"github.com/blindpaylabs/blindpay-go/customers"
 	"github.com/blindpaylabs/blindpay-go/fees"
 	"github.com/blindpaylabs/blindpay-go/instances"
 	"github.com/blindpaylabs/blindpay-go/internal/config"
@@ -26,7 +27,7 @@ import (
 )
 
 // Version is the current version of the SDK.
-const Version = "1.13.0"
+const Version = "1.14.0"
 
 // Client is the main BlindPay client.
 type Client struct {
@@ -39,12 +40,15 @@ type Client struct {
 	APIKeys          *apikeys.Client
 	BankAccounts     *bankaccounts.Client
 	CustodialWallets *custodialwallets.Client
+	Customers        *customers.Client
 	Fees             *fees.Client
 	Instances        *instances.Client
 	PartnerFees      *partnerfees.Client
 	Payins           *payins.Client
 	Payouts          *payouts.Client
 	Quotes           *quotes.Client
+	// Deprecated: use Customers instead. The receivers resource will be removed in a future major version.
+	// See https://www.blindpay.com/changelog/2026-06-04-customers-rename
 	Receivers        *receivers.Client
 	Tos              *termsofservice.Client
 	Transfers        *transfers.Client
@@ -90,6 +94,7 @@ func New(apiKey, instanceID string, opts ...Option) (*Client, error) {
 	c.APIKeys = apikeys.NewClient(cfg)
 	c.BankAccounts = bankaccounts.NewClient(cfg)
 	c.CustodialWallets = custodialwallets.NewClient(cfg)
+	c.Customers = customers.NewClient(cfg)
 	c.Fees = fees.NewClient(cfg)
 	c.Instances = instances.NewClient(cfg)
 	c.PartnerFees = partnerfees.NewClient(cfg)

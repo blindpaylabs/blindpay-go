@@ -23,10 +23,9 @@ func TestPayouts_List(t *testing.T) {
 		HTTPClient: &http.Client{
 			Transport: &blindpaytest.RoundTripper{
 				T: t,
-				Out: json.RawMessage(`{
-					"data":[
-						{
-							"receiver_id":"re_000000000000",
+				Out: json.RawMessage(`[
+					{
+						"receiver_id":"re_000000000000",
 							"id":"pa_000000000000",
 							"status":"processing",
 							"sender_wallet_address":"0x123...890",
@@ -116,14 +115,8 @@ func TestPayouts_List(t *testing.T) {
 							"transfers_account":"BM123123123123",
 							"transfers_type":"CVU",
 							"has_virtual_account":true
-						}
-					],
-					"pagination":{
-						"has_more":true,
-						"next_page":3,
-						"prev_page":1
 					}
-				}`),
+				]`),
 				Method: http.MethodGet,
 				Path:   fmt.Sprintf("/instances/%s/payouts", instanceID),
 			},
@@ -134,9 +127,9 @@ func TestPayouts_List(t *testing.T) {
 	client := NewClient(cfg)
 	response, err := client.List(context.Background(), &ListParams{})
 	require.NoError(t, err)
-	require.Len(t, response.Data, 1)
-	require.Equal(t, "pa_000000000000", response.Data[0].ID)
-	require.Equal(t, types.TransactionStatusProcessing, response.Data[0].Status)
+	require.Len(t, response, 1)
+	require.Equal(t, "pa_000000000000", response[0].ID)
+	require.Equal(t, types.TransactionStatusProcessing, response[0].Status)
 }
 
 func TestPayouts_Export(t *testing.T) {

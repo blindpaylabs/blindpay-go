@@ -48,6 +48,16 @@ type UpdateMemberRoleParams struct {
 	Role     InstanceMemberRole `json:"user_role"`
 }
 
+// MigrateOwnershipParams represents parameters for migrating instance ownership.
+type MigrateOwnershipParams struct {
+	UserID string `json:"user_id"`
+}
+
+// MigrateOwnershipResponse represents the response when migrating instance ownership.
+type MigrateOwnershipResponse struct {
+	Success bool `json:"success"`
+}
+
 // Client handles instance-related operations.
 type Client struct {
 	cfg        *request.Config
@@ -129,4 +139,17 @@ func (c *Client) UpdateMemberRole(ctx context.Context, params *UpdateMemberRoleP
 
 	_, err := request.Do[struct{}](c.cfg, ctx, "PUT", path, body)
 	return err
+}
+
+// MigrateOwnership migrates instance ownership to another user.
+func (c *Client) MigrateOwnership(ctx context.Context, params *MigrateOwnershipParams) (*MigrateOwnershipResponse, error) {
+	if params == nil {
+		return nil, fmt.Errorf("params cannot be nil")
+	}
+	if params.UserID == "" {
+		return nil, fmt.Errorf("user ID cannot be empty")
+	}
+
+	path := fmt.Sprintf("/instances/%s/ownership", c.instanceID)
+	return request.Do[*MigrateOwnershipResponse](c.cfg, ctx, "POST", path, params)
 }

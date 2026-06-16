@@ -23,10 +23,9 @@ func TestPayins_List(t *testing.T) {
 		HTTPClient: &http.Client{
 			Transport: &blindpaytest.RoundTripper{
 				T: t,
-				Out: json.RawMessage(`{
-					"data": [
-						{
-							"receiver_id": "re_000000000000",
+				Out: json.RawMessage(`[
+					{
+						"receiver_id": "re_000000000000",
 							"id": "re_000000000000",
 							"pix_code":"00020101021226790014br.gov.bcb.pix2557brcode.starkinfra.com/v2/bcf07f6c4110454e9fd6f120bab13e835204000053039865802BR5915Blind Pay, Inc.6010Vila Velha62070503***6304BCAB",
 							"memo_code": "8K45GHBNT6BQ6462",
@@ -108,13 +107,7 @@ func TestPayins_List(t *testing.T) {
 								}
 							}
 						}
-					],
-					"pagination": {
-						"has_more": true,
-						"next_page": 3,
-						"prev_page": 1
-					}
-				}`),
+				]`),
 				Method: http.MethodGet,
 				Path:   fmt.Sprintf("/instances/%s/payins", instanceID),
 			},
@@ -125,9 +118,9 @@ func TestPayins_List(t *testing.T) {
 	client := NewClient(cfg)
 	response, err := client.List(context.Background(), &ListParams{})
 	require.NoError(t, err)
-	require.Len(t, response.Data, 1)
-	require.Equal(t, "re_000000000000", response.Data[0].ID)
-	require.Equal(t, types.TransactionStatusProcessing, response.Data[0].Status)
+	require.Len(t, response, 1)
+	require.Equal(t, "re_000000000000", response[0].ID)
+	require.Equal(t, types.TransactionStatusProcessing, response[0].Status)
 }
 
 func TestPayins_Get(t *testing.T) {

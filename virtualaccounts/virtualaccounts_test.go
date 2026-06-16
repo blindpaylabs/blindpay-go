@@ -14,7 +14,7 @@ import (
 )
 
 func TestVirtualAccounts_Create(t *testing.T) {
-	receiverID := "re_000000000000"
+	customerID := "re_000000000000"
 	instanceID := "in_000000000000"
 	id := "va_000000000000"
 	walletID := "bw_000000000000"
@@ -67,7 +67,7 @@ func TestVirtualAccounts_Create(t *testing.T) {
 				In:     json.RawMessage(inJson),
 				Out:    json.RawMessage(outJson),
 				Method: http.MethodPost,
-				Path:   fmt.Sprintf("/instances/%s/receivers/%s/virtual-accounts", instanceID, receiverID),
+				Path:   fmt.Sprintf("/instances/%s/customers/%s/virtual-accounts", instanceID, customerID),
 			},
 		},
 		UserAgent: "test",
@@ -75,7 +75,7 @@ func TestVirtualAccounts_Create(t *testing.T) {
 
 	client := NewClient(cfg)
 	account, err := client.Create(context.Background(), &CreateParams{
-		ReceiverID:         receiverID,
+		CustomerID:         customerID,
 		BlockchainWalletID: walletID,
 		Token:              types.StablecoinTokenUSDC,
 		BankingPartner:     types.BankingPartnerCfsb,
@@ -86,7 +86,7 @@ func TestVirtualAccounts_Create(t *testing.T) {
 }
 
 func TestVirtualAccounts_Get(t *testing.T) {
-	receiverID := "re_000000000000"
+	customerID := "re_000000000000"
 	instanceID := "in_000000000000"
 	id := "va_000000000000"
 	walletID := "bw_000000000000"
@@ -132,21 +132,21 @@ func TestVirtualAccounts_Get(t *testing.T) {
 				T:      t,
 				Out:    json.RawMessage(outJson),
 				Method: http.MethodGet,
-				Path:   fmt.Sprintf("/instances/%s/receivers/%s/virtual-accounts/%s", instanceID, receiverID, id),
+				Path:   fmt.Sprintf("/instances/%s/customers/%s/virtual-accounts/%s", instanceID, customerID, id),
 			},
 		},
 		UserAgent: "test",
 	}
 
 	client := NewClient(cfg)
-	account, err := client.Get(context.Background(), receiverID, id)
+	account, err := client.Get(context.Background(), customerID, id)
 	require.NoError(t, err)
 	require.Equal(t, id, account.ID)
 	require.Equal(t, walletID, account.BlockchainWalletID)
 }
 
 func TestVirtualAccounts_Update(t *testing.T) {
-	receiverID := "re_000000000000"
+	customerID := "re_000000000000"
 	instanceID := "in_000000000000"
 	virtualAccountID := "va_000000000000"
 	newWalletID := "bw_000000000000"
@@ -167,7 +167,7 @@ func TestVirtualAccounts_Update(t *testing.T) {
 				In:     json.RawMessage(inJson),
 				Out:    json.RawMessage(outJson),
 				Method: http.MethodPut,
-				Path:   fmt.Sprintf("/instances/%s/receivers/%s/virtual-accounts/%s", instanceID, receiverID, virtualAccountID),
+				Path:   fmt.Sprintf("/instances/%s/customers/%s/virtual-accounts/%s", instanceID, customerID, virtualAccountID),
 			},
 		},
 		UserAgent: "test",
@@ -175,7 +175,7 @@ func TestVirtualAccounts_Update(t *testing.T) {
 
 	client := NewClient(cfg)
 	err := client.Update(context.Background(), &UpdateParams{
-		ReceiverID:         receiverID,
+		CustomerID:         customerID,
 		VirtualAccountID:   virtualAccountID,
 		BlockchainWalletID: newWalletID,
 		Token:              types.StablecoinTokenUSDC,

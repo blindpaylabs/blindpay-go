@@ -94,12 +94,6 @@ type ListParams struct {
 	Offset     int                     `json:"offset,omitempty"`
 }
 
-// ListResponse represents the response when listing payins.
-type ListResponse struct {
-	Data       []Payin                  `json:"data"`
-	Pagination types.PaginationMetadata `json:"pagination"`
-}
-
 // CreateEvmResponse represents the response when creating an EVM payin.
 type CreateEvmResponse struct {
 	ID                  string                     `json:"id"`
@@ -135,7 +129,7 @@ func NewClient(cfg *config.Config) *Client {
 }
 
 // List retrieves all payins with optional filters.
-func (c *Client) List(ctx context.Context, params *ListParams) (*ListResponse, error) {
+func (c *Client) List(ctx context.Context, params *ListParams) ([]Payin, error) {
 	path := fmt.Sprintf("/instances/%s/payins", c.instanceID)
 
 	if params != nil {
@@ -157,7 +151,7 @@ func (c *Client) List(ctx context.Context, params *ListParams) (*ListResponse, e
 		}
 	}
 
-	return request.Do[*ListResponse](c.cfg, ctx, "GET", path, nil)
+	return request.Do[[]Payin](c.cfg, ctx, "GET", path, nil)
 }
 
 // Get retrieves a specific payin by ID.
