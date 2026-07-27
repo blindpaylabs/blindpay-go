@@ -214,6 +214,7 @@ type AmlHits struct {
 type Owner struct {
 	ID                    string                 `json:"id,omitempty"`
 	InstanceID            string                 `json:"instance_id,omitempty"`
+	ReceiverID            string                 `json:"receiver_id,omitempty"` // sent today; CustomerID takes over post-migration
 	CustomerID            string                 `json:"customer_id,omitempty"`
 	Role                  OwnerRole              `json:"role"`
 	FirstName             string                 `json:"first_name"`

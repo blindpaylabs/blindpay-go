@@ -31,9 +31,15 @@ type RailEntry struct {
 type WebhookEvent string
 
 const (
-	WebhookEventReceiverNew            WebhookEvent = "receiver.new"
-	WebhookEventReceiverUpdate         WebhookEvent = "receiver.update"
+	// Deprecated: use WebhookEventCustomerNew/Update/Delete instead.
+	WebhookEventReceiverNew WebhookEvent = "receiver.new"
+	// Deprecated: use WebhookEventCustomerNew/Update/Delete instead.
+	WebhookEventReceiverUpdate WebhookEvent = "receiver.update"
+	// Deprecated: use WebhookEventCustomerNew/Update/Delete instead.
 	WebhookEventReceiverDelete         WebhookEvent = "receiver.delete"
+	WebhookEventCustomerNew            WebhookEvent = "customer.new"
+	WebhookEventCustomerUpdate         WebhookEvent = "customer.update"
+	WebhookEventCustomerDelete         WebhookEvent = "customer.delete"
 	WebhookEventBankAccountNew         WebhookEvent = "bankAccount.new"
 	WebhookEventPayoutNew              WebhookEvent = "payout.new"
 	WebhookEventPayoutUpdate           WebhookEvent = "payout.update"
