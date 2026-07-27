@@ -11,7 +11,7 @@ import (
 // InitiateParams represents parameters for initiating terms of service.
 type InitiateParams struct {
 	IdempotencyKey string  `json:"idempotency_key"`
-	ReceiverID     *string `json:"receiver_id"`
+	CustomerID     *string `json:"customer_id"`
 	RedirectURL    *string `json:"redirect_url"`
 }
 

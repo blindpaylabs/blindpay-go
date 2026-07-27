@@ -23,9 +23,9 @@ blindpay-go/
     blindpaytest/
       roundtripper.go      # Test helper: mock HTTP RoundTripper for unit tests.
   available/client.go      # GET /available/* -- rails, bank details, NAICS, SWIFT lookup.
-  apikeys/client.go        # API key management.
   bankaccounts/client.go   # Bank account CRUD (PIX, ACH, Wire, SPEI, SWIFT, RTP, etc.).
   custodialwallets/...     # Custodial wallet operations.
+  customers/client.go      # Customer CRUD (individual/business, standard/enhanced KYC).
   fees/client.go           # GET /instances/{id}/billing/fees.
   instances/...            # Instance management.
   partnerfees/...          # Partner fee configuration.
@@ -34,15 +34,15 @@ blindpay-go/
     quotes.go              # QuotesClient -- payin quote creation + FX rates.
   payouts/client.go        # Payout CRUD + export + document submission.
   quotes/client.go         # Payout quote creation + FX rates.
-  receivers/client.go      # Receiver CRUD (individual/business, standard/enhanced KYC).
   transfers/...            # Transfer operations.
   upload/...               # File upload.
   virtualaccounts/...      # Virtual account operations.
   wallets/client.go        # Blockchain wallet CRUD + OfframpClient (second client in same pkg).
   webhookendpoints/...     # Webhook endpoint management.
+  cmd/contractcheck/       # `go run ./cmd/contractcheck` -- wire-contract check, see section 8.
 ```
 
-Each resource lives in its own Go package (directory). The package name is the plural lowercase resource name (e.g. `payins`, `receivers`, `wallets`). Multi-word resources use a single lowercase word (e.g. `bankaccounts`, `custodialwallets`, `webhookendpoints`, `virtualaccounts`, `partnerfees`).
+Each resource lives in its own Go package (directory). The package name is the plural lowercase resource name (e.g. `payins`, `customers`, `wallets`). Multi-word resources use a single lowercase word (e.g. `bankaccounts`, `custodialwallets`, `webhookendpoints`, `virtualaccounts`, `partnerfees`). There is no `receivers` or `apikeys` package: `receivers` was fully replaced by `customers`, and API Keys is intentionally absent from the public API reference.
 
 ## 2. Conventions
 
@@ -56,17 +56,17 @@ Each resource lives in its own Go package (directory). The package name is the p
   - Variant get methods: `GetTrack`, `GetLimits`, `GetFxRate`, `GetWalletMessage`.
 - **Params structs**: `<Action>Params` or `<Action><Variant>Params`. E.g. `ListParams`, `CreateEvmParams`, `CreateIndividualStandardParams`.
 - **Response structs**: `<Action>Response` or the resource struct itself. E.g. `ListResponse`, `CreateResponse`, `CreateEvmResponse`.
-- **Resource structs**: Singular PascalCase. `Payin`, `Payout`, `Receiver`, `BlockchainWallet`, `BankAccount`.
+- **Resource structs**: Singular PascalCase. `Payin`, `Payout`, `Customer`, `BlockchainWallet`, `BankAccount`.
 
 ### Types and fields
 
 - Required fields: bare type (`string`, `float64`, `types.Country`).
 - Optional fields: pointer type (`*string`, `*float64`, `*types.Country`).
-- ID fields that are path parameters (not sent in JSON body): tagged `json:"-"`. E.g. `ReceiverID string \`json:"-"\``.
+- ID fields that are path parameters (not sent in JSON body): tagged `json:"-"`. E.g. `CustomerID string \`json:"-"\``.
 - All JSON tags use `snake_case` matching the API.
 - Optional JSON fields include `omitempty`.
 - Shared enum types are defined in `internal/types/` and re-exported in root `types.go`.
-- Package-specific enum types are defined directly in the package file (e.g. `receivers.ProofOfAddressDocType`).
+- Package-specific enum types are defined directly in the package file (e.g. `customers.ProofOfAddressDocType`).
 
 ### Go idioms
 
@@ -109,12 +109,12 @@ type Invoice struct {
     ID         string  `json:"id"`
     Amount     float64 `json:"amount"`
     Currency   string  `json:"currency"`
-    ReceiverID string  `json:"receiver_id"`
+    CustomerID string  `json:"customer_id"`
 }
 
 // CreateParams represents parameters for creating an invoice.
 type CreateParams struct {
-    ReceiverID string  `json:"receiver_id"`
+    CustomerID string  `json:"customer_id"`
     Amount     float64 `json:"amount"`
     Currency   string  `json:"currency"`
 }
@@ -201,7 +201,7 @@ func TestInvoices_List(t *testing.T) {
         HTTPClient: &http.Client{
             Transport: &blindpaytest.RoundTripper{
                 T:      t,
-                Out:    json.RawMessage(`[{"id":"inv_001","amount":100,"currency":"USD","receiver_id":"re_001"}]`),
+                Out:    json.RawMessage(`[{"id":"inv_001","amount":100,"currency":"USD","customer_id":"re_001"}]`),
                 Method: http.MethodGet,
                 Path:   fmt.Sprintf("/instances/%s/invoices", instanceID),
             },
@@ -228,19 +228,19 @@ Update `const Version` in `blindpay.go` (MINOR bump for new resource).
 3. Follow the existing method patterns in the same file.
 4. Add a test case in the corresponding `_test.go` file.
 
-Example -- adding `GetByExternalID` to `receivers`:
+Example -- adding `GetByExternalID` to `customers`:
 
 ```go
-// In receivers/client.go
+// In customers/client.go
 
-// GetByExternalID retrieves a receiver by external ID.
-func (c *Client) GetByExternalID(ctx context.Context, externalID string) (*Receiver, error) {
+// GetByExternalID retrieves a customer by external ID.
+func (c *Client) GetByExternalID(ctx context.Context, externalID string) (*Customer, error) {
     if externalID == "" {
         return nil, fmt.Errorf("external ID cannot be empty")
     }
 
-    path := fmt.Sprintf("/instances/%s/receivers/external/%s", c.instanceID, externalID)
-    return request.Do[*Receiver](c.cfg, ctx, "GET", path, nil)
+    path := fmt.Sprintf("/instances/%s/customers/external/%s", c.instanceID, externalID)
+    return request.Do[*Customer](c.cfg, ctx, "GET", path, nil)
 }
 ```
 
@@ -381,6 +381,19 @@ go test ./...
 go build ./...
 ```
 
+### Contract check
+
+```bash
+go run ./cmd/contractcheck
+```
+
+Flags any json struct tag the SDK declares that doesn't exist anywhere in the
+committed spec snapshot (`.api-sync/spec-snapshot.json`), plus any spec
+webhook-event enum member missing from `internal/types.WebhookEvent`. Genuine
+pre-existing divergences that can't be fixed in the current PR go in
+`.api-sync/contract-allowlist.json` with a reason and owner; do not use it to
+silence a mismatch the PR itself introduced.
+
 ### Test structure
 
 - Each resource package has its own `_test.go` file (e.g. `payins/payins_test.go`).
@@ -424,10 +437,10 @@ blindpaytest.RoundTripper{
 | `/instances/{id}/payouts` | `payouts` | |
 | `/instances/{id}/quotes` | `quotes` | Payout quotes |
 | `/instances/{id}/payin-quotes` | `payins` (sub-client `Quotes`) | Payin quotes |
-| `/instances/{id}/receivers` | `receivers` | |
-| `/instances/{id}/receivers/{rid}/blockchain-wallets` | `wallets` | |
-| `/instances/{id}/receivers/{rid}/bank-accounts` | `bankaccounts` | |
-| `/instances/{id}/receivers/{rid}/bank-accounts/{bid}/offramp-wallets` | `wallets` (`OfframpClient`) | |
+| `/instances/{id}/customers` | `customers` | |
+| `/instances/{id}/customers/{cid}/blockchain-wallets` | `wallets` | |
+| `/instances/{id}/customers/{cid}/bank-accounts` | `bankaccounts` | |
+| `/instances/{id}/customers/{cid}/bank-accounts/{bid}/offramp-wallets` | `wallets` (`OfframpClient`) | |
 | `/instances/{id}/billing/fees` | `fees` | |
 | `/available/*` | `available` | No instanceID in path |
 | `/e/payins/{id}` | `payins` (method `GetTrack`) | External/public tracking |
@@ -462,7 +475,7 @@ blindpaytest.RoundTripper{
 | `array` | `[]T` |
 | `date-time` | `time.Time` |
 | Property name `foo_bar` | JSON tag `json:"foo_bar"` or `json:"foo_bar,omitempty"` |
-| Path parameter (e.g. `{receiver_id}`) | Struct field with `json:"-"`, passed as method arg or in params struct |
+| Path parameter (e.g. `{customer_id}`) | Struct field with `json:"-"`, passed as method arg or in params struct |
 
 ### Pagination
 

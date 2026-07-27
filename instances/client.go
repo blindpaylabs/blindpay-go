@@ -37,7 +37,7 @@ type InstanceMember struct {
 // UpdateParams represents parameters for updating an instance.
 type UpdateParams struct {
 	Name                      string  `json:"name"`
-	ReceiverInviteRedirectURL *string `json:"receiver_invite_redirect_url,omitempty"`
+	CustomerInviteRedirectURL *string `json:"customer_invite_redirect_url,omitempty"`
 	EmailNotifications        *bool   `json:"email_notifications,omitempty"`
 	RequirePasskey            *bool   `json:"require_passkey,omitempty"`
 }
@@ -90,8 +90,8 @@ func (c *Client) Update(ctx context.Context, params *UpdateParams) error {
 		"name": params.Name,
 	}
 
-	if params.ReceiverInviteRedirectURL != nil {
-		body["receiver_invite_redirect_url"] = params.ReceiverInviteRedirectURL
+	if params.CustomerInviteRedirectURL != nil {
+		body["customer_invite_redirect_url"] = params.CustomerInviteRedirectURL
 	}
 	if params.EmailNotifications != nil {
 		body["email_notifications"] = *params.EmailNotifications

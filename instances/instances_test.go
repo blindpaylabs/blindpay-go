@@ -72,7 +72,7 @@ func TestInstances_Update(t *testing.T) {
 	client := NewClient(cfg)
 	err := client.Update(context.Background(), &UpdateParams{
 		Name:                      "New Instance Name",
-		ReceiverInviteRedirectURL: &redirectURL,
+		CustomerInviteRedirectURL: &redirectURL,
 	})
 	require.NoError(t, err)
 }

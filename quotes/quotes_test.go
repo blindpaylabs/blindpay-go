@@ -58,7 +58,7 @@ func TestQuotes_Create(t *testing.T) {
 							"chainId":1
 						}
 					},
-					"receiver_local_amount":1000,
+					"customer_local_amount":1000,
 					"description":"Memo code or description, only works with USD and BRL"
 				}`),
 				Method: http.MethodPost,

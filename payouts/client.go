@@ -14,7 +14,7 @@ import (
 
 // Payout represents a payout transaction.
 type Payout struct {
-	ReceiverID                 string                          `json:"receiver_id"`
+	CustomerID                 string                          `json:"customer_id"`
 	ID                         string                          `json:"id"`
 	Status                     types.TransactionStatus         `json:"status"`
 	SenderWalletAddress        string                          `json:"sender_wallet_address"`
@@ -41,7 +41,7 @@ type Payout struct {
 	CommercialQuotation        float64                         `json:"commercial_quotation"`
 	BlindpayQuotation          float64                         `json:"blindpay_quotation"`
 	TotalFeeAmount             float64                         `json:"total_fee_amount"`
-	ReceiverLocalAmount        float64                         `json:"receiver_local_amount"`
+	CustomerLocalAmount        float64                         `json:"customer_local_amount"`
 	Currency                   types.Currency                  `json:"currency"`
 	TransactionDocumentFile    string                          `json:"transaction_document_file"`
 	TransactionDocumentType    types.TransactionDocumentType   `json:"transaction_document_type"`
@@ -88,8 +88,6 @@ type Payout struct {
 
 // ListParams represents parameters for listing payouts.
 type ListParams struct {
-	// Deprecated: use CustomerID instead.
-	ReceiverID string `json:"receiver_id,omitempty"`
 	CustomerID string `json:"customer_id,omitempty"`
 	Limit      int    `json:"limit,omitempty"`
 	Offset     int    `json:"offset,omitempty"`
@@ -177,9 +175,6 @@ func (c *Client) List(ctx context.Context, params *ListParams) ([]Payout, error)
 
 	if params != nil {
 		q := url.Values{}
-		if params.ReceiverID != "" {
-			q.Set("receiver_id", params.ReceiverID)
-		}
 		if params.CustomerID != "" {
 			q.Set("customer_id", params.CustomerID)
 		}

@@ -25,7 +25,7 @@ func TestPayins_List(t *testing.T) {
 				T: t,
 				Out: json.RawMessage(`[
 					{
-						"receiver_id": "re_000000000000",
+						"customer_id": "re_000000000000",
 							"id": "re_000000000000",
 							"pix_code":"00020101021226790014br.gov.bcb.pix2557brcode.starkinfra.com/v2/bcf07f6c4110454e9fd6f120bab13e835204000053039865802BR5915Blind Pay, Inc.6010Vila Velha62070503***6304BCAB",
 							"memo_code": "8K45GHBNT6BQ6462",
@@ -135,7 +135,7 @@ func TestPayins_Get(t *testing.T) {
 			Transport: &blindpaytest.RoundTripper{
 				T: t,
 				Out: json.RawMessage(`{
-					"receiver_id": "re_000000000000",
+					"customer_id": "re_000000000000",
 					"id": "re_000000000000",
 					"pix_code":"00020101021226790014br.gov.bcb.pix2557brcode.starkinfra.com/v2/bcf07f6c4110454e9fd6f120bab13e835204000053039865802BR5915Blind Pay, Inc.6010Vila Velha62070503***6304BCAB",
 					"memo_code": "8K45GHBNT6BQ6462",

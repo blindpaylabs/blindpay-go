@@ -49,12 +49,12 @@ type Transfer struct {
 	SenderToken                   types.StablecoinToken         `json:"sender_token"`
 	SenderAmount                  float64                       `json:"sender_amount"`
 	ReceiverAmount                float64                       `json:"receiver_amount"`
-	ReceiverNetwork               types.Network                 `json:"receiver_network"`
-	ReceiverToken                 types.StablecoinToken         `json:"receiver_token"`
-	ReceiverWalletAddress         string                        `json:"receiver_wallet_address"`
+	CustomerNetwork               types.Network                 `json:"customer_network"`
+	CustomerToken                 types.StablecoinToken         `json:"customer_token"`
+	CustomerWalletAddress         string                        `json:"customer_wallet_address"`
 	PartnerFeeAmount              *float64                      `json:"partner_fee_amount"`
 	ExternalID                    *string                       `json:"external_id,omitempty"`
-	ReceiverID                    string                        `json:"receiver_id"`
+	CustomerID                    string                        `json:"customer_id"`
 	Address                       string                        `json:"address"`
 	Network                       types.Network                 `json:"network"`
 }
@@ -63,9 +63,9 @@ type Transfer struct {
 type CreateQuoteParams struct {
 	WalletID              string                `json:"wallet_id"`
 	SenderToken           types.StablecoinToken `json:"sender_token"`
-	ReceiverWalletAddress string                `json:"receiver_wallet_address"`
-	ReceiverToken         types.StablecoinToken `json:"receiver_token"`
-	ReceiverNetwork       types.Network         `json:"receiver_network"`
+	CustomerWalletAddress string                `json:"customer_wallet_address"`
+	CustomerToken         types.StablecoinToken `json:"customer_token"`
+	CustomerNetwork       types.Network         `json:"customer_network"`
 	RequestAmount         float64               `json:"request_amount"`
 	CoverFees             bool                  `json:"cover_fees"`
 	AmountReference       string                `json:"amount_reference"`

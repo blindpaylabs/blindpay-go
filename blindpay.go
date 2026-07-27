@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/blindpaylabs/blindpay-go/apikeys"
 	"github.com/blindpaylabs/blindpay-go/available"
 	"github.com/blindpaylabs/blindpay-go/bankaccounts"
 	"github.com/blindpaylabs/blindpay-go/custodialwallets"
@@ -17,7 +16,6 @@ import (
 	"github.com/blindpaylabs/blindpay-go/payins"
 	"github.com/blindpaylabs/blindpay-go/payouts"
 	"github.com/blindpaylabs/blindpay-go/quotes"
-	"github.com/blindpaylabs/blindpay-go/receivers"
 	"github.com/blindpaylabs/blindpay-go/termsofservice"
 	"github.com/blindpaylabs/blindpay-go/transfers"
 	"github.com/blindpaylabs/blindpay-go/upload"
@@ -27,7 +25,7 @@ import (
 )
 
 // Version is the current version of the SDK.
-const Version = "1.15.0"
+const Version = "1.16.0"
 
 // Client is the main BlindPay client.
 type Client struct {
@@ -37,7 +35,6 @@ type Client struct {
 	httpClient *http.Client
 
 	Available        *available.Client
-	APIKeys          *apikeys.Client
 	BankAccounts     *bankaccounts.Client
 	CustodialWallets *custodialwallets.Client
 	Customers        *customers.Client
@@ -47,9 +44,6 @@ type Client struct {
 	Payins           *payins.Client
 	Payouts          *payouts.Client
 	Quotes           *quotes.Client
-	// Deprecated: use Customers instead. The receivers resource will be removed in a future major version.
-	// See https://www.blindpay.com/changelog/2026-06-04-customers-rename
-	Receivers        *receivers.Client
 	Tos              *termsofservice.Client
 	Transfers        *transfers.Client
 	Upload           *upload.Client
@@ -91,7 +85,6 @@ func New(apiKey, instanceID string, opts ...Option) (*Client, error) {
 	}
 
 	c.Available = available.NewClient(cfg)
-	c.APIKeys = apikeys.NewClient(cfg)
 	c.BankAccounts = bankaccounts.NewClient(cfg)
 	c.CustodialWallets = custodialwallets.NewClient(cfg)
 	c.Customers = customers.NewClient(cfg)
@@ -101,7 +94,6 @@ func New(apiKey, instanceID string, opts ...Option) (*Client, error) {
 	c.Payins = payins.NewClient(cfg)
 	c.Payouts = payouts.NewClient(cfg)
 	c.Quotes = quotes.NewClient(cfg)
-	c.Receivers = receivers.NewClient(cfg)
 	c.Tos = termsofservice.NewClient(cfg)
 	c.Transfers = transfers.NewClient(cfg)
 	c.Upload = upload.NewClient(cfg)

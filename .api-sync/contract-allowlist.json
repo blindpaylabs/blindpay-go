@@ -1,0 +1,104 @@
+[
+  {
+    "schema": "bankaccounts.GetResponse",
+    "field": "account_holder_name",
+    "reason": "GetResponse models a bank account detail shape (bank_name, iban, account_holder_name, is_primary) that does not match BankAccountOut in the spec. Pre-existing, unrelated to the customers rename; needs its own investigation.",
+    "owner": "eric"
+  },
+  {
+    "schema": "bankaccounts.GetResponse",
+    "field": "swift_code",
+    "reason": "Same GetResponse/BankAccountOut mismatch as account_holder_name.",
+    "owner": "eric"
+  },
+  {
+    "schema": "bankaccounts.GetResponse",
+    "field": "is_primary",
+    "reason": "Same GetResponse/BankAccountOut mismatch as account_holder_name.",
+    "owner": "eric"
+  },
+  {
+    "schema": "request.ErrorItem",
+    "field": "long_message",
+    "reason": "ErrorItem.long_message has no matching property anywhere in the spec; the spec's Error.errors is untyped strings. Pre-existing, unrelated to the customers rename.",
+    "owner": "eric"
+  },
+  {
+    "schema": "partnerfees.PartnerFee",
+    "field": "evm_wallet_address",
+    "reason": "Partner fee wallet address fields are not present in the spec's partner-fees schema at all. Pre-existing, unrelated to the customers rename.",
+    "owner": "eric"
+  },
+  {
+    "schema": "partnerfees.PartnerFee",
+    "field": "stellar_wallet_address",
+    "reason": "Same partner-fees/spec mismatch as evm_wallet_address.",
+    "owner": "eric"
+  },
+  {
+    "schema": "partnerfees.CreatePartnerFeeParams",
+    "field": "evm_wallet_address",
+    "reason": "Same partner-fees/spec mismatch as evm_wallet_address.",
+    "owner": "eric"
+  },
+  {
+    "schema": "partnerfees.CreatePartnerFeeParams",
+    "field": "stellar_wallet_address",
+    "reason": "Same partner-fees/spec mismatch as evm_wallet_address.",
+    "owner": "eric"
+  },
+  {
+    "schema": "payins.Payin",
+    "field": "tracking_partner_fee",
+    "reason": "tracking_partner_fee has no matching property anywhere in the spec for payins, payouts, or transfers. Pre-existing, unrelated to the customers rename.",
+    "owner": "eric"
+  },
+  {
+    "schema": "payins.CreateEvmResponse",
+    "field": "tracking_partner_fee",
+    "reason": "Same tracking_partner_fee/spec mismatch as payins.Payin.",
+    "owner": "eric"
+  },
+  {
+    "schema": "payins.Payin",
+    "field": "billing_fee",
+    "reason": "billing_fee has no matching property anywhere in the spec; only billing_fee_amount exists. Pre-existing, unrelated to the customers rename.",
+    "owner": "eric"
+  },
+  {
+    "schema": "payouts.Payout",
+    "field": "tracking_partner_fee",
+    "reason": "Same tracking_partner_fee/spec mismatch as payins.Payin.",
+    "owner": "eric"
+  },
+  {
+    "schema": "payouts.CreateResponse",
+    "field": "tracking_partner_fee",
+    "reason": "Same tracking_partner_fee/spec mismatch as payins.Payin.",
+    "owner": "eric"
+  },
+  {
+    "schema": "transfers.Transfer",
+    "field": "tracking_partner_fee",
+    "reason": "Same tracking_partner_fee/spec mismatch as payins.Payin.",
+    "owner": "eric"
+  },
+  {
+    "schema": "transfers.CreateResponse",
+    "field": "tracking_partner_fee",
+    "reason": "Same tracking_partner_fee/spec mismatch as payins.Payin.",
+    "owner": "eric"
+  },
+  {
+    "schema": "bankaccounts.GetResponse",
+    "field": "iban",
+    "reason": "Absent from the public spec snapshot; only appeared alongside internal-only surface in the unfiltered spec. Pre-existing SDK field, unrelated to the customers rename; needs its own investigation.",
+    "owner": "eric"
+  },
+  {
+    "schema": "customers.Customer",
+    "field": "aiprise_validation_key",
+    "reason": "Absent from the public spec snapshot; only appeared alongside internal-only surface in the unfiltered spec. Pre-existing SDK field, unrelated to the customers rename; needs its own investigation.",
+    "owner": "eric"
+  }
+]

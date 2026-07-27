@@ -364,12 +364,6 @@ const (
 )
 
 const (
-	// Deprecated: use WebhookEventCustomerNew/Update/Delete instead.
-	WebhookEventReceiverNew = types.WebhookEventReceiverNew //nolint:staticcheck // SA1019: re-exporting the deprecated const under its own deprecated name; receiver.* still fires on the wire today.
-	// Deprecated: use WebhookEventCustomerNew/Update/Delete instead.
-	WebhookEventReceiverUpdate = types.WebhookEventReceiverUpdate //nolint:staticcheck // SA1019: same as above.
-	// Deprecated: use WebhookEventCustomerNew/Update/Delete instead.
-	WebhookEventReceiverDelete         = types.WebhookEventReceiverDelete //nolint:staticcheck // SA1019: same as above.
 	WebhookEventCustomerNew            = types.WebhookEventCustomerNew
 	WebhookEventCustomerUpdate         = types.WebhookEventCustomerUpdate
 	WebhookEventCustomerDelete         = types.WebhookEventCustomerDelete

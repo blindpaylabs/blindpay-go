@@ -25,7 +25,7 @@ func TestPayouts_List(t *testing.T) {
 				T: t,
 				Out: json.RawMessage(`[
 					{
-						"receiver_id":"re_000000000000",
+						"customer_id":"re_000000000000",
 							"id":"pa_000000000000",
 							"status":"processing",
 							"sender_wallet_address":"0x123...890",
@@ -79,7 +79,7 @@ func TestPayouts_List(t *testing.T) {
 							"commercial_quotation":495,
 							"blindpay_quotation":485,
 							"total_fee_amount":1.5,
-							"receiver_local_amount":1000,
+							"customer_local_amount":1000,
 							"currency":"BRL",
 							"transaction_document_file":"https://example.com/image.png",
 							"transaction_document_type":"invoice",
@@ -144,7 +144,7 @@ func TestPayouts_Export(t *testing.T) {
 				T: t,
 				Out: json.RawMessage(`[
 					{
-						"receiver_id":"re_000000000000",
+						"customer_id":"re_000000000000",
 						"id":"pa_000000000000",
 						"status":"processing",
 						"sender_wallet_address":"0x123...890",
@@ -198,7 +198,7 @@ func TestPayouts_Export(t *testing.T) {
 						"commercial_quotation":495,
 						"blindpay_quotation":485,
 						"total_fee_amount":1.5,
-						"receiver_local_amount":1000,
+						"customer_local_amount":1000,
 						"currency":"BRL",
 						"transaction_document_file":"https://example.com/image.png",
 						"transaction_document_type":"invoice",
@@ -236,7 +236,7 @@ func TestPayouts_Export(t *testing.T) {
 						"has_virtual_account":true
 					},
 					{
-						"receiver_id":"re_111111111111",
+						"customer_id":"re_111111111111",
 						"id":"pa_111111111111",
 						"status":"completed",
 						"sender_wallet_address":"0x456...abc",
@@ -290,7 +290,7 @@ func TestPayouts_Export(t *testing.T) {
 						"commercial_quotation":495,
 						"blindpay_quotation":485,
 						"total_fee_amount":3.0,
-						"receiver_local_amount":2000,
+						"customer_local_amount":2000,
 						"currency":"BRL",
 						"transaction_document_file":"https://example.com/image2.png",
 						"transaction_document_type":"receipt",
@@ -333,7 +333,7 @@ func TestPayouts_Get(t *testing.T) {
 			Transport: &blindpaytest.RoundTripper{
 				T: t,
 				Out: json.RawMessage(`{
-					"receiver_id":"re_000000000000",
+					"customer_id":"re_000000000000",
 					"id":"pa_000000000000",
 					"status":"processing",
 					"sender_wallet_address":"0x123...890",
@@ -387,7 +387,7 @@ func TestPayouts_Get(t *testing.T) {
 					"commercial_quotation":495,
 					"blindpay_quotation":485,
 					"total_fee_amount":1.5,
-					"receiver_local_amount":1000,
+					"customer_local_amount":1000,
 					"currency":"BRL",
 					"transaction_document_file":"https://example.com/image.png",
 					"transaction_document_type":"invoice",
@@ -490,7 +490,7 @@ func TestPayouts_ExecuteEvm(t *testing.T) {
 						"estimated_time_of_arrival":"1_business_day",
 						"completed_at":"2011-10-05T14:48:00.000Z"
 					},
-					"receiver_id":"re_000000000000"
+					"customer_id":"re_000000000000"
 				}`, payoutID)),
 				Method: http.MethodPost,
 				Path:   fmt.Sprintf("/instances/%s/payouts/evm", instanceID),
@@ -560,7 +560,7 @@ func TestPayouts_ExecuteStellar(t *testing.T) {
 						"estimated_time_of_arrival":"1_business_day",
 						"completed_at":"2011-10-05T14:48:00.000Z"
 					},
-					"receiver_id":"re_000000000000"
+					"customer_id":"re_000000000000"
 				}`, payoutID)),
 				Method: http.MethodPost,
 				Path:   fmt.Sprintf("/instances/%s/payouts/stellar", instanceID),

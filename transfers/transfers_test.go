@@ -44,9 +44,9 @@ func TestTransfers_CreateQuote(t *testing.T) {
 	response, err := client.Quotes.Create(context.Background(), &CreateQuoteParams{
 		WalletID:              "wl_000000000000",
 		SenderToken:           types.StablecoinTokenUSDC,
-		ReceiverWalletAddress: "0x123...890",
-		ReceiverToken:         types.StablecoinTokenUSDC,
-		ReceiverNetwork:       types.NetworkBase,
+		CustomerWalletAddress: "0x123...890",
+		CustomerToken:         types.StablecoinTokenUSDC,
+		CustomerNetwork:       types.NetworkBase,
 		RequestAmount:         100,
 		CoverFees:             true,
 		AmountReference:       "sender",
@@ -117,9 +117,9 @@ func TestTransfers_List(t *testing.T) {
 						"sender_token":"USDC",
 						"sender_amount":100,
 						"receiver_amount":99,
-						"receiver_network":"base",
-						"receiver_token":"USDC",
-						"receiver_wallet_address":"0x123...890"
+						"customer_network":"base",
+						"customer_token":"USDC",
+						"customer_wallet_address":"0x123...890"
 					}],
 					"pagination":{"has_more":false,"next_page":0,"prev_page":0}
 				}`),
@@ -164,9 +164,9 @@ func TestTransfers_Get(t *testing.T) {
 					"sender_token":"USDC",
 					"sender_amount":100,
 					"receiver_amount":99,
-					"receiver_network":"base",
-					"receiver_token":"USDC",
-					"receiver_wallet_address":"0x123...890"
+					"customer_network":"base",
+					"customer_token":"USDC",
+					"customer_wallet_address":"0x123...890"
 				}`),
 				Method: http.MethodGet,
 				Path:   fmt.Sprintf("/instances/%s/transfers/%s", instanceID, transferID),
