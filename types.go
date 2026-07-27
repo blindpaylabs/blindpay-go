@@ -367,6 +367,9 @@ const (
 	WebhookEventReceiverNew            = types.WebhookEventReceiverNew
 	WebhookEventReceiverUpdate         = types.WebhookEventReceiverUpdate
 	WebhookEventReceiverDelete         = types.WebhookEventReceiverDelete
+	WebhookEventCustomerNew            = types.WebhookEventCustomerNew
+	WebhookEventCustomerUpdate         = types.WebhookEventCustomerUpdate
+	WebhookEventCustomerDelete         = types.WebhookEventCustomerDelete
 	WebhookEventBankAccountNew         = types.WebhookEventBankAccountNew
 	WebhookEventPayoutNew              = types.WebhookEventPayoutNew
 	WebhookEventPayoutUpdate           = types.WebhookEventPayoutUpdate

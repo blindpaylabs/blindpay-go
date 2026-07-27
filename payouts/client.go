@@ -88,7 +88,9 @@ type Payout struct {
 
 // ListParams represents parameters for listing payouts.
 type ListParams struct {
+	// Deprecated: use CustomerID instead.
 	ReceiverID string `json:"receiver_id,omitempty"`
+	CustomerID string `json:"customer_id,omitempty"`
 	Limit      int    `json:"limit,omitempty"`
 	Offset     int    `json:"offset,omitempty"`
 }
@@ -177,6 +179,9 @@ func (c *Client) List(ctx context.Context, params *ListParams) ([]Payout, error)
 		q := url.Values{}
 		if params.ReceiverID != "" {
 			q.Set("receiver_id", params.ReceiverID)
+		}
+		if params.CustomerID != "" {
+			q.Set("customer_id", params.CustomerID)
 		}
 		if params.Limit > 0 {
 			q.Set("limit", fmt.Sprintf("%d", params.Limit))

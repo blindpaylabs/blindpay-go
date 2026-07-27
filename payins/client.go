@@ -88,10 +88,12 @@ type BankDetails struct {
 
 // ListParams represents parameters for listing payins.
 type ListParams struct {
-	Status     types.TransactionStatus `json:"status,omitempty"`
-	ReceiverID string                  `json:"receiver_id,omitempty"`
-	Limit      int                     `json:"limit,omitempty"`
-	Offset     int                     `json:"offset,omitempty"`
+	Status types.TransactionStatus `json:"status,omitempty"`
+	// Deprecated: use CustomerID instead.
+	ReceiverID string `json:"receiver_id,omitempty"`
+	CustomerID string `json:"customer_id,omitempty"`
+	Limit      int    `json:"limit,omitempty"`
+	Offset     int    `json:"offset,omitempty"`
 }
 
 // CreateEvmResponse represents the response when creating an EVM payin.
@@ -139,6 +141,9 @@ func (c *Client) List(ctx context.Context, params *ListParams) ([]Payin, error) 
 		}
 		if params.ReceiverID != "" {
 			q.Set("receiver_id", params.ReceiverID)
+		}
+		if params.CustomerID != "" {
+			q.Set("customer_id", params.CustomerID)
 		}
 		if params.Limit > 0 {
 			q.Set("limit", fmt.Sprintf("%d", params.Limit))
