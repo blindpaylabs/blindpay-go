@@ -27,6 +27,44 @@ func TestWebhookEndpoints_Create(t *testing.T) {
 				T: t,
 				In: json.RawMessage(`{
 					"url":"https://example.com/webhook",
+					"events":["customer.new"]
+				}`),
+				Out:    json.RawMessage(fmt.Sprintf(`{"id":"%s"}`, id)),
+				Method: http.MethodPost,
+				Path:   fmt.Sprintf("/instances/%s/webhook-endpoints", instanceID),
+			},
+		},
+		UserAgent: "test",
+	}
+
+	client := NewClient(cfg)
+	response, err := client.Create(context.Background(), &CreateParams{
+		URL: url,
+		Events: []types.WebhookEvent{
+			types.WebhookEventCustomerNew,
+		},
+	})
+	require.NoError(t, err)
+	require.Equal(t, id, response.ID)
+}
+
+// receiver.* webhook events are deprecated in favor of customer.* but the
+// deployed API still dual-emits them today, so Create must keep accepting
+// the deprecated constant.
+func TestWebhookEndpoints_Create_DeprecatedReceiverEvent(t *testing.T) {
+	instanceID := "in_000000000000"
+	id := "we_000000000000"
+	url := "https://example.com/webhook"
+
+	cfg := &config.Config{
+		BaseURL:    "https://api.blindpay.com",
+		APIKey:     "test-key",
+		InstanceID: instanceID,
+		HTTPClient: &http.Client{
+			Transport: &blindpaytest.RoundTripper{
+				T: t,
+				In: json.RawMessage(`{
+					"url":"https://example.com/webhook",
 					"events":["receiver.new"]
 				}`),
 				Out:    json.RawMessage(fmt.Sprintf(`{"id":"%s"}`, id)),
@@ -41,7 +79,7 @@ func TestWebhookEndpoints_Create(t *testing.T) {
 	response, err := client.Create(context.Background(), &CreateParams{
 		URL: url,
 		Events: []types.WebhookEvent{
-			types.WebhookEventReceiverNew,
+			types.WebhookEventReceiverNew, //nolint:staticcheck // SA1019: deprecated but still live on the wire; intentionally testing backward compat.
 		},
 	})
 	require.NoError(t, err)

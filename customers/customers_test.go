@@ -154,7 +154,8 @@ func TestCustomers_List(t *testing.T) {
 								"proof_of_address_doc_file":"https://example.com/image.png",
 								"id":"ub_000000000000",
 								"instance_id":"in_000000000000",
-								"receiver_id":"re_IOxAUL24LG7P"
+								"receiver_id":"re_IOxAUL24LG7P",
+								"customer_id":"re_IOxAUL24LG7P"
 							}
 						],
 						"incorporation_doc_file":"https://example.com/image.png",
@@ -191,6 +192,7 @@ func TestCustomers_List(t *testing.T) {
 	require.Equal(t, "Business Corp", customers[2].LegalName)
 	require.Len(t, customers[2].Owners, 1)
 	require.Equal(t, "re_IOxAUL24LG7P", customers[2].Owners[0].ReceiverID)
+	require.Equal(t, "re_IOxAUL24LG7P", customers[2].Owners[0].CustomerID)
 }
 
 func TestCustomers_CreateIndividualWithStandardKYC(t *testing.T) {
@@ -356,7 +358,7 @@ func TestCustomers_CreateBusinessWithStandardKYB(t *testing.T) {
 				ProofOfAddressDocFile: "https://example.com/image.png",
 				ID:                    "ub_000000000000",
 				InstanceID:            "in_000000000000",
-				ReceiverID:            "re_IOxAUL24LG7P",
+				CustomerID:            "re_IOxAUL24LG7P",
 			},
 		},
 		TosID: "to_nppX66ntvtHs",
@@ -543,7 +545,7 @@ func TestCustomers_GetLimitIncreaseRequests(t *testing.T) {
 				Out: json.RawMessage(`[
 					{
 						"id": "rl_000000000000",
-						"receiver_id": "re_YuaMcI2B8zbQ",
+						"customer_id": "re_YuaMcI2B8zbQ",
 						"status": "in_review",
 						"daily": 50000,
 						"monthly": 250000,
@@ -555,7 +557,7 @@ func TestCustomers_GetLimitIncreaseRequests(t *testing.T) {
 					},
 					{
 						"id": "rl_000000000001",
-						"receiver_id": "re_YuaMcI2B8zbQ",
+						"customer_id": "re_YuaMcI2B8zbQ",
 						"status": "approved",
 						"daily": 30000,
 						"monthly": 150000,
@@ -581,7 +583,7 @@ func TestCustomers_GetLimitIncreaseRequests(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, requests, 2)
 	require.Equal(t, "rl_000000000000", requests[0].ID)
-	require.Equal(t, customerID, requests[0].ReceiverID)
+	require.Equal(t, customerID, requests[0].CustomerID)
 	require.Equal(t, LimitIncreaseRequestStatusInReview, requests[0].Status)
 	require.Equal(t, 50000.0, requests[0].Daily)
 	require.Equal(t, 250000.0, requests[0].Monthly)

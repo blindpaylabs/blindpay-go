@@ -18,7 +18,7 @@ type BlockchainWallet struct {
 	Address              string        `json:"address,omitempty"`
 	SignatureTxHash      string        `json:"signature_tx_hash,omitempty"`
 	IsAccountAbstraction bool          `json:"is_account_abstraction"`
-	ReceiverID           string        `json:"receiver_id"`
+	CustomerID           string        `json:"customer_id"`
 }
 
 // GetMessageResponse represents the wallet message response.
@@ -245,7 +245,7 @@ type OfframpWallet struct {
 	ID            string    `json:"id"`
 	ExternalID    string    `json:"external_id"`
 	InstanceID    string    `json:"instance_id"`
-	ReceiverID    string    `json:"receiver_id"`
+	CustomerID    string    `json:"customer_id"`
 	BankAccountID string    `json:"bank_account_id"`
 	Network       string    `json:"network"`
 	Address       string    `json:"address"`

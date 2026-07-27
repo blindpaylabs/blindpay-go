@@ -214,7 +214,8 @@ type AmlHits struct {
 type Owner struct {
 	ID                    string                 `json:"id,omitempty"`
 	InstanceID            string                 `json:"instance_id,omitempty"`
-	ReceiverID            string                 `json:"receiver_id,omitempty"`
+	ReceiverID            string                 `json:"receiver_id,omitempty"` // sent today; CustomerID takes over post-migration
+	CustomerID            string                 `json:"customer_id,omitempty"`
 	Role                  OwnerRole              `json:"role"`
 	FirstName             string                 `json:"first_name"`
 	LastName              string                 `json:"last_name"`
@@ -490,7 +491,7 @@ type LimitsResponse struct {
 // LimitIncreaseRequest represents a limit increase request for a customer.
 type LimitIncreaseRequest struct {
 	ID                     string                                     `json:"id"`
-	ReceiverID             string                                     `json:"receiver_id"`
+	CustomerID             string                                     `json:"customer_id"`
 	Status                 LimitIncreaseRequestStatus                 `json:"status"`
 	Daily                  float64                                    `json:"daily"`
 	Monthly                float64                                    `json:"monthly"`
