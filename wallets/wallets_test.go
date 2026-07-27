@@ -39,7 +39,7 @@ func TestWallets_CreateWithAddress(t *testing.T) {
 					"address":"0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C",
 					"signature_tx_hash":null,
 					"is_account_abstraction":true,
-					"customer_id":"re_000000000000"
+					"receiver_id":"re_000000000000"
 				}`),
 				Method: http.MethodPost,
 				Path:   fmt.Sprintf("/instances/%s/customers/%s/blockchain-wallets", instanceID, customerID),
@@ -80,7 +80,7 @@ func TestWallets_List(t *testing.T) {
 						"address":"0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C",
 						"signature_tx_hash":"0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
 						"is_account_abstraction":false,
-						"customer_id":"re_000000000000"
+						"receiver_id":"re_000000000000"
 					}
 				]`),
 				Method: http.MethodGet,
@@ -100,7 +100,7 @@ func TestWallets_List(t *testing.T) {
 	require.Equal(t, "0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C", wallets[0].Address)
 	require.Equal(t, "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359", wallets[0].SignatureTxHash)
 	require.False(t, wallets[0].IsAccountAbstraction)
-	require.Equal(t, "re_000000000000", wallets[0].CustomerID)
+	require.Equal(t, "re_000000000000", wallets[0].ReceiverID)
 }
 
 func TestWallets_Get(t *testing.T) {
@@ -122,7 +122,7 @@ func TestWallets_Get(t *testing.T) {
 					"address":"0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C",
 					"signature_tx_hash":"0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
 					"is_account_abstraction":false,
-					"customer_id":"re_000000000000"
+					"receiver_id":"re_000000000000"
 				}`),
 				Method: http.MethodGet,
 				Path:   fmt.Sprintf("/instances/%s/customers/%s/blockchain-wallets/%s", instanceID, customerID, id),
@@ -140,7 +140,7 @@ func TestWallets_Get(t *testing.T) {
 	require.Equal(t, "0xDD6a3aD0949396e57C7738ba8FC1A46A5a1C372C", wallet.Address)
 	require.Equal(t, "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359", wallet.SignatureTxHash)
 	require.False(t, wallet.IsAccountAbstraction)
-	require.Equal(t, "re_000000000000", wallet.CustomerID)
+	require.Equal(t, "re_000000000000", wallet.ReceiverID)
 }
 
 func TestWallets_Delete(t *testing.T) {
@@ -357,7 +357,7 @@ func TestOfframpWallets_List(t *testing.T) {
 						"id":"ow_000000000000",
 						"external_id":"your_external_id",
 						"instance_id":"in_000000000000",
-						"customer_id":"re_000000000000",
+						"receiver_id":"re_000000000000",
 						"bank_account_id":"ba_000000000000",
 						"network":"tron",
 						"address":"TALJN9zTTEL9TVBb4WuTt6wLvPqJZr3hvb",
@@ -379,7 +379,7 @@ func TestOfframpWallets_List(t *testing.T) {
 	require.Equal(t, "ow_000000000000", wallets[0].ID)
 	require.Equal(t, "your_external_id", wallets[0].ExternalID)
 	require.Equal(t, "in_000000000000", wallets[0].InstanceID)
-	require.Equal(t, "re_000000000000", wallets[0].CustomerID)
+	require.Equal(t, "re_000000000000", wallets[0].ReceiverID)
 	require.Equal(t, "ba_000000000000", wallets[0].BankAccountID)
 	require.Equal(t, "tron", wallets[0].Network)
 	require.Equal(t, "TALJN9zTTEL9TVBb4WuTt6wLvPqJZr3hvb", wallets[0].Address)
@@ -447,7 +447,7 @@ func TestOfframpWallets_Get(t *testing.T) {
 					"id":"ow_000000000000",
 					"external_id":"your_external_id",
 					"instance_id":"in_000000000000",
-					"customer_id":"re_000000000000",
+					"receiver_id":"re_000000000000",
 					"bank_account_id":"ba_000000000000",
 					"network":"tron",
 					"address":"TALJN9zTTEL9TVBb4WuTt6wLvPqJZr3hvb",
@@ -467,7 +467,7 @@ func TestOfframpWallets_Get(t *testing.T) {
 	require.Equal(t, id, wallet.ID)
 	require.Equal(t, "your_external_id", wallet.ExternalID)
 	require.Equal(t, "in_000000000000", wallet.InstanceID)
-	require.Equal(t, customerID, wallet.CustomerID)
+	require.Equal(t, customerID, wallet.ReceiverID)
 	require.Equal(t, bankAccountID, wallet.BankAccountID)
 	require.Equal(t, "tron", wallet.Network)
 	require.Equal(t, "TALJN9zTTEL9TVBb4WuTt6wLvPqJZr3hvb", wallet.Address)
