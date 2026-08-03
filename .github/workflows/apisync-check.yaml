@@ -47,3 +47,15 @@ jobs:
       # /export/* paths). Never fails the build.
       - name: Spec-operation coverage report (non-blocking)
         run: go run ./cmd/apisync -coverage
+
+      # Informational only: every mapped property's spec type against its
+      # declared Go field type, including ones already excused in
+      # unmodeled.json (unlike -check, which only reports unexcused ones).
+      # -check catches type changes going forward from a synced baseline;
+      # this catches the SDK's current type surface already disagreeing
+      # with the spec, which is a state question -check's drift-only view
+      # can't answer on its own. Triaging every pre-existing mismatch is
+      # its own (Phase C) piece of work, not a gate on every sync, so this
+      # never fails the build.
+      - name: Spec-vs-Go-type audit (non-blocking)
+        run: go run ./cmd/apisync -audit-types

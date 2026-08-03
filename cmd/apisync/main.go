@@ -48,6 +48,7 @@ func run() error {
 	specFlag := flag.String("spec", "", "spec file to reconcile against (default: spec-snapshot.json for -check, spec-current.json for -apply)")
 	reportPath := flag.String("report", "", "write a JSON report to this path")
 	coverage := flag.Bool("coverage", false, "print the non-blocking spec-operations-with-no-SDK-path coverage report and exit 0")
+	auditTypesFlag := flag.Bool("audit-types", false, "print the non-blocking full spec-vs-Go-type compatibility survey (every mapped property, not only unexcused ones) and exit 0")
 	validateMap := flag.Bool("validate-map", false, "resolve every spec-map.json anchor (files, symbols) and exit 1 on the first one that does not; a fast, standalone preflight")
 	flag.Parse()
 
@@ -58,6 +59,10 @@ func run() error {
 
 	if *coverage {
 		return runCoverage(repoRoot)
+	}
+
+	if *auditTypesFlag {
+		return runAuditTypes(repoRoot)
 	}
 
 	if *validateMap {
