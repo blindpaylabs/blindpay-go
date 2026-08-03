@@ -12,6 +12,9 @@ jobs:
   tests:
     needs: lint
     uses: ./.github/workflows/tests.yaml
+  contract-check:
+    needs: lint
+    uses: ./.github/workflows/contract-check.yaml
   snyk:
       needs: [lint, tests]
       uses: ./.github/workflows/snyk.yaml

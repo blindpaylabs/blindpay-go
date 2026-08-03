@@ -26,7 +26,7 @@ func TestTermsOfService_Initiate(t *testing.T) {
 				T: t,
 				In: json.RawMessage(`{
 					"idempotency_key":"123e4567-e89b-12d3-a456-426614174000",
-					"receiver_id":null,
+					"customer_id":null,
 					"redirect_url":null
 				}`),
 				Out: json.RawMessage(`{
@@ -42,7 +42,7 @@ func TestTermsOfService_Initiate(t *testing.T) {
 	client := NewClient(cfg)
 	response, err := client.Initiate(context.Background(), &InitiateParams{
 		IdempotencyKey: idempotencyKey,
-		ReceiverID:     nil,
+		CustomerID:     nil,
 		RedirectURL:    nil,
 	})
 	require.NoError(t, err)

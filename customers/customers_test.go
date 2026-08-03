@@ -154,7 +154,6 @@ func TestCustomers_List(t *testing.T) {
 								"proof_of_address_doc_file":"https://example.com/image.png",
 								"id":"ub_000000000000",
 								"instance_id":"in_000000000000",
-								"receiver_id":"re_IOxAUL24LG7P",
 								"customer_id":"re_IOxAUL24LG7P"
 							}
 						],
@@ -191,7 +190,6 @@ func TestCustomers_List(t *testing.T) {
 	require.Equal(t, "re_IOxAUL24LG7P", customers[2].ID)
 	require.Equal(t, "Business Corp", customers[2].LegalName)
 	require.Len(t, customers[2].Owners, 1)
-	require.Equal(t, "re_IOxAUL24LG7P", customers[2].Owners[0].ReceiverID)
 	require.Equal(t, "re_IOxAUL24LG7P", customers[2].Owners[0].CustomerID)
 }
 

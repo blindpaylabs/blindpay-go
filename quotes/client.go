@@ -48,7 +48,7 @@ type CreateResponse struct {
 	PartnerFeeAmount    float64       `json:"partner_fee_amount"`
 	FlatFee             float64       `json:"flat_fee"`
 	Contract            QuoteContract `json:"contract"`
-	ReceiverLocalAmount float64       `json:"receiver_local_amount"`
+	CustomerLocalAmount float64       `json:"customer_local_amount"`
 	Description         string        `json:"description"`
 }
 
