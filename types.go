@@ -75,6 +75,7 @@ const (
 	BankingPartnerCiti     = types.BankingPartnerCiti
 	BankingPartnerHsbc     = types.BankingPartnerHsbc
 	BankingPartnerJpmorgan = types.BankingPartnerJpmorgan
+	BankingPartnerPortage  = types.BankingPartnerPortage
 
 	SoleProprietorDocTypeBankStatement          = types.SoleProprietorDocTypeBankStatement
 	SoleProprietorDocTypeMasterServiceAgreement = types.SoleProprietorDocTypeMasterServiceAgreement

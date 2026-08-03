@@ -143,6 +143,7 @@ const (
 	BankingPartnerCiti     BankingPartner = "citi"
 	BankingPartnerHsbc     BankingPartner = "hsbc"
 	BankingPartnerJpmorgan BankingPartner = "jpmorgan"
+	BankingPartnerPortage  BankingPartner = "portage"
 )
 
 type SoleProprietorDocType string
