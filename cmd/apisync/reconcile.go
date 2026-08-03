@@ -24,6 +24,41 @@ func (p *planResult) addNeedsHuman(format string, args ...any) {
 	p.NeedsHuman = append(p.NeedsHuman, fmt.Sprintf(format, args...))
 }
 
+// checkFieldTypeCompatibility verifies that a property already modeled by
+// the SDK still corresponds to the CURRENT spec's declared type -- not a
+// drift check against the old snapshot, a standing state assertion. This
+// is the dangerous direction contractcheck-style presence checks miss:
+// a spec property silently changing shape (e.g. string -> integer) behind
+// a Go field of the wrong kind compiles and lints clean, then fails at
+// runtime for every consumer the moment encoding/json tries to unmarshal a
+// number into that string field. Nullability changes and an enum
+// property degrading to a bare string of the same base type are
+// deliberately NOT flagged (see typesCompatible / specTypeCategory).
+func (p *planResult) checkFieldTypeCompatibility(shapes []*StructShape, label, name string, specDef map[string]any) {
+	specCat := specTypeCategory(specDef)
+	for _, shape := range shapes {
+		for _, f := range shape.fieldsNamed(name) {
+			goCat := goTypeCategory(f.GoType)
+			if typesCompatible(specCat, goCat) {
+				continue
+			}
+			p.addNeedsHuman(
+				"NEEDS_HUMAN: %s.%s: spec type %s is not compatible with %s.%s's Go type %q (%s); encoding/json would fail to unmarshal this at runtime",
+				label, name, specWireTypeName(specDef), shape.Symbol, f.GoName, f.GoType, shape.File)
+		}
+	}
+}
+
+// specWireTypeName renders a property definition's declared type for an
+// error message (e.g. "integer", "[string, null]" widened to "string").
+func specWireTypeName(def map[string]any) string {
+	bases := baseTypes(def)
+	if len(bases) == 0 {
+		return "(unconstrained)"
+	}
+	return strings.Join(bases, "|")
+}
+
 // checkMapValidity resolves every SDK anchor in the map (struct sites, enum
 // sites, re-export sites). A resolution failure is always NEEDS_HUMAN: a
 // stale map must fail loudly, never silently skip a mapping.
@@ -312,6 +347,9 @@ func (p *planResult) reconcileOneLevel(repoRoot, unmodeledSchemaKey, humanLabelP
 		}
 
 		if sdkHas(name) {
+			if !um.excusesProperty(unmodeledSchemaKey, name) {
+				p.checkFieldTypeCompatibility(shapes, label, name, newDef)
+			}
 			continue
 		}
 		if um.excusesProperty(unmodeledSchemaKey, name) {

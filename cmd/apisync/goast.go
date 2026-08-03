@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 // FieldShape is one json-tagged field already declared on a struct.
@@ -17,6 +18,7 @@ type FieldShape struct {
 	JSONName  string
 	Omitempty bool
 	Pointer   bool
+	GoType    string // textual type expression, e.g. "*string", "types.Country", "[]Owner"
 }
 
 // StructShape locates a struct type declaration precisely enough to splice
@@ -79,6 +81,7 @@ func findStructShape(repoRoot, file, symbol string) (*StructShape, error) {
 					JSONName:  jsonName,
 					Omitempty: omitempty,
 					Pointer:   isPointer,
+					GoType:    typeExprString(f.Type),
 				})
 			}
 			if shape.LastFieldLine == 0 {
@@ -97,6 +100,49 @@ func (s *StructShape) hasJSONField(name string) bool {
 		}
 	}
 	return false
+}
+
+// fieldsNamed returns every field on this struct with the given json name
+// (normally exactly one, but harmless to check all if there were ever more).
+func (s *StructShape) fieldsNamed(name string) []FieldShape {
+	var out []FieldShape
+	for _, f := range s.Fields {
+		if f.JSONName == name {
+			out = append(out, f)
+		}
+	}
+	return out
+}
+
+// typeExprString renders a field's type expression as text, handling every
+// shape actually used in this repo's structs: identifiers (string, int,
+// bool, time.Time, a named enum or struct type), pointers, slices,
+// package-qualified selectors (types.Country), interface{}/any (free-form
+// fields like virtualaccounts.VirtualAccount.BlockchainWallet), maps, and
+// anonymous structs (collapsed to "struct", never spliced into new code,
+// only compared against for type-compatibility checking).
+func typeExprString(expr ast.Expr) string {
+	switch t := expr.(type) {
+	case *ast.Ident:
+		return t.Name
+	case *ast.StarExpr:
+		return "*" + typeExprString(t.X)
+	case *ast.ArrayType:
+		return "[]" + typeExprString(t.Elt)
+	case *ast.SelectorExpr:
+		return typeExprString(t.X) + "." + t.Sel.Name
+	case *ast.InterfaceType:
+		if t.Methods == nil || len(t.Methods.List) == 0 {
+			return "interface{}"
+		}
+		return "interface{...}"
+	case *ast.MapType:
+		return "map[" + typeExprString(t.Key) + "]" + typeExprString(t.Value)
+	case *ast.StructType:
+		return "struct"
+	default:
+		return "unknown"
+	}
 }
 
 // preferPointerStyle inspects the struct's existing optional (omitempty)
@@ -272,7 +318,7 @@ func parseJSONTag(tag string) (string, bool) {
 // than "UETR"). Acceptable for an auto-applied, reviewable PR.
 func pascalCase(name string) string {
 	parts := strings.FieldsFunc(name, func(r rune) bool {
-		return !(r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= '0' && r <= '9')
+		return !unicode.IsLetter(r) && !unicode.IsDigit(r)
 	})
 	var b strings.Builder
 	for _, p := range parts {

@@ -86,23 +86,6 @@ func resolveProperty(schema map[string]any, dottedPath string) map[string]any {
 	return leaf
 }
 
-// topLevelPropertyNames returns the sorted property names of a schema
-// (or, if dottedPath is non-empty, of the nested object reached by it).
-func topLevelPropertyNames(schema map[string]any, dottedPath string) []string {
-	var props map[string]any
-	if dottedPath == "" {
-		props = properties(schema)
-	} else {
-		leaf := resolveProperty(schema, dottedPath)
-		props = properties(leaf)
-	}
-	names := make([]string, 0, len(props))
-	for k := range props {
-		names = append(names, k)
-	}
-	return names
-}
-
 // enumMembers extracts the string enum members for a SpecPointer: from
 // property.enum (Items false) or property.items.enum (Items true).
 func enumMembers(schema map[string]any, ptr SpecPointer) ([]string, error) {
