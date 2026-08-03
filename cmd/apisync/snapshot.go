@@ -1,23 +1,17 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"os"
 	"path/filepath"
 )
 
-// refreshSnapshot re-serializes the applied spec deterministically (Go's
-// encoding/json always sorts map keys) and writes it over
-// .api-sync/spec-snapshot.json, so code and baseline never drift apart.
-func refreshSnapshot(repoRoot string, spec map[string]any) error {
-	var buf bytes.Buffer
-	enc := json.NewEncoder(&buf)
-	enc.SetEscapeHTML(false)
-	enc.SetIndent("", "    ")
-	if err := enc.Encode(spec); err != nil {
-		return err
-	}
+// refreshSnapshot copies the applied spec's raw bytes verbatim over
+// .api-sync/spec-snapshot.json. It must never re-marshal the parsed
+// document: encoding/json would reorder object keys into map order,
+// re-indent, and re-escape, turning every future no-op refresh into an
+// unreviewable diff of the entire file (and the committed snapshot would
+// stop matching the bytes blindpay-v2 actually ships as spec-current.json).
+func refreshSnapshot(repoRoot string, specBytes []byte) error {
 	path := filepath.Join(repoRoot, ".api-sync", "spec-snapshot.json")
-	return os.WriteFile(path, buf.Bytes(), 0o644)
+	return os.WriteFile(path, specBytes, 0o644)
 }

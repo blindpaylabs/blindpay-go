@@ -166,6 +166,27 @@ func TestIntegration_ApplyThenIdempotent(t *testing.T) {
 	require.Equal(t, beforeVersion, readFixture(t, root, "blindpay.go"), "idempotent apply must not bump the version again")
 }
 
+func TestIntegration_RefreshedSnapshotIsAByteForByteCopyNotAReserialization(t *testing.T) {
+	// Deliberately odd formatting (2-space indent, unsorted keys, an escaped
+	// unicode char) that json.Marshal would never reproduce on its own, to
+	// catch any regression to re-marshaling the parsed document instead of
+	// copying the source file's bytes verbatim -- a whole-file diff on
+	// every future no-op sync, and a snapshot that stops byte-matching
+	// what blindpay-v2 actually ships as spec-current.json.
+	oddSpecJSON := "{\n  \"paths\": {},\n  \"components\": {\n    \"schemas\": {\n      \"Widget\": {\n        \"required\": [\"id\"],\n        \"type\": \"object\",\n        \"properties\": {\n          \"name\": {\"type\": [\"string\", \"null\"]},\n          \"id\": {\"type\": \"string\"},\n          \"color\": {\"type\": \"string\", \"enum\": [\"red\", \"blue\"], \"example\": \"caf\\u00e9\"},\n          \"score\": {\"type\": \"integer\"}\n        }\n      }\n    }\n  }\n}"
+
+	root := integrationFixture(t, map[string]string{"Widget": baselineWidgetSchema})
+	specCurrentPath := filepath.Join(root, ".api-sync", "spec-current.json")
+	require.NoError(t, os.WriteFile(specCurrentPath, []byte(oddSpecJSON), 0o644))
+
+	_, err := reconcileAndMaybeApply(root, syncOptions{Apply: true})
+	require.NoError(t, err)
+
+	snapshot, err := os.ReadFile(filepath.Join(root, ".api-sync", "spec-snapshot.json"))
+	require.NoError(t, err)
+	require.Equal(t, oddSpecJSON, string(snapshot), "refreshSnapshot must copy spec-current.json's bytes verbatim, never re-marshal them")
+}
+
 func TestIntegration_FieldOnlyChangeBumpsPatch(t *testing.T) {
 	root := integrationFixture(t, map[string]string{"Widget": baselineWidgetSchema})
 	writeSpecCurrent(t, root, map[string]string{

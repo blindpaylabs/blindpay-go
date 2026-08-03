@@ -113,11 +113,11 @@ func reconcileAndMaybeApply(repoRoot string, opts syncOptions) (quiet bool, err 
 		}
 	}
 
-	newRaw, err := readSpecFile(repoRoot, specPath)
+	newRawBytes, newRaw, err := readSpecFile(repoRoot, specPath)
 	if err != nil {
 		return false, fmt.Errorf("reading %s: %w", specPath, err)
 	}
-	oldRaw, err := readSpecFile(repoRoot, ".api-sync/spec-snapshot.json")
+	_, oldRaw, err := readSpecFile(repoRoot, ".api-sync/spec-snapshot.json")
 	if err != nil {
 		return false, fmt.Errorf("reading .api-sync/spec-snapshot.json: %w", err)
 	}
@@ -200,7 +200,7 @@ func reconcileAndMaybeApply(repoRoot string, opts syncOptions) (quiet bool, err 
 	}
 	fmt.Printf("applied %d change(s), version bumped to %s (%s)\n", len(actions), newVersion, bump)
 
-	if err := refreshSnapshot(repoRoot, newRaw); err != nil {
+	if err := refreshSnapshot(repoRoot, newRawBytes); err != nil {
 		return false, fmt.Errorf("refreshing snapshot: %w", err)
 	}
 
@@ -247,16 +247,20 @@ func findRepoRoot() (string, error) {
 	}
 }
 
-func readSpecFile(repoRoot, relPath string) (map[string]any, error) {
+// readSpecFile returns both the raw bytes (so refreshSnapshot can copy them
+// verbatim -- never re-marshal, which would reorder keys into map order,
+// re-indent, and re-escape, turning a no-op spec refresh into a diff of the
+// entire file) and the parsed document used for reconciliation.
+func readSpecFile(repoRoot, relPath string) ([]byte, map[string]any, error) {
 	data, err := os.ReadFile(filepath.Join(repoRoot, relPath))
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	var doc map[string]any
 	if err := json.Unmarshal(data, &doc); err != nil {
-		return nil, fmt.Errorf("invalid JSON: %w", err)
+		return nil, nil, fmt.Errorf("invalid JSON: %w", err)
 	}
-	return doc, nil
+	return data, doc, nil
 }
 
 func loadSpecMap(repoRoot string) (*SpecMap, error) {
