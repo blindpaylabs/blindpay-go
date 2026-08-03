@@ -1,0 +1,467 @@
+{
+  "$schema_note": "Curated mapping from spec constructs to SDK symbols. Bootstrapped by scoring internal/types/shared.go and types.go json-tag sets against spec schema property-sets (dumpstructs + Jaccard scoring), then every entry below was verified by reading the corresponding SDK source and the spec. enums[].spec/types[].spec point at .api-sync/spec-current.json (or spec-snapshot.json) component schema names. types[].nested handles properties that are inline sub-objects in the spec (never $ref'd) rather than top-level schema properties; the nested key is the property name on the parent schema, and its own 'sdk' array is reconciled against that inline sub-object's properties instead of the parent's. types[].discriminator lists property names on the spec schema that the SDK injects as literal values per variant (see bankaccounts 'type', customers 'type'/'kyc_type') rather than modeling as a struct field; reconciliation excludes them from the missing-property computation.",
+
+  "enums": [
+    {
+      "sdk": { "file": "internal/types/shared.go", "symbol": "CurrencyType" },
+      "reexport": { "file": "types.go", "symbol": "CurrencyType" },
+      "spec": { "schema": "QuoteIn", "property": "currency_type" }
+    },
+    {
+      "sdk": { "file": "internal/types/shared.go", "symbol": "Network" },
+      "reexport": { "file": "types.go", "symbol": "Network" },
+      "spec": { "schema": "QuoteIn", "property": "network" }
+    },
+    {
+      "sdk": { "file": "internal/types/shared.go", "symbol": "StablecoinToken" },
+      "reexport": { "file": "types.go", "symbol": "StablecoinToken" },
+      "spec": { "schema": "QuoteIn", "property": "token" }
+    },
+    {
+      "sdk": { "file": "internal/types/shared.go", "symbol": "TransactionDocumentType" },
+      "reexport": { "file": "types.go", "symbol": "TransactionDocumentType" },
+      "spec": { "schema": "PayoutOut", "property": "transaction_document_type" }
+    },
+    {
+      "sdk": { "file": "internal/types/shared.go", "symbol": "BankAccountType" },
+      "reexport": { "file": "types.go", "symbol": "BankAccountType" },
+      "spec": { "schema": "CreateBankAccountIn", "property": "account_type" },
+      "note": "Verified against packages/api-contract/src/bank-account.schema.ts accountType = ['checking','saving']. This SDK already has the correct value 'saving' (unlike python/php/swift, which have a live 'savings' bug). Do not change."
+    },
+    {
+      "sdk": { "file": "internal/types/shared.go", "symbol": "Currency" },
+      "reexport": { "file": "types.go", "symbol": "Currency" },
+      "spec": { "schema": "inline:POST /v1/instances/{instance_id}/quotes/fx#requestBody", "property": "to" },
+      "note": "Currency conflates two independent, disjoint spec enums used on the same GetFxRate requestBody: 'from' (stablecoins: USDC/USDT/USDB, exactly StablecoinToken) and 'to' (fiat: BRL/USD/MXN/COP/ARS/EUR). Anchored on 'to' since that is the superset side relevant to this type; 'from' is already fully covered by StablecoinToken. 'to' has no named component schema (inline object on the operation), hence the inline: pseudo-pointer -- the patcher's map-validity check treats an inline: schema value as informational-only (not resolved against spec-current.json's components.schemas)."
+    },
+    {
+      "sdk": { "file": "internal/types/shared.go", "symbol": "AccountClass" },
+      "reexport": { "file": "types.go", "symbol": "AccountClass" },
+      "spec": { "schema": "BankAccountOut", "property": "account_class" }
+    },
+    {
+      "sdk": { "file": "internal/types/shared.go", "symbol": "TransactionStatus" },
+      "reexport": { "file": "types.go", "symbol": "TransactionStatus" },
+      "spec": { "schema": "PayoutOut", "property": "status" },
+      "note": "SDK carries an extra 'pending' member not currently emitted by PayoutOut/PayinOut/TransferOut.status; harmless (SDK superset), left as-is."
+    },
+    {
+      "sdk": { "file": "internal/types/shared.go", "symbol": "BankingPartner" },
+      "reexport": { "file": "types.go", "symbol": "BankingPartner" },
+      "spec": { "schema": "VirtualAccountOut", "property": "banking_partner" }
+    },
+    {
+      "sdk": { "file": "internal/types/shared.go", "symbol": "SoleProprietorDocType" },
+      "reexport": { "file": "types.go", "symbol": "SoleProprietorDocType" },
+      "spec": { "schema": "CreateVirtualAccountIn", "property": "sole_proprietor_doc_type" }
+    },
+    {
+      "sdk": { "file": "internal/types/types.go", "symbol": "Rail" },
+      "reexport": { "file": "types.go", "symbol": "Rail" },
+      "spec": { "schema": "CreateBankAccountIn", "property": "type" }
+    },
+    {
+      "sdk": { "file": "internal/types/types.go", "symbol": "WebhookEvent" },
+      "reexport": { "file": "types.go", "symbol": "WebhookEvent" },
+      "spec": { "schema": "WebhookEndpoint", "property": "events", "items": true },
+      "fallback_spec_schemas": ["WebhookEndpointIn", "WebhookEndpointOut"],
+      "note": "Matches cmd/contractcheck's own extractWebhookEventEnum fallback order."
+    },
+    {
+      "sdk": { "file": "internal/types/types.go", "symbol": "RecipientRelationship" },
+      "reexport": { "file": "types.go", "symbol": "RecipientRelationship" },
+      "spec": { "schema": "CreateBankAccountIn", "property": "recipient_relationship" }
+    },
+    {
+      "sdk": { "file": "internal/types/types.go", "symbol": "PayinPaymentMethod" },
+      "reexport": { "file": "types.go", "symbol": "PayinPaymentMethod" },
+      "spec": { "schema": "PayinOut", "property": "payment_method" }
+    },
+    {
+      "sdk": { "file": "internal/types/types.go", "symbol": "TrackingStatus" },
+      "reexport": { "file": "types.go", "symbol": "TrackingStatus" },
+      "spec": { "schema": "PayoutOut", "property": "tracking_payment.step" },
+      "note": "tracking_payment is an inline (non-$ref'd) sub-object; property path is dotted to reach the nested 'step' enum. Same 4 values recur on tracking_transaction.step/tracking_complete.step across Payout/Payin/Transfer webhook schemas."
+    },
+    {
+      "sdk": { "file": "internal/types/types.go", "symbol": "BusinessIndustry" },
+      "reexport": null,
+      "spec": { "schema": "CreateCustomerIn", "property": "business_industry" },
+      "note": "PRE-EXISTING BUG, not introduced by this PR: root types.go declares 'type BusinessIndustry = types.BusinessIndustry' but re-exports none of the 154 value constants (every other shared enum in this file has a matching const block; this one does not). Consumers of the public blindpay package cannot currently reference any BusinessIndustry value at all. Flagged prominently in this PR's description for a human to fix in its own PR (add the missing ~154-line const block to types.go); reexport intentionally left null here so map-validity does not fail on a re-export block that does not exist, and so a future enum-member addition does not try to patch it either. SDK also carries 11 qualitative categories (dapp, exchange, gambling, gaming, infra, marketplace, neo_bank, other, saas, social, wallet) absent from the current spec entirely; harmless (SDK superset)."
+    },
+    {
+      "sdk": { "file": "internal/types/types.go", "symbol": "AipriseDocumentType" },
+      "reexport": { "file": "types.go", "symbol": "AipriseDocumentType" },
+      "spec": { "schema": "RfiField", "property": "aiprise_document_type" },
+      "note": "Exact match today, but its only spec anchor is inside the ignored Rfi* family (see ignore.schemas) and the type is not referenced by any SDK struct field. Tracked here so a future RfiField change is not invisible, even though the RfiField struct itself is out of scope."
+    },
+    {
+      "sdk": { "file": "internal/types/types.go", "symbol": "ApprovalRate" },
+      "reexport": { "file": "types.go", "symbol": "ApprovalRate" },
+      "spec": { "schema": "UploadAnalyzeOut", "property": "approval_rate" },
+      "note": "Exact match today, but its only spec anchor is inside the ignored UploadAnalyze* family (see ignore.schemas) and the type is not referenced by any SDK struct field. Same rationale as AipriseDocumentType."
+    },
+    {
+      "sdk": { "file": "internal/types/types.go", "symbol": "ManualExecutionStatus" },
+      "reexport": { "file": "types.go", "symbol": "ManualExecutionStatus" },
+      "spec": { "schema": "PayinOut", "property": "manual_execution_status" }
+    },
+    {
+      "sdk": { "file": "customers/client.go", "symbol": "KycStatus" },
+      "reexport": null,
+      "spec": { "schema": "CustomerOut", "property": "kyc_status" },
+      "note": "Package-local enum (not in internal/types), so no root types.go re-export exists or is needed -- CLAUDE.md draws that line at package-specific vs shared enums."
+    }
+  ],
+
+  "types": [
+    {
+      "spec": "BankAccountOut",
+      "sdk": [
+        { "file": "bankaccounts/client.go", "symbol": "BankAccount" },
+        { "file": "bankaccounts/client.go", "symbol": "CreatePixResponse" },
+        { "file": "bankaccounts/client.go", "symbol": "CreateAchResponse" },
+        { "file": "bankaccounts/client.go", "symbol": "CreateWireResponse" },
+        { "file": "bankaccounts/client.go", "symbol": "CreateArgentinaTransfersResponse" },
+        { "file": "bankaccounts/client.go", "symbol": "CreateSpeiResponse" },
+        { "file": "bankaccounts/client.go", "symbol": "CreateColombiaAchResponse" },
+        { "file": "bankaccounts/client.go", "symbol": "CreateInternationalSwiftResponse" },
+        { "file": "bankaccounts/client.go", "symbol": "CreatePixSafeResponse" },
+        { "file": "bankaccounts/client.go", "symbol": "CreateRtpResponse" },
+        { "file": "bankaccounts/client.go", "symbol": "CreateTedResponse" },
+        { "file": "bankaccounts/client.go", "symbol": "CreateSepaResponse" }
+      ],
+      "note": "POST create-bank-account returns BankAccountOut uniformly for every rail (verified against the spec response schema); the 11 per-rail CreateXxxResponse structs are each a narrower view of the same wire shape, so a property only needs to appear on at least one of the 12 sites, not all of them."
+    },
+    {
+      "spec": "CreateBankAccountIn",
+      "discriminator": ["type"],
+      "sdk": [
+        { "file": "bankaccounts/client.go", "symbol": "CreatePixParams" },
+        { "file": "bankaccounts/client.go", "symbol": "CreateAchParams" },
+        { "file": "bankaccounts/client.go", "symbol": "CreateWireParams" },
+        { "file": "bankaccounts/client.go", "symbol": "CreateArgentinaTransfersParams" },
+        { "file": "bankaccounts/client.go", "symbol": "CreateSpeiParams" },
+        { "file": "bankaccounts/client.go", "symbol": "CreateColombiaAchParams" },
+        { "file": "bankaccounts/client.go", "symbol": "CreateInternationalSwiftParams" },
+        { "file": "bankaccounts/client.go", "symbol": "CreatePixSafeParams" },
+        { "file": "bankaccounts/client.go", "symbol": "CreateRtpParams" },
+        { "file": "bankaccounts/client.go", "symbol": "CreateTedParams" },
+        { "file": "bankaccounts/client.go", "symbol": "CreateSepaParams" }
+      ],
+      "note": "CreateBankAccountIn is one flat spec schema discriminated at runtime by 'type' (11 rail values); the SDK models 11 separate Create*Params structs plus a literal 'type' string injected in the request body (see bankaccounts/client.go CreatePix/CreateAch/etc.). A property is satisfied if present on at least one of the 11 sites."
+    },
+    {
+      "spec": "CreateCustomerIn",
+      "discriminator": ["type", "kyc_type"],
+      "sdk": [
+        { "file": "customers/client.go", "symbol": "CreateIndividualStandardParams" },
+        { "file": "customers/client.go", "symbol": "CreateIndividualEnhancedParams" },
+        { "file": "customers/client.go", "symbol": "CreateBusinessStandardParams" }
+      ],
+      "note": "CreateCustomerIn is one flat kitchen-sink spec schema (individual+business, standard+enhanced fields all optional/nullable side by side), discriminated at runtime by 'type'+'kyc_type' literals injected by the SDK (see customers/client.go CreateIndividualWithStandardKYC/CreateIndividualWithEnhancedKYC/CreateBusinessWithStandardKYB). A property is satisfied if present on at least one of the 3 sites; there is no 'light' kyc_type or enhanced-business variant in the SDK today (pre-existing, not part of this sync)."
+    },
+    {
+      "spec": "CustomerOut",
+      "sdk": [{ "file": "customers/client.go", "symbol": "Customer" }]
+    },
+    {
+      "spec": "UpdateCustomerIn",
+      "sdk": [{ "file": "customers/client.go", "symbol": "UpdateParams" }]
+    },
+    {
+      "spec": "GetCustomerLimitsOut",
+      "sdk": [{ "file": "customers/client.go", "symbol": "LimitsResponse" }]
+    },
+    {
+      "spec": "GetCustomerLimitIncreaseOut",
+      "sdk": [{ "file": "customers/client.go", "symbol": "LimitIncreaseRequest" }]
+    },
+    {
+      "spec": "CustomerLimitIncreaseIn",
+      "sdk": [{ "file": "customers/client.go", "symbol": "RequestLimitIncreaseParams" }]
+    },
+    {
+      "spec": "CustomerLimitIncreaseOut",
+      "sdk": [{ "file": "customers/client.go", "symbol": "RequestLimitIncreaseResponse" }]
+    },
+    {
+      "spec": "PayinOut",
+      "sdk": [{ "file": "payins/client.go", "symbol": "Payin" }]
+    },
+    {
+      "spec": "CreatePayinQuoteIn",
+      "sdk": [{ "file": "payins/quotes.go", "symbol": "CreateQuoteParams" }]
+    },
+    {
+      "spec": "CreatePayinQuoteOut",
+      "sdk": [{ "file": "payins/quotes.go", "symbol": "CreateQuoteResponse" }]
+    },
+    {
+      "spec": "CreatePayinOut",
+      "sdk": [{ "file": "payins/client.go", "symbol": "CreateEvmResponse" }]
+    },
+    {
+      "spec": "PayoutOut",
+      "sdk": [{ "file": "payouts/client.go", "symbol": "Payout" }],
+      "nested": {
+        "tracking_payment": {
+          "sdk": [{ "file": "internal/types/shared.go", "symbol": "TrackingPayment" }]
+        }
+      }
+    },
+    {
+      "spec": "PayoutOnEvmOut",
+      "sdk": [{ "file": "payouts/client.go", "symbol": "CreateResponse" }],
+      "note": "PayoutOnEvmOut is the response schema for all 3 payout creation operations (evm/stellar/solana), verified directly against the spec; payouts.CreateResponse backs all 3 SDK methods (CreateEvm/CreateStellar/CreateSolana)."
+    },
+    {
+      "spec": "PayoutOnEvmIn",
+      "sdk": [{ "file": "payouts/client.go", "symbol": "CreateEvmParams" }]
+    },
+    {
+      "spec": "PayoutOnStellarIn",
+      "sdk": [{ "file": "payouts/client.go", "symbol": "CreateStellarParams" }]
+    },
+    {
+      "spec": "PayoutOnSolanaIn",
+      "sdk": [{ "file": "payouts/client.go", "symbol": "CreateSolanaParams" }]
+    },
+    {
+      "spec": "PayoutOnStellarAuthorizeIn",
+      "sdk": [{ "file": "payouts/client.go", "symbol": "AuthorizeStellarTokenParams" }],
+      "note": "Spec operation is POST .../payouts/stellar/authorize; SDK calls POST .../payouts/stellar/authorize-token (pre-existing path drift, see cmd/apisync coverage report and PR description; not changed in this PR)."
+    },
+    {
+      "spec": "SubmitPayoutDocumentsIn",
+      "sdk": [{ "file": "payouts/client.go", "symbol": "SubmitDocumentsParams" }]
+    },
+    {
+      "spec": "QuoteIn",
+      "sdk": [{ "file": "quotes/client.go", "symbol": "CreateParams" }]
+    },
+    {
+      "spec": "QuoteOut",
+      "sdk": [{ "file": "quotes/client.go", "symbol": "CreateResponse" }]
+    },
+    {
+      "spec": "TransferOut",
+      "sdk": [{ "file": "transfers/client.go", "symbol": "Transfer" }]
+    },
+    {
+      "spec": "CreateTransferIn",
+      "sdk": [{ "file": "transfers/client.go", "symbol": "CreateParams" }]
+    },
+    {
+      "spec": "CreateTransferOut",
+      "sdk": [{ "file": "transfers/client.go", "symbol": "CreateResponse" }]
+    },
+    {
+      "spec": "CreateTransferQuoteIn",
+      "sdk": [{ "file": "transfers/client.go", "symbol": "CreateQuoteParams" }]
+    },
+    {
+      "spec": "CreateTransferQuoteOut",
+      "sdk": [{ "file": "transfers/client.go", "symbol": "CreateQuoteResponse" }]
+    },
+    {
+      "spec": "WebhookEndpoint",
+      "sdk": [{ "file": "webhookendpoints/client.go", "symbol": "WebhookEndpoint" }]
+    },
+    {
+      "spec": "WebhookEndpointIn",
+      "sdk": [{ "file": "webhookendpoints/client.go", "symbol": "CreateParams" }]
+    },
+    {
+      "spec": "WebhookEndpointOut",
+      "sdk": [{ "file": "webhookendpoints/client.go", "symbol": "CreateResponse" }]
+    },
+    {
+      "spec": "PortalAccessOut",
+      "sdk": [{ "file": "webhookendpoints/client.go", "symbol": "GetPortalAccessURLResponse" }]
+    },
+    {
+      "spec": "VirtualAccountOut",
+      "sdk": [{ "file": "virtualaccounts/client.go", "symbol": "VirtualAccount" }]
+    },
+    {
+      "spec": "CreateVirtualAccountIn",
+      "sdk": [{ "file": "virtualaccounts/client.go", "symbol": "CreateParams" }]
+    },
+    {
+      "spec": "UpdateVirtualAccountIn",
+      "sdk": [{ "file": "virtualaccounts/client.go", "symbol": "UpdateParams" }]
+    },
+    {
+      "spec": "BlockchainWalletOut",
+      "sdk": [{ "file": "wallets/client.go", "symbol": "BlockchainWallet" }]
+    },
+    {
+      "spec": "CreateBlockchainWalletIn",
+      "discriminator": ["is_account_abstraction"],
+      "sdk": [
+        { "file": "wallets/client.go", "symbol": "CreateWithAddressParams" },
+        { "file": "wallets/client.go", "symbol": "CreateWithHashParams" }
+      ],
+      "note": "2-way discriminator fan-out: CreateWithAddress injects is_account_abstraction=true, CreateWithHash injects is_account_abstraction=false (see wallets/client.go). A property is satisfied if present on either site."
+    },
+    {
+      "spec": "BlockchainWalletMessageOut",
+      "sdk": [{ "file": "wallets/client.go", "symbol": "GetMessageResponse" }]
+    },
+    {
+      "spec": "OfframpWallet",
+      "sdk": [{ "file": "wallets/client.go", "symbol": "OfframpWallet" }]
+    },
+    {
+      "spec": "WalletOut",
+      "sdk": [{ "file": "custodialwallets/client.go", "symbol": "CustodialWallet" }],
+      "note": "Spec's 'WalletOut'/'CreateWalletIn'/'WalletTokenOut'/'WalletBalanceOut' back the custodial-wallet family (path /customers/{id}/wallets), modeled by the custodialwallets package; distinct from BlockchainWalletOut (path /customers/{id}/blockchain-wallets), modeled by the wallets package."
+    },
+    {
+      "spec": "CreateWalletIn",
+      "sdk": [{ "file": "custodialwallets/client.go", "symbol": "CreateParams" }]
+    },
+    {
+      "spec": "WalletTokenOut",
+      "sdk": [{ "file": "custodialwallets/client.go", "symbol": "WalletTokenBalance" }]
+    },
+    {
+      "spec": "WalletBalanceOut",
+      "sdk": [{ "file": "custodialwallets/client.go", "symbol": "GetBalanceResponse" }]
+    },
+    {
+      "spec": "GetFeesOut",
+      "sdk": [{ "file": "fees/client.go", "symbol": "GetResponse" }]
+    },
+    {
+      "spec": "FeeOptions",
+      "sdk": [{ "file": "fees/client.go", "symbol": "FeeOptions" }]
+    },
+    {
+      "spec": "UpdateInstanceIn",
+      "sdk": [{ "file": "instances/client.go", "symbol": "UpdateParams" }]
+    },
+    {
+      "spec": "UpdateInstanceMemberIn",
+      "sdk": [{ "file": "instances/client.go", "symbol": "UpdateMemberRoleParams" }]
+    },
+    {
+      "spec": "MigrateInstanceOwnershipIn",
+      "sdk": [{ "file": "instances/client.go", "symbol": "MigrateOwnershipParams" }]
+    },
+    {
+      "spec": "Success",
+      "sdk": [{ "file": "instances/client.go", "symbol": "MigrateOwnershipResponse" }]
+    },
+    {
+      "spec": "InitiateTosIn",
+      "sdk": [{ "file": "termsofservice/client.go", "symbol": "InitiateParams" }]
+    },
+    {
+      "spec": "InitiateTosOut",
+      "sdk": [{ "file": "termsofservice/client.go", "symbol": "InitiateResponse" }]
+    },
+    {
+      "spec": "UploadOut",
+      "sdk": [{ "file": "upload/client.go", "symbol": "UploadResponse" }]
+    },
+    {
+      "spec": "SwiftCodeItem",
+      "sdk": [{ "file": "available/client.go", "symbol": "GetSwiftCodeBankDetailsResponse" }]
+    },
+    {
+      "spec": "PaginationMetadata",
+      "sdk": [{ "file": "internal/types/shared.go", "symbol": "PaginationMetadata" }],
+      "reexport": { "file": "types.go", "symbol": "PaginationMetadata" }
+    },
+    {
+      "spec": "Error",
+      "sdk": [{ "file": "internal/request/request.go", "symbol": "APIError" }]
+    }
+  ],
+
+  "ignore": {
+    "schemas": [
+      { "schema": "Rfi", "reason": "RFI (request-for-information / compliance) resource has zero SDK coverage; adding it is a human task (naming, method shape) tracked separately from this sync, see design doc Phase C." },
+      { "schema": "RfiField", "reason": "Same Rfi family as Rfi." },
+      { "schema": "RfiSection", "reason": "Same Rfi family as Rfi." },
+      { "schema": "CreateRfiBody", "reason": "Same Rfi family as Rfi." },
+      { "schema": "CreateInstanceRfiBody", "reason": "Same Rfi family as Rfi (instance-level RFI operations)." },
+      { "schema": "InstanceRfi", "reason": "Same Rfi family as Rfi (instance-level RFI operations)." },
+      { "schema": "UploadAnalyzeIn", "reason": "POST /v1/upload/analyze has zero SDK coverage; adding it is a human task tracked separately from this sync, see design doc Phase C." },
+      { "schema": "UploadAnalyzeOut", "reason": "Same UploadAnalyze family as UploadAnalyzeIn (ApprovalRate is still tracked as an enum above since it happens to exactly match today)." },
+      { "schema": "LedgerOperation", "reason": "Unreferenced by any public operation or webhook (zero $ref anywhere in the spec) -- an orphan schema, not reachable from any endpoint the SDK could call. funding_end_to_end_id and payer_tax_id live only here; there is no home to add them to." },
+      { "schema": "ApiKeyPublic", "reason": "API Keys are intentionally absent from the public API reference per this repo's own CLAUDE.md; the SDK has no apikeys package by design (removed in v1.16.0, see git history)." },
+      { "schema": "CreateApiKeyIn", "reason": "Same ApiKey family as ApiKeyPublic." },
+      { "schema": "CreateApiKeyOut", "reason": "Same ApiKey family as ApiKeyPublic." },
+      { "schema": "BillingDetails", "reason": "Billing/invoicing/subscriptions is an entire spec subsystem (billing, invoices, recurring items, add-ons, usage) with zero SDK coverage; out of scope for this sync, needs its own resource-design decision." },
+      { "schema": "BillingSubscription", "reason": "Same billing family as BillingDetails." },
+      { "schema": "CollectInvoiceBody", "reason": "Same billing family as BillingDetails." },
+      { "schema": "CollectInvoiceSchemaOut", "reason": "Same billing family as BillingDetails." },
+      { "schema": "CreateRecurringItemSchemaIn", "reason": "Same billing family as BillingDetails." },
+      { "schema": "CreateTransferSchemaOut", "reason": "Billing-side 'transfer' (paying an invoice), unrelated to the crypto transfers resource the SDK models under transfers/client.go; same billing family as BillingDetails." },
+      { "schema": "CreatePortalSessionSchemaOut", "reason": "Same billing family as BillingDetails (billing portal session), distinct from the webhook-endpoints portal access URL already modeled." },
+      { "schema": "CurrentUsageSchema", "reason": "Same billing family as BillingDetails." },
+      { "schema": "GetInvoicePdfSchemaOut", "reason": "Same billing family as BillingDetails." },
+      { "schema": "GetInvoiceSchemaOut", "reason": "Same billing family as BillingDetails." },
+      { "schema": "GetInvoicesSchemaOut", "reason": "Same billing family as BillingDetails." },
+      { "schema": "InvoiceItemSchema", "reason": "Same billing family as BillingDetails." },
+      { "schema": "PayInvoiceSchemaOut", "reason": "Same billing family as BillingDetails." },
+      { "schema": "PaymentMethodSchemaOut", "reason": "Same billing family as BillingDetails." },
+      { "schema": "RecurringItem", "reason": "Same billing family as BillingDetails." },
+      { "schema": "UpdateRecurringItemSchemaIn", "reason": "Same billing family as BillingDetails." },
+      { "schema": "VirtualAccountsUsage", "reason": "Same billing family as BillingDetails (usage-based billing for virtual accounts)." },
+      { "schema": "AddonItemSchema", "reason": "Same billing family as BillingDetails." },
+      { "schema": "AuditLog", "reason": "Audit-log resource has zero SDK coverage; dashboard/back-office only today." },
+      { "schema": "AuditLogOut", "reason": "Same audit family as AuditLog." },
+      { "schema": "AuditActor", "reason": "Same audit family as AuditLog." },
+      { "schema": "BlockchainWalletWebhookOut", "reason": "Webhook payload schema; this SDK does not model typed per-event webhook payloads (webhooks.go only verifies the svix signature), so no webhook *WebhookOut schema has an SDK struct site." },
+      { "schema": "BankAccountWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
+      { "schema": "CustomerNewWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
+      { "schema": "CustomerUpdateWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
+      { "schema": "CustomerDeleteWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
+      { "schema": "PayinNewWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
+      { "schema": "PayinCompleteWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
+      { "schema": "PayinUpdateWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
+      { "schema": "PayinPartnerFeeWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
+      { "schema": "PayoutNewWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
+      { "schema": "PayoutCompleteWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
+      { "schema": "PayoutUpdateWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
+      { "schema": "PayoutPartnerFeeWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
+      { "schema": "LimitIncreaseNewWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
+      { "schema": "LimitIncreaseUpdateWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
+      { "schema": "TosAcceptWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
+      { "schema": "CircleTransactionWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
+      { "schema": "WalletInboundSchemaOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut (wallet.inbound event)." },
+      { "schema": "AcceptTosIn", "reason": "Public/embedded terms-of-service acceptance page payload; no corresponding SDK operation (customers accept ToS via the hosted link, not an API call this SDK wraps)." },
+      { "schema": "AcceptTosOut", "reason": "Same as AcceptTosIn." },
+      { "schema": "CopyInstanceMembersIn", "reason": "Instance-member copy operation has zero SDK coverage." },
+      { "schema": "CopyInstanceMembersOut", "reason": "Same as CopyInstanceMembersIn." },
+      { "schema": "CreateComplaintIn", "reason": "Complaints/feedback resource has zero SDK coverage." },
+      { "schema": "CreateFeedbackIn", "reason": "Same feedback family as CreateComplaintIn." },
+      { "schema": "FeedbackActor", "reason": "Same feedback family as CreateComplaintIn." },
+      { "schema": "FeedbackOut", "reason": "Same feedback family as CreateComplaintIn." },
+      { "schema": "FeedbackWithActorOut", "reason": "Same feedback family as CreateComplaintIn." },
+      { "schema": "CreateInstanceOnboardingInviteIn", "reason": "Instance onboarding/invite flow has zero SDK coverage (dashboard-only today)." },
+      { "schema": "CreateInviteIn", "reason": "Same onboarding-invite family as CreateInstanceOnboardingInviteIn." },
+      { "schema": "ExternalInstanceOut", "reason": "Same onboarding-invite family as CreateInstanceOnboardingInviteIn." },
+      { "schema": "ExternalOnboardingInfo", "reason": "Same onboarding-invite family as CreateInstanceOnboardingInviteIn." },
+      { "schema": "CreateExternalCustomerTokenIn", "reason": "External customer-token issuance has zero SDK coverage." },
+      { "schema": "KycDecisionBody", "reason": "Internal compliance-review operation, not a public SDK surface." },
+      { "schema": "ManualReviewSkip", "reason": "Internal compliance-review operation, not a public SDK surface." },
+      { "schema": "MonitoredWallet", "reason": "Compliance wallet-monitoring resource has zero SDK coverage." },
+      { "schema": "PaymentRoute", "reason": "Internal routing-configuration schema, not a public SDK surface." },
+      { "schema": "UpdateDynamicRateOtcIn", "reason": "Internal OTC rate administration, not a public SDK surface." },
+      { "schema": "InstanceIn", "reason": "Instance-creation request body; instances are provisioned via the dashboard, not this SDK (instances/client.go only models Get/Update/Delete/members)." },
+      { "schema": "InstanceOut", "reason": "No GET-single-instance SDK method exists today (only GetMembers/Update/Delete/UpdateMemberRole/MigrateOwnership); adding one is additive but out of scope for this sync." },
+      { "schema": "CreatePayinIn", "reason": "POST /payins/evm's request body is built as an inline map[string]string in payins/client.go CreateEvm (not a named params struct), so there is no SDK symbol this schema can anchor to. Pre-existing, unrelated to this sync." },
+      { "schema": "UploadIn", "reason": "upload.Client.Upload sends multipart/form-data built by hand (upload/client.go bypasses request.Do entirely per this repo's own irregularity notes); UploadParams has no json tags at all, so there is no SDK symbol this schema can anchor to." },
+      { "schema": "AvailableRails", "reason": "available.Client.GetRails returns []types.RailEntry; RailEntry's fields (label/value/country) are a clean match but the wrapping list schema itself carries no extra properties worth anchoring separately from the RailEntry entry the SDK already models faithfully; tracked informally, not enforced." },
+      { "schema": "AvailableBankDetails", "reason": "Same rationale as AvailableRails; available.Client.GetBankDetails returns []types.BankDetail, already a faithful field-for-field match." },
+      { "schema": "AvailableNaicsList", "reason": "Same rationale as AvailableRails; available.Client.GetNaicsCodes returns []available.NaicsCode, already a faithful field-for-field match." },
+      { "schema": "AdditionalInfoItem", "reason": "Generic label/value pair shared by AvailableNaicsList and others; not independently interesting to track." },
+      { "schema": "SwiftCodeResponse", "reason": "Wrapper/list-of envelope around SwiftCodeItem (already mapped); the wrapper itself carries no extra properties." }
+    ]
+  }
+}
