@@ -229,8 +229,7 @@
     },
     {
       "spec": "PayoutOnStellarAuthorizeIn",
-      "sdk": [{ "file": "payouts/client.go", "symbol": "AuthorizeStellarTokenParams" }],
-      "note": "Spec operation is POST .../payouts/stellar/authorize; SDK calls POST .../payouts/stellar/authorize-token (pre-existing path drift, see cmd/apisync coverage report and PR description; not changed in this PR)."
+      "sdk": [{ "file": "payouts/client.go", "symbol": "AuthorizeStellarTokenParams" }]
     },
     {
       "spec": "SubmitPayoutDocumentsIn",
