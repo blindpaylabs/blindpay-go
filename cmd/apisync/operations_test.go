@@ -30,6 +30,11 @@ func getOp(responseSchemaRef string) map[string]any {
 }
 
 func TestCheckOperationChanges_NewOperationHardFailsByDefault(t *testing.T) {
+	// No fixture SDK packages exist at all, so the deterministic generator
+	// can never resolve a target package for this route and must fall back
+	// to NEEDS_HUMAN, exactly like the pre-generator behavior.
+	repoRoot := writeFixture(t, map[string]string{"go.mod": "module example.com/fixture\n\ngo 1.21\n"})
+
 	sm := &SpecMap{Types: []TypeMapping{{Spec: "PayoutOut", SDK: []SDKSite{{File: "x", Symbol: "Y"}}}}}
 	oldSpec := specWithPaths(t, map[string]string{"PayoutOut": `{"type":"object","properties":{}}`}, map[string]any{})
 	newSpec := specWithPaths(t, map[string]string{"PayoutOut": `{"type":"object","properties":{}}`}, map[string]any{
@@ -38,13 +43,14 @@ func TestCheckOperationChanges_NewOperationHardFailsByDefault(t *testing.T) {
 		},
 	})
 
-	issues := checkOperationChanges(sm, oldSpec, newSpec)
+	issues := checkOperationChanges(repoRoot, sm, oldSpec, newSpec).NeedsHuman
 	require.True(t, containsString(issues, "GET /v1/instances/{instance_id}/payouts/new-thing"))
 	require.True(t, containsString(issues, "NEEDS_HUMAN"))
 	require.True(t, containsString(issues, "hand-written client wiring"))
 }
 
 func TestCheckOperationChanges_NewOperationInAnIgnoredFamilyIsNotBlocking(t *testing.T) {
+	repoRoot := writeFixture(t, map[string]string{"go.mod": "module example.com/fixture\n\ngo 1.21\n"})
 	sm := &SpecMap{}
 	sm.Ignore.Schemas = []IgnoreEntry{{Schema: "Rfi", Reason: "not modeled"}}
 
@@ -69,8 +75,8 @@ func TestCheckOperationChanges_NewOperationInAnIgnoredFamilyIsNotBlocking(t *tes
 				"/v1/instances/{instance_id}/rfi/new-endpoint": map[string]any{"get": tt.op},
 			})
 
-			issues := checkOperationChanges(sm, oldSpec, newSpec)
-			require.Empty(t, issues, "a new operation reachable only through an already-ignored schema/tag must not block the pipeline")
+			plan := checkOperationChanges(repoRoot, sm, oldSpec, newSpec)
+			require.Empty(t, plan.NeedsHuman, "a new operation reachable only through an already-ignored schema/tag must not block the pipeline")
 		})
 	}
 }
@@ -80,6 +86,7 @@ func TestCheckOperationChanges_TagPrefixAloneIsNotEnoughToExempt(t *testing.T) {
 	// UploadAnalyzeIn/UploadAnalyzeOut; a tag "Upload" must not exempt an
 	// operation by loosely prefix-matching the ignored name, since that
 	// would also wrongly exempt a genuinely new Upload-family operation.
+	repoRoot := writeFixture(t, map[string]string{"go.mod": "module example.com/fixture\n\ngo 1.21\n"})
 	sm := &SpecMap{}
 	sm.Ignore.Schemas = []IgnoreEntry{{Schema: "UploadAnalyzeOut", Reason: "not modeled"}}
 
@@ -94,29 +101,32 @@ func TestCheckOperationChanges_TagPrefixAloneIsNotEnoughToExempt(t *testing.T) {
 		},
 	})
 
-	issues := checkOperationChanges(sm, oldSpec, newSpec)
+	issues := checkOperationChanges(repoRoot, sm, oldSpec, newSpec).NeedsHuman
 	require.True(t, containsString(issues, "POST /v1/upload/new-variant"), "referencing a MAPPED schema (UploadOut) must still hard-fail even though the tag loosely resembles an ignored family name")
 }
 
 func TestCheckOperationChanges_RemovedOperationIsAlwaysNeedsHuman(t *testing.T) {
+	repoRoot := writeFixture(t, map[string]string{"go.mod": "module example.com/fixture\n\ngo 1.21\n"})
 	sm := &SpecMap{}
 	oldSpec := specWithPaths(t, map[string]string{}, map[string]any{
 		"/v1/instances/{instance_id}/widgets": map[string]any{"get": map[string]any{"responses": map[string]any{"200": map[string]any{}}}},
 	})
 	newSpec := specWithPaths(t, map[string]string{}, map[string]any{})
 
-	issues := checkOperationChanges(sm, oldSpec, newSpec)
+	issues := checkOperationChanges(repoRoot, sm, oldSpec, newSpec).NeedsHuman
 	require.True(t, containsString(issues, "GET /v1/instances/{instance_id}/widgets"))
 	require.True(t, containsString(issues, "removal is always a hard fail"))
 }
 
 func TestCheckOperationChanges_NoChangeIsClean(t *testing.T) {
+	repoRoot := writeFixture(t, map[string]string{"go.mod": "module example.com/fixture\n\ngo 1.21\n"})
 	sm := &SpecMap{}
 	spec := specWithPaths(t, map[string]string{}, map[string]any{
 		"/v1/widgets": map[string]any{"get": map[string]any{"responses": map[string]any{"200": map[string]any{}}}},
 	})
-	issues := checkOperationChanges(sm, spec, spec)
-	require.Empty(t, issues)
+	plan := checkOperationChanges(repoRoot, sm, spec, spec)
+	require.Empty(t, plan.NeedsHuman)
+	require.Empty(t, plan.Actions)
 }
 
 func TestCheckUnclassifiedSchemas_NewSchemaAbsentFromCommittedSnapshotIsNeedsHuman(t *testing.T) {
@@ -138,7 +148,7 @@ func TestCheckUnclassifiedSchemas_NewSchemaAbsentFromCommittedSnapshotIsNeedsHum
 		"/v1/new":     map[string]any{"get": getOp("BrandNewThing")},
 	})
 
-	issues := checkUnclassifiedSchemas(sm, newSpec)
+	issues := checkUnclassifiedSchemas(sm, newSpec, nil)
 	require.True(t, containsString(issues, "BrandNewThing"))
 	require.True(t, containsString(issues, "NEEDS_HUMAN"))
 }

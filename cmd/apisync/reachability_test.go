@@ -136,6 +136,6 @@ func TestCheckUnclassifiedSchemas_OrphanSchemaProducesNoWork(t *testing.T) {
 		},
 	})
 
-	issues := checkUnclassifiedSchemas(sm, spec)
+	issues := checkUnclassifiedSchemas(sm, spec, nil)
 	require.Empty(t, issues, "an orphan schema unreachable from any path/webhook/parameter must produce no work")
 }

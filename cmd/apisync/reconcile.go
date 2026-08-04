@@ -18,6 +18,12 @@ type action struct {
 type planResult struct {
 	Actions    []action
 	NeedsHuman []string
+	// PendingSchemas is set only by checkOperationChanges: the spec schema
+	// names its operation-insert actions are about to register in
+	// spec-map.json, so checkUnclassifiedSchemas can treat them as already
+	// classified this same run (the registration hasn't been written to
+	// disk yet -- see reconcileAndMaybeApply).
+	PendingSchemas map[string]bool
 }
 
 func (p *planResult) addNeedsHuman(format string, args ...any) {
@@ -115,7 +121,7 @@ func checkMapValidity(repoRoot string, sm *SpecMap) []string {
 // reachable from any path, webhook, or non-schema component section, even
 // transitively through other schemas' $refs) produces no work at all: see
 // reachableSchemas.
-func checkUnclassifiedSchemas(sm *SpecMap, spec *specDoc) []string {
+func checkUnclassifiedSchemas(sm *SpecMap, spec *specDoc, pending map[string]bool) []string {
 	classified := map[string]bool{}
 	for _, t := range sm.Types {
 		classified[t.Spec] = true
@@ -131,7 +137,7 @@ func checkUnclassifiedSchemas(sm *SpecMap, spec *specDoc) []string {
 		if !reachable[name] {
 			continue // orphan: nothing in the spec's surface can reach it, no work either way
 		}
-		if !classified[name] {
+		if !classified[name] && !pending[name] {
 			issues = append(issues, fmt.Sprintf(
 				"NEEDS_HUMAN: schema %q is not in spec-map.json (neither types[] nor ignore.schemas[]); "+
 					"a human must decide whether to model it or ignore it with a reason", name))
