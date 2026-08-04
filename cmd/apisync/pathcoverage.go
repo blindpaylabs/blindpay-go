@@ -118,8 +118,8 @@ func normalizeSpecPath(p string) string {
 // computeCoverageGaps returns a human-readable, sorted, non-blocking list
 // of (a) spec operations with no matching SDK path literal and (b) SDK path
 // literals with no matching spec operation (e.g. this repo's known
-// pre-existing drift: authorize-token vs authorize, and the two
-// spec-absent /export/* paths). Scope note: this is a path-shape match
+// pre-existing drift: the two spec-absent /export/* paths, which have no
+// corresponding operation in the current public spec). Scope note: this is a path-shape match
 // only (method is not correlated back to the literal, since the SDK builds
 // path variables separately from the request.Do method argument); good
 // enough for a non-blocking survey, not a substitute for the map-validity

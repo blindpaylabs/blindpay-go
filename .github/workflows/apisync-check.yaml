@@ -42,8 +42,7 @@ jobs:
           diff -rq /tmp/apisync-proof-a /tmp/apisync-proof-b
 
       # Informational only: spec operations the SDK does not call, and SDK
-      # paths with no matching spec operation (e.g. the known
-      # authorize-token vs authorize drift, and the two spec-absent
+      # paths with no matching spec operation (e.g. the two spec-absent
       # /export/* paths). Never fails the build.
       - name: Spec-operation coverage report (non-blocking)
         run: go run ./cmd/apisync -coverage

@@ -292,6 +292,6 @@ func (c *Client) AuthorizeStellarToken(ctx context.Context, params *AuthorizeSte
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	path := fmt.Sprintf("/instances/%s/payouts/stellar/authorize-token", c.instanceID)
+	path := fmt.Sprintf("/instances/%s/payouts/stellar/authorize", c.instanceID)
 	return request.Do[*AuthorizeStellarTokenResponse](c.cfg, ctx, "POST", path, params)
 }
