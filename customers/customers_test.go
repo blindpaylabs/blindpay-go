@@ -662,8 +662,8 @@ func TestCustomers_ListWithParams(t *testing.T) {
 					],
 					"pagination": {
 						"has_more": false,
-						"next_page": 0,
-						"prev_page": 0
+						"next_page": null,
+						"prev_page": null
 					}
 				}`),
 				Method: http.MethodGet,

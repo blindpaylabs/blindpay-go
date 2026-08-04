@@ -283,3 +283,55 @@ func TestPayins_CreateQuote(t *testing.T) {
 	require.Equal(t, quoteID, quote.ID)
 	require.Equal(t, 5240.0, quote.SenderAmount)
 }
+
+// TestPayin_UnmarshalBillingFeeAmount pins the wire shape reported by the
+// spec (billing_fee_amount: ["number","null"], cents, example 50).
+// BillingFeeAmount was *string before this fix, which could never decode a
+// real fee value: unmarshalling {"id":"pi_1","status":"completed",
+// "billing_fee_amount":50} failed with "json: cannot unmarshal number into
+// Go struct field Payin.billing_fee_amount of type string" for every payin
+// that actually had a billing fee charged.
+func TestPayin_UnmarshalBillingFeeAmount(t *testing.T) {
+	tests := []struct {
+		name string
+		wire string
+		want *float64
+	}{
+		{
+			name: "a real fee amount (the exact reported failure payload)",
+			wire: `{"id":"pi_1","status":"completed","billing_fee_amount":50}`,
+			want: float64Ptr(50),
+		},
+		{
+			name: "a fractional cents value",
+			wire: `{"id":"pi_1","status":"completed","billing_fee_amount":12.5}`,
+			want: float64Ptr(12.5),
+		},
+		{
+			name: "null (no billing fee charged)",
+			wire: `{"id":"pi_1","status":"completed","billing_fee_amount":null}`,
+			want: nil,
+		},
+		{
+			name: "absent entirely",
+			wire: `{"id":"pi_1","status":"completed"}`,
+			want: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var got Payin
+			err := json.Unmarshal([]byte(tt.wire), &got)
+			require.NoError(t, err)
+			if tt.want == nil {
+				require.Nil(t, got.BillingFeeAmount)
+			} else {
+				require.NotNil(t, got.BillingFeeAmount)
+				require.Equal(t, *tt.want, *got.BillingFeeAmount)
+			}
+		})
+	}
+}
+
+func float64Ptr(f float64) *float64 { return &f }

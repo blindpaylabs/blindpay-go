@@ -47,7 +47,7 @@ type Payin struct {
 	Network               types.Network                `json:"network"`
 	BlindpayBankDetails   BankDetails                  `json:"blindpay_bank_details"`
 	IsOtc                 *bool                        `json:"is_otc,omitempty"`
-	BillingFeeAmount      *string                      `json:"billing_fee_amount,omitempty"`
+	BillingFeeAmount      *float64                     `json:"billing_fee_amount,omitempty"`
 	PseDocumentType       *string                      `json:"pse_document_type,omitempty"`
 	PseFullName           *string                      `json:"pse_full_name,omitempty"`
 	PsePaymentLink        *string                      `json:"pse_payment_link,omitempty"`
