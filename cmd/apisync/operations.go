@@ -1,0 +1,176 @@
+package main
+
+import (
+	"fmt"
+	"sort"
+	"strings"
+)
+
+// operationEntry is one method+path operation from a spec's paths object,
+// carrying just enough to decide whether it belongs to an already-ignored
+// subsystem.
+type operationEntry struct {
+	Method string
+	Path   string
+	Tags   []string
+	Op     map[string]any
+}
+
+func (e operationEntry) key() string { return e.Method + " " + e.Path }
+
+// operationEntries returns every operation in a spec, keyed by "METHOD /path".
+func operationEntries(spec *specDoc) map[string]operationEntry {
+	out := map[string]operationEntry{}
+	paths, _ := spec.raw["paths"].(map[string]any)
+	for p, methodsRaw := range paths {
+		methods, ok := methodsRaw.(map[string]any)
+		if !ok {
+			continue
+		}
+		for m, opRaw := range methods {
+			switch m {
+			case "get", "post", "put", "patch", "delete":
+			default:
+				continue
+			}
+			op, _ := opRaw.(map[string]any)
+			var tags []string
+			if rawTags, ok := op["tags"].([]any); ok {
+				for _, t := range rawTags {
+					if s, ok := t.(string); ok {
+						tags = append(tags, s)
+					}
+				}
+			}
+			method := strings.ToUpper(m)
+			entry := operationEntry{Method: method, Path: p, Tags: tags, Op: op}
+			out[entry.key()] = entry
+		}
+	}
+	return out
+}
+
+// collectRefSchemaNames recursively walks a JSON subtree collecting every
+// "#/components/schemas/X" $ref target it finds, however deeply nested
+// (anyOf/oneOf branches, array items, etc.).
+func collectRefSchemaNames(node any) []string {
+	var out []string
+	const prefix = "#/components/schemas/"
+	var walk func(n any)
+	walk = func(n any) {
+		switch v := n.(type) {
+		case map[string]any:
+			if ref, ok := v["$ref"].(string); ok && strings.HasPrefix(ref, prefix) {
+				out = append(out, strings.TrimPrefix(ref, prefix))
+			}
+			for _, child := range v {
+				walk(child)
+			}
+		case []any:
+			for _, child := range v {
+				walk(child)
+			}
+		}
+	}
+	walk(node)
+	return out
+}
+
+// referencedSchemas returns every component schema name reachable from an
+// operation's requestBody and 2xx responses.
+func referencedSchemas(op map[string]any) []string {
+	var names []string
+	if rb, ok := op["requestBody"].(map[string]any); ok {
+		names = append(names, collectRefSchemaNames(rb)...)
+	}
+	if responses, ok := op["responses"].(map[string]any); ok {
+		for code, r := range responses {
+			if !strings.HasPrefix(code, "2") {
+				continue
+			}
+			names = append(names, collectRefSchemaNames(r)...)
+		}
+	}
+	return names
+}
+
+// operationIsIgnored decides whether a new operation belongs to a subsystem
+// this SDK already deliberately does not model, so a spec addition there
+// must not wedge the whole pipeline. Two independent signals, either
+// sufficient on its own:
+//
+//  1. Schema reachability (primary, mechanical): every component schema the
+//     operation's requestBody/responses reference is already in
+//     ignore.schemas, and there is at least one such schema (an operation
+//     with zero named schema refs is never exempted this way -- an
+//     untyped/generic body is not evidence of anything).
+//  2. Tag match (secondary, for operations whose bodies are too generic to
+//     carry a useful schema ref, e.g. `{"type":"object","additionalProperties":{}}`):
+//     an exact, case-insensitive match between one of the operation's
+//     OpenAPI tags and an ignored schema name. Exact match only, never a
+//     prefix: e.g. UploadIn/UploadOut are real, mapped schemas alongside
+//     the ignored UploadAnalyzeIn/UploadAnalyzeOut, so a tag "Upload"
+//     prefix-matching "UploadAnalyzeIn" would have wrongly exempted an
+//     operation actually belonging to the mapped Upload family.
+func operationIsIgnored(op operationEntry, sm *SpecMap) bool {
+	ignored := map[string]bool{}
+	for _, e := range sm.Ignore.Schemas {
+		ignored[e.Schema] = true
+	}
+
+	if refs := referencedSchemas(op.Op); len(refs) > 0 {
+		allIgnored := true
+		for _, r := range refs {
+			if !ignored[r] {
+				allIgnored = false
+				break
+			}
+		}
+		if allIgnored {
+			return true
+		}
+	}
+
+	for _, tag := range op.Tags {
+		for name := range ignored {
+			if strings.EqualFold(tag, name) {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+// checkOperationChanges hard-fails on any operation added or removed
+// relative to the committed snapshot, unless (for an addition) it belongs
+// to an already-ignored subsystem -- see operationIsIgnored. A brand new
+// operation needs hand-written client wiring (naming, grouping, request/
+// response shape) that a patcher must never invent; silently accepting it
+// is exactly the silent-divergence failure state reconciliation replaced
+// event-diffing to prevent, just one level up from properties/enums.
+func checkOperationChanges(sm *SpecMap, oldSpec, newSpec *specDoc) []string {
+	oldOps, newOps := operationEntries(oldSpec), operationEntries(newSpec)
+
+	var issues []string
+	for key, entry := range newOps {
+		if _, existed := oldOps[key]; existed {
+			continue
+		}
+		if operationIsIgnored(entry, sm) {
+			continue
+		}
+		issues = append(issues, fmt.Sprintf(
+			"NEEDS_HUMAN: new operation %s is not present in the committed snapshot; adding SDK support for a new endpoint needs hand-written client wiring (naming, grouping, request/response shape) that a patcher must not invent (tags=%v)",
+			key, entry.Tags))
+	}
+	for key := range oldOps {
+		if _, stillPresent := newOps[key]; !stillPresent {
+			issues = append(issues, fmt.Sprintf(
+				"NEEDS_HUMAN: operation %s present in the committed snapshot is absent from the target spec (removal is always a hard fail)", key))
+		}
+	}
+
+	sort.Strings(issues)
+	return issues
+}

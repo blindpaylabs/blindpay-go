@@ -43,7 +43,7 @@ func integrationFixture(t *testing.T, schemas map[string]string) string {
 				"sdk": [{"file": "widgets/client.go", "symbol": "Widget"}]
 			}
 		],
-		"ignore": {"schemas": []}
+		"ignore": {"schemas": [{"schema": "IgnoredThing", "reason": "not modeled by this SDK, test fixture"}]}
 	}`
 	unmodeled := `{"properties": [], "enums": []}`
 
@@ -213,9 +213,20 @@ func TestIntegration_OperationSetChangeAloneBumpsMinorEvenForAFieldOnlyAction(t 
 				"color":{"type":"string","enum":["red","blue"]},
 				"score":{"type":"integer"}
 			},"required":["id"]}`),
+			"IgnoredThing": mustUnmarshal(t, `{"type":"object","properties":{}}`),
 		}},
 		"paths": map[string]any{
-			"/widgets": map[string]any{"get": map[string]any{}},
+			// References only an ignored schema, so checkOperationChanges
+			// exempts it from the new-operation hard-fail (see
+			// TestCheckOperationChanges_NewOperationInAnIgnoredFamilyIsNotBlocking)
+			// while it still counts toward the operation-set-changed bump signal.
+			"/widgets": map[string]any{"get": map[string]any{
+				"responses": map[string]any{
+					"200": map[string]any{"content": map[string]any{"application/json": map[string]any{
+						"schema": map[string]any{"$ref": "#/components/schemas/IgnoredThing"},
+					}}},
+				},
+			}},
 		},
 	}
 	data, err := json.MarshalIndent(spec, "", "  ")

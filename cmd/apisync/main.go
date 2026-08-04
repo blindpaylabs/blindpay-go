@@ -132,6 +132,7 @@ func reconcileAndMaybeApply(repoRoot string, opts syncOptions) (quiet bool, err 
 	var needsHuman []string
 	needsHuman = append(needsHuman, checkMapValidity(repoRoot, sm)...)
 	needsHuman = append(needsHuman, checkUnclassifiedSchemas(sm, newSpec)...)
+	needsHuman = append(needsHuman, checkOperationChanges(sm, oldSpec, newSpec)...)
 
 	enumPlan := reconcileEnums(repoRoot, sm, um, oldSpec, newSpec)
 	typePlan := reconcileTypes(repoRoot, sm, um, oldSpec, newSpec)
@@ -255,9 +256,15 @@ func findRepoRoot() (string, error) {
 // readSpecFile returns both the raw bytes (so refreshSnapshot can copy them
 // verbatim -- never re-marshal, which would reorder keys into map order,
 // re-indent, and re-escape, turning a no-op spec refresh into a diff of the
-// entire file) and the parsed document used for reconciliation.
-func readSpecFile(repoRoot, relPath string) ([]byte, map[string]any, error) {
-	data, err := os.ReadFile(filepath.Join(repoRoot, relPath))
+// entire file) and the parsed document used for reconciliation. path may be
+// relative to repoRoot (the common case, e.g. ".api-sync/spec-current.json")
+// or absolute (e.g. -spec /tmp/x.json for a one-off dry run); an absolute
+// path is used as-is rather than joined under repoRoot.
+func readSpecFile(repoRoot, path string) ([]byte, map[string]any, error) {
+	if !filepath.IsAbs(path) {
+		path = filepath.Join(repoRoot, path)
+	}
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, nil, err
 	}
