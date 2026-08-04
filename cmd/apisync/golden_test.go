@@ -2,9 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -60,6 +62,19 @@ func copyTree(t *testing.T, src, dst string) {
 	require.NoError(t, err)
 }
 
+// nextMinorVersion reads blindpay.go's current `const Version` and returns
+// the minor bump apisync is expected to produce, so golden assertions track
+// whatever version main is on instead of a literal that goes stale on every
+// release.
+func nextMinorVersion(t *testing.T, blindpayGoPath string) string {
+	t.Helper()
+	m := versionLineRE.FindStringSubmatch(readFile(t, blindpayGoPath))
+	require.NotNil(t, m, "blindpay.go: const Version line not found")
+	minor, err := strconv.Atoi(m[2])
+	require.NoError(t, err)
+	return fmt.Sprintf("%s.%d.0", m[1], minor+1)
+}
+
 func readFile(t *testing.T, path string) string {
 	t.Helper()
 	data, err := os.ReadFile(path)
@@ -90,6 +105,8 @@ func TestGolden_OperationInsertRegeneratesDeletedMethods(t *testing.T) {
 	real := realRepoRoot(t)
 	work := t.TempDir()
 	copyTree(t, real, work)
+
+	expectedVersion := nextMinorVersion(t, filepath.Join(work, "blindpay.go"))
 
 	clientPath := filepath.Join(work, "partnerfees", "client.go")
 	src := readFile(t, clientPath)
@@ -179,7 +196,7 @@ func (c *Client) Get(ctx context.Context, id string) (*PartnerFee, error) {
 	require.Contains(t, regenerated, `request.Do[*CreateResponse](c.cfg, ctx, "POST", path, params)`)
 
 	blindpayGo := readFile(t, filepath.Join(work, "blindpay.go"))
-	require.Contains(t, blindpayGo, `const Version = "1.19.0"`, "operationSetChanged escalates the bump to minor")
+	require.Contains(t, blindpayGo, fmt.Sprintf(`const Version = "%s"`, expectedVersion), "operationSetChanged escalates the bump to minor")
 
 	run := func(name string, args ...string) string {
 		cmd := exec.Command(name, args...)
