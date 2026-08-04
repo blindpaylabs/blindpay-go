@@ -77,9 +77,21 @@ func checkMapValidity(repoRoot string, sm *SpecMap) []string {
 	}
 
 	for _, t := range sm.Types {
+		knownSymbols := map[string]bool{}
 		for _, site := range t.SDK {
+			knownSymbols[site.Symbol] = true
 			if _, err := findStructShape(repoRoot, site.File, site.Symbol); err != nil {
 				issues = append(issues, fmt.Sprintf("spec-map.json: type %s: %v", t.Spec, err))
+			}
+		}
+		if t.Policy != "" && t.Policy != "uniform" && t.Policy != "union" {
+			issues = append(issues, fmt.Sprintf("spec-map.json: type %s: unknown policy %q (must be \"uniform\" or \"union\")", t.Spec, t.Policy))
+		}
+		for propName, siteSymbols := range t.PropertySites {
+			for _, sym := range siteSymbols {
+				if !knownSymbols[sym] {
+					issues = append(issues, fmt.Sprintf("spec-map.json: type %s property_sites[%s]: %q is not one of this mapping's sdk sites", t.Spec, propName, sym))
+				}
 			}
 		}
 		for propName, nested := range t.Nested {
@@ -99,7 +111,10 @@ func checkMapValidity(repoRoot string, sm *SpecMap) []string {
 // that is neither mapped nor explicitly ignored -- a genuinely new spec
 // construct that needs a human triage decision (map it or ignore it),
 // per the design's "property added on a schema with no mapping" /
-// "schema added" NEEDS_HUMAN categories.
+// "schema added" NEEDS_HUMAN categories. An unreachable orphan schema (not
+// reachable from any path, webhook, or non-schema component section, even
+// transitively through other schemas' $refs) produces no work at all: see
+// reachableSchemas.
 func checkUnclassifiedSchemas(sm *SpecMap, spec *specDoc) []string {
 	classified := map[string]bool{}
 	for _, t := range sm.Types {
@@ -109,8 +124,13 @@ func checkUnclassifiedSchemas(sm *SpecMap, spec *specDoc) []string {
 		classified[i.Schema] = true
 	}
 
+	reachable := reachableSchemas(spec)
+
 	var issues []string
 	for name := range spec.schemas() {
+		if !reachable[name] {
+			continue // orphan: nothing in the spec's surface can reach it, no work either way
+		}
 		if !classified[name] {
 			issues = append(issues, fmt.Sprintf(
 				"NEEDS_HUMAN: schema %q is not in spec-map.json (neither types[] nor ignore.schemas[]); "+
@@ -252,7 +272,7 @@ func reconcileTypes(repoRoot string, sm *SpecMap, um *Unmodeled, oldSpec, newSpe
 			exclude[propName] = true
 		}
 
-		p.reconcileOneLevel(repoRoot, t.Spec, "", newSchema, oldSchema, oldFound, t.SDK, exclude, um)
+		p.reconcileOneLevel(repoRoot, t.Spec, "", newSchema, oldSchema, oldFound, t.SDK, t.Policy, t.PropertySites, exclude, um)
 
 		for propName, nested := range t.Nested {
 			newSub := resolveProperty(newSchema, propName)
@@ -272,7 +292,7 @@ func reconcileTypes(repoRoot string, sm *SpecMap, um *Unmodeled, oldSpec, newSpe
 			if len(nested.SDK) > 0 {
 				nestedSchemaKey = nested.SDK[0].Symbol
 			}
-			p.reconcileOneLevel(repoRoot, nestedSchemaKey, t.Spec+"."+propName, newSub, oldSub, oldSubFound, nested.SDK, nil, um)
+			p.reconcileOneLevel(repoRoot, nestedSchemaKey, t.Spec+"."+propName, newSub, oldSub, oldSubFound, nested.SDK, "", nil, nil, um)
 		}
 	}
 
@@ -282,23 +302,34 @@ func reconcileTypes(repoRoot string, sm *SpecMap, um *Unmodeled, oldSpec, newSpe
 
 // reconcileOneLevel handles one flat property set (top-level schema or a
 // resolved nested sub-object) against its SDK site(s).
-func (p *planResult) reconcileOneLevel(repoRoot, unmodeledSchemaKey, humanLabelPrefix string, newSchema, oldSchema map[string]any, oldFound bool, sites []SDKSite, exclude map[string]bool, um *Unmodeled) {
+//
+// Every mapped site is reconciled independently (never "does ANY site have
+// this property" / "add it to site zero"): for a single-site mapping there is
+// only one target anyway; for a multi-site mapping, policy decides the
+// target sites per property -- "uniform" (default) means every site, "union"
+// means exactly the sites named in propertySites, which must be explicit
+// (never inferred from current site membership).
+func (p *planResult) reconcileOneLevel(repoRoot, unmodeledSchemaKey, humanLabelPrefix string, newSchema, oldSchema map[string]any, oldFound bool, sites []SDKSite, policy string, propertySites map[string][]string, exclude map[string]bool, um *Unmodeled) {
 	label := unmodeledSchemaKey
 	if humanLabelPrefix != "" {
 		label = humanLabelPrefix
 	}
 
-	shapes := make([]*StructShape, 0, len(sites))
+	shapeBySymbol := map[string]*StructShape{}
+	var shapes []*StructShape
 	for _, site := range sites {
 		shape, err := findStructShape(repoRoot, site.File, site.Symbol)
 		if err != nil {
 			continue // already reported by checkMapValidity
 		}
+		shapeBySymbol[site.Symbol] = shape
 		shapes = append(shapes, shape)
 	}
 	if len(shapes) == 0 {
 		return
 	}
+	multiSite := len(sites) > 1
+	tm := TypeMapping{SDK: sites, Policy: policy, PropertySites: propertySites}
 
 	newProps := properties(newSchema)
 	newReq := requiredSet(newSchema)
@@ -307,15 +338,6 @@ func (p *planResult) reconcileOneLevel(repoRoot, unmodeledSchemaKey, humanLabelP
 	if oldFound {
 		oldProps = properties(oldSchema)
 		oldReq = requiredSet(oldSchema)
-	}
-
-	sdkHas := func(jsonName string) bool {
-		for _, s := range shapes {
-			if s.hasJSONField(jsonName) {
-				return true
-			}
-		}
-		return false
 	}
 
 	names := make([]string, 0, len(newProps))
@@ -346,41 +368,68 @@ func (p *planResult) reconcileOneLevel(repoRoot, unmodeledSchemaKey, humanLabelP
 			}
 		}
 
-		if sdkHas(name) {
-			if !um.excusesProperty(unmodeledSchemaKey, name) {
-				p.checkFieldTypeCompatibility(shapes, label, name, newDef)
+		var targetSymbols []string
+		if multiSite {
+			var ok bool
+			targetSymbols, ok = tm.sitesFor(name)
+			if !ok {
+				if !um.excusesProperty(unmodeledSchemaKey, name) {
+					p.addNeedsHuman("NEEDS_HUMAN: %s.%s: union-policy mapping has no property_sites entry for this property; a human must record which SDK sites it belongs on (or exclude it in unmodeled.json)", label, name)
+				}
+				continue
 			}
-			continue
-		}
-		if um.excusesProperty(unmodeledSchemaKey, name) {
-			continue
-		}
-
-		if newReq[name] {
-			p.addNeedsHuman("NEEDS_HUMAN: %s.%s: required spec property is not modeled by any mapped SDK struct", label, name)
-			continue
-		}
-
-		goType, ok := scalarGoType(newDef)
-		if !ok {
-			p.addNeedsHuman("NEEDS_HUMAN: %s.%s: new property has a non-scalar shape (object/array/union); needs a human-designed Go type", label, name)
-			continue
-		}
-
-		target := shapes[0]
-		goName := pascalCase(name)
-		var fieldLine string
-		if target.preferPointerStyle() {
-			fieldLine = fmt.Sprintf("\t%s *%s `json:\"%s,omitempty\"`", goName, goType, name)
 		} else {
-			fieldLine = fmt.Sprintf("\t%s %s `json:\"%s,omitempty\"`", goName, goType, name)
+			targetSymbols = []string{shapes[0].Symbol}
 		}
 
-		p.Actions = append(p.Actions, action{
-			description: fmt.Sprintf("field %s.%s: add %s (%s)", target.Symbol, goName, name, target.File),
-			insert:      insertion{File: target.File, Line: target.LastFieldLine, Text: fieldLine},
-			bump:        "patch",
-		})
+		excused := um.excusesProperty(unmodeledSchemaKey, name)
+		goType, scalarOK := scalarGoType(newDef)
+		missingRequiredReported := false
+		nonScalarReported := false
+
+		for _, sym := range targetSymbols {
+			shape, ok := shapeBySymbol[sym]
+			if !ok {
+				continue // property_sites names a site not among this mapping's resolved shapes
+			}
+			if shape.hasJSONField(name) {
+				if !excused {
+					p.checkFieldTypeCompatibility([]*StructShape{shape}, label, name, newDef)
+				}
+				continue
+			}
+			if excused {
+				continue
+			}
+			if newReq[name] {
+				if !missingRequiredReported {
+					p.addNeedsHuman("NEEDS_HUMAN: %s.%s: required spec property is not modeled by every mapped SDK struct (missing on %s)", label, name, shape.Symbol)
+					missingRequiredReported = true
+				}
+				continue
+			}
+			if !scalarOK {
+				if !nonScalarReported {
+					p.addNeedsHuman("NEEDS_HUMAN: %s.%s: new property has a non-scalar shape (object/array/union); needs a human-designed Go type", label, name)
+					nonScalarReported = true
+				}
+				continue
+			}
+
+			goName := pascalCase(name)
+			var fieldLine string
+			if shape.preferPointerStyle() {
+				fieldLine = fmt.Sprintf("\t%s *%s `json:\"%s,omitempty\"`", goName, goType, name)
+			} else {
+				fieldLine = fmt.Sprintf("\t%s %s `json:\"%s,omitempty\"`", goName, goType, name)
+			}
+
+			p.Actions = append(p.Actions, action{
+				description: fmt.Sprintf("field %s.%s: add %s (%s)", shape.Symbol, goName, name, shape.File),
+				insert:      insertion{File: shape.File, Line: shape.LastFieldLine, Text: fieldLine},
+				bump:        "patch",
+			})
+		}
 	}
 
 	// Property removal relative to the old snapshot, scoped to this mapping.

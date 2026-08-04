@@ -142,6 +142,48 @@ func operationIsIgnored(op operationEntry, sm *SpecMap) bool {
 	return false
 }
 
+// reachableSchemas computes every component schema transitively reachable
+// from the spec's actual surface: every path operation, every webhook, and
+// every non-schema components section (parameters, requestBodies,
+// responses, headers, etc. -- anything that can itself hold a $ref). A
+// schema that is not reachable is an orphan: nothing in the spec's surface
+// can ever produce or consume it, so a patcher has no work to do for it
+// either way (map it or ignore it), and must not report it as an
+// unclassified schema needing a human decision.
+func reachableSchemas(spec *specDoc) map[string]bool {
+	reachable := map[string]bool{}
+	var queue []string
+
+	if paths, ok := spec.raw["paths"].(map[string]any); ok {
+		queue = append(queue, collectRefSchemaNames(paths)...)
+	}
+	if webhooks, ok := spec.raw["webhooks"].(map[string]any); ok {
+		queue = append(queue, collectRefSchemaNames(webhooks)...)
+	}
+	if components, ok := spec.raw["components"].(map[string]any); ok {
+		for section, val := range components {
+			if section == "schemas" {
+				continue
+			}
+			queue = append(queue, collectRefSchemaNames(val)...)
+		}
+	}
+
+	schemas := spec.schemas()
+	for len(queue) > 0 {
+		name := queue[len(queue)-1]
+		queue = queue[:len(queue)-1]
+		if reachable[name] {
+			continue
+		}
+		reachable[name] = true
+		if def, ok := schemas[name]; ok {
+			queue = append(queue, collectRefSchemaNames(def)...)
+		}
+	}
+	return reachable
+}
+
 // checkOperationChanges hard-fails on any operation added or removed
 // relative to the committed snapshot, unless (for an addition) it belongs
 // to an already-ignored subsystem -- see operationIsIgnored. A brand new
