@@ -472,7 +472,7 @@ func TestCheckUnclassifiedSchemas_FlagsAnUnmappedSchema(t *testing.T) {
 		"/v1/mystery": map[string]any{"get": getOp("Mystery")},
 	})
 
-	issues := checkUnclassifiedSchemas(sm, spec)
+	issues := checkUnclassifiedSchemas(sm, spec, nil)
 	require.True(t, containsString(issues, "Mystery"))
 	require.False(t, containsString(issues, "Widget"))
 	require.False(t, containsString(issues, `"Ignored"`))

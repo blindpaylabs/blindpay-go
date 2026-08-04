@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 )
@@ -184,35 +183,58 @@ func reachableSchemas(spec *specDoc) map[string]bool {
 	return reachable
 }
 
-// checkOperationChanges hard-fails on any operation added or removed
-// relative to the committed snapshot, unless (for an addition) it belongs
-// to an already-ignored subsystem -- see operationIsIgnored. A brand new
-// operation needs hand-written client wiring (naming, grouping, request/
-// response shape) that a patcher must never invent; silently accepting it
-// is exactly the silent-divergence failure state reconciliation replaced
-// event-diffing to prevent, just one level up from properties/enums.
-func checkOperationChanges(sm *SpecMap, oldSpec, newSpec *specDoc) []string {
+// checkOperationChanges reconciles every operation added or removed
+// relative to the committed snapshot. Removal is always a hard fail.
+// Addition, unless it belongs to an already-ignored subsystem (see
+// operationIsIgnored), is handed to classifyAndPlanOperation: STANDARD
+// (fully generated method + structs + any spec-map.json registrations,
+// via actions) or NON-STANDARD (a precise NEEDS_HUMAN reason -- the
+// generator refuses to guess naming, grouping, or a shape it cannot
+// express, same posture as every other NEEDS_HUMAN in this patcher).
+func checkOperationChanges(repoRoot string, sm *SpecMap, oldSpec, newSpec *specDoc) *planResult {
 	oldOps, newOps := operationEntries(oldSpec), operationEntries(newSpec)
+	p := &planResult{PendingSchemas: map[string]bool{}}
 
-	var issues []string
-	for key, entry := range newOps {
+	newKeys := make([]string, 0, len(newOps))
+	for key := range newOps {
+		newKeys = append(newKeys, key)
+	}
+	sort.Strings(newKeys)
+
+	for _, key := range newKeys {
+		entry := newOps[key]
 		if _, existed := oldOps[key]; existed {
 			continue
 		}
 		if operationIsIgnored(entry, sm) {
 			continue
 		}
-		issues = append(issues, fmt.Sprintf(
-			"NEEDS_HUMAN: new operation %s is not present in the committed snapshot; adding SDK support for a new endpoint needs hand-written client wiring (naming, grouping, request/response shape) that a patcher must not invent (tags=%v)",
-			key, entry.Tags))
-	}
-	for key := range oldOps {
-		if _, stillPresent := newOps[key]; !stillPresent {
-			issues = append(issues, fmt.Sprintf(
-				"NEEDS_HUMAN: operation %s present in the committed snapshot is absent from the target spec (removal is always a hard fail)", key))
+
+		acts, pending, reason := classifyAndPlanOperation(repoRoot, sm, newSpec, entry)
+		if reason != "" {
+			p.addNeedsHuman(
+				"NEEDS_HUMAN: new operation %s is not present in the committed snapshot and the deterministic generator could not classify it as STANDARD (%s); adding SDK support needs hand-written client wiring (naming, grouping, request/response shape) that a patcher must not invent (tags=%v)",
+				key, reason, entry.Tags)
+			continue
+		}
+		p.Actions = append(p.Actions, acts...)
+		for _, name := range pending {
+			p.PendingSchemas[name] = true
 		}
 	}
 
-	sort.Strings(issues)
-	return issues
+	oldKeys := make([]string, 0, len(oldOps))
+	for key := range oldOps {
+		oldKeys = append(oldKeys, key)
+	}
+	sort.Strings(oldKeys)
+	for _, key := range oldKeys {
+		if _, stillPresent := newOps[key]; !stillPresent {
+			p.addNeedsHuman(
+				"NEEDS_HUMAN: operation %s present in the committed snapshot is absent from the target spec (removal is always a hard fail)", key)
+		}
+	}
+
+	sort.Strings(p.NeedsHuman)
+	return p
 }

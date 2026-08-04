@@ -33,6 +33,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"sort"
+	"strings"
 )
 
 func main() {
@@ -129,10 +130,17 @@ func reconcileAndMaybeApply(repoRoot string, opts syncOptions) (quiet bool, err 
 	newSpec := loadSpecDoc(newRaw)
 	oldSpec := loadSpecDoc(oldRaw)
 
+	// checkOperationChanges must run first: its operation-insert actions
+	// register brand-new spec-map.json types[] entries in the same apply
+	// they add the SDK struct for, so checkUnclassifiedSchemas needs its
+	// PendingSchemas to avoid re-flagging those schemas as unclassified
+	// before that registration has actually been written to disk.
+	opPlan := checkOperationChanges(repoRoot, sm, oldSpec, newSpec)
+
 	var needsHuman []string
 	needsHuman = append(needsHuman, checkMapValidity(repoRoot, sm)...)
-	needsHuman = append(needsHuman, checkUnclassifiedSchemas(sm, newSpec)...)
-	needsHuman = append(needsHuman, checkOperationChanges(sm, oldSpec, newSpec)...)
+	needsHuman = append(needsHuman, checkUnclassifiedSchemas(sm, newSpec, opPlan.PendingSchemas)...)
+	needsHuman = append(needsHuman, opPlan.NeedsHuman...)
 	needsHuman = append(needsHuman, checkEnumCoverage(sm, um, newSpec)...)
 	needsHuman = append(needsHuman, checkNestedObjectCoverage(sm, um, newSpec)...)
 
@@ -142,7 +150,7 @@ func reconcileAndMaybeApply(repoRoot string, opts syncOptions) (quiet bool, err 
 	needsHuman = append(needsHuman, typePlan.NeedsHuman...)
 	sort.Strings(needsHuman)
 
-	actions := append(append([]action{}, enumPlan.Actions...), typePlan.Actions...)
+	actions := append(append(append([]action{}, enumPlan.Actions...), typePlan.Actions...), opPlan.Actions...)
 	sort.Slice(actions, func(i, j int) bool { return actions[i].description < actions[j].description })
 
 	gaps := computeCoverageGaps(repoRoot, newSpec)
@@ -197,6 +205,9 @@ func reconcileAndMaybeApply(repoRoot string, opts syncOptions) (quiet bool, err 
 		return false, fmt.Errorf("applying changes: %w", err)
 	}
 	for file := range touchedFiles {
+		if !strings.HasSuffix(file, ".go") {
+			continue // e.g. .api-sync/spec-map.json, patched by operation-insert but not gofmt-able
+		}
 		if err := gofmtFile(filepath.Join(repoRoot, file)); err != nil {
 			return false, fmt.Errorf("gofmt %s: %w", file, err)
 		}
