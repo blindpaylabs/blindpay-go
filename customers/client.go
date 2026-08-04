@@ -159,7 +159,10 @@ const (
 	EstimatedAnnualRevenue1000000To9999999    EstimatedAnnualRevenue = "1000000_9999999"
 	EstimatedAnnualRevenue10000000To49999999  EstimatedAnnualRevenue = "10000000_49999999"
 	EstimatedAnnualRevenue50000000To249999999 EstimatedAnnualRevenue = "50000000_249999999"
-	EstimatedAnnualRevenue2500000000Plus      EstimatedAnnualRevenue = "2500000000_plus"
+	EstimatedAnnualRevenue250000000Plus       EstimatedAnnualRevenue = "250000000_plus"
+	// Deprecated: the name carried an extra digit and the value the API rejects.
+	// Use EstimatedAnnualRevenue250000000Plus.
+	EstimatedAnnualRevenue2500000000Plus EstimatedAnnualRevenue = "250000000_plus"
 )
 
 // SourceOfWealth represents the source of wealth for a customer.
