@@ -121,7 +121,7 @@ func TestTransfers_List(t *testing.T) {
 						"customer_token":"USDC",
 						"customer_wallet_address":"0x123...890"
 					}],
-					"pagination":{"has_more":false,"next_page":0,"prev_page":0}
+					"pagination":{"has_more":false,"next_page":null,"prev_page":null}
 				}`),
 				Method: http.MethodGet,
 				Path:   fmt.Sprintf("/instances/%s/transfers", instanceID),

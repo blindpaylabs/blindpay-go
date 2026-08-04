@@ -86,9 +86,9 @@ const (
 )
 
 type PaginationMetadata struct {
-	HasMore  bool `json:"has_more"`
-	NextPage int  `json:"next_page"`
-	PrevPage int  `json:"prev_page"`
+	HasMore  bool    `json:"has_more"`
+	NextPage *string `json:"next_page"`
+	PrevPage *string `json:"prev_page"`
 }
 
 type TrackingTransaction struct {
