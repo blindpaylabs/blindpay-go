@@ -107,6 +107,20 @@ type EnumExclusion struct {
 type Unmodeled struct {
 	Properties []PropertyExclusion `json:"properties"`
 	Enums      []EnumExclusion     `json:"enums"`
+	// EnumCoverage records an enum-constrained property (on a mapped schema,
+	// possibly a dotted nested path e.g. "tracking_payment.step") that is
+	// deliberately not tied to any mapped enum symbol -- see
+	// checkEnumCoverage. Schema is always the top-level mapped spec schema
+	// name (t.Spec), never a nested SDK symbol, matching EnumMapping.Spec's
+	// own dotted-property convention.
+	EnumCoverage []PropertyExclusion `json:"enum_coverage,omitempty"`
+	// NestedObjects records an inline object / array-item-object shape (on a
+	// mapped, reachable schema) that is deliberately not given a nested[]
+	// map entry -- see checkNestedObjectCoverage. Schema follows the same
+	// convention as Properties: the top-level spec schema name, or (for a
+	// shape found one level inside an already-mapped nested[] entry) that
+	// nested mapping's SDK symbol name.
+	NestedObjects []PropertyExclusion `json:"nested_objects,omitempty"`
 }
 
 func (u *Unmodeled) excusesProperty(schema, property string) bool {
@@ -121,6 +135,24 @@ func (u *Unmodeled) excusesProperty(schema, property string) bool {
 func (u *Unmodeled) excusesEnumMember(symbol, member string) bool {
 	for _, e := range u.Enums {
 		if e.Symbol == symbol && e.Member == member {
+			return true
+		}
+	}
+	return false
+}
+
+func (u *Unmodeled) excusesEnumCoverage(schema, property string) bool {
+	for _, p := range u.EnumCoverage {
+		if p.Schema == schema && p.Property == property {
+			return true
+		}
+	}
+	return false
+}
+
+func (u *Unmodeled) excusesNestedObject(schema, property string) bool {
+	for _, p := range u.NestedObjects {
+		if p.Schema == schema && p.Property == property {
 			return true
 		}
 	}

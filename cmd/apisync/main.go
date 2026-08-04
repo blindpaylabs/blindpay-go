@@ -133,6 +133,8 @@ func reconcileAndMaybeApply(repoRoot string, opts syncOptions) (quiet bool, err 
 	needsHuman = append(needsHuman, checkMapValidity(repoRoot, sm)...)
 	needsHuman = append(needsHuman, checkUnclassifiedSchemas(sm, newSpec)...)
 	needsHuman = append(needsHuman, checkOperationChanges(sm, oldSpec, newSpec)...)
+	needsHuman = append(needsHuman, checkEnumCoverage(sm, um, newSpec)...)
+	needsHuman = append(needsHuman, checkNestedObjectCoverage(sm, um, newSpec)...)
 
 	enumPlan := reconcileEnums(repoRoot, sm, um, oldSpec, newSpec)
 	typePlan := reconcileTypes(repoRoot, sm, um, oldSpec, newSpec)
@@ -304,6 +306,16 @@ func loadUnmodeled(repoRoot string) (*Unmodeled, error) {
 	for i, e := range um.Enums {
 		if e.Symbol == "" || e.Member == "" || e.Reason == "" || e.Owner == "" {
 			return nil, fmt.Errorf("enums[%d] missing symbol/member/reason/owner", i)
+		}
+	}
+	for i, p := range um.EnumCoverage {
+		if p.Schema == "" || p.Property == "" || p.Reason == "" || p.Owner == "" {
+			return nil, fmt.Errorf("enum_coverage[%d] missing schema/property/reason/owner", i)
+		}
+	}
+	for i, p := range um.NestedObjects {
+		if p.Schema == "" || p.Property == "" || p.Reason == "" || p.Owner == "" {
+			return nil, fmt.Errorf("nested_objects[%d] missing schema/property/reason/owner", i)
 		}
 	}
 	return &um, nil
