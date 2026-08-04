@@ -30,11 +30,45 @@ jobs:
             git checkout -b api-sync
           fi
 
-      - name: Fetch the new spec from api-sync-data
+      - name: Fetch the new spec and delivery manifest from api-sync-data
         run: |
           git fetch origin api-sync-data
           mkdir -p .api-sync
-          git show origin/api-sync-data:.api-sync/spec-current.json > .api-sync/spec-current.json
+          git show origin/api-sync-data:.api-sync/spec-current.json > .api-sync/spec-current.json || {
+            echo "::error::api-sync-data branch is missing .api-sync/spec-current.json"
+            exit 1
+          }
+          git show origin/api-sync-data:.api-sync/delivery.json > /tmp/delivery.json || {
+            echo "::error::api-sync-data branch is missing .api-sync/delivery.json (source_repository/source_sha/spec_sha256/generated_at manifest)"
+            exit 1
+          }
+
+      - name: Verify delivery manifest
+        env:
+          CLIENT_PAYLOAD_SPEC_SHA256: ${{ github.event.client_payload.spec_sha256 }}
+        run: |
+          set -e
+          for field in source_repository source_sha spec_sha256 generated_at; do
+            value=$(jq -r ".${field} // \"\"" /tmp/delivery.json)
+            if [ -z "$value" ]; then
+              echo "::error::.api-sync/delivery.json is missing required field \"$field\""
+              exit 1
+            fi
+          done
+
+          manifest_sha256=$(jq -r '.spec_sha256' /tmp/delivery.json)
+          actual_sha256=$(sha256sum .api-sync/spec-current.json | awk '{print $1}')
+          if [ "$manifest_sha256" != "$actual_sha256" ]; then
+            echo "::error::spec-current.json does not match delivery.json's spec_sha256 (manifest=$manifest_sha256, actual=$actual_sha256); refusing to sync against an unverified spec"
+            exit 1
+          fi
+
+          if [ -n "$CLIENT_PAYLOAD_SPEC_SHA256" ] && [ "$CLIENT_PAYLOAD_SPEC_SHA256" != "$manifest_sha256" ]; then
+            echo "::error::stale delivery: repository_dispatch client_payload.spec_sha256 ($CLIENT_PAYLOAD_SPEC_SHA256) does not match api-sync-data's delivery.json spec_sha256 ($manifest_sha256); the branch was updated again after this dispatch was sent"
+            exit 1
+          fi
+
+          echo "delivery manifest verified: source=$(jq -r '.source_repository' /tmp/delivery.json)@$(jq -r '.source_sha' /tmp/delivery.json), spec_sha256=$manifest_sha256, generated_at=$(jq -r '.generated_at' /tmp/delivery.json)"
 
       - name: Run apisync
         id: apisync

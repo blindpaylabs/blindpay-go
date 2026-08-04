@@ -128,10 +128,14 @@ func TestCheckUnclassifiedSchemas_NewSchemaAbsentFromCommittedSnapshotIsNeedsHum
 	sm := &SpecMap{Types: []TypeMapping{{Spec: "Widget"}}}
 	sm.Ignore.Schemas = []IgnoreEntry{{Schema: "Ignored", Reason: "not modeled"}}
 
-	newSpec := mustSpec(t, map[string]string{
+	newSpec := specWithPaths(t, map[string]string{
 		"Widget":        `{"type":"object","properties":{}}`,
 		"Ignored":       `{"type":"object","properties":{}}`,
 		"BrandNewThing": `{"type":"object","properties":{}}`, // present only in the new spec
+	}, map[string]any{
+		"/v1/widgets": map[string]any{"get": getOp("Widget")},
+		"/v1/ignored": map[string]any{"get": getOp("Ignored")},
+		"/v1/new":     map[string]any{"get": getOp("BrandNewThing")},
 	})
 
 	issues := checkUnclassifiedSchemas(sm, newSpec)

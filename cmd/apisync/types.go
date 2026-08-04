@@ -32,12 +32,41 @@ type NestedMapping struct {
 }
 
 // TypeMapping ties one spec schema to one or more SDK struct sites.
+//
+// Policy governs how a property is checked/applied across multiple SDK
+// sites (irrelevant, and left "", when len(SDK) == 1):
+//
+//   - "uniform": every site must contain the property; a missing optional
+//     property is added to every site independently (never just the first).
+//   - "union": a property may exist on a named subset of sites only, listed
+//     explicitly in PropertySites. This must never be inferred from which
+//     sites currently happen to have the property -- a property absent from
+//     PropertySites is NEEDS_HUMAN, not silently treated as "satisfied
+//     anywhere" or "add to site zero".
 type TypeMapping struct {
 	Spec          string                   `json:"spec"`
 	SDK           []SDKSite                `json:"sdk"`
+	Policy        string                   `json:"policy,omitempty"`
+	PropertySites map[string][]string      `json:"property_sites,omitempty"`
 	Nested        map[string]NestedMapping `json:"nested,omitempty"`
 	Discriminator []string                 `json:"discriminator,omitempty"`
 	Note          string                   `json:"note,omitempty"`
+}
+
+// sitesFor returns the SDK sites a property applies to, per the mapping's
+// fan-out policy. ok is false when a union-policy mapping has no explicit
+// PropertySites entry for this property -- the caller must treat that as
+// NEEDS_HUMAN, never guess.
+func (t TypeMapping) sitesFor(property string) (symbols []string, ok bool) {
+	if t.Policy != "union" {
+		symbols = make([]string, 0, len(t.SDK))
+		for _, s := range t.SDK {
+			symbols = append(symbols, s.Symbol)
+		}
+		return symbols, true
+	}
+	symbols, ok = t.PropertySites[property]
+	return symbols, ok
 }
 
 // IgnoreEntry documents a spec schema this SDK deliberately does not model.

@@ -462,10 +462,14 @@ func TestCheckUnclassifiedSchemas_FlagsAnUnmappedSchema(t *testing.T) {
 	sm := &SpecMap{Types: []TypeMapping{{Spec: "Widget"}}}
 	sm.Ignore.Schemas = []IgnoreEntry{{Schema: "Ignored", Reason: "not modeled"}}
 
-	spec := mustSpec(t, map[string]string{
+	spec := specWithPaths(t, map[string]string{
 		"Widget":  `{"type":"object","properties":{}}`,
 		"Ignored": `{"type":"object","properties":{}}`,
 		"Mystery": `{"type":"object","properties":{}}`,
+	}, map[string]any{
+		"/v1/widgets": map[string]any{"get": getOp("Widget")},
+		"/v1/ignored": map[string]any{"get": getOp("Ignored")},
+		"/v1/mystery": map[string]any{"get": getOp("Mystery")},
 	})
 
 	issues := checkUnclassifiedSchemas(sm, spec)
