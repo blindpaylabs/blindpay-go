@@ -22,6 +22,7 @@ type CreateParams struct {
 	TransactionDocumentFile *string                       `json:"transaction_document_file"`
 	TransactionDocumentID   *string                       `json:"transaction_document_id"`
 	TransactionDocumentType types.TransactionDocumentType `json:"transaction_document_type"`
+	RefundWalletAddress     *string                       `json:"refund_wallet_address,omitempty"`
 }
 
 // QuoteContract represents contract information in a quote.

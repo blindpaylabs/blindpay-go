@@ -30,3 +30,7 @@ go.work.sum
 
 # Snyk Security Extension - AI Rules (auto-generated)
 .cursor/rules/snyk_rules.mdc
+
+# Delivered by the api-sync-data branch at sync time (repository_dispatch);
+# never committed to this repo, see .github/workflows/api-sync.yml.
+/.api-sync/spec-current.json

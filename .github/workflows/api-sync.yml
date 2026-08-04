@@ -7,7 +7,6 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  id-token: write
 
 jobs:
   sync:
@@ -16,27 +15,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Fetch API sync data
-        run: |
-          mkdir -p /tmp/api-sync
-          git fetch origin api-sync-data
-          git show origin/api-sync-data:.api-sync/changelog.md > /tmp/api-sync/changelog.md
-          echo "=== Changelog ==="
-          cat /tmp/api-sync/changelog.md
-
-      - name: Check for existing api-sync PR
-        id: check-pr
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          PR_NUMBER=$(gh pr list --head api-sync --json number --jq '.[0].number // empty')
-          if [ -n "$PR_NUMBER" ]; then
-            echo "existing_pr=$PR_NUMBER" >> $GITHUB_OUTPUT
-            echo "Found existing api-sync PR: #$PR_NUMBER"
-          else
-            echo "existing_pr=" >> $GITHUB_OUTPUT
-            echo "No existing api-sync PR found"
-          fi
+      - name: Setup go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.21"
 
       - name: Create or checkout api-sync branch
         run: |
@@ -48,63 +30,66 @@ jobs:
             git checkout -b api-sync
           fi
 
-      - name: Apply changes with Claude Code
-        uses: anthropics/claude-code-action@v1
-        with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          claude_args: '--model claude-opus-5 --allowedTools "Bash(*),Read,Edit,Write,Glob,Grep"'
-          prompt: |
-            You are updating this SDK to match API changes. Read CLAUDE.md for this SDK's conventions.
+      - name: Fetch the new spec from api-sync-data
+        run: |
+          git fetch origin api-sync-data
+          mkdir -p .api-sync
+          git show origin/api-sync-data:.api-sync/spec-current.json > .api-sync/spec-current.json
 
-            The changelog is at /tmp/api-sync/changelog.md — it contains ALL the information you need.
-            Do NOT read openapi.json. The changelog is self-contained.
+      - name: Run apisync
+        id: apisync
+        run: |
+          set +e
+          go run ./cmd/apisync -apply -spec .api-sync/spec-current.json -report /tmp/apisync-report.json
+          status=$?
+          set -e
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          echo "=== apisync report ==="
+          cat /tmp/apisync-report.json
 
-            INSTRUCTIONS:
-            1. Read CLAUDE.md thoroughly for this SDK's patterns and conventions.
-            2. Read /tmp/api-sync/changelog.md — it lists every enum type with every value, every field to add, and every change to make.
-            3. Implement ALL changes. Go through the changelog section by section:
-               - Section 1 (Enum Types): For each enum listed, check if the SDK has it. If missing, create it. If it exists, add any missing values. The changelog lists ALL values — add the ones that don't exist yet.
-               - Section 2 (Receiver Fields): Add each listed field to the receiver input/output types.
-               - Section 3 (Version): Minor bump.
-            4. Do not skip ANY enum or field. Every item in the changelog must be addressed.
-            5. Follow CLAUDE.md patterns exactly for naming, typing, and file organization.
-            6. MINOR version bump only.
-            7. Run lint and type check commands (see CLAUDE.md). Fix any errors until clean.
-            8. Do NOT create commits — just modify the files.
+      - name: Fail loudly on needs-human
+        if: steps.apisync.outputs.status != '0'
+        run: |
+          echo "::error::apisync found NEEDS_HUMAN issue(s); nothing was changed. See the report above (needs_human) for exactly what a human must decide -- update spec-map.json / unmodeled.json, or make the change by hand, then re-dispatch."
+          exit 1
 
       - name: Commit and push
         id: commit
         run: |
           git remote set-url origin "https://x-access-token:${{ secrets.SDK_SYNC_PAT }}@github.com/${{ github.repository }}.git"
-          git checkout -- .github/workflows/ 2>/dev/null || true
           git add -A
-          git reset HEAD .github/workflows/ 2>/dev/null || true
           if git diff --staged --quiet; then
             echo "No changes to commit"
-            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          echo "has_changes=true" >> $GITHUB_OUTPUT
+          echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          VERSION=$(grep -oP 'const Version = "\K[^"]+' blindpay.go)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git commit -m "feat: sync SDK with API changes"
+          git commit -m "feat: sync SDK with API changes (v$VERSION)"
           git push --force-with-lease origin api-sync
 
-      - name: Create or update PR
+      - name: Create or update PR and enable auto-merge
         if: steps.commit.outputs.has_changes == 'true'
         env:
           GH_TOKEN: ${{ secrets.SDK_SYNC_PAT }}
         run: |
-          EXISTING_PR="${{ steps.check-pr.outputs.existing_pr }}"
-
-          if [ -n "$EXISTING_PR" ]; then
-            echo "Updating existing PR #$EXISTING_PR"
-            gh pr comment "$EXISTING_PR" --body "Updated with latest API changes."
+          PR_NUMBER=$(gh pr list --head api-sync --json number --jq '.[0].number // empty')
+          if [ -n "$PR_NUMBER" ]; then
+            gh pr comment "$PR_NUMBER" --body "Updated with latest API changes (v${{ steps.commit.outputs.version }})."
           else
             gh pr create \
-              --title "feat: sync SDK with API changes" \
-              --body "Automated SDK update from API changes." \
+              --title "feat: sync SDK with API changes (v${{ steps.commit.outputs.version }})" \
+              --body "Automated SDK update from API changes, applied by cmd/apisync. See the workflow run for the full report (applied changes, coverage gaps)." \
               --base main \
               --head api-sync \
               --label api-sync
+            PR_NUMBER=$(gh pr list --head api-sync --json number --jq '.[0].number')
           fi
+          # release.yml tags and releases on merge only when the PR carries
+          # this label; apply it every run in case a prior run's label was
+          # removed by hand.
+          gh pr edit "$PR_NUMBER" --add-label release
+          gh pr merge "$PR_NUMBER" --auto --squash

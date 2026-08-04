@@ -1,0 +1,61 @@
+name: API Sync Check
+
+on:
+  workflow_call:
+
+jobs:
+  apisync-check:
+    name: API Sync Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.21"
+
+      - name: Validate spec-map.json anchors
+        run: go run ./cmd/apisync -validate-map
+
+      - name: State reconciliation against the committed snapshot
+        run: go run ./cmd/apisync -check
+
+      # Proves the patcher itself is deterministic (no timestamps, no
+      # randomness, no map-iteration-order leaks): apply the same spec into
+      # two independent copies of the repo and diff them. Ordinary CI has no
+      # spec-current.json (that only exists inside the api-sync.yml
+      # workflow, fetched from origin/api-sync-data), so this self-applies
+      # the committed snapshot -- since -check above already asserts zero
+      # pending drift, this exercises the full load/reconcile/write/gofmt
+      # path end to end and expects a true no-op, byte-identical result.
+      # Unit-level determinism/idempotency with synthetic fixtures that do
+      # have real insertions to make is covered by cmd/apisync's own
+      # TestIntegration_ApplyThenIdempotent and friends (go test, run by the
+      # tests job).
+      - name: Determinism proof (apply into two scratch copies, diff byte-identical)
+        run: |
+          rm -rf /tmp/apisync-proof-a /tmp/apisync-proof-b
+          rsync -a --exclude='.git' ./ /tmp/apisync-proof-a/
+          rsync -a --exclude='.git' ./ /tmp/apisync-proof-b/
+          (cd /tmp/apisync-proof-a && go run ./cmd/apisync -apply -spec .api-sync/spec-snapshot.json)
+          (cd /tmp/apisync-proof-b && go run ./cmd/apisync -apply -spec .api-sync/spec-snapshot.json)
+          diff -rq /tmp/apisync-proof-a /tmp/apisync-proof-b
+
+      # Informational only: spec operations the SDK does not call, and SDK
+      # paths with no matching spec operation (e.g. the known
+      # authorize-token vs authorize drift, and the two spec-absent
+      # /export/* paths). Never fails the build.
+      - name: Spec-operation coverage report (non-blocking)
+        run: go run ./cmd/apisync -coverage
+
+      # Informational only: every mapped property's spec type against its
+      # declared Go field type, including ones already excused in
+      # unmodeled.json (unlike -check, which only reports unexcused ones).
+      # -check catches type changes going forward from a synced baseline;
+      # this catches the SDK's current type surface already disagreeing
+      # with the spec, which is a state question -check's drift-only view
+      # can't answer on its own. Triaging every pre-existing mismatch is
+      # its own (Phase C) piece of work, not a gate on every sync, so this
+      # never fails the build.
+      - name: Spec-vs-Go-type audit (non-blocking)
+        run: go run ./cmd/apisync -audit-types
