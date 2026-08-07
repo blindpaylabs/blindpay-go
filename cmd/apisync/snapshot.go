@@ -13,5 +13,5 @@ import (
 // stop matching the bytes blindpay-v2 actually ships as spec-current.json).
 func refreshSnapshot(repoRoot string, specBytes []byte) error {
 	path := filepath.Join(repoRoot, ".api-sync", "spec-snapshot.json")
-	return os.WriteFile(path, specBytes, 0o644)
+	return os.WriteFile(path, specBytes, 0o600)
 }

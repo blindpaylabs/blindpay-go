@@ -290,7 +290,7 @@ func allStructShapesInDir(repoRoot, dir string) ([]*StructShape, error) {
 }
 
 func lastLineOf(repoRoot, file string) (int, error) {
-	data, err := os.ReadFile(filepath.Join(repoRoot, file))
+	data, err := os.ReadFile(filepath.Join(repoRoot, file)) //#nosec G304 -- path is developer-supplied (CLI arg or repo-relative), this is a local codegen tool
 	if err != nil {
 		return 0, err
 	}
@@ -307,7 +307,7 @@ func lastLineOf(repoRoot, file string) (int, error) {
 // is the only way to add an entry without reordering/reformatting
 // everything else in the file.
 func jsonArrayOpenLine(repoRoot, file, key string) (int, error) {
-	data, err := os.ReadFile(filepath.Join(repoRoot, file))
+	data, err := os.ReadFile(filepath.Join(repoRoot, file)) //#nosec G304 -- path is developer-supplied (CLI arg or repo-relative), this is a local codegen tool
 	if err != nil {
 		return 0, err
 	}

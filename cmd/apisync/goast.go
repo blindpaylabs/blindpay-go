@@ -354,7 +354,7 @@ func applyInsertions(repoRoot string, insertions []insertion) error {
 
 	for file, list := range byFile {
 		path := filepath.Join(repoRoot, file)
-		data, err := os.ReadFile(path)
+		data, err := os.ReadFile(path) //#nosec G304 -- path is developer-supplied (CLI arg or repo-relative), this is a local codegen tool
 		if err != nil {
 			return err
 		}
@@ -381,7 +381,7 @@ func applyInsertions(repoRoot string, insertions []insertion) error {
 			lines = out
 		}
 
-		if err := os.WriteFile(path, []byte(strings.Join(lines, "\n")), 0o644); err != nil {
+		if err := os.WriteFile(path, []byte(strings.Join(lines, "\n")), 0o600); err != nil { //#nosec G703 -- path joins repoRoot (developer CLI arg) with repo-relative spec-map entries
 			return err
 		}
 	}
