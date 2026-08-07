@@ -16,7 +16,7 @@ var versionLineRE = regexp.MustCompile(`const Version = "(\d+)\.(\d+)\.(\d+)"`)
 // `grep -oP 'const Version = "\K[^"]+'` expects.
 func bumpVersion(repoRoot, class string) (string, error) {
 	path := filepath.Join(repoRoot, "blindpay.go")
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(path) //#nosec G304 -- path is developer-supplied (CLI arg or repo-relative), this is a local codegen tool
 	if err != nil {
 		return "", err
 	}
@@ -56,7 +56,7 @@ func bumpVersion(repoRoot, class string) (string, error) {
 	out = append(out, newLine...)
 	out = append(out, data[loc[1]:]...)
 
-	if err := os.WriteFile(path, out, 0o644); err != nil {
+	if err := os.WriteFile(path, out, 0o600); err != nil { //#nosec G703 -- path is repoRoot/blindpay.go, repoRoot comes from the developer CLI arg
 		return "", err
 	}
 	return newVersion, nil

@@ -277,7 +277,7 @@ func readSpecFile(repoRoot, path string) ([]byte, map[string]any, error) {
 	if !filepath.IsAbs(path) {
 		path = filepath.Join(repoRoot, path)
 	}
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(path) //#nosec G304 -- path is developer-supplied (CLI arg or repo-relative), this is a local codegen tool
 	if err != nil {
 		return nil, nil, err
 	}
@@ -289,7 +289,7 @@ func readSpecFile(repoRoot, path string) ([]byte, map[string]any, error) {
 }
 
 func loadSpecMap(repoRoot string) (*SpecMap, error) {
-	data, err := os.ReadFile(filepath.Join(repoRoot, ".api-sync", "spec-map.json"))
+	data, err := os.ReadFile(filepath.Join(repoRoot, ".api-sync", "spec-map.json")) //#nosec G304 -- path is developer-supplied (CLI arg or repo-relative), this is a local codegen tool
 	if err != nil {
 		return nil, err
 	}
@@ -301,7 +301,7 @@ func loadSpecMap(repoRoot string) (*SpecMap, error) {
 }
 
 func loadUnmodeled(repoRoot string) (*Unmodeled, error) {
-	data, err := os.ReadFile(filepath.Join(repoRoot, ".api-sync", "unmodeled.json"))
+	data, err := os.ReadFile(filepath.Join(repoRoot, ".api-sync", "unmodeled.json")) //#nosec G304 -- path is developer-supplied (CLI arg or repo-relative), this is a local codegen tool
 	if err != nil {
 		return nil, err
 	}
@@ -333,7 +333,7 @@ func loadUnmodeled(repoRoot string) (*Unmodeled, error) {
 }
 
 func gofmtFile(path string) error {
-	cmd := exec.Command("gofmt", "-w", path)
+	cmd := exec.Command("gofmt", "-w", path) //#nosec G204 -- fixed binary gofmt, path is a repo file this tool just wrote
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("%s: %w", string(out), err)

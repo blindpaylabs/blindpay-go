@@ -162,7 +162,7 @@ func findRepoRoot() (string, error) {
 // loadSpec returns the set of every object property name that appears
 // anywhere in the spec document, plus the webhook endpoint events enum.
 func loadSpec(path string) (map[string]bool, []string, error) {
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(path) //#nosec G304 -- path is developer-supplied (CLI arg or repo-relative), this is a local codegen tool
 	if err != nil {
 		return nil, nil, err
 	}
@@ -274,7 +274,7 @@ func extractWebhookEventEnum(doc any) []string {
 }
 
 func loadAllowlist(path string) (map[string]allowEntry, error) {
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(path) //#nosec G304 -- path is developer-supplied (CLI arg or repo-relative), this is a local codegen tool
 	if err != nil {
 		if os.IsNotExist(err) {
 			return map[string]allowEntry{}, nil
