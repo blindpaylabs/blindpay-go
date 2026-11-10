@@ -12,8 +12,8 @@ import (
 
 // FixturesDir returns the absolute path of the shared spec-shaped fixtures
 // (testdata/fixtures, copied verbatim from the cross-SDK reference set; see
-// testdata/fixtures/README.md). The test is skipped when the directory is
-// not present, e.g. when the module is tested from the module cache.
+// testdata/fixtures/README.md). The directory is part of the module (Go
+// module zips include testdata/), so a missing directory fails the test.
 func FixturesDir(t *testing.T) string {
 	t.Helper()
 
@@ -23,7 +23,7 @@ func FixturesDir(t *testing.T) string {
 	}
 	dir := filepath.Join(filepath.Dir(file), "..", "..", "testdata", "fixtures")
 	if _, err := os.Stat(dir); err != nil {
-		t.Skipf("blindpaytest: fixtures not available: %v", err)
+		t.Fatalf("blindpaytest: fixtures not available: %v", err)
 	}
 	return dir
 }
@@ -40,10 +40,34 @@ func ReadFixture(t *testing.T, rel string) []byte {
 	return b
 }
 
+// Shape tells which branch of a response a fixture variant exercises.
+type Shape int
+
+const (
+	// ShapeSingle is a non-list response (variant names without a suffix).
+	ShapeSingle Shape = iota
+	// ShapeEnvelope is the {data, pagination} list branch (".b0" variants).
+	ShapeEnvelope
+	// ShapeBareArray is the bare-array list branch (".b1" variants).
+	ShapeBareArray
+)
+
 // Variant is one named response body from a response fixture.
 type Variant struct {
-	Name string
-	Body json.RawMessage
+	Name  string
+	Body  json.RawMessage
+	Shape Shape
+}
+
+func shapeOf(name string) Shape {
+	switch {
+	case strings.HasSuffix(name, ".b0"):
+		return ShapeEnvelope
+	case strings.HasSuffix(name, ".b1"):
+		return ShapeBareArray
+	default:
+		return ShapeSingle
+	}
 }
 
 // ResponseVariants returns every variant of the success response fixture for
@@ -87,7 +111,7 @@ func ResponseVariants(t *testing.T, operation string) []Variant {
 
 	out := make([]Variant, 0, len(variants))
 	for name, body := range variants {
-		out = append(out, Variant{Name: name, Body: body})
+		out = append(out, Variant{Name: name, Body: body, Shape: shapeOf(name)})
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
 	return out
@@ -132,18 +156,12 @@ func LoadErrorFixture(t *testing.T, name string) ErrorFixture {
 	return ErrorFixture(raw)
 }
 
-// IsEnvelope reports whether a list variant name is the {data, pagination}
-// envelope branch (".b0") rather than the bare-array branch (".b1").
-func (v Variant) IsEnvelope() bool {
-	return strings.HasSuffix(v.Name, ".b0")
-}
-
 // RowCount returns the number of rows in a list variant, for either shape.
 func (v Variant) RowCount(t *testing.T) int {
 	t.Helper()
 
 	var rows []json.RawMessage
-	if v.IsEnvelope() {
+	if v.Shape == ShapeEnvelope {
 		var envelope struct {
 			Data []json.RawMessage `json:"data"`
 		}

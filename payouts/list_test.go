@@ -24,7 +24,7 @@ func TestPayouts_ListShapes(t *testing.T) {
 		t.Run(v.Name, func(t *testing.T) {
 			params := &ListParams{CustomerID: "re_000000000000"}
 			query := url.Values{"customer_id": {"re_000000000000"}}
-			if v.IsEnvelope() {
+			if v.Shape == blindpaytest.ShapeEnvelope {
 				params.Limit = 10
 				query.Set("limit", "10")
 			}

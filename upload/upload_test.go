@@ -26,24 +26,33 @@ func newTestClient(rt *blindpaytest.RoundTripper) *Client {
 }
 
 func TestUpload_Upload(t *testing.T) {
-	client := newTestClient(&blindpaytest.RoundTripper{
-		T:      t,
-		Method: http.MethodPost,
-		Path:   "/v1/upload",
-		Query:  url.Values{"instance_id": {"in_000000000000"}},
-		RequestHeader: http.Header{
-			"Authorization": {"Bearer test_key"},
-		},
-		Out: json.RawMessage(`{"file_url":"https://example.com/file.png"}`),
-	})
+	for _, v := range blindpaytest.ResponseVariants(t, "POST /v1/upload") {
+		v := v
+		t.Run(v.Name, func(t *testing.T) {
+			var want UploadResponse
+			require.NoError(t, json.Unmarshal(v.Body, &want))
 
-	resp, err := client.Upload(context.Background(), &UploadParams{
-		File:     strings.NewReader("data"),
-		FileName: "file.png",
-		Bucket:   BucketOnboarding,
-	})
-	require.NoError(t, err)
-	require.Equal(t, "https://example.com/file.png", resp.FileURL)
+			client := newTestClient(&blindpaytest.RoundTripper{
+				T:      t,
+				Method: http.MethodPost,
+				Path:   "/v1/upload",
+				Query:  url.Values{"instance_id": {"in_000000000000"}},
+				RequestHeader: http.Header{
+					"Authorization": {"Bearer test_key"},
+				},
+				Out: v.Body,
+			})
+
+			resp, err := client.Upload(context.Background(), &UploadParams{
+				File:     strings.NewReader("data"),
+				FileName: "file.png",
+				Bucket:   BucketOnboarding,
+			})
+			require.NoError(t, err)
+			require.NotEmpty(t, resp.FileURL)
+			require.Equal(t, want.FileURL, resp.FileURL)
+		})
+	}
 }
 
 func TestUpload_UploadAPIError(t *testing.T) {
