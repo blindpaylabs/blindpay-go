@@ -2,6 +2,7 @@ package bankaccounts
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"time"
@@ -106,21 +107,56 @@ type OfframpWalletInfo struct {
 	ExternalID string `json:"external_id"`
 }
 
-// GetResponse represents a detailed bank account response.
+// GetResponse is the response of Get.
+//
+// The API returns the same BankAccountOut shape as List, which is decoded
+// into the embedded BankAccount: use resp.BankAccount (or the promoted
+// fields, e.g. resp.Name, resp.Type, resp.PixKey) for the full account.
+// The fields declared directly on GetResponse are kept for compatibility.
+// ID, AccountNumber, RoutingNumber, AccountType, SepaBeneficiaryBic and
+// CreatedAt are filled from the same response; the others are not part of
+// the API response and are always empty.
 type GetResponse struct {
-	ID                 string                `json:"id"`
-	CustomerID         string                `json:"customer_id"`
-	AccountHolderName  string                `json:"account_holder_name"`
-	AccountNumber      string                `json:"account_number"`
-	RoutingNumber      string                `json:"routing_number"`
-	AccountType        types.BankAccountType `json:"account_type"`
-	BankName           string                `json:"bank_name"`
-	SwiftCode          *string               `json:"swift_code"`
-	IBAN               *string               `json:"iban"`
-	IsPrimary          bool                  `json:"is_primary"`
-	SepaBeneficiaryBic *string               `json:"sepa_beneficiary_bic,omitempty"`
-	CreatedAt          time.Time             `json:"created_at"`
-	UpdatedAt          time.Time             `json:"updated_at"`
+	BankAccount
+
+	ID string `json:"id"`
+	// Deprecated: not returned by the API; always empty.
+	CustomerID string `json:"customer_id"`
+	// Deprecated: not returned by the API; always empty. Use the
+	// rail-specific holder field (e.g. BeneficiaryName, SwiftAccountHolderName).
+	AccountHolderName string                `json:"account_holder_name"`
+	AccountNumber     string                `json:"account_number"`
+	RoutingNumber     string                `json:"routing_number"`
+	AccountType       types.BankAccountType `json:"account_type"`
+	// Deprecated: not returned by the API; always empty. Use SwiftBankName.
+	BankName string `json:"bank_name"`
+	// Deprecated: not returned by the API; always nil. Use SwiftCodeBic.
+	SwiftCode *string `json:"swift_code"`
+	// Deprecated: not returned by the API; always nil. Use
+	// SwiftAccountNumberIban.
+	IBAN *string `json:"iban"`
+	// Deprecated: not returned by the API; always false.
+	IsPrimary          bool      `json:"is_primary"`
+	SepaBeneficiaryBic *string   `json:"sepa_beneficiary_bic,omitempty"`
+	CreatedAt          time.Time `json:"created_at"`
+	// Deprecated: not returned by the API; always zero.
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+// UnmarshalJSON decodes the response into both the compatibility fields and
+// the embedded BankAccount. The compatibility fields shadow the embedded
+// fields with the same JSON name, so the embedded copy is decoded separately.
+func (r *GetResponse) UnmarshalJSON(data []byte) error {
+	type compat GetResponse // drops this method to avoid recursion
+	var out compat
+	if err := json.Unmarshal(data, &out); err != nil {
+		return err
+	}
+	if err := json.Unmarshal(data, &out.BankAccount); err != nil {
+		return err
+	}
+	*r = GetResponse(out)
+	return nil
 }
 
 // CreatePixParams represents parameters for creating a PIX bank account.
@@ -539,7 +575,8 @@ func (c *Client) List(ctx context.Context, params *ListParams) ([]BankAccount, e
 	return request.Do[[]BankAccount](c.cfg, ctx, "GET", path, nil)
 }
 
-// Get retrieves a specific bank account.
+// Get retrieves a specific bank account. The account is in the embedded
+// GetResponse.BankAccount (same shape as List).
 func (c *Client) Get(ctx context.Context, customerID, id string) (*GetResponse, error) {
 	if customerID == "" {
 		return nil, fmt.Errorf("customer ID cannot be empty")
