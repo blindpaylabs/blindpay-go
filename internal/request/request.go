@@ -5,16 +5,29 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
+	"time"
 )
 
-// Config holds the configuration for making API requests.
+// Config holds the configuration for making API requests. It is shared by
+// every resource client and must not be mutated after construction.
 type Config struct {
 	BaseURL    string
 	APIKey     string
 	HTTPClient *http.Client
 	UserAgent  string
+
+	// Timeout bounds each attempt (connect, headers and body). Zero means no
+	// per-attempt timeout beyond the caller's context.
+	Timeout time.Duration
+	// MaxRetries is the number of retries after the first attempt (A2
+	// decision table). Zero disables retries and automatic idempotency keys.
+	MaxRetries int
+
+	// Test seams. Nil means the production implementation.
+	Sleep  func(ctx context.Context, d time.Duration) error
+	NewKey func() (string, error)
+	Jitter func() float64
 }
 
 // APIError represents an error response from the BlindPay API.
@@ -24,14 +37,26 @@ type Config struct {
 // to branch on; it is empty for idempotency errors and for non-JSON bodies.
 // Description is a human-readable explanation safe to show to end users.
 // TraceID is absent on auth and rate-limit errors.
+//
+// RequestID comes from the X-Request-Id response header. IdempotencyKey is
+// the key the request carried (caller-supplied or generated); resend with it
+// to resume safely. Retryable reports that the failure is transient (408,
+// 429, 409 idempotency_key_in_flight, or a 5xx not classified terminal). The
+// SDK never auto-retries a POST/PUT/PATCH/DELETE on 5xx, because the API
+// releases the idempotency key on 5xx: look the resource up first, then
+// resend with IdempotencyKey.
 type APIError struct {
-	StatusCode  int         `json:"-"`
-	Code        string      `json:"code,omitempty"`
-	Message     string      `json:"message"`
-	Description string      `json:"description,omitempty"`
-	Errors      []ErrorItem `json:"errors,omitempty"`
-	TraceID     string      `json:"trace_id,omitempty"`
-	RawBody     []byte      `json:"-"`
+	StatusCode     int         `json:"-"`
+	Code           string      `json:"code,omitempty"`
+	Message        string      `json:"message"`
+	Description    string      `json:"description,omitempty"`
+	Errors         []ErrorItem `json:"errors,omitempty"`
+	TraceID        string      `json:"trace_id,omitempty"`
+	RequestID      string      `json:"-"`
+	IdempotencyKey string      `json:"-"`
+	Retryable      bool        `json:"-"`
+	Header         http.Header `json:"-"`
+	RawBody        []byte      `json:"-"`
 }
 
 // ErrorItem represents an individual entry of the errors array.
@@ -114,59 +139,6 @@ func (e *APIError) Error() string {
 	}
 
 	return msg
-}
-
-// Do performs an HTTP request and decodes the response into the given type T.
-func Do[T any](cfg *Config, ctx context.Context, method, path string, body any) (T, error) {
-	var zero T
-
-	url := cfg.BaseURL + path
-
-	var reqBody io.Reader
-	if body != nil {
-		jsonBody, err := json.Marshal(body)
-		if err != nil {
-			return zero, fmt.Errorf("failed to marshal request body: %w", err)
-		}
-		reqBody = bytes.NewReader(jsonBody)
-	}
-
-	req, err := http.NewRequestWithContext(ctx, method, url, reqBody)
-	if err != nil {
-		return zero, fmt.Errorf("failed to create request: %w", err)
-	}
-
-	req.Header.Set("Authorization", "Bearer "+cfg.APIKey)
-	req.Header.Set("User-Agent", cfg.UserAgent)
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
-
-	resp, err := cfg.HTTPClient.Do(req)
-	if err != nil {
-		return zero, fmt.Errorf("request failed: %w", err)
-	}
-	defer resp.Body.Close()
-
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return zero, fmt.Errorf("failed to read response body: %w", err)
-	}
-
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return zero, ParseAPIError(resp.StatusCode, respBody)
-	}
-
-	// For DELETE requests that return 204 No Content, return zero value
-	if resp.StatusCode == http.StatusNoContent {
-		return zero, nil
-	}
-
-	var result T
-	if err := json.Unmarshal(respBody, &result); err != nil {
-		return zero, fmt.Errorf("failed to decode response: %w", err)
-	}
-
-	return result, nil
 }
 
 // ParseAPIError builds an APIError from a non-2xx response. A JSON object

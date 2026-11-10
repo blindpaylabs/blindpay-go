@@ -2,6 +2,7 @@ package config
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/blindpaylabs/blindpay-go/internal/request"
 )
@@ -16,6 +17,11 @@ type Config struct {
 	InstanceID string
 	HTTPClient *http.Client
 	UserAgent  string
+	// Timeout bounds each attempt; zero means none.
+	Timeout time.Duration
+	// MaxRetries is the number of retries after the first attempt; zero
+	// disables retries and automatic idempotency keys.
+	MaxRetries int
 }
 
 /*
@@ -32,5 +38,7 @@ func (c *Config) ToRequestConfig() *request.Config {
 		APIKey:     c.APIKey,
 		HTTPClient: c.HTTPClient,
 		UserAgent:  c.UserAgent,
+		Timeout:    c.Timeout,
+		MaxRetries: c.MaxRetries,
 	}
 }
