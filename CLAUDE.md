@@ -408,13 +408,27 @@ silence a mismatch the PR itself introduced.
 
 ```go
 blindpaytest.RoundTripper{
-    T:      t,                          // *testing.T
-    In:     json.RawMessage(`{...}`),   // Expected request body (optional, nil to skip)
-    Out:    json.RawMessage(`{...}`),   // Canned response body
-    Method: http.MethodGet,             // Expected HTTP method
-    Path:   "/instances/in_xxx/...",    // Expected URL path
+    T:               t,                          // *testing.T
+    In:              json.RawMessage(`{...}`),   // Expected request body (optional, nil to skip)
+    Out:             json.RawMessage(`{...}`),   // Canned response body
+    Method:          http.MethodGet,             // Expected HTTP method
+    Path:            "/instances/in_xxx/...",    // Expected URL path
+    Query:           url.Values{"limit": {"10"}}, // Exact query (nil skips; url.Values{} asserts "no query")
+    RequestHeader:   http.Header{...},           // Request headers that must match exactly (optional)
+    NoRequestHeader: []string{"Idempotency-Key"}, // Request headers that must be absent (optional)
+    Status:          http.StatusOK,              // Response status (default 200)
+    Header:          http.Header{...},           // Response headers (optional)
 }
 ```
+
+### Shared spec-shaped fixtures
+
+`testdata/fixtures/` is a verbatim copy of the cross-SDK reference fixture set
+(see its `README.md`; regenerate by copying the directory, never hand-edit).
+Load them with `blindpaytest.ResponseVariants(t, "GET /v1/instances/{instance_id}/payouts")`
+(every variant of an operation's success body; list ops have `.b0` envelope and
+`.b1` bare-array variants) and `blindpaytest.LoadErrorFixture(t, "rate_limited_429.json")`.
+Response-decoding tests must use these instead of hand-written JSON.
 
 ## 9. Versioning
 
