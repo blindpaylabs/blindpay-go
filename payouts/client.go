@@ -195,11 +195,7 @@ func (c *Client) List(ctx context.Context, params *ListParams) ([]Payout, error)
 		}
 	}
 
-	list, err := request.Do[request.List[Payout]](c.cfg, ctx, "GET", path, nil)
-	if err != nil {
-		return nil, err
-	}
-	return list.Data, nil
+	return request.DoList[Payout](c.cfg, ctx, path)
 }
 
 // Export retrieves all payouts for export with optional pagination.

@@ -2,6 +2,7 @@ package request
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -50,4 +51,14 @@ func (l *List[T]) UnmarshalJSON(data []byte) error {
 	default:
 		return fmt.Errorf("blindpay: list response is neither an array nor an object")
 	}
+}
+
+// DoList GETs a list endpoint that may answer with either shape (see List)
+// and returns the rows.
+func DoList[T any](cfg *Config, ctx context.Context, path string) ([]T, error) {
+	list, err := Do[List[T]](cfg, ctx, "GET", path, nil)
+	if err != nil {
+		return nil, err
+	}
+	return list.Data, nil
 }

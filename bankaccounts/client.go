@@ -112,10 +112,16 @@ type OfframpWalletInfo struct {
 // The API returns the same BankAccountOut shape as List, which is decoded
 // into the embedded BankAccount: use resp.BankAccount (or the promoted
 // fields, e.g. resp.Name, resp.Type, resp.PixKey) for the full account.
-// The fields declared directly on GetResponse are kept for compatibility.
-// ID, AccountNumber, RoutingNumber, AccountType, SepaBeneficiaryBic and
-// CreatedAt are filled from the same response; the others are not part of
-// the API response and are always empty.
+//
+// Why embed and shadow: up to v1.19.0 Get returned a GetResponse that
+// modelled a shape the API never sends. Changing Get to return *BankAccount,
+// or removing or moving GetResponse's own fields into the embedded struct,
+// would break callers that name GetResponse or build it with keyed literals
+// (e.g. GetResponse{ID: ...}) in v1. So the old fields stay declared here and
+// shadow the embedded fields with the same JSON name; UnmarshalJSON fills
+// both copies. ID, AccountNumber, RoutingNumber, AccountType,
+// SepaBeneficiaryBic and CreatedAt are filled from the response; the
+// Deprecated ones are not part of it and are always empty.
 type GetResponse struct {
 	BankAccount
 
@@ -147,8 +153,8 @@ type GetResponse struct {
 // the embedded BankAccount. The compatibility fields shadow the embedded
 // fields with the same JSON name, so the embedded copy is decoded separately.
 func (r *GetResponse) UnmarshalJSON(data []byte) error {
-	type compat GetResponse // drops this method to avoid recursion
-	var out compat
+	type getResponseFields GetResponse // same fields, no methods: avoids recursing into UnmarshalJSON
+	var out getResponseFields
 	if err := json.Unmarshal(data, &out); err != nil {
 		return err
 	}

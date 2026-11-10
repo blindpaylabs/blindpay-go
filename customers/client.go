@@ -559,11 +559,7 @@ func NewClient(cfg *config.Config) *Client {
 // List retrieves all customers for the instance.
 func (c *Client) List(ctx context.Context) ([]Customer, error) {
 	path := fmt.Sprintf("/instances/%s/customers", c.instanceID)
-	list, err := request.Do[request.List[Customer]](c.cfg, ctx, "GET", path, nil)
-	if err != nil {
-		return nil, err
-	}
-	return list.Data, nil
+	return request.DoList[Customer](c.cfg, ctx, path)
 }
 
 // ListWithParams retrieves customers with pagination and filtering.

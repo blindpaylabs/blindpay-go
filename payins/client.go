@@ -155,11 +155,7 @@ func (c *Client) List(ctx context.Context, params *ListParams) ([]Payin, error) 
 		}
 	}
 
-	list, err := request.Do[request.List[Payin]](c.cfg, ctx, "GET", path, nil)
-	if err != nil {
-		return nil, err
-	}
-	return list.Data, nil
+	return request.DoList[Payin](c.cfg, ctx, path)
 }
 
 // Get retrieves a specific payin by ID.
