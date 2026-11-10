@@ -10,6 +10,7 @@ import (
 	"net/http"
 
 	"github.com/blindpaylabs/blindpay-go/internal/config"
+	"github.com/blindpaylabs/blindpay-go/internal/request"
 )
 
 // Bucket represents the upload destination bucket.
@@ -55,6 +56,9 @@ func NewClient(cfg *config.Config) *Client {
 }
 
 // Upload uploads a file.
+//
+// A non-2xx response is returned as *blindpay.APIError (same shape as every
+// other method).
 func (c *Client) Upload(ctx context.Context, params *UploadParams) (*UploadResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
@@ -110,7 +114,7 @@ func (c *Client) Upload(ctx context.Context, params *UploadParams) (*UploadRespo
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return nil, fmt.Errorf("upload failed with status %d: %s", resp.StatusCode, string(respBody))
+		return nil, request.ParseAPIError(resp.StatusCode, respBody)
 	}
 
 	var result UploadResponse
