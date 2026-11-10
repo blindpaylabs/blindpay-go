@@ -27,12 +27,15 @@ import (
 // Version is the current version of the SDK.
 const Version = "1.20.0"
 
-// Client is the main BlindPay client.
+// Client is the main BlindPay client. It is immutable after New and safe
+// for concurrent use by multiple goroutines.
 type Client struct {
 	baseURL    string
 	apiKey     string
 	instanceID string
 	httpClient *http.Client
+	timeout    time.Duration
+	maxRetries int
 
 	Available        *available.Client
 	BankAccounts     *bankaccounts.Client
@@ -67,9 +70,11 @@ func New(apiKey, instanceID string, opts ...Option) (*Client, error) {
 		baseURL:    "https://api.blindpay.com/v1",
 		apiKey:     apiKey,
 		instanceID: instanceID,
-		httpClient: &http.Client{
-			Timeout: 30 * time.Second,
-		},
+		// No http.Client.Timeout: it would cut off the per-attempt timeout,
+		// which is applied through the request context instead.
+		httpClient: &http.Client{},
+		timeout:    DefaultTimeout,
+		maxRetries: DefaultMaxRetries,
 	}
 
 	for _, opt := range opts {
@@ -82,6 +87,8 @@ func New(apiKey, instanceID string, opts ...Option) (*Client, error) {
 		InstanceID: c.instanceID,
 		HTTPClient: c.httpClient,
 		UserAgent:  c.userAgent(),
+		Timeout:    c.timeout,
+		MaxRetries: c.maxRetries,
 	}
 
 	c.Available = available.NewClient(cfg)
@@ -103,6 +110,16 @@ func New(apiKey, instanceID string, opts ...Option) (*Client, error) {
 	c.WebhookEndpoints = webhookendpoints.NewClient(cfg)
 
 	return c, nil
+}
+
+// String implements fmt.Stringer without exposing the API key.
+func (c *Client) String() string {
+	return fmt.Sprintf("blindpay.Client{instanceID: %q, baseURL: %q, apiKey: [REDACTED]}", c.instanceID, c.baseURL)
+}
+
+// GoString implements fmt.GoStringer without exposing the API key.
+func (c *Client) GoString() string {
+	return c.String()
 }
 
 // userAgent returns the User-Agent string for requests.
