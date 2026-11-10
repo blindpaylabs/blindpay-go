@@ -94,6 +94,8 @@ type ListParams struct {
 }
 
 // ExportParams represents parameters for exporting payouts.
+//
+// Deprecated: only used by Export, which always fails. Use ListParams.
 type ExportParams struct {
 	Limit  int `json:"limit,omitempty"`
 	Offset int `json:"offset,omitempty"`
@@ -201,6 +203,10 @@ func (c *Client) List(ctx context.Context, params *ListParams) ([]Payout, error)
 }
 
 // Export retrieves all payouts for export with optional pagination.
+//
+// Deprecated: the API has no GET /instances/{id}/export/payouts route, so this
+// method always fails (404). It will be removed in the next major version.
+// Use List instead.
 func (c *Client) Export(ctx context.Context, params *ExportParams) ([]Payout, error) {
 	path := fmt.Sprintf("/instances/%s/export/payouts", c.instanceID)
 

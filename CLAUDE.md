@@ -30,9 +30,9 @@ blindpay-go/
   instances/...            # Instance management.
   partnerfees/...          # Partner fee configuration.
   payins/
-    client.go              # Payin CRUD + export. Has sub-client: Quotes.
+    client.go              # Payin CRUD (+ deprecated Export). Has sub-client: Quotes.
     quotes.go              # QuotesClient -- payin quote creation + FX rates.
-  payouts/client.go        # Payout CRUD + export + document submission.
+  payouts/client.go        # Payout CRUD + document submission (+ deprecated Export).
   quotes/client.go         # Payout quote creation + FX rates.
   transfers/...            # Transfer operations.
   upload/...               # File upload.
@@ -459,8 +459,8 @@ Response-decoding tests must use these instead of hand-written JSON.
 | `/available/*` | `available` | No instanceID in path |
 | `/e/payins/{id}` | `payins` (method `GetTrack`) | External/public tracking |
 | `/e/payouts/{id}` | `payouts` (method `GetTrack`) | External/public tracking |
-| `/instances/{id}/export/payins` | `payins` (method `Export`) | |
-| `/instances/{id}/export/payouts` | `payouts` (method `Export`) | |
+| `/instances/{id}/export/payins` | `payins` (method `Export`) | Deprecated: route does not exist (always 404); remove in next major |
+| `/instances/{id}/export/payouts` | `payouts` (method `Export`) | Deprecated: route does not exist (always 404); remove in next major |
 
 ### HTTP method to Go function
 

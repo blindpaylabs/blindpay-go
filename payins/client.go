@@ -183,6 +183,10 @@ func (c *Client) GetTrack(ctx context.Context, payinID string) (*Payin, error) {
 }
 
 // Export exports payins with filters.
+//
+// Deprecated: the API has no GET /instances/{id}/export/payins route, so this
+// method always fails (404). It will be removed in the next major version.
+// Use List instead.
 func (c *Client) Export(ctx context.Context, status types.TransactionStatus, limit, offset int) ([]Payin, error) {
 	path := fmt.Sprintf("/instances/%s/export/payins", c.instanceID)
 
