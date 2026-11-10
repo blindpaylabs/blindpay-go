@@ -178,7 +178,7 @@ func NewClient(cfg *config.Config) *Client {
 // sent, and one page wrapped in {data, pagination} when Limit is set; both
 // shapes are decoded and the page's rows are returned.
 func (c *Client) List(ctx context.Context, params *ListParams, opts ...option.RequestOption) ([]Payout, error) {
-	path := fmt.Sprintf("/instances/%s/payouts", c.instanceID)
+	path := request.Pathf("/instances/%s/payouts", c.instanceID)
 
 	if params != nil {
 		q := url.Values{}
@@ -205,7 +205,7 @@ func (c *Client) List(ctx context.Context, params *ListParams, opts ...option.Re
 // method always fails (404). It will be removed in the next major version.
 // Use List instead.
 func (c *Client) Export(ctx context.Context, params *ExportParams, opts ...option.RequestOption) ([]Payout, error) {
-	path := fmt.Sprintf("/instances/%s/export/payouts", c.instanceID)
+	path := request.Pathf("/instances/%s/export/payouts", c.instanceID)
 
 	if params != nil {
 		q := url.Values{}
@@ -229,7 +229,7 @@ func (c *Client) Get(ctx context.Context, payoutID string, opts ...option.Reques
 		return nil, fmt.Errorf("payout ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/payouts/%s", c.instanceID, payoutID)
+	path := request.Pathf("/instances/%s/payouts/%s", c.instanceID, payoutID)
 	return request.Do[*Payout](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
@@ -239,7 +239,7 @@ func (c *Client) GetTrack(ctx context.Context, payoutID string, opts ...option.R
 		return nil, fmt.Errorf("payout ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/e/payouts/%s", payoutID)
+	path := request.Pathf("/e/payouts/%s", payoutID)
 	return request.Do[*Payout](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
@@ -249,7 +249,7 @@ func (c *Client) CreateEvm(ctx context.Context, params *CreateEvmParams, opts ..
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	path := fmt.Sprintf("/instances/%s/payouts/evm", c.instanceID)
+	path := request.Pathf("/instances/%s/payouts/evm", c.instanceID)
 	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, params, opts...)
 }
 
@@ -259,7 +259,7 @@ func (c *Client) CreateStellar(ctx context.Context, params *CreateStellarParams,
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	path := fmt.Sprintf("/instances/%s/payouts/stellar", c.instanceID)
+	path := request.Pathf("/instances/%s/payouts/stellar", c.instanceID)
 	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, params, opts...)
 }
 
@@ -269,7 +269,7 @@ func (c *Client) CreateSolana(ctx context.Context, params *CreateSolanaParams, o
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	path := fmt.Sprintf("/instances/%s/payouts/solana", c.instanceID)
+	path := request.Pathf("/instances/%s/payouts/solana", c.instanceID)
 	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, params, opts...)
 }
 
@@ -282,7 +282,7 @@ func (c *Client) SubmitDocuments(ctx context.Context, params *SubmitDocumentsPar
 		return nil, fmt.Errorf("payout ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/payouts/%s/documents", c.instanceID, params.PayoutID)
+	path := request.Pathf("/instances/%s/payouts/%s/documents", c.instanceID, params.PayoutID)
 
 	body := map[string]any{
 		"transaction_document_type": params.TransactionDocumentType,
@@ -303,6 +303,6 @@ func (c *Client) AuthorizeStellarToken(ctx context.Context, params *AuthorizeSte
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	path := fmt.Sprintf("/instances/%s/payouts/stellar/authorize", c.instanceID)
+	path := request.Pathf("/instances/%s/payouts/stellar/authorize", c.instanceID)
 	return request.Do[*AuthorizeStellarTokenResponse](c.cfg, ctx, "POST", path, params, opts...)
 }

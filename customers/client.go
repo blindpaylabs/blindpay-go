@@ -559,7 +559,7 @@ func NewClient(cfg *config.Config) *Client {
 
 // List retrieves all customers for the instance.
 func (c *Client) List(ctx context.Context, opts ...option.RequestOption) ([]Customer, error) {
-	path := fmt.Sprintf("/instances/%s/customers", c.instanceID)
+	path := request.Pathf("/instances/%s/customers", c.instanceID)
 	return request.DoList[Customer](c.cfg, ctx, path, opts...)
 }
 
@@ -570,7 +570,7 @@ func (c *Client) List(ctx context.Context, opts ...option.RequestOption) ([]Cust
 // returns every matching customer as a bare array. Both shapes are decoded;
 // for a bare array Pagination is the zero value (HasMore false).
 func (c *Client) ListWithParams(ctx context.Context, params *ListParams, opts ...option.RequestOption) (*ListResponse, error) {
-	path := fmt.Sprintf("/instances/%s/customers", c.instanceID)
+	path := request.Pathf("/instances/%s/customers", c.instanceID)
 
 	if params != nil {
 		q := url.Values{}
@@ -627,7 +627,7 @@ func (c *Client) CreateIndividualWithStandardKYC(ctx context.Context, params *Cr
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers", c.instanceID)
+	path := request.Pathf("/instances/%s/customers", c.instanceID)
 
 	body := map[string]any{
 		"kyc_type":                  "standard",
@@ -687,7 +687,7 @@ func (c *Client) CreateIndividualWithEnhancedKYC(ctx context.Context, params *Cr
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers", c.instanceID)
+	path := request.Pathf("/instances/%s/customers", c.instanceID)
 
 	body := map[string]any{
 		"kyc_type":                  "enhanced",
@@ -754,7 +754,7 @@ func (c *Client) CreateBusinessWithStandardKYB(ctx context.Context, params *Crea
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers", c.instanceID)
+	path := request.Pathf("/instances/%s/customers", c.instanceID)
 
 	body := map[string]any{
 		"kyc_type":                    "standard",
@@ -835,7 +835,7 @@ func (c *Client) Get(ctx context.Context, customerID string, opts ...option.Requ
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s", c.instanceID, customerID)
+	path := request.Pathf("/instances/%s/customers/%s", c.instanceID, customerID)
 	return request.Do[*Customer](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
@@ -848,7 +848,7 @@ func (c *Client) Update(ctx context.Context, params *UpdateParams, opts ...optio
 		return fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s", c.instanceID, params.CustomerID)
 
 	// Build the request body with only non-nil fields
 	body := make(map[string]any)
@@ -999,7 +999,7 @@ func (c *Client) Delete(ctx context.Context, customerID string, opts ...option.R
 		return fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s", c.instanceID, customerID)
+	path := request.Pathf("/instances/%s/customers/%s", c.instanceID, customerID)
 	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil, opts...)
 	return err
 }
@@ -1010,7 +1010,7 @@ func (c *Client) GetLimits(ctx context.Context, customerID string, opts ...optio
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/limits/customers/%s", c.instanceID, customerID)
+	path := request.Pathf("/instances/%s/limits/customers/%s", c.instanceID, customerID)
 	return request.Do[*LimitsResponse](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
@@ -1020,7 +1020,7 @@ func (c *Client) GetLimitIncreaseRequests(ctx context.Context, customerID string
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/limit-increase", c.instanceID, customerID)
+	path := request.Pathf("/instances/%s/customers/%s/limit-increase", c.instanceID, customerID)
 	return request.Do[[]LimitIncreaseRequest](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
@@ -1033,7 +1033,7 @@ func (c *Client) RequestLimitIncrease(ctx context.Context, params *RequestLimitI
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/limit-increase", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s/limit-increase", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"daily":                    params.Daily,

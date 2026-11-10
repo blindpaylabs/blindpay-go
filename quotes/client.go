@@ -91,7 +91,7 @@ func (c *Client) Create(ctx context.Context, params *CreateParams, opts ...optio
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	path := fmt.Sprintf("/instances/%s/quotes", c.instanceID)
+	path := request.Pathf("/instances/%s/quotes", c.instanceID)
 	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, params, opts...)
 }
 
@@ -101,6 +101,6 @@ func (c *Client) GetFxRate(ctx context.Context, params *GetFxRateParams, opts ..
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	path := fmt.Sprintf("/instances/%s/quotes/fx", c.instanceID)
+	path := request.Pathf("/instances/%s/quotes/fx", c.instanceID)
 	return request.Do[*GetFxRateResponse](c.cfg, ctx, "POST", path, params, opts...)
 }

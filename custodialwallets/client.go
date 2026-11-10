@@ -64,7 +64,7 @@ func (c *Client) List(ctx context.Context, customerID string, opts ...option.Req
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/wallets", c.instanceID, customerID)
+	path := request.Pathf("/instances/%s/customers/%s/wallets", c.instanceID, customerID)
 	return request.Do[[]CustodialWallet](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
@@ -77,7 +77,7 @@ func (c *Client) Get(ctx context.Context, customerID, id string, opts ...option.
 		return nil, fmt.Errorf("id cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/wallets/%s", c.instanceID, customerID, id)
+	path := request.Pathf("/instances/%s/customers/%s/wallets/%s", c.instanceID, customerID, id)
 	return request.Do[*CustodialWallet](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
@@ -90,7 +90,7 @@ func (c *Client) Create(ctx context.Context, params *CreateParams, opts ...optio
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/wallets", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s/wallets", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"name":    params.Name,
@@ -113,7 +113,7 @@ func (c *Client) GetBalance(ctx context.Context, customerID, id string, opts ...
 		return nil, fmt.Errorf("id cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/wallets/%s/balance", c.instanceID, customerID, id)
+	path := request.Pathf("/instances/%s/customers/%s/wallets/%s/balance", c.instanceID, customerID, id)
 	return request.Do[*GetBalanceResponse](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
@@ -126,7 +126,7 @@ func (c *Client) Delete(ctx context.Context, customerID, id string, opts ...opti
 		return fmt.Errorf("id cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/wallets/%s", c.instanceID, customerID, id)
+	path := request.Pathf("/instances/%s/customers/%s/wallets/%s", c.instanceID, customerID, id)
 	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil, opts...)
 	return err
 }

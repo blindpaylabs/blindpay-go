@@ -2,7 +2,6 @@ package fees
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/blindpaylabs/blindpay-go/internal/config"
@@ -58,6 +57,6 @@ func NewClient(cfg *config.Config) *Client {
 
 // Get retrieves the fee configuration for the instance.
 func (c *Client) Get(ctx context.Context, opts ...option.RequestOption) (*GetResponse, error) {
-	path := fmt.Sprintf("/instances/%s/billing/fees", c.instanceID)
+	path := request.Pathf("/instances/%s/billing/fees", c.instanceID)
 	return request.Do[*GetResponse](c.cfg, ctx, "GET", path, nil, opts...)
 }

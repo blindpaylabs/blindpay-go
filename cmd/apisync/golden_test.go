@@ -131,7 +131,7 @@ func (c *Client) Create(ctx context.Context, params *CreatePartnerFeeParams, opt
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	path := fmt.Sprintf("/instances/%s/partner-fees", c.instanceID)
+	path := request.Pathf("/instances/%s/partner-fees", c.instanceID)
 	return request.Do[*PartnerFee](c.cfg, ctx, "POST", path, params, opts...)
 }
 
@@ -142,7 +142,7 @@ func (c *Client) Get(ctx context.Context, id string, opts ...option.RequestOptio
 		return nil, fmt.Errorf("id cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/partner-fees/%s", c.instanceID, id)
+	path := request.Pathf("/instances/%s/partner-fees/%s", c.instanceID, id)
 	return request.Do[*PartnerFee](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
@@ -189,10 +189,10 @@ func (c *Client) Get(ctx context.Context, id string, opts ...option.RequestOptio
 
 	regenerated := readFile(t, clientPath)
 	require.Contains(t, regenerated, `func (c *Client) Get(ctx context.Context, id string, opts ...option.RequestOption)`)
-	require.Contains(t, regenerated, `fmt.Sprintf("/instances/%s/partner-fees/%s", c.instanceID, id)`)
+	require.Contains(t, regenerated, `request.Pathf("/instances/%s/partner-fees/%s", c.instanceID, id)`)
 	require.Contains(t, regenerated, `request.Do[*GetResponse](c.cfg, ctx, "GET", path, nil, opts...)`)
 	require.Contains(t, regenerated, `func (c *Client) Create(ctx context.Context, params *CreateParams, opts ...option.RequestOption)`)
-	require.Contains(t, regenerated, `fmt.Sprintf("/instances/%s/partner-fees", c.instanceID)`)
+	require.Contains(t, regenerated, `request.Pathf("/instances/%s/partner-fees", c.instanceID)`)
 	require.Contains(t, regenerated, `request.Do[*CreateResponse](c.cfg, ctx, "POST", path, params, opts...)`)
 
 	blindpayGo := readFile(t, filepath.Join(work, "blindpay.go"))

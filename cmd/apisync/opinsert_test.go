@@ -33,7 +33,7 @@ type Client struct {
 }
 
 func (c *Client) List(ctx context.Context, opts ...option.RequestOption) ([]Gadget, error) {
-	path := fmt.Sprintf("/instances/%s/gadgets", c.instanceID)
+	path := request.Pathf("/instances/%s/gadgets", c.instanceID)
 	return request.Do[[]Gadget](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
@@ -78,7 +78,7 @@ func TestClassifyAndPlanOperation_InlineFlatBodyIsStandard(t *testing.T) {
 	require.Empty(t, pending) // inline shapes are never spec-map registered
 	require.Len(t, acts, 1)
 	require.Contains(t, acts[0].insert.Text, "func (c *Client) Activate(")
-	require.Contains(t, acts[0].insert.Text, `fmt.Sprintf("/instances/%s/gadgets/%s/activate", c.instanceID, id)`)
+	require.Contains(t, acts[0].insert.Text, `request.Pathf("/instances/%s/gadgets/%s/activate", c.instanceID, id)`)
 	require.Contains(t, acts[0].insert.Text, `request.Do[*ActivateResponse](c.cfg, ctx, "POST", path, params, opts...)`)
 	require.Contains(t, acts[0].insert.Text, "type ActivateParams struct")
 	require.Contains(t, acts[0].insert.Text, "Reason string `json:\"reason\"`")

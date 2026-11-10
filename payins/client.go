@@ -135,7 +135,7 @@ func NewClient(cfg *config.Config) *Client {
 // sent, and one page wrapped in {data, pagination} when Limit is set; both
 // shapes are decoded and the page's rows are returned.
 func (c *Client) List(ctx context.Context, params *ListParams, opts ...option.RequestOption) ([]Payin, error) {
-	path := fmt.Sprintf("/instances/%s/payins", c.instanceID)
+	path := request.Pathf("/instances/%s/payins", c.instanceID)
 
 	if params != nil {
 		q := url.Values{}
@@ -165,7 +165,7 @@ func (c *Client) Get(ctx context.Context, payinID string, opts ...option.Request
 		return nil, fmt.Errorf("payin ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/payins/%s", c.instanceID, payinID)
+	path := request.Pathf("/instances/%s/payins/%s", c.instanceID, payinID)
 	return request.Do[*Payin](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
@@ -175,7 +175,7 @@ func (c *Client) GetTrack(ctx context.Context, payinID string, opts ...option.Re
 		return nil, fmt.Errorf("payin ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/e/payins/%s", payinID)
+	path := request.Pathf("/e/payins/%s", payinID)
 	return request.Do[*Payin](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
@@ -185,7 +185,7 @@ func (c *Client) GetTrack(ctx context.Context, payinID string, opts ...option.Re
 // method always fails (404). It will be removed in the next major version.
 // Use List instead.
 func (c *Client) Export(ctx context.Context, status types.TransactionStatus, limit, offset int, opts ...option.RequestOption) ([]Payin, error) {
-	path := fmt.Sprintf("/instances/%s/export/payins", c.instanceID)
+	path := request.Pathf("/instances/%s/export/payins", c.instanceID)
 
 	q := url.Values{}
 	if status != "" {
@@ -210,7 +210,7 @@ func (c *Client) CreateEvm(ctx context.Context, payinQuoteID string, opts ...opt
 		return nil, fmt.Errorf("payin quote ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/payins/evm", c.instanceID)
+	path := request.Pathf("/instances/%s/payins/evm", c.instanceID)
 	body := map[string]string{
 		"payin_quote_id": payinQuoteID,
 	}

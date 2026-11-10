@@ -3,6 +3,7 @@ package available
 import (
 	"context"
 	"fmt"
+	"net/url"
 
 	"github.com/blindpaylabs/blindpay-go/internal/config"
 	"github.com/blindpaylabs/blindpay-go/internal/request"
@@ -40,7 +41,7 @@ func (c *Client) GetBankDetails(ctx context.Context, rail types.Rail, opts ...op
 		return nil, fmt.Errorf("rail cannot be empty")
 	}
 
-	path := fmt.Sprintf("/available/bank-details?rail=%s", rail)
+	path := "/available/bank-details?" + url.Values{"rail": {string(rail)}}.Encode()
 	return request.Do[[]types.BankDetail](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
@@ -66,7 +67,7 @@ func (c *Client) GetSwiftCodeBankDetails(ctx context.Context, swift string, opts
 		return nil, fmt.Errorf("swift code cannot be empty")
 	}
 
-	path := fmt.Sprintf("/available/swift/%s", swift)
+	path := request.Pathf("/available/swift/%s", swift)
 
 	return request.Do[[]GetSwiftCodeBankDetailsResponse](c.cfg, ctx, "GET", path, nil, opts...)
 }

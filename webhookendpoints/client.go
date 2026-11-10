@@ -59,7 +59,7 @@ func NewClient(cfg *config.Config) *Client {
 
 // List retrieves all webhook endpoints for the instance.
 func (c *Client) List(ctx context.Context, opts ...option.RequestOption) ([]WebhookEndpoint, error) {
-	path := fmt.Sprintf("/instances/%s/webhook-endpoints", c.instanceID)
+	path := request.Pathf("/instances/%s/webhook-endpoints", c.instanceID)
 	return request.Do[[]WebhookEndpoint](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
@@ -69,7 +69,7 @@ func (c *Client) Create(ctx context.Context, params *CreateParams, opts ...optio
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	path := fmt.Sprintf("/instances/%s/webhook-endpoints", c.instanceID)
+	path := request.Pathf("/instances/%s/webhook-endpoints", c.instanceID)
 	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, params, opts...)
 }
 
@@ -79,7 +79,7 @@ func (c *Client) Delete(ctx context.Context, id string, opts ...option.RequestOp
 		return fmt.Errorf("id cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/webhook-endpoints/%s", c.instanceID, id)
+	path := request.Pathf("/instances/%s/webhook-endpoints/%s", c.instanceID, id)
 	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil, opts...)
 	return err
 }
@@ -90,12 +90,12 @@ func (c *Client) GetSecret(ctx context.Context, id string, opts ...option.Reques
 		return nil, fmt.Errorf("id cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/webhook-endpoints/%s/secret", c.instanceID, id)
+	path := request.Pathf("/instances/%s/webhook-endpoints/%s/secret", c.instanceID, id)
 	return request.Do[*GetSecretResponse](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // GetPortalAccessURL retrieves the portal access URL.
 func (c *Client) GetPortalAccessURL(ctx context.Context, opts ...option.RequestOption) (*GetPortalAccessURLResponse, error) {
-	path := fmt.Sprintf("/instances/%s/webhook-endpoints/portal-access", c.instanceID)
+	path := request.Pathf("/instances/%s/webhook-endpoints/portal-access", c.instanceID)
 	return request.Do[*GetPortalAccessURLResponse](c.cfg, ctx, "GET", path, nil, opts...)
 }

@@ -50,7 +50,7 @@ func NewClient(cfg *config.Config) *Client {
 
 // List retrieves all partner fees for the instance.
 func (c *Client) List(ctx context.Context, opts ...option.RequestOption) ([]PartnerFee, error) {
-	path := fmt.Sprintf("/instances/%s/partner-fees", c.instanceID)
+	path := request.Pathf("/instances/%s/partner-fees", c.instanceID)
 	return request.Do[[]PartnerFee](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
@@ -60,7 +60,7 @@ func (c *Client) Create(ctx context.Context, params *CreatePartnerFeeParams, opt
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	path := fmt.Sprintf("/instances/%s/partner-fees", c.instanceID)
+	path := request.Pathf("/instances/%s/partner-fees", c.instanceID)
 	return request.Do[*PartnerFee](c.cfg, ctx, "POST", path, params, opts...)
 }
 
@@ -70,7 +70,7 @@ func (c *Client) Get(ctx context.Context, id string, opts ...option.RequestOptio
 		return nil, fmt.Errorf("id cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/partner-fees/%s", c.instanceID, id)
+	path := request.Pathf("/instances/%s/partner-fees/%s", c.instanceID, id)
 	return request.Do[*PartnerFee](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
@@ -80,7 +80,7 @@ func (c *Client) Delete(ctx context.Context, id string, opts ...option.RequestOp
 		return fmt.Errorf("id cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/partner-fees/%s", c.instanceID, id)
+	path := request.Pathf("/instances/%s/partner-fees/%s", c.instanceID, id)
 	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil, opts...)
 	return err
 }

@@ -75,7 +75,7 @@ func NewClient(cfg *config.Config) *Client {
 
 // GetMembers retrieves all members of the instance.
 func (c *Client) GetMembers(ctx context.Context, opts ...option.RequestOption) ([]InstanceMember, error) {
-	path := fmt.Sprintf("/instances/%s/members", c.instanceID)
+	path := request.Pathf("/instances/%s/members", c.instanceID)
 	return request.Do[[]InstanceMember](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
@@ -85,7 +85,7 @@ func (c *Client) Update(ctx context.Context, params *UpdateParams, opts ...optio
 		return fmt.Errorf("params cannot be nil")
 	}
 
-	path := fmt.Sprintf("/instances/%s", c.instanceID)
+	path := request.Pathf("/instances/%s", c.instanceID)
 
 	body := map[string]any{
 		"name": params.Name,
@@ -107,7 +107,7 @@ func (c *Client) Update(ctx context.Context, params *UpdateParams, opts ...optio
 
 // Delete deletes the instance.
 func (c *Client) Delete(ctx context.Context, opts ...option.RequestOption) error {
-	path := fmt.Sprintf("/instances/%s", c.instanceID)
+	path := request.Pathf("/instances/%s", c.instanceID)
 	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil, opts...)
 	return err
 }
@@ -118,7 +118,7 @@ func (c *Client) DeleteMember(ctx context.Context, memberID string, opts ...opti
 		return fmt.Errorf("member ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/members/%s", c.instanceID, memberID)
+	path := request.Pathf("/instances/%s/members/%s", c.instanceID, memberID)
 	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil, opts...)
 	return err
 }
@@ -132,7 +132,7 @@ func (c *Client) UpdateMemberRole(ctx context.Context, params *UpdateMemberRoleP
 		return fmt.Errorf("member ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/members/%s", c.instanceID, params.MemberID)
+	path := request.Pathf("/instances/%s/members/%s", c.instanceID, params.MemberID)
 
 	body := map[string]any{
 		"user_role": params.Role,
@@ -151,6 +151,6 @@ func (c *Client) MigrateOwnership(ctx context.Context, params *MigrateOwnershipP
 		return nil, fmt.Errorf("user ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/ownership", c.instanceID)
+	path := request.Pathf("/instances/%s/ownership", c.instanceID)
 	return request.Do[*MigrateOwnershipResponse](c.cfg, ctx, "POST", path, params, opts...)
 }

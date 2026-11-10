@@ -557,7 +557,7 @@ func (c *Client) List(ctx context.Context, params *ListParams, opts ...option.Re
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	q := url.Values{}
 	if params.Status != "" {
@@ -592,7 +592,7 @@ func (c *Client) Get(ctx context.Context, customerID, id string, opts ...option.
 		return nil, fmt.Errorf("id cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts/%s", c.instanceID, customerID, id)
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts/%s", c.instanceID, customerID, id)
 	return request.Do[*GetResponse](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
@@ -605,7 +605,7 @@ func (c *Client) Delete(ctx context.Context, customerID, id string, opts ...opti
 		return fmt.Errorf("id cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts/%s", c.instanceID, customerID, id)
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts/%s", c.instanceID, customerID, id)
 	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil, opts...)
 	return err
 }
@@ -619,7 +619,7 @@ func (c *Client) CreatePix(ctx context.Context, params *CreatePixParams, opts ..
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":    "pix",
@@ -639,7 +639,7 @@ func (c *Client) CreateAch(ctx context.Context, params *CreateAchParams, opts ..
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":                   "ach",
@@ -685,7 +685,7 @@ func (c *Client) CreateWire(ctx context.Context, params *CreateWireParams, opts 
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":                   "wire",
@@ -730,7 +730,7 @@ func (c *Client) CreateArgentinaTransfers(ctx context.Context, params *CreateArg
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":              "transfers_bitso",
@@ -752,7 +752,7 @@ func (c *Client) CreateSpei(ctx context.Context, params *CreateSpeiParams, opts 
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":                  "spei_bitso",
@@ -775,7 +775,7 @@ func (c *Client) CreateColombiaAch(ctx context.Context, params *CreateColombiaAc
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":                           "ach_cop_bitso",
@@ -802,7 +802,7 @@ func (c *Client) CreateInternationalSwift(ctx context.Context, params *CreateInt
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":                                        "international_swift",
@@ -866,7 +866,7 @@ func (c *Client) CreatePixSafe(ctx context.Context, params *CreatePixSafeParams,
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":                 "pix_safe",
@@ -891,7 +891,7 @@ func (c *Client) CreateRtp(ctx context.Context, params *CreateRtpParams, opts ..
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":                   "rtp",
@@ -936,7 +936,7 @@ func (c *Client) CreateTed(ctx context.Context, params *CreateTedParams, opts ..
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":                   "ted",
@@ -1017,7 +1017,7 @@ func (c *Client) CreateSepa(ctx context.Context, params *CreateSepaParams, opts 
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
 	body := map[string]any{
 		"type":                            "sepa",

@@ -96,7 +96,7 @@ func (c *Client) Create(ctx context.Context, params *CreateParams, opts ...optio
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/virtual-accounts", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s/virtual-accounts", c.instanceID, params.CustomerID)
 
 	body := struct {
 		BlockchainWalletID    string                `json:"blockchain_wallet_id"`
@@ -124,7 +124,7 @@ func (c *Client) Get(ctx context.Context, customerID, virtualAccountID string, o
 		return nil, fmt.Errorf("virtual account ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/virtual-accounts/%s", c.instanceID, customerID, virtualAccountID)
+	path := request.Pathf("/instances/%s/customers/%s/virtual-accounts/%s", c.instanceID, customerID, virtualAccountID)
 	return request.Do[*VirtualAccount](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
@@ -134,7 +134,7 @@ func (c *Client) List(ctx context.Context, customerID string, opts ...option.Req
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/virtual-accounts", c.instanceID, customerID)
+	path := request.Pathf("/instances/%s/customers/%s/virtual-accounts", c.instanceID, customerID)
 	return request.Do[[]VirtualAccount](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
@@ -150,7 +150,7 @@ func (c *Client) Update(ctx context.Context, params *UpdateParams, opts ...optio
 		return fmt.Errorf("virtual account ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/virtual-accounts/%s", c.instanceID, params.CustomerID, params.VirtualAccountID)
+	path := request.Pathf("/instances/%s/customers/%s/virtual-accounts/%s", c.instanceID, params.CustomerID, params.VirtualAccountID)
 
 	body := struct {
 		BlockchainWalletID string                `json:"blockchain_wallet_id"`

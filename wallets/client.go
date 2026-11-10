@@ -114,7 +114,7 @@ func (c *Client) List(ctx context.Context, customerID string, opts ...option.Req
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/blockchain-wallets", c.instanceID, customerID)
+	path := request.Pathf("/instances/%s/customers/%s/blockchain-wallets", c.instanceID, customerID)
 	return request.Do[[]BlockchainWallet](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
@@ -127,7 +127,7 @@ func (c *Client) CreateWithAddress(ctx context.Context, params *CreateWithAddres
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/blockchain-wallets", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s/blockchain-wallets", c.instanceID, params.CustomerID)
 
 	body := struct {
 		Name                 string        `json:"name"`
@@ -155,7 +155,7 @@ func (c *Client) CreateWithHash(ctx context.Context, params *CreateWithHashParam
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/blockchain-wallets", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s/blockchain-wallets", c.instanceID, params.CustomerID)
 
 	body := struct {
 		Name                 string        `json:"name"`
@@ -180,7 +180,7 @@ func (c *Client) GetWalletMessage(ctx context.Context, customerID string, opts .
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/blockchain-wallets/sign-message", c.instanceID, customerID)
+	path := request.Pathf("/instances/%s/customers/%s/blockchain-wallets/sign-message", c.instanceID, customerID)
 	return request.Do[*GetMessageResponse](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
@@ -193,7 +193,7 @@ func (c *Client) Get(ctx context.Context, customerID, id string, opts ...option.
 		return nil, fmt.Errorf("id cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/blockchain-wallets/%s", c.instanceID, customerID, id)
+	path := request.Pathf("/instances/%s/customers/%s/blockchain-wallets/%s", c.instanceID, customerID, id)
 	return request.Do[*BlockchainWallet](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
@@ -206,7 +206,7 @@ func (c *Client) Delete(ctx context.Context, customerID, id string, opts ...opti
 		return fmt.Errorf("id cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/blockchain-wallets/%s", c.instanceID, customerID, id)
+	path := request.Pathf("/instances/%s/customers/%s/blockchain-wallets/%s", c.instanceID, customerID, id)
 	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil, opts...)
 	return err
 }
@@ -217,7 +217,7 @@ func (c *Client) CreateAssetTrustline(ctx context.Context, address string, opts 
 		return nil, fmt.Errorf("address cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/create-asset-trustline", c.instanceID)
+	path := request.Pathf("/instances/%s/create-asset-trustline", c.instanceID)
 	body := struct {
 		Address string `json:"address"`
 	}{
@@ -233,7 +233,7 @@ func (c *Client) MintUsdbStellar(ctx context.Context, params *MintUsdbStellarPar
 		return fmt.Errorf("params cannot be nil")
 	}
 
-	path := fmt.Sprintf("/instances/%s/mint-usdb-stellar", c.instanceID)
+	path := request.Pathf("/instances/%s/mint-usdb-stellar", c.instanceID)
 	_, err := request.Do[struct{}](c.cfg, ctx, "POST", path, params, opts...)
 	return err
 }
@@ -244,7 +244,7 @@ func (c *Client) MintUsdbSolana(ctx context.Context, params *MintUsdbSolanaParam
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	path := fmt.Sprintf("/instances/%s/mint-usdb-solana", c.instanceID)
+	path := request.Pathf("/instances/%s/mint-usdb-solana", c.instanceID)
 	return request.Do[*MintUsdbSolanaResponse](c.cfg, ctx, "POST", path, params, opts...)
 }
 
@@ -254,7 +254,7 @@ func (c *Client) PrepareSolanaDelegationTransaction(ctx context.Context, params 
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	path := fmt.Sprintf("/instances/%s/prepare-delegate-solana", c.instanceID)
+	path := request.Pathf("/instances/%s/prepare-delegate-solana", c.instanceID)
 	return request.Do[*PrepareSolanaDelegationTransactionResponse](c.cfg, ctx, "POST", path, params, opts...)
 }
 
@@ -310,7 +310,7 @@ func (c *OfframpClient) List(ctx context.Context, customerID, bankAccountID stri
 		return nil, fmt.Errorf("bank account ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts/%s/offramp-wallets",
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts/%s/offramp-wallets",
 		c.instanceID, customerID, bankAccountID)
 	return request.Do[[]OfframpWallet](c.cfg, ctx, "GET", path, nil, opts...)
 }
@@ -327,7 +327,7 @@ func (c *OfframpClient) Create(ctx context.Context, params *CreateOfframpWalletP
 		return nil, fmt.Errorf("bank account ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts/%s/offramp-wallets",
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts/%s/offramp-wallets",
 		c.instanceID, params.CustomerID, params.BankAccountID)
 
 	body := struct {
@@ -353,7 +353,7 @@ func (c *OfframpClient) Get(ctx context.Context, customerID, bankAccountID, id s
 		return nil, fmt.Errorf("id cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts/%s/offramp-wallets/%s",
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts/%s/offramp-wallets/%s",
 		c.instanceID, customerID, bankAccountID, id)
 	return request.Do[*OfframpWallet](c.cfg, ctx, "GET", path, nil, opts...)
 }

@@ -145,7 +145,7 @@ func (c *QuotesClient) Create(ctx context.Context, params *CreateQuoteParams, op
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	path := fmt.Sprintf("/instances/%s/transfer-quotes", c.instanceID)
+	path := request.Pathf("/instances/%s/transfer-quotes", c.instanceID)
 	return request.Do[*CreateQuoteResponse](c.cfg, ctx, "POST", path, params, opts...)
 }
 
@@ -155,13 +155,13 @@ func (c *Client) Create(ctx context.Context, params *CreateParams, opts ...optio
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	path := fmt.Sprintf("/instances/%s/transfers", c.instanceID)
+	path := request.Pathf("/instances/%s/transfers", c.instanceID)
 	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, params, opts...)
 }
 
 // List retrieves all transfers with optional pagination.
 func (c *Client) List(ctx context.Context, params *ListParams, opts ...option.RequestOption) (*ListResponse, error) {
-	path := fmt.Sprintf("/instances/%s/transfers", c.instanceID)
+	path := request.Pathf("/instances/%s/transfers", c.instanceID)
 
 	if params != nil {
 		q := url.Values{}
@@ -185,7 +185,7 @@ func (c *Client) Get(ctx context.Context, transferID string, opts ...option.Requ
 		return nil, fmt.Errorf("transfer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/transfers/%s", c.instanceID, transferID)
+	path := request.Pathf("/instances/%s/transfers/%s", c.instanceID, transferID)
 	return request.Do[*Transfer](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
@@ -195,6 +195,6 @@ func (c *Client) GetTrack(ctx context.Context, transferID string, opts ...option
 		return nil, fmt.Errorf("transfer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/e/transfers/%s", transferID)
+	path := request.Pathf("/e/transfers/%s", transferID)
 	return request.Do[*Transfer](c.cfg, ctx, "GET", path, nil, opts...)
 }

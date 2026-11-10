@@ -69,7 +69,7 @@ func (c *QuotesClient) Create(ctx context.Context, params *CreateQuoteParams, op
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	path := fmt.Sprintf("/instances/%s/payin-quotes", c.instanceID)
+	path := request.Pathf("/instances/%s/payin-quotes", c.instanceID)
 	return request.Do[*CreateQuoteResponse](c.cfg, ctx, "POST", path, params, opts...)
 }
 
@@ -79,6 +79,6 @@ func (c *QuotesClient) GetFxRate(ctx context.Context, params *GetFxRateParams, o
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	path := fmt.Sprintf("/instances/%s/payin-quotes/fx", c.instanceID)
+	path := request.Pathf("/instances/%s/payin-quotes/fx", c.instanceID)
 	return request.Do[*GetFxRateResponse](c.cfg, ctx, "POST", path, params, opts...)
 }

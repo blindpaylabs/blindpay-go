@@ -44,6 +44,6 @@ func (c *Client) Initiate(ctx context.Context, params *InitiateParams, opts ...o
 		return nil, fmt.Errorf("idempotency key cannot be empty")
 	}
 
-	path := fmt.Sprintf("/e/instances/%s/tos", c.instanceID)
+	path := request.Pathf("/e/instances/%s/tos", c.instanceID)
 	return request.Do[*InitiateResponse](c.cfg, ctx, "POST", path, params, opts...)
 }
