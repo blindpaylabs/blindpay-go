@@ -10,6 +10,7 @@ import (
 
 	"github.com/blindpaylabs/blindpay-go/internal/config"
 	"github.com/blindpaylabs/blindpay-go/internal/request"
+	"github.com/blindpaylabs/blindpay-go/option"
 )
 
 // Bucket represents the upload destination bucket.
@@ -52,7 +53,7 @@ func NewClient(cfg *config.Config) *Client {
 //
 // A non-2xx response is returned as *blindpay.APIError (same shape as every
 // other method).
-func (c *Client) Upload(ctx context.Context, params *UploadParams) (*UploadResponse, error) {
+func (c *Client) Upload(ctx context.Context, params *UploadParams, opts ...option.RequestOption) (*UploadResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -85,5 +86,5 @@ func (c *Client) Upload(ctx context.Context, params *UploadParams) (*UploadRespo
 	}
 
 	path := "/upload?" + url.Values{"instance_id": {instanceID}}.Encode()
-	return request.DoMultipart[*UploadResponse](c.cfg, ctx, path, body.Bytes(), writer.FormDataContentType())
+	return request.DoMultipart[*UploadResponse](c.cfg, ctx, path, body.Bytes(), writer.FormDataContentType(), opts...)
 }

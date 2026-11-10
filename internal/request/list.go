@@ -55,8 +55,8 @@ func (l *List[T]) UnmarshalJSON(data []byte) error {
 
 // DoList GETs a list endpoint that may answer with either shape (see List)
 // and returns the rows.
-func DoList[T any](cfg *Config, ctx context.Context, path string) ([]T, error) {
-	list, err := Do[List[T]](cfg, ctx, "GET", path, nil)
+func DoList[T any](cfg *Config, ctx context.Context, path string, opts ...RequestOption) ([]T, error) {
+	list, err := Do[List[T]](cfg, ctx, "GET", path, nil, opts...)
 	if err != nil {
 		return nil, err
 	}

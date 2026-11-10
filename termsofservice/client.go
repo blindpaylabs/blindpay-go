@@ -6,6 +6,7 @@ import (
 
 	"github.com/blindpaylabs/blindpay-go/internal/config"
 	"github.com/blindpaylabs/blindpay-go/internal/request"
+	"github.com/blindpaylabs/blindpay-go/option"
 )
 
 // InitiateParams represents parameters for initiating terms of service.
@@ -35,7 +36,7 @@ func NewClient(cfg *config.Config) *Client {
 }
 
 // Initiate initiates the terms of service flow and returns a URL.
-func (c *Client) Initiate(ctx context.Context, params *InitiateParams) (*InitiateResponse, error) {
+func (c *Client) Initiate(ctx context.Context, params *InitiateParams, opts ...option.RequestOption) (*InitiateResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -44,5 +45,5 @@ func (c *Client) Initiate(ctx context.Context, params *InitiateParams) (*Initiat
 	}
 
 	path := fmt.Sprintf("/e/instances/%s/tos", c.instanceID)
-	return request.Do[*InitiateResponse](c.cfg, ctx, "POST", path, params)
+	return request.Do[*InitiateResponse](c.cfg, ctx, "POST", path, params, opts...)
 }

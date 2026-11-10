@@ -9,6 +9,7 @@ import (
 	"github.com/blindpaylabs/blindpay-go/internal/config"
 	"github.com/blindpaylabs/blindpay-go/internal/request"
 	"github.com/blindpaylabs/blindpay-go/internal/types"
+	"github.com/blindpaylabs/blindpay-go/option"
 )
 
 // Payin represents a payin transaction.
@@ -133,7 +134,7 @@ func NewClient(cfg *config.Config) *Client {
 // The API returns every payin as a bare array when no pagination param is
 // sent, and one page wrapped in {data, pagination} when Limit is set; both
 // shapes are decoded and the page's rows are returned.
-func (c *Client) List(ctx context.Context, params *ListParams) ([]Payin, error) {
+func (c *Client) List(ctx context.Context, params *ListParams, opts ...option.RequestOption) ([]Payin, error) {
 	path := fmt.Sprintf("/instances/%s/payins", c.instanceID)
 
 	if params != nil {
@@ -155,27 +156,27 @@ func (c *Client) List(ctx context.Context, params *ListParams) ([]Payin, error) 
 		}
 	}
 
-	return request.DoList[Payin](c.cfg, ctx, path)
+	return request.DoList[Payin](c.cfg, ctx, path, opts...)
 }
 
 // Get retrieves a specific payin by ID.
-func (c *Client) Get(ctx context.Context, payinID string) (*Payin, error) {
+func (c *Client) Get(ctx context.Context, payinID string, opts ...option.RequestOption) (*Payin, error) {
 	if payinID == "" {
 		return nil, fmt.Errorf("payin ID cannot be empty")
 	}
 
 	path := fmt.Sprintf("/instances/%s/payins/%s", c.instanceID, payinID)
-	return request.Do[*Payin](c.cfg, ctx, "GET", path, nil)
+	return request.Do[*Payin](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // GetTrack retrieves tracking information for a payin.
-func (c *Client) GetTrack(ctx context.Context, payinID string) (*Payin, error) {
+func (c *Client) GetTrack(ctx context.Context, payinID string, opts ...option.RequestOption) (*Payin, error) {
 	if payinID == "" {
 		return nil, fmt.Errorf("payin ID cannot be empty")
 	}
 
 	path := fmt.Sprintf("/e/payins/%s", payinID)
-	return request.Do[*Payin](c.cfg, ctx, "GET", path, nil)
+	return request.Do[*Payin](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // Export exports payins with filters.
@@ -183,7 +184,7 @@ func (c *Client) GetTrack(ctx context.Context, payinID string) (*Payin, error) {
 // Deprecated: the API has no GET /instances/{id}/export/payins route, so this
 // method always fails (404). It will be removed in the next major version.
 // Use List instead.
-func (c *Client) Export(ctx context.Context, status types.TransactionStatus, limit, offset int) ([]Payin, error) {
+func (c *Client) Export(ctx context.Context, status types.TransactionStatus, limit, offset int, opts ...option.RequestOption) ([]Payin, error) {
 	path := fmt.Sprintf("/instances/%s/export/payins", c.instanceID)
 
 	q := url.Values{}
@@ -200,11 +201,11 @@ func (c *Client) Export(ctx context.Context, status types.TransactionStatus, lim
 		path += "?" + q.Encode()
 	}
 
-	return request.Do[[]Payin](c.cfg, ctx, "GET", path, nil)
+	return request.Do[[]Payin](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // CreateEvm creates an EVM payin.
-func (c *Client) CreateEvm(ctx context.Context, payinQuoteID string) (*CreateEvmResponse, error) {
+func (c *Client) CreateEvm(ctx context.Context, payinQuoteID string, opts ...option.RequestOption) (*CreateEvmResponse, error) {
 	if payinQuoteID == "" {
 		return nil, fmt.Errorf("payin quote ID cannot be empty")
 	}
@@ -214,5 +215,5 @@ func (c *Client) CreateEvm(ctx context.Context, payinQuoteID string) (*CreateEvm
 		"payin_quote_id": payinQuoteID,
 	}
 
-	return request.Do[*CreateEvmResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateEvmResponse](c.cfg, ctx, "POST", path, body, opts...)
 }

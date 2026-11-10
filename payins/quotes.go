@@ -6,6 +6,7 @@ import (
 
 	"github.com/blindpaylabs/blindpay-go/internal/request"
 	"github.com/blindpaylabs/blindpay-go/internal/types"
+	"github.com/blindpaylabs/blindpay-go/option"
 )
 
 // CreateQuoteParams represents parameters for creating a payin quote.
@@ -63,21 +64,21 @@ type QuotesClient struct {
 }
 
 // Create creates a new payin quote.
-func (c *QuotesClient) Create(ctx context.Context, params *CreateQuoteParams) (*CreateQuoteResponse, error) {
+func (c *QuotesClient) Create(ctx context.Context, params *CreateQuoteParams, opts ...option.RequestOption) (*CreateQuoteResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
 	path := fmt.Sprintf("/instances/%s/payin-quotes", c.instanceID)
-	return request.Do[*CreateQuoteResponse](c.cfg, ctx, "POST", path, params)
+	return request.Do[*CreateQuoteResponse](c.cfg, ctx, "POST", path, params, opts...)
 }
 
 // GetFxRate retrieves the current FX rate for a payin currency pair.
-func (c *QuotesClient) GetFxRate(ctx context.Context, params *GetFxRateParams) (*GetFxRateResponse, error) {
+func (c *QuotesClient) GetFxRate(ctx context.Context, params *GetFxRateParams, opts ...option.RequestOption) (*GetFxRateResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
 	path := fmt.Sprintf("/instances/%s/payin-quotes/fx", c.instanceID)
-	return request.Do[*GetFxRateResponse](c.cfg, ctx, "POST", path, params)
+	return request.Do[*GetFxRateResponse](c.cfg, ctx, "POST", path, params, opts...)
 }

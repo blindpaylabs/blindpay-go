@@ -7,6 +7,7 @@ import (
 
 	"github.com/blindpaylabs/blindpay-go/internal/config"
 	"github.com/blindpaylabs/blindpay-go/internal/request"
+	"github.com/blindpaylabs/blindpay-go/option"
 )
 
 // InstanceMemberRole represents the role of an instance member.
@@ -73,13 +74,13 @@ func NewClient(cfg *config.Config) *Client {
 }
 
 // GetMembers retrieves all members of the instance.
-func (c *Client) GetMembers(ctx context.Context) ([]InstanceMember, error) {
+func (c *Client) GetMembers(ctx context.Context, opts ...option.RequestOption) ([]InstanceMember, error) {
 	path := fmt.Sprintf("/instances/%s/members", c.instanceID)
-	return request.Do[[]InstanceMember](c.cfg, ctx, "GET", path, nil)
+	return request.Do[[]InstanceMember](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // Update updates the instance settings.
-func (c *Client) Update(ctx context.Context, params *UpdateParams) error {
+func (c *Client) Update(ctx context.Context, params *UpdateParams, opts ...option.RequestOption) error {
 	if params == nil {
 		return fmt.Errorf("params cannot be nil")
 	}
@@ -100,30 +101,30 @@ func (c *Client) Update(ctx context.Context, params *UpdateParams) error {
 		body["require_passkey"] = *params.RequirePasskey
 	}
 
-	_, err := request.Do[struct{}](c.cfg, ctx, "PUT", path, body)
+	_, err := request.Do[struct{}](c.cfg, ctx, "PUT", path, body, opts...)
 	return err
 }
 
 // Delete deletes the instance.
-func (c *Client) Delete(ctx context.Context) error {
+func (c *Client) Delete(ctx context.Context, opts ...option.RequestOption) error {
 	path := fmt.Sprintf("/instances/%s", c.instanceID)
-	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil)
+	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil, opts...)
 	return err
 }
 
 // DeleteMember removes a member from the instance.
-func (c *Client) DeleteMember(ctx context.Context, memberID string) error {
+func (c *Client) DeleteMember(ctx context.Context, memberID string, opts ...option.RequestOption) error {
 	if memberID == "" {
 		return fmt.Errorf("member ID cannot be empty")
 	}
 
 	path := fmt.Sprintf("/instances/%s/members/%s", c.instanceID, memberID)
-	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil)
+	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil, opts...)
 	return err
 }
 
 // UpdateMemberRole updates a member's role in the instance.
-func (c *Client) UpdateMemberRole(ctx context.Context, params *UpdateMemberRoleParams) error {
+func (c *Client) UpdateMemberRole(ctx context.Context, params *UpdateMemberRoleParams, opts ...option.RequestOption) error {
 	if params == nil {
 		return fmt.Errorf("params cannot be nil")
 	}
@@ -137,12 +138,12 @@ func (c *Client) UpdateMemberRole(ctx context.Context, params *UpdateMemberRoleP
 		"user_role": params.Role,
 	}
 
-	_, err := request.Do[struct{}](c.cfg, ctx, "PUT", path, body)
+	_, err := request.Do[struct{}](c.cfg, ctx, "PUT", path, body, opts...)
 	return err
 }
 
 // MigrateOwnership migrates instance ownership to another user.
-func (c *Client) MigrateOwnership(ctx context.Context, params *MigrateOwnershipParams) (*MigrateOwnershipResponse, error) {
+func (c *Client) MigrateOwnership(ctx context.Context, params *MigrateOwnershipParams, opts ...option.RequestOption) (*MigrateOwnershipResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -151,5 +152,5 @@ func (c *Client) MigrateOwnership(ctx context.Context, params *MigrateOwnershipP
 	}
 
 	path := fmt.Sprintf("/instances/%s/ownership", c.instanceID)
-	return request.Do[*MigrateOwnershipResponse](c.cfg, ctx, "POST", path, params)
+	return request.Do[*MigrateOwnershipResponse](c.cfg, ctx, "POST", path, params, opts...)
 }

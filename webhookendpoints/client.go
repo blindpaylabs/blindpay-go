@@ -8,6 +8,7 @@ import (
 	"github.com/blindpaylabs/blindpay-go/internal/config"
 	"github.com/blindpaylabs/blindpay-go/internal/request"
 	"github.com/blindpaylabs/blindpay-go/internal/types"
+	"github.com/blindpaylabs/blindpay-go/option"
 )
 
 // WebhookEndpoint represents a webhook endpoint.
@@ -57,44 +58,44 @@ func NewClient(cfg *config.Config) *Client {
 }
 
 // List retrieves all webhook endpoints for the instance.
-func (c *Client) List(ctx context.Context) ([]WebhookEndpoint, error) {
+func (c *Client) List(ctx context.Context, opts ...option.RequestOption) ([]WebhookEndpoint, error) {
 	path := fmt.Sprintf("/instances/%s/webhook-endpoints", c.instanceID)
-	return request.Do[[]WebhookEndpoint](c.cfg, ctx, "GET", path, nil)
+	return request.Do[[]WebhookEndpoint](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // Create creates a new webhook endpoint.
-func (c *Client) Create(ctx context.Context, params *CreateParams) (*CreateResponse, error) {
+func (c *Client) Create(ctx context.Context, params *CreateParams, opts ...option.RequestOption) (*CreateResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
 	path := fmt.Sprintf("/instances/%s/webhook-endpoints", c.instanceID)
-	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, params)
+	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, params, opts...)
 }
 
 // Delete deletes a webhook endpoint.
-func (c *Client) Delete(ctx context.Context, id string) error {
+func (c *Client) Delete(ctx context.Context, id string, opts ...option.RequestOption) error {
 	if id == "" {
 		return fmt.Errorf("id cannot be empty")
 	}
 
 	path := fmt.Sprintf("/instances/%s/webhook-endpoints/%s", c.instanceID, id)
-	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil)
+	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil, opts...)
 	return err
 }
 
 // GetSecret retrieves the secret for a webhook endpoint.
-func (c *Client) GetSecret(ctx context.Context, id string) (*GetSecretResponse, error) {
+func (c *Client) GetSecret(ctx context.Context, id string, opts ...option.RequestOption) (*GetSecretResponse, error) {
 	if id == "" {
 		return nil, fmt.Errorf("id cannot be empty")
 	}
 
 	path := fmt.Sprintf("/instances/%s/webhook-endpoints/%s/secret", c.instanceID, id)
-	return request.Do[*GetSecretResponse](c.cfg, ctx, "GET", path, nil)
+	return request.Do[*GetSecretResponse](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // GetPortalAccessURL retrieves the portal access URL.
-func (c *Client) GetPortalAccessURL(ctx context.Context) (*GetPortalAccessURLResponse, error) {
+func (c *Client) GetPortalAccessURL(ctx context.Context, opts ...option.RequestOption) (*GetPortalAccessURLResponse, error) {
 	path := fmt.Sprintf("/instances/%s/webhook-endpoints/portal-access", c.instanceID)
-	return request.Do[*GetPortalAccessURLResponse](c.cfg, ctx, "GET", path, nil)
+	return request.Do[*GetPortalAccessURLResponse](c.cfg, ctx, "GET", path, nil, opts...)
 }

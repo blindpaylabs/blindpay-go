@@ -7,6 +7,7 @@ import (
 	"github.com/blindpaylabs/blindpay-go/internal/config"
 	"github.com/blindpaylabs/blindpay-go/internal/request"
 	"github.com/blindpaylabs/blindpay-go/internal/types"
+	"github.com/blindpaylabs/blindpay-go/option"
 )
 
 // VirtualAccountUS represents US-specific virtual account details.
@@ -87,7 +88,7 @@ func NewClient(cfg *config.Config) *Client {
 }
 
 // Create creates a new virtual account.
-func (c *Client) Create(ctx context.Context, params *CreateParams) (*VirtualAccount, error) {
+func (c *Client) Create(ctx context.Context, params *CreateParams, opts ...option.RequestOption) (*VirtualAccount, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -111,11 +112,11 @@ func (c *Client) Create(ctx context.Context, params *CreateParams) (*VirtualAcco
 		SoleProprietorDocFile: params.SoleProprietorDocFile,
 	}
 
-	return request.Do[*VirtualAccount](c.cfg, ctx, "POST", path, body)
+	return request.Do[*VirtualAccount](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // Get retrieves a virtual account by ID.
-func (c *Client) Get(ctx context.Context, customerID, virtualAccountID string) (*VirtualAccount, error) {
+func (c *Client) Get(ctx context.Context, customerID, virtualAccountID string, opts ...option.RequestOption) (*VirtualAccount, error) {
 	if customerID == "" {
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
@@ -124,21 +125,21 @@ func (c *Client) Get(ctx context.Context, customerID, virtualAccountID string) (
 	}
 
 	path := fmt.Sprintf("/instances/%s/customers/%s/virtual-accounts/%s", c.instanceID, customerID, virtualAccountID)
-	return request.Do[*VirtualAccount](c.cfg, ctx, "GET", path, nil)
+	return request.Do[*VirtualAccount](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // List retrieves all virtual accounts for a customer.
-func (c *Client) List(ctx context.Context, customerID string) ([]VirtualAccount, error) {
+func (c *Client) List(ctx context.Context, customerID string, opts ...option.RequestOption) ([]VirtualAccount, error) {
 	if customerID == "" {
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
 	path := fmt.Sprintf("/instances/%s/customers/%s/virtual-accounts", c.instanceID, customerID)
-	return request.Do[[]VirtualAccount](c.cfg, ctx, "GET", path, nil)
+	return request.Do[[]VirtualAccount](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // Update updates a virtual account.
-func (c *Client) Update(ctx context.Context, params *UpdateParams) error {
+func (c *Client) Update(ctx context.Context, params *UpdateParams, opts ...option.RequestOption) error {
 	if params == nil {
 		return fmt.Errorf("params cannot be nil")
 	}
@@ -159,6 +160,6 @@ func (c *Client) Update(ctx context.Context, params *UpdateParams) error {
 		Token:              params.Token,
 	}
 
-	_, err := request.Do[struct{}](c.cfg, ctx, "PUT", path, body)
+	_, err := request.Do[struct{}](c.cfg, ctx, "PUT", path, body, opts...)
 	return err
 }

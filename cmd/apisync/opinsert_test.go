@@ -1,6 +1,9 @@
 package main
 
 import (
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -21,6 +24,7 @@ import (
 	"fmt"
 
 	"github.com/blindpaylabs/blindpay-go/internal/request"
+	"github.com/blindpaylabs/blindpay-go/option"
 )
 
 type Client struct {
@@ -28,9 +32,9 @@ type Client struct {
 	instanceID string
 }
 
-func (c *Client) List(ctx context.Context) ([]Gadget, error) {
+func (c *Client) List(ctx context.Context, opts ...option.RequestOption) ([]Gadget, error) {
 	path := fmt.Sprintf("/instances/%s/gadgets", c.instanceID)
-	return request.Do[[]Gadget](c.cfg, ctx, "GET", path, nil)
+	return request.Do[[]Gadget](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 type Gadget struct {
@@ -75,7 +79,7 @@ func TestClassifyAndPlanOperation_InlineFlatBodyIsStandard(t *testing.T) {
 	require.Len(t, acts, 1)
 	require.Contains(t, acts[0].insert.Text, "func (c *Client) Activate(")
 	require.Contains(t, acts[0].insert.Text, `fmt.Sprintf("/instances/%s/gadgets/%s/activate", c.instanceID, id)`)
-	require.Contains(t, acts[0].insert.Text, `request.Do[*ActivateResponse](c.cfg, ctx, "POST", path, params)`)
+	require.Contains(t, acts[0].insert.Text, `request.Do[*ActivateResponse](c.cfg, ctx, "POST", path, params, opts...)`)
 	require.Contains(t, acts[0].insert.Text, "type ActivateParams struct")
 	require.Contains(t, acts[0].insert.Text, "Reason string `json:\"reason\"`")
 	require.Contains(t, acts[0].insert.Text, "type ActivateResponse struct")
@@ -188,4 +192,24 @@ func TestCamelParam(t *testing.T) {
 	require.Equal(t, "customerID", camelParam("customer_id"))
 	require.Equal(t, "userID", camelParam("user_id"))
 	require.Equal(t, "swift", camelParam("swift"))
+}
+
+func TestClassifyAndPlanOperation_RequiresOptionImport(t *testing.T) {
+	root := gadgetsFixture(t)
+	clientPath := filepath.Join(root, "gadgets", "client.go")
+	src, err := os.ReadFile(clientPath)
+	require.NoError(t, err)
+	stripped := strings.Replace(string(src), "\t\"github.com/blindpaylabs/blindpay-go/option\"\n", "", 1)
+	require.NoError(t, os.WriteFile(clientPath, []byte(stripped), 0o600))
+
+	acts, _, reason := classifyAndPlanOperation(root, &SpecMap{}, mustSpec(t, map[string]string{}), gadgetOp("POST", nil, nil))
+	require.Empty(t, acts)
+	require.Contains(t, reason, "does not import")
+}
+
+func TestRenderMethod_ForwardsRequestOptions(t *testing.T) {
+	text := renderMethod("Activate", "POST", "/v1/instances/{instance_id}/gadgets/{id}/activate", []string{"id"},
+		&bodySpec{Kind: "none"}, &bodySpec{Kind: "none"})
+	require.Contains(t, text, "func (c *Client) Activate(ctx context.Context, id string, opts ...option.RequestOption) error {")
+	require.Contains(t, text, `request.Do[struct{}](c.cfg, ctx, "POST", path, nil, opts...)`)
 }

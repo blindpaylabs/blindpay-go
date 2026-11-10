@@ -10,6 +10,7 @@ import (
 	"github.com/blindpaylabs/blindpay-go/internal/config"
 	"github.com/blindpaylabs/blindpay-go/internal/request"
 	"github.com/blindpaylabs/blindpay-go/internal/types"
+	"github.com/blindpaylabs/blindpay-go/option"
 )
 
 // ArgentinaTransfers represents Argentina transfer types.
@@ -548,7 +549,7 @@ func NewClient(cfg *config.Config) *Client {
 }
 
 // List retrieves all bank accounts for a customer with optional filters.
-func (c *Client) List(ctx context.Context, params *ListParams) ([]BankAccount, error) {
+func (c *Client) List(ctx context.Context, params *ListParams, opts ...option.RequestOption) ([]BankAccount, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -578,12 +579,12 @@ func (c *Client) List(ctx context.Context, params *ListParams) ([]BankAccount, e
 		path += "?" + q.Encode()
 	}
 
-	return request.Do[[]BankAccount](c.cfg, ctx, "GET", path, nil)
+	return request.Do[[]BankAccount](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // Get retrieves a specific bank account. The account is in the embedded
 // GetResponse.BankAccount (same shape as List).
-func (c *Client) Get(ctx context.Context, customerID, id string) (*GetResponse, error) {
+func (c *Client) Get(ctx context.Context, customerID, id string, opts ...option.RequestOption) (*GetResponse, error) {
 	if customerID == "" {
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
@@ -592,11 +593,11 @@ func (c *Client) Get(ctx context.Context, customerID, id string) (*GetResponse, 
 	}
 
 	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts/%s", c.instanceID, customerID, id)
-	return request.Do[*GetResponse](c.cfg, ctx, "GET", path, nil)
+	return request.Do[*GetResponse](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // Delete deletes a bank account.
-func (c *Client) Delete(ctx context.Context, customerID, id string) error {
+func (c *Client) Delete(ctx context.Context, customerID, id string, opts ...option.RequestOption) error {
 	if customerID == "" {
 		return fmt.Errorf("customer ID cannot be empty")
 	}
@@ -605,12 +606,12 @@ func (c *Client) Delete(ctx context.Context, customerID, id string) error {
 	}
 
 	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts/%s", c.instanceID, customerID, id)
-	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil)
+	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil, opts...)
 	return err
 }
 
 // CreatePix creates a PIX bank account.
-func (c *Client) CreatePix(ctx context.Context, params *CreatePixParams) (*CreatePixResponse, error) {
+func (c *Client) CreatePix(ctx context.Context, params *CreatePixParams, opts ...option.RequestOption) (*CreatePixResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -626,11 +627,11 @@ func (c *Client) CreatePix(ctx context.Context, params *CreatePixParams) (*Creat
 		"pix_key": params.PixKey,
 	}
 
-	return request.Do[*CreatePixResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreatePixResponse](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // CreateAch creates an ACH bank account.
-func (c *Client) CreateAch(ctx context.Context, params *CreateAchParams) (*CreateAchResponse, error) {
+func (c *Client) CreateAch(ctx context.Context, params *CreateAchParams, opts ...option.RequestOption) (*CreateAchResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -672,11 +673,11 @@ func (c *Client) CreateAch(ctx context.Context, params *CreateAchParams) (*Creat
 		body["date_of_birth"] = params.DateOfBirth
 	}
 
-	return request.Do[*CreateAchResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateAchResponse](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // CreateWire creates a Wire bank account.
-func (c *Client) CreateWire(ctx context.Context, params *CreateWireParams) (*CreateWireResponse, error) {
+func (c *Client) CreateWire(ctx context.Context, params *CreateWireParams, opts ...option.RequestOption) (*CreateWireResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -717,11 +718,11 @@ func (c *Client) CreateWire(ctx context.Context, params *CreateWireParams) (*Cre
 		body["date_of_birth"] = params.DateOfBirth
 	}
 
-	return request.Do[*CreateWireResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateWireResponse](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // CreateArgentinaTransfers creates an Argentina transfers bank account.
-func (c *Client) CreateArgentinaTransfers(ctx context.Context, params *CreateArgentinaTransfersParams) (*CreateArgentinaTransfersResponse, error) {
+func (c *Client) CreateArgentinaTransfers(ctx context.Context, params *CreateArgentinaTransfersParams, opts ...option.RequestOption) (*CreateArgentinaTransfersResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -739,11 +740,11 @@ func (c *Client) CreateArgentinaTransfers(ctx context.Context, params *CreateArg
 		"transfers_type":    params.TransfersType,
 	}
 
-	return request.Do[*CreateArgentinaTransfersResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateArgentinaTransfersResponse](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // CreateSpei creates a SPEI bank account.
-func (c *Client) CreateSpei(ctx context.Context, params *CreateSpeiParams) (*CreateSpeiResponse, error) {
+func (c *Client) CreateSpei(ctx context.Context, params *CreateSpeiParams, opts ...option.RequestOption) (*CreateSpeiResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -762,11 +763,11 @@ func (c *Client) CreateSpei(ctx context.Context, params *CreateSpeiParams) (*Cre
 		"spei_protocol":         params.SpeiProtocol,
 	}
 
-	return request.Do[*CreateSpeiResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateSpeiResponse](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // CreateColombiaAch creates a Colombia ACH bank account.
-func (c *Client) CreateColombiaAch(ctx context.Context, params *CreateColombiaAchParams) (*CreateColombiaAchResponse, error) {
+func (c *Client) CreateColombiaAch(ctx context.Context, params *CreateColombiaAchParams, opts ...option.RequestOption) (*CreateColombiaAchResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -789,11 +790,11 @@ func (c *Client) CreateColombiaAch(ctx context.Context, params *CreateColombiaAc
 		"ach_cop_bank_account":           params.AchCopBankAccount,
 	}
 
-	return request.Do[*CreateColombiaAchResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateColombiaAchResponse](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // CreateInternationalSwift creates an international SWIFT bank account.
-func (c *Client) CreateInternationalSwift(ctx context.Context, params *CreateInternationalSwiftParams) (*CreateInternationalSwiftResponse, error) {
+func (c *Client) CreateInternationalSwift(ctx context.Context, params *CreateInternationalSwiftParams, opts ...option.RequestOption) (*CreateInternationalSwiftResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -853,11 +854,11 @@ func (c *Client) CreateInternationalSwift(ctx context.Context, params *CreateInt
 		body["sepa_beneficiary_bic"] = params.SepaBeneficiaryBic
 	}
 
-	return request.Do[*CreateInternationalSwiftResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateInternationalSwiftResponse](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // CreatePixSafe creates a PIX Safe bank account.
-func (c *Client) CreatePixSafe(ctx context.Context, params *CreatePixSafeParams) (*CreatePixSafeResponse, error) {
+func (c *Client) CreatePixSafe(ctx context.Context, params *CreatePixSafeParams, opts ...option.RequestOption) (*CreatePixSafeResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -878,11 +879,11 @@ func (c *Client) CreatePixSafe(ctx context.Context, params *CreatePixSafeParams)
 		"pix_safe_cpf_cnpj":    params.PixSafeCpfCnpj,
 	}
 
-	return request.Do[*CreatePixSafeResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreatePixSafeResponse](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // CreateRtp creates an RTP (Real-Time Payments) bank account.
-func (c *Client) CreateRtp(ctx context.Context, params *CreateRtpParams) (*CreateRtpResponse, error) {
+func (c *Client) CreateRtp(ctx context.Context, params *CreateRtpParams, opts ...option.RequestOption) (*CreateRtpResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -923,11 +924,11 @@ func (c *Client) CreateRtp(ctx context.Context, params *CreateRtpParams) (*Creat
 		body["date_of_birth"] = params.DateOfBirth
 	}
 
-	return request.Do[*CreateRtpResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateRtpResponse](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // CreateTed creates a TED bank account.
-func (c *Client) CreateTed(ctx context.Context, params *CreateTedParams) (*CreateTedResponse, error) {
+func (c *Client) CreateTed(ctx context.Context, params *CreateTedParams, opts ...option.RequestOption) (*CreateTedResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -969,7 +970,7 @@ func (c *Client) CreateTed(ctx context.Context, params *CreateTedParams) (*Creat
 		body["date_of_birth"] = params.DateOfBirth
 	}
 
-	return request.Do[*CreateTedResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateTedResponse](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // CreateSepaParams represents parameters for creating a SEPA bank account.
@@ -1008,7 +1009,7 @@ type CreateSepaResponse struct {
 }
 
 // CreateSepa creates a SEPA bank account.
-func (c *Client) CreateSepa(ctx context.Context, params *CreateSepaParams) (*CreateSepaResponse, error) {
+func (c *Client) CreateSepa(ctx context.Context, params *CreateSepaParams, opts ...option.RequestOption) (*CreateSepaResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -1038,5 +1039,5 @@ func (c *Client) CreateSepa(ctx context.Context, params *CreateSepaParams) (*Cre
 		body["sepa_beneficiary_state_province_region"] = *params.SepaBeneficiaryStateProvinceRegion
 	}
 
-	return request.Do[*CreateSepaResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateSepaResponse](c.cfg, ctx, "POST", path, body, opts...)
 }

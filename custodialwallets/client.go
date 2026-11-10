@@ -8,6 +8,7 @@ import (
 	"github.com/blindpaylabs/blindpay-go/internal/config"
 	"github.com/blindpaylabs/blindpay-go/internal/request"
 	"github.com/blindpaylabs/blindpay-go/internal/types"
+	"github.com/blindpaylabs/blindpay-go/option"
 )
 
 // CustodialWallet represents a custodial wallet.
@@ -58,17 +59,17 @@ func NewClient(cfg *config.Config) *Client {
 }
 
 // List retrieves all custodial wallets for a customer.
-func (c *Client) List(ctx context.Context, customerID string) ([]CustodialWallet, error) {
+func (c *Client) List(ctx context.Context, customerID string, opts ...option.RequestOption) ([]CustodialWallet, error) {
 	if customerID == "" {
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
 	path := fmt.Sprintf("/instances/%s/customers/%s/wallets", c.instanceID, customerID)
-	return request.Do[[]CustodialWallet](c.cfg, ctx, "GET", path, nil)
+	return request.Do[[]CustodialWallet](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // Get retrieves a specific custodial wallet.
-func (c *Client) Get(ctx context.Context, customerID, id string) (*CustodialWallet, error) {
+func (c *Client) Get(ctx context.Context, customerID, id string, opts ...option.RequestOption) (*CustodialWallet, error) {
 	if customerID == "" {
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
@@ -77,11 +78,11 @@ func (c *Client) Get(ctx context.Context, customerID, id string) (*CustodialWall
 	}
 
 	path := fmt.Sprintf("/instances/%s/customers/%s/wallets/%s", c.instanceID, customerID, id)
-	return request.Do[*CustodialWallet](c.cfg, ctx, "GET", path, nil)
+	return request.Do[*CustodialWallet](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // Create creates a new custodial wallet.
-func (c *Client) Create(ctx context.Context, params *CreateParams) (*CustodialWallet, error) {
+func (c *Client) Create(ctx context.Context, params *CreateParams, opts ...option.RequestOption) (*CustodialWallet, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -100,11 +101,11 @@ func (c *Client) Create(ctx context.Context, params *CreateParams) (*CustodialWa
 		body["external_id"] = *params.ExternalID
 	}
 
-	return request.Do[*CustodialWallet](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CustodialWallet](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // GetBalance retrieves the balance of a custodial wallet.
-func (c *Client) GetBalance(ctx context.Context, customerID, id string) (*GetBalanceResponse, error) {
+func (c *Client) GetBalance(ctx context.Context, customerID, id string, opts ...option.RequestOption) (*GetBalanceResponse, error) {
 	if customerID == "" {
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
@@ -113,11 +114,11 @@ func (c *Client) GetBalance(ctx context.Context, customerID, id string) (*GetBal
 	}
 
 	path := fmt.Sprintf("/instances/%s/customers/%s/wallets/%s/balance", c.instanceID, customerID, id)
-	return request.Do[*GetBalanceResponse](c.cfg, ctx, "GET", path, nil)
+	return request.Do[*GetBalanceResponse](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // Delete deletes a custodial wallet.
-func (c *Client) Delete(ctx context.Context, customerID, id string) error {
+func (c *Client) Delete(ctx context.Context, customerID, id string, opts ...option.RequestOption) error {
 	if customerID == "" {
 		return fmt.Errorf("customer ID cannot be empty")
 	}
@@ -126,6 +127,6 @@ func (c *Client) Delete(ctx context.Context, customerID, id string) error {
 	}
 
 	path := fmt.Sprintf("/instances/%s/customers/%s/wallets/%s", c.instanceID, customerID, id)
-	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil)
+	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil, opts...)
 	return err
 }

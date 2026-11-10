@@ -730,6 +730,10 @@ func buildPathTemplate(specPath string, pathArgs []string) (string, []string) {
 	return fmtBuf.String(), args
 }
 
+// optionImport is the import every client.go needs for generated methods'
+// trailing "opts ...option.RequestOption" parameter.
+const optionImport = `"github.com/blindpaylabs/blindpay-go/option"`
+
 func renderMethod(methodName, httpMethod, specPath string, pathArgs []string, req, resp *bodySpec) string {
 	pathFmt, sprintfArgs := buildPathTemplate(specPath, pathArgs)
 
@@ -742,15 +746,18 @@ func renderMethod(methodName, httpMethod, specPath string, pathArgs []string, re
 		sigParams = append(sigParams, "params "+asPtr(req.GoType))
 		bodyArg = "params"
 	}
+	// Every SDK method takes trailing per-request options (idempotency key,
+	// headers, timeout) and forwards them to the transport.
+	sigParams = append(sigParams, "opts ...option.RequestOption")
 
 	var retType, callLine string
 	if resp.Kind == "none" {
 		retType = "error"
-		callLine = fmt.Sprintf("_, err := request.Do[struct{}](c.cfg, ctx, %q, path, %s)\n\treturn err", httpMethod, bodyArg)
+		callLine = fmt.Sprintf("_, err := request.Do[struct{}](c.cfg, ctx, %q, path, %s, opts...)\n\treturn err", httpMethod, bodyArg)
 	} else {
 		rt := asPtr(resp.GoType)
 		retType = fmt.Sprintf("(%s, error)", rt)
-		callLine = fmt.Sprintf("return request.Do[%s](c.cfg, ctx, %q, path, %s)", rt, httpMethod, bodyArg)
+		callLine = fmt.Sprintf("return request.Do[%s](c.cfg, ctx, %q, path, %s, opts...)", rt, httpMethod, bodyArg)
 	}
 
 	return fmt.Sprintf(`
@@ -835,6 +842,11 @@ func classifyAndPlanOperation(repoRoot string, sm *SpecMap, spec *specDoc, entry
 	pieces = append(pieces, methodText)
 
 	clientFile := target.Dir + "/client.go"
+	if src, err := os.ReadFile(filepath.Join(repoRoot, clientFile)); err != nil {
+		return nil, nil, fmt.Sprintf("could not read %s: %v", clientFile, err)
+	} else if !strings.Contains(string(src), optionImport) {
+		return nil, nil, fmt.Sprintf("%s does not import %s, which generated methods need for their request options", clientFile, optionImport)
+	}
 	lastLine, err := lastLineOf(repoRoot, clientFile)
 	if err != nil {
 		return nil, nil, fmt.Sprintf("could not read %s: %v", clientFile, err)

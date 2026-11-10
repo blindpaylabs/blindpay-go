@@ -10,6 +10,7 @@ import (
 	"github.com/blindpaylabs/blindpay-go/internal/config"
 	"github.com/blindpaylabs/blindpay-go/internal/request"
 	"github.com/blindpaylabs/blindpay-go/internal/types"
+	"github.com/blindpaylabs/blindpay-go/option"
 )
 
 // Payout represents a payout transaction.
@@ -176,7 +177,7 @@ func NewClient(cfg *config.Config) *Client {
 // The API returns every payout as a bare array when no pagination param is
 // sent, and one page wrapped in {data, pagination} when Limit is set; both
 // shapes are decoded and the page's rows are returned.
-func (c *Client) List(ctx context.Context, params *ListParams) ([]Payout, error) {
+func (c *Client) List(ctx context.Context, params *ListParams, opts ...option.RequestOption) ([]Payout, error) {
 	path := fmt.Sprintf("/instances/%s/payouts", c.instanceID)
 
 	if params != nil {
@@ -195,7 +196,7 @@ func (c *Client) List(ctx context.Context, params *ListParams) ([]Payout, error)
 		}
 	}
 
-	return request.DoList[Payout](c.cfg, ctx, path)
+	return request.DoList[Payout](c.cfg, ctx, path, opts...)
 }
 
 // Export retrieves all payouts for export with optional pagination.
@@ -203,7 +204,7 @@ func (c *Client) List(ctx context.Context, params *ListParams) ([]Payout, error)
 // Deprecated: the API has no GET /instances/{id}/export/payouts route, so this
 // method always fails (404). It will be removed in the next major version.
 // Use List instead.
-func (c *Client) Export(ctx context.Context, params *ExportParams) ([]Payout, error) {
+func (c *Client) Export(ctx context.Context, params *ExportParams, opts ...option.RequestOption) ([]Payout, error) {
 	path := fmt.Sprintf("/instances/%s/export/payouts", c.instanceID)
 
 	if params != nil {
@@ -219,61 +220,61 @@ func (c *Client) Export(ctx context.Context, params *ExportParams) ([]Payout, er
 		}
 	}
 
-	return request.Do[[]Payout](c.cfg, ctx, "GET", path, nil)
+	return request.Do[[]Payout](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // Get retrieves a specific payout by ID.
-func (c *Client) Get(ctx context.Context, payoutID string) (*Payout, error) {
+func (c *Client) Get(ctx context.Context, payoutID string, opts ...option.RequestOption) (*Payout, error) {
 	if payoutID == "" {
 		return nil, fmt.Errorf("payout ID cannot be empty")
 	}
 
 	path := fmt.Sprintf("/instances/%s/payouts/%s", c.instanceID, payoutID)
-	return request.Do[*Payout](c.cfg, ctx, "GET", path, nil)
+	return request.Do[*Payout](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // GetTrack retrieves tracking information for a payout.
-func (c *Client) GetTrack(ctx context.Context, payoutID string) (*Payout, error) {
+func (c *Client) GetTrack(ctx context.Context, payoutID string, opts ...option.RequestOption) (*Payout, error) {
 	if payoutID == "" {
 		return nil, fmt.Errorf("payout ID cannot be empty")
 	}
 
 	path := fmt.Sprintf("/e/payouts/%s", payoutID)
-	return request.Do[*Payout](c.cfg, ctx, "GET", path, nil)
+	return request.Do[*Payout](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // CreateEvm creates an EVM payout.
-func (c *Client) CreateEvm(ctx context.Context, params *CreateEvmParams) (*CreateResponse, error) {
+func (c *Client) CreateEvm(ctx context.Context, params *CreateEvmParams, opts ...option.RequestOption) (*CreateResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
 	path := fmt.Sprintf("/instances/%s/payouts/evm", c.instanceID)
-	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, params)
+	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, params, opts...)
 }
 
 // CreateStellar creates a Stellar payout.
-func (c *Client) CreateStellar(ctx context.Context, params *CreateStellarParams) (*CreateResponse, error) {
+func (c *Client) CreateStellar(ctx context.Context, params *CreateStellarParams, opts ...option.RequestOption) (*CreateResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
 	path := fmt.Sprintf("/instances/%s/payouts/stellar", c.instanceID)
-	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, params)
+	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, params, opts...)
 }
 
 // CreateSolana creates a Solana payout.
-func (c *Client) CreateSolana(ctx context.Context, params *CreateSolanaParams) (*CreateResponse, error) {
+func (c *Client) CreateSolana(ctx context.Context, params *CreateSolanaParams, opts ...option.RequestOption) (*CreateResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
 	path := fmt.Sprintf("/instances/%s/payouts/solana", c.instanceID)
-	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, params)
+	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, params, opts...)
 }
 
 // SubmitDocuments submits documents for a payout.
-func (c *Client) SubmitDocuments(ctx context.Context, params *SubmitDocumentsParams) (*SubmitDocumentsResponse, error) {
+func (c *Client) SubmitDocuments(ctx context.Context, params *SubmitDocumentsParams, opts ...option.RequestOption) (*SubmitDocumentsResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -293,15 +294,15 @@ func (c *Client) SubmitDocuments(ctx context.Context, params *SubmitDocumentsPar
 		body["description"] = params.Description
 	}
 
-	return request.Do[*SubmitDocumentsResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*SubmitDocumentsResponse](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // AuthorizeStellarToken authorizes a Stellar token for payout.
-func (c *Client) AuthorizeStellarToken(ctx context.Context, params *AuthorizeStellarTokenParams) (*AuthorizeStellarTokenResponse, error) {
+func (c *Client) AuthorizeStellarToken(ctx context.Context, params *AuthorizeStellarTokenParams, opts ...option.RequestOption) (*AuthorizeStellarTokenResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
 	path := fmt.Sprintf("/instances/%s/payouts/stellar/authorize", c.instanceID)
-	return request.Do[*AuthorizeStellarTokenResponse](c.cfg, ctx, "POST", path, params)
+	return request.Do[*AuthorizeStellarTokenResponse](c.cfg, ctx, "POST", path, params, opts...)
 }

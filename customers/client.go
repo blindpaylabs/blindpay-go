@@ -9,6 +9,7 @@ import (
 	"github.com/blindpaylabs/blindpay-go/internal/config"
 	"github.com/blindpaylabs/blindpay-go/internal/request"
 	"github.com/blindpaylabs/blindpay-go/internal/types"
+	"github.com/blindpaylabs/blindpay-go/option"
 )
 
 // ProofOfAddressDocType represents proof of address document types.
@@ -557,9 +558,9 @@ func NewClient(cfg *config.Config) *Client {
 }
 
 // List retrieves all customers for the instance.
-func (c *Client) List(ctx context.Context) ([]Customer, error) {
+func (c *Client) List(ctx context.Context, opts ...option.RequestOption) ([]Customer, error) {
 	path := fmt.Sprintf("/instances/%s/customers", c.instanceID)
-	return request.DoList[Customer](c.cfg, ctx, path)
+	return request.DoList[Customer](c.cfg, ctx, path, opts...)
 }
 
 // ListWithParams retrieves customers with pagination and filtering.
@@ -568,7 +569,7 @@ func (c *Client) List(ctx context.Context) ([]Customer, error) {
 // StartingAfter or EndingBefore is set; with filters alone (or nil params) it
 // returns every matching customer as a bare array. Both shapes are decoded;
 // for a bare array Pagination is the zero value (HasMore false).
-func (c *Client) ListWithParams(ctx context.Context, params *ListParams) (*ListResponse, error) {
+func (c *Client) ListWithParams(ctx context.Context, params *ListParams, opts ...option.RequestOption) (*ListResponse, error) {
 	path := fmt.Sprintf("/instances/%s/customers", c.instanceID)
 
 	if params != nil {
@@ -608,7 +609,7 @@ func (c *Client) ListWithParams(ctx context.Context, params *ListParams) (*ListR
 		}
 	}
 
-	list, err := request.Do[request.List[Customer]](c.cfg, ctx, "GET", path, nil)
+	list, err := request.Do[request.List[Customer]](c.cfg, ctx, "GET", path, nil, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -621,7 +622,7 @@ func (c *Client) ListWithParams(ctx context.Context, params *ListParams) (*ListR
 }
 
 // CreateIndividualWithStandardKYC creates an individual customer with standard KYC.
-func (c *Client) CreateIndividualWithStandardKYC(ctx context.Context, params *CreateIndividualStandardParams) (*CreateResponse, error) {
+func (c *Client) CreateIndividualWithStandardKYC(ctx context.Context, params *CreateIndividualStandardParams, opts ...option.RequestOption) (*CreateResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -677,11 +678,11 @@ func (c *Client) CreateIndividualWithStandardKYC(ctx context.Context, params *Cr
 		body["sole_proprietor_doc_type"] = params.SoleProprietorDocType
 	}
 
-	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // CreateIndividualWithEnhancedKYC creates an individual customer with enhanced KYC.
-func (c *Client) CreateIndividualWithEnhancedKYC(ctx context.Context, params *CreateIndividualEnhancedParams) (*CreateResponse, error) {
+func (c *Client) CreateIndividualWithEnhancedKYC(ctx context.Context, params *CreateIndividualEnhancedParams, opts ...option.RequestOption) (*CreateResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -744,11 +745,11 @@ func (c *Client) CreateIndividualWithEnhancedKYC(ctx context.Context, params *Cr
 		body["sole_proprietor_doc_type"] = params.SoleProprietorDocType
 	}
 
-	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // CreateBusinessWithStandardKYB creates a business customer with standard KYB.
-func (c *Client) CreateBusinessWithStandardKYB(ctx context.Context, params *CreateBusinessStandardParams) (*CreateResponse, error) {
+func (c *Client) CreateBusinessWithStandardKYB(ctx context.Context, params *CreateBusinessStandardParams, opts ...option.RequestOption) (*CreateResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -825,21 +826,21 @@ func (c *Client) CreateBusinessWithStandardKYB(ctx context.Context, params *Crea
 		body["sole_proprietor_doc_type"] = params.SoleProprietorDocType
 	}
 
-	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // Get retrieves a specific customer by ID.
-func (c *Client) Get(ctx context.Context, customerID string) (*Customer, error) {
+func (c *Client) Get(ctx context.Context, customerID string, opts ...option.RequestOption) (*Customer, error) {
 	if customerID == "" {
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
 	path := fmt.Sprintf("/instances/%s/customers/%s", c.instanceID, customerID)
-	return request.Do[*Customer](c.cfg, ctx, "GET", path, nil)
+	return request.Do[*Customer](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // Update updates a customer.
-func (c *Client) Update(ctx context.Context, params *UpdateParams) error {
+func (c *Client) Update(ctx context.Context, params *UpdateParams, opts ...option.RequestOption) error {
 	if params == nil {
 		return fmt.Errorf("params cannot be nil")
 	}
@@ -988,43 +989,43 @@ func (c *Client) Update(ctx context.Context, params *UpdateParams) error {
 		body["sole_proprietor_doc_type"] = params.SoleProprietorDocType
 	}
 
-	_, err := request.Do[struct{}](c.cfg, ctx, "PUT", path, body)
+	_, err := request.Do[struct{}](c.cfg, ctx, "PUT", path, body, opts...)
 	return err
 }
 
 // Delete deletes a customer.
-func (c *Client) Delete(ctx context.Context, customerID string) error {
+func (c *Client) Delete(ctx context.Context, customerID string, opts ...option.RequestOption) error {
 	if customerID == "" {
 		return fmt.Errorf("customer ID cannot be empty")
 	}
 
 	path := fmt.Sprintf("/instances/%s/customers/%s", c.instanceID, customerID)
-	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil)
+	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil, opts...)
 	return err
 }
 
 // GetLimits retrieves transaction limits for a customer.
-func (c *Client) GetLimits(ctx context.Context, customerID string) (*LimitsResponse, error) {
+func (c *Client) GetLimits(ctx context.Context, customerID string, opts ...option.RequestOption) (*LimitsResponse, error) {
 	if customerID == "" {
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
 	path := fmt.Sprintf("/instances/%s/limits/customers/%s", c.instanceID, customerID)
-	return request.Do[*LimitsResponse](c.cfg, ctx, "GET", path, nil)
+	return request.Do[*LimitsResponse](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // GetLimitIncreaseRequests retrieves all limit increase requests for a customer.
-func (c *Client) GetLimitIncreaseRequests(ctx context.Context, customerID string) ([]LimitIncreaseRequest, error) {
+func (c *Client) GetLimitIncreaseRequests(ctx context.Context, customerID string, opts ...option.RequestOption) ([]LimitIncreaseRequest, error) {
 	if customerID == "" {
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
 	path := fmt.Sprintf("/instances/%s/customers/%s/limit-increase", c.instanceID, customerID)
-	return request.Do[[]LimitIncreaseRequest](c.cfg, ctx, "GET", path, nil)
+	return request.Do[[]LimitIncreaseRequest](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // RequestLimitIncrease creates a new limit increase request for a customer.
-func (c *Client) RequestLimitIncrease(ctx context.Context, params *RequestLimitIncreaseParams) (*RequestLimitIncreaseResponse, error) {
+func (c *Client) RequestLimitIncrease(ctx context.Context, params *RequestLimitIncreaseParams, opts ...option.RequestOption) (*RequestLimitIncreaseResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -1042,5 +1043,5 @@ func (c *Client) RequestLimitIncrease(ctx context.Context, params *RequestLimitI
 		"supporting_document_type": params.SupportingDocumentType,
 	}
 
-	return request.Do[*RequestLimitIncreaseResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*RequestLimitIncreaseResponse](c.cfg, ctx, "POST", path, body, opts...)
 }

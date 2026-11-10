@@ -7,6 +7,7 @@ import (
 	"github.com/blindpaylabs/blindpay-go/internal/config"
 	"github.com/blindpaylabs/blindpay-go/internal/request"
 	"github.com/blindpaylabs/blindpay-go/internal/types"
+	"github.com/blindpaylabs/blindpay-go/option"
 )
 
 // Client handles available-related operations.
@@ -34,18 +35,18 @@ func NewClient(cfg *config.Config) *Client {
 }
 
 // GetBankDetails retrieves the bank details configuration for a specific rail.
-func (c *Client) GetBankDetails(ctx context.Context, rail types.Rail) ([]types.BankDetail, error) {
+func (c *Client) GetBankDetails(ctx context.Context, rail types.Rail, opts ...option.RequestOption) ([]types.BankDetail, error) {
 	if rail == "" {
 		return nil, fmt.Errorf("rail cannot be empty")
 	}
 
 	path := fmt.Sprintf("/available/bank-details?rail=%s", rail)
-	return request.Do[[]types.BankDetail](c.cfg, ctx, "GET", path, nil)
+	return request.Do[[]types.BankDetail](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // GetRails retrieves all available payment rails.
-func (c *Client) GetRails(ctx context.Context) ([]types.RailEntry, error) {
-	return request.Do[[]types.RailEntry](c.cfg, ctx, "GET", "/available/rails", nil)
+func (c *Client) GetRails(ctx context.Context, opts ...option.RequestOption) ([]types.RailEntry, error) {
+	return request.Do[[]types.RailEntry](c.cfg, ctx, "GET", "/available/rails", nil, opts...)
 }
 
 // NaicsCode represents a NAICS business industry code.
@@ -55,17 +56,17 @@ type NaicsCode struct {
 }
 
 // GetNaicsCodes retrieves the available NAICS business industry codes.
-func (c *Client) GetNaicsCodes(ctx context.Context) ([]NaicsCode, error) {
-	return request.Do[[]NaicsCode](c.cfg, ctx, "GET", "/available/naics", nil)
+func (c *Client) GetNaicsCodes(ctx context.Context, opts ...option.RequestOption) ([]NaicsCode, error) {
+	return request.Do[[]NaicsCode](c.cfg, ctx, "GET", "/available/naics", nil, opts...)
 }
 
 // GetSwiftCodeBankDetails retrieves the bank details of a specific swift code.
-func (c *Client) GetSwiftCodeBankDetails(ctx context.Context, swift string) ([]GetSwiftCodeBankDetailsResponse, error) {
+func (c *Client) GetSwiftCodeBankDetails(ctx context.Context, swift string, opts ...option.RequestOption) ([]GetSwiftCodeBankDetailsResponse, error) {
 	if swift == "" {
 		return nil, fmt.Errorf("swift code cannot be empty")
 	}
 
 	path := fmt.Sprintf("/available/swift/%s", swift)
 
-	return request.Do[[]GetSwiftCodeBankDetailsResponse](c.cfg, ctx, "GET", path, nil)
+	return request.Do[[]GetSwiftCodeBankDetailsResponse](c.cfg, ctx, "GET", path, nil, opts...)
 }

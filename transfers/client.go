@@ -9,6 +9,7 @@ import (
 	"github.com/blindpaylabs/blindpay-go/internal/config"
 	"github.com/blindpaylabs/blindpay-go/internal/request"
 	"github.com/blindpaylabs/blindpay-go/internal/types"
+	"github.com/blindpaylabs/blindpay-go/option"
 )
 
 // TrackingStep represents a transfer tracking step.
@@ -139,27 +140,27 @@ func NewClient(cfg *config.Config) *Client {
 }
 
 // Create creates a new transfer quote.
-func (c *QuotesClient) Create(ctx context.Context, params *CreateQuoteParams) (*CreateQuoteResponse, error) {
+func (c *QuotesClient) Create(ctx context.Context, params *CreateQuoteParams, opts ...option.RequestOption) (*CreateQuoteResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
 	path := fmt.Sprintf("/instances/%s/transfer-quotes", c.instanceID)
-	return request.Do[*CreateQuoteResponse](c.cfg, ctx, "POST", path, params)
+	return request.Do[*CreateQuoteResponse](c.cfg, ctx, "POST", path, params, opts...)
 }
 
 // Create creates a new transfer.
-func (c *Client) Create(ctx context.Context, params *CreateParams) (*CreateResponse, error) {
+func (c *Client) Create(ctx context.Context, params *CreateParams, opts ...option.RequestOption) (*CreateResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
 	path := fmt.Sprintf("/instances/%s/transfers", c.instanceID)
-	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, params)
+	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, params, opts...)
 }
 
 // List retrieves all transfers with optional pagination.
-func (c *Client) List(ctx context.Context, params *ListParams) (*ListResponse, error) {
+func (c *Client) List(ctx context.Context, params *ListParams, opts ...option.RequestOption) (*ListResponse, error) {
 	path := fmt.Sprintf("/instances/%s/transfers", c.instanceID)
 
 	if params != nil {
@@ -175,25 +176,25 @@ func (c *Client) List(ctx context.Context, params *ListParams) (*ListResponse, e
 		}
 	}
 
-	return request.Do[*ListResponse](c.cfg, ctx, "GET", path, nil)
+	return request.Do[*ListResponse](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // Get retrieves a specific transfer by ID.
-func (c *Client) Get(ctx context.Context, transferID string) (*Transfer, error) {
+func (c *Client) Get(ctx context.Context, transferID string, opts ...option.RequestOption) (*Transfer, error) {
 	if transferID == "" {
 		return nil, fmt.Errorf("transfer ID cannot be empty")
 	}
 
 	path := fmt.Sprintf("/instances/%s/transfers/%s", c.instanceID, transferID)
-	return request.Do[*Transfer](c.cfg, ctx, "GET", path, nil)
+	return request.Do[*Transfer](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // GetTrack retrieves tracking information for a transfer (public endpoint).
-func (c *Client) GetTrack(ctx context.Context, transferID string) (*Transfer, error) {
+func (c *Client) GetTrack(ctx context.Context, transferID string, opts ...option.RequestOption) (*Transfer, error) {
 	if transferID == "" {
 		return nil, fmt.Errorf("transfer ID cannot be empty")
 	}
 
 	path := fmt.Sprintf("/e/transfers/%s", transferID)
-	return request.Do[*Transfer](c.cfg, ctx, "GET", path, nil)
+	return request.Do[*Transfer](c.cfg, ctx, "GET", path, nil, opts...)
 }

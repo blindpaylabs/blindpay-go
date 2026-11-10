@@ -8,6 +8,7 @@ import (
 	"github.com/blindpaylabs/blindpay-go/internal/config"
 	"github.com/blindpaylabs/blindpay-go/internal/request"
 	"github.com/blindpaylabs/blindpay-go/internal/types"
+	"github.com/blindpaylabs/blindpay-go/option"
 )
 
 // BlockchainWallet represents a blockchain wallet.
@@ -108,17 +109,17 @@ func NewClient(cfg *config.Config) *Client {
 }
 
 // List retrieves all blockchain wallets for a customer.
-func (c *Client) List(ctx context.Context, customerID string) ([]BlockchainWallet, error) {
+func (c *Client) List(ctx context.Context, customerID string, opts ...option.RequestOption) ([]BlockchainWallet, error) {
 	if customerID == "" {
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
 	path := fmt.Sprintf("/instances/%s/customers/%s/blockchain-wallets", c.instanceID, customerID)
-	return request.Do[[]BlockchainWallet](c.cfg, ctx, "GET", path, nil)
+	return request.Do[[]BlockchainWallet](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // CreateWithAddress creates a new blockchain wallet with an address.
-func (c *Client) CreateWithAddress(ctx context.Context, params *CreateWithAddressParams) (*BlockchainWallet, error) {
+func (c *Client) CreateWithAddress(ctx context.Context, params *CreateWithAddressParams, opts ...option.RequestOption) (*BlockchainWallet, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -142,11 +143,11 @@ func (c *Client) CreateWithAddress(ctx context.Context, params *CreateWithAddres
 		IsSelfCustody:        params.IsSelfCustody,
 	}
 
-	return request.Do[*BlockchainWallet](c.cfg, ctx, "POST", path, body)
+	return request.Do[*BlockchainWallet](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // CreateWithHash creates a new blockchain wallet with a signature transaction hash.
-func (c *Client) CreateWithHash(ctx context.Context, params *CreateWithHashParams) (*BlockchainWallet, error) {
+func (c *Client) CreateWithHash(ctx context.Context, params *CreateWithHashParams, opts ...option.RequestOption) (*BlockchainWallet, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -170,21 +171,21 @@ func (c *Client) CreateWithHash(ctx context.Context, params *CreateWithHashParam
 		IsSelfCustody:        params.IsSelfCustody,
 	}
 
-	return request.Do[*BlockchainWallet](c.cfg, ctx, "POST", path, body)
+	return request.Do[*BlockchainWallet](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // GetWalletMessage retrieves the wallet message for signing.
-func (c *Client) GetWalletMessage(ctx context.Context, customerID string) (*GetMessageResponse, error) {
+func (c *Client) GetWalletMessage(ctx context.Context, customerID string, opts ...option.RequestOption) (*GetMessageResponse, error) {
 	if customerID == "" {
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
 	path := fmt.Sprintf("/instances/%s/customers/%s/blockchain-wallets/sign-message", c.instanceID, customerID)
-	return request.Do[*GetMessageResponse](c.cfg, ctx, "GET", path, nil)
+	return request.Do[*GetMessageResponse](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // Get retrieves a specific blockchain wallet.
-func (c *Client) Get(ctx context.Context, customerID, id string) (*BlockchainWallet, error) {
+func (c *Client) Get(ctx context.Context, customerID, id string, opts ...option.RequestOption) (*BlockchainWallet, error) {
 	if customerID == "" {
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
@@ -193,11 +194,11 @@ func (c *Client) Get(ctx context.Context, customerID, id string) (*BlockchainWal
 	}
 
 	path := fmt.Sprintf("/instances/%s/customers/%s/blockchain-wallets/%s", c.instanceID, customerID, id)
-	return request.Do[*BlockchainWallet](c.cfg, ctx, "GET", path, nil)
+	return request.Do[*BlockchainWallet](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // Delete deletes a blockchain wallet.
-func (c *Client) Delete(ctx context.Context, customerID, id string) error {
+func (c *Client) Delete(ctx context.Context, customerID, id string, opts ...option.RequestOption) error {
 	if customerID == "" {
 		return fmt.Errorf("customer ID cannot be empty")
 	}
@@ -206,12 +207,12 @@ func (c *Client) Delete(ctx context.Context, customerID, id string) error {
 	}
 
 	path := fmt.Sprintf("/instances/%s/customers/%s/blockchain-wallets/%s", c.instanceID, customerID, id)
-	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil)
+	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil, opts...)
 	return err
 }
 
 // CreateAssetTrustline creates an asset trustline on Stellar.
-func (c *Client) CreateAssetTrustline(ctx context.Context, address string) (*CreateAssetTrustlineResponse, error) {
+func (c *Client) CreateAssetTrustline(ctx context.Context, address string, opts ...option.RequestOption) (*CreateAssetTrustlineResponse, error) {
 	if address == "" {
 		return nil, fmt.Errorf("address cannot be empty")
 	}
@@ -223,38 +224,38 @@ func (c *Client) CreateAssetTrustline(ctx context.Context, address string) (*Cre
 		Address: address,
 	}
 
-	return request.Do[*CreateAssetTrustlineResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateAssetTrustlineResponse](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // MintUsdbStellar mints USDB on Stellar.
-func (c *Client) MintUsdbStellar(ctx context.Context, params *MintUsdbStellarParams) error {
+func (c *Client) MintUsdbStellar(ctx context.Context, params *MintUsdbStellarParams, opts ...option.RequestOption) error {
 	if params == nil {
 		return fmt.Errorf("params cannot be nil")
 	}
 
 	path := fmt.Sprintf("/instances/%s/mint-usdb-stellar", c.instanceID)
-	_, err := request.Do[struct{}](c.cfg, ctx, "POST", path, params)
+	_, err := request.Do[struct{}](c.cfg, ctx, "POST", path, params, opts...)
 	return err
 }
 
 // MintUsdbSolana mints USDB on Solana.
-func (c *Client) MintUsdbSolana(ctx context.Context, params *MintUsdbSolanaParams) (*MintUsdbSolanaResponse, error) {
+func (c *Client) MintUsdbSolana(ctx context.Context, params *MintUsdbSolanaParams, opts ...option.RequestOption) (*MintUsdbSolanaResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
 	path := fmt.Sprintf("/instances/%s/mint-usdb-solana", c.instanceID)
-	return request.Do[*MintUsdbSolanaResponse](c.cfg, ctx, "POST", path, params)
+	return request.Do[*MintUsdbSolanaResponse](c.cfg, ctx, "POST", path, params, opts...)
 }
 
 // PrepareSolanaDelegationTransaction prepares a Solana delegation transaction.
-func (c *Client) PrepareSolanaDelegationTransaction(ctx context.Context, params *PrepareSolanaDelegationTransactionParams) (*PrepareSolanaDelegationTransactionResponse, error) {
+func (c *Client) PrepareSolanaDelegationTransaction(ctx context.Context, params *PrepareSolanaDelegationTransactionParams, opts ...option.RequestOption) (*PrepareSolanaDelegationTransactionResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
 	path := fmt.Sprintf("/instances/%s/prepare-delegate-solana", c.instanceID)
-	return request.Do[*PrepareSolanaDelegationTransactionResponse](c.cfg, ctx, "POST", path, params)
+	return request.Do[*PrepareSolanaDelegationTransactionResponse](c.cfg, ctx, "POST", path, params, opts...)
 }
 
 // OfframpWallet represents an offramp wallet.
@@ -301,7 +302,7 @@ func NewOfframpClient(cfg *config.Config) *OfframpClient {
 }
 
 // List retrieves all offramp wallets for a bank account.
-func (c *OfframpClient) List(ctx context.Context, customerID, bankAccountID string) ([]OfframpWallet, error) {
+func (c *OfframpClient) List(ctx context.Context, customerID, bankAccountID string, opts ...option.RequestOption) ([]OfframpWallet, error) {
 	if customerID == "" {
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
@@ -311,11 +312,11 @@ func (c *OfframpClient) List(ctx context.Context, customerID, bankAccountID stri
 
 	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts/%s/offramp-wallets",
 		c.instanceID, customerID, bankAccountID)
-	return request.Do[[]OfframpWallet](c.cfg, ctx, "GET", path, nil)
+	return request.Do[[]OfframpWallet](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // Create creates a new offramp wallet.
-func (c *OfframpClient) Create(ctx context.Context, params *CreateOfframpWalletParams) (*CreateOfframpWalletResponse, error) {
+func (c *OfframpClient) Create(ctx context.Context, params *CreateOfframpWalletParams, opts ...option.RequestOption) (*CreateOfframpWalletResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -337,11 +338,11 @@ func (c *OfframpClient) Create(ctx context.Context, params *CreateOfframpWalletP
 		Network:    params.Network,
 	}
 
-	return request.Do[*CreateOfframpWalletResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateOfframpWalletResponse](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // Get retrieves a specific offramp wallet.
-func (c *OfframpClient) Get(ctx context.Context, customerID, bankAccountID, id string) (*OfframpWallet, error) {
+func (c *OfframpClient) Get(ctx context.Context, customerID, bankAccountID, id string, opts ...option.RequestOption) (*OfframpWallet, error) {
 	if customerID == "" {
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
@@ -354,5 +355,5 @@ func (c *OfframpClient) Get(ctx context.Context, customerID, bankAccountID, id s
 
 	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts/%s/offramp-wallets/%s",
 		c.instanceID, customerID, bankAccountID, id)
-	return request.Do[*OfframpWallet](c.cfg, ctx, "GET", path, nil)
+	return request.Do[*OfframpWallet](c.cfg, ctx, "GET", path, nil, opts...)
 }
