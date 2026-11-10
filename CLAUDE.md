@@ -504,6 +504,21 @@ type ListResponse struct {
 
 For list endpoints that return a simple array, use `[]Resource` directly.
 
+Payouts, payins, payables and customers return a bare array when none of
+`limit` / `starting_after` / `ending_before` is sent, and the
+`{data, pagination}` envelope when any is (transfers and wallet deposits
+always return the envelope). Decode these with
+`request.Do[request.List[Resource]](...)`, which detects the shape from the
+body and exposes `Data` plus an optional `Pagination`; never infer the shape
+from the params you sent.
+
+### Errors
+
+Every non-2xx response becomes `*request.APIError` (re-exported as
+`blindpay.APIError`) via `request.ParseAPIError`. Code paths that cannot use
+`request.Do` (multipart upload) must call `request.ParseAPIError` too.
+`ErrorItem` decoding accepts any JSON value; never change `Errors`' type.
+
 ### Query parameters
 
 Build query params manually with `url.Values{}`. Do not use struct tags for query encoding:
