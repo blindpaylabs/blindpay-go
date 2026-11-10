@@ -19,6 +19,9 @@ type BlockchainWallet struct {
 	SignatureTxHash      string        `json:"signature_tx_hash,omitempty"`
 	IsAccountAbstraction bool          `json:"is_account_abstraction"`
 	CustomerID           string        `json:"customer_id"`
+	// IsSelfCustody reports whether the customer holds the wallet's private
+	// keys. nil means it was never answered; once set it cannot be changed.
+	IsSelfCustody *bool `json:"is_self_custody,omitempty"`
 }
 
 // GetMessageResponse represents the wallet message response.
@@ -32,6 +35,11 @@ type CreateWithAddressParams struct {
 	Name       string        `json:"name"`
 	Network    types.Network `json:"network"`
 	Address    string        `json:"address"`
+	// IsSelfCustody declares whether the customer holds the wallet's private
+	// keys. Required when the customer's country is BR (the API returns
+	// 400 self_custody_required without it since 2026-10-10); optional
+	// otherwise. nil omits the field.
+	IsSelfCustody *bool `json:"is_self_custody,omitempty"`
 }
 
 // CreateWithHashParams represents parameters for creating a wallet with hash.
@@ -40,6 +48,11 @@ type CreateWithHashParams struct {
 	Name            string        `json:"name"`
 	Network         types.Network `json:"network"`
 	SignatureTxHash string        `json:"signature_tx_hash"`
+	// IsSelfCustody declares whether the customer holds the wallet's private
+	// keys. Required when the customer's country is BR (the API returns
+	// 400 self_custody_required without it since 2026-10-10); optional
+	// otherwise. nil omits the field.
+	IsSelfCustody *bool `json:"is_self_custody,omitempty"`
 }
 
 // CreateAssetTrustlineResponse represents the asset trustline response.
@@ -120,11 +133,13 @@ func (c *Client) CreateWithAddress(ctx context.Context, params *CreateWithAddres
 		Network              types.Network `json:"network"`
 		Address              string        `json:"address"`
 		IsAccountAbstraction bool          `json:"is_account_abstraction"`
+		IsSelfCustody        *bool         `json:"is_self_custody,omitempty"`
 	}{
 		Name:                 params.Name,
 		Network:              params.Network,
 		Address:              params.Address,
 		IsAccountAbstraction: true,
+		IsSelfCustody:        params.IsSelfCustody,
 	}
 
 	return request.Do[*BlockchainWallet](c.cfg, ctx, "POST", path, body)
@@ -146,11 +161,13 @@ func (c *Client) CreateWithHash(ctx context.Context, params *CreateWithHashParam
 		Network              types.Network `json:"network"`
 		SignatureTxHash      string        `json:"signature_tx_hash"`
 		IsAccountAbstraction bool          `json:"is_account_abstraction"`
+		IsSelfCustody        *bool         `json:"is_self_custody,omitempty"`
 	}{
 		Name:                 params.Name,
 		Network:              params.Network,
 		SignatureTxHash:      params.SignatureTxHash,
 		IsAccountAbstraction: false,
+		IsSelfCustody:        params.IsSelfCustody,
 	}
 
 	return request.Do[*BlockchainWallet](c.cfg, ctx, "POST", path, body)

@@ -100,5 +100,23 @@
     "field": "aiprise_validation_key",
     "reason": "Absent from the public spec snapshot; only appeared alongside internal-only surface in the unfiltered spec. Pre-existing SDK field, unrelated to the customers rename; needs its own investigation.",
     "owner": "eric"
+  },
+  {
+    "schema": "wallets.BlockchainWallet",
+    "field": "is_self_custody",
+    "reason": "Present in the reference spec (blindpay-v2@66144f3b2: CreateBlockchainWalletIn / BlockchainWalletOut) but missing from the stale committed spec-snapshot.json; required for BR customers since 2026-10-10 (post.instances.[instance_id].customers.[customer_id].blockchain-wallets.ts:64). Remove this entry when the snapshot is refreshed to the reference spec.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "wallets.CreateWithAddressParams",
+    "field": "is_self_custody",
+    "reason": "Present in the reference spec (blindpay-v2@66144f3b2: CreateBlockchainWalletIn / BlockchainWalletOut) but missing from the stale committed spec-snapshot.json; required for BR customers since 2026-10-10 (post.instances.[instance_id].customers.[customer_id].blockchain-wallets.ts:64). Remove this entry when the snapshot is refreshed to the reference spec.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "wallets.CreateWithHashParams",
+    "field": "is_self_custody",
+    "reason": "Present in the reference spec (blindpay-v2@66144f3b2: CreateBlockchainWalletIn / BlockchainWalletOut) but missing from the stale committed spec-snapshot.json; required for BR customers since 2026-10-10 (post.instances.[instance_id].customers.[customer_id].blockchain-wallets.ts:64). Remove this entry when the snapshot is refreshed to the reference spec.",
+    "owner": "sdk-parity"
   }
 ]
