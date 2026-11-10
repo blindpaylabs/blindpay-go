@@ -16,12 +16,14 @@ blindpay-go/
   VERSIONING.md            # Release process docs.
   internal/
     config/config.go       # config.Config -- bridges top-level config to request.Config.
-    request/request.go     # Generic HTTP helper: request.Do[T](...). APIError type.
+    request/request.go     # Generic HTTP helper: request.Do[T](...). APIError, ParseAPIError.
+    request/list.go        # request.List[T] / DoList[T]: decodes bare-array and {data, pagination} lists.
     types/
       shared.go            # Shared enums: CurrencyType, Network, StablecoinToken, etc.
       types.go             # More shared enums: Rail, WebhookEvent, RecipientRelationship, etc.
     blindpaytest/
-      roundtripper.go      # Test helper: mock HTTP RoundTripper for unit tests.
+      roundtripper.go      # Test helper: mock HTTP RoundTripper (asserts method, path, query, headers, body).
+      fixtures.go          # Test helper: loaders for testdata/fixtures (ResponseVariants, LoadErrorFixture).
   available/client.go      # GET /available/* -- rails, bank details, NAICS, SWIFT lookup.
   bankaccounts/client.go   # Bank account CRUD (PIX, ACH, Wire, SPEI, SWIFT, RTP, etc.).
   custodialwallets/...     # Custodial wallet operations.
@@ -40,6 +42,7 @@ blindpay-go/
   wallets/client.go        # Blockchain wallet CRUD + OfframpClient (second client in same pkg).
   webhookendpoints/...     # Webhook endpoint management.
   cmd/contractcheck/       # `go run ./cmd/contractcheck` -- wire-contract check, see section 8.
+  testdata/fixtures/       # Shared spec-shaped fixtures (verbatim copy of the cross-SDK set), see section 8.
 ```
 
 Each resource lives in its own Go package (directory). The package name is the plural lowercase resource name (e.g. `payins`, `customers`, `wallets`). Multi-word resources use a single lowercase word (e.g. `bankaccounts`, `custodialwallets`, `webhookendpoints`, `virtualaccounts`, `partnerfees`). There is no `receivers` or `apikeys` package: `receivers` was fully replaced by `customers`, and API Keys is intentionally absent from the public API reference.
@@ -508,9 +511,10 @@ Payouts, payins, payables and customers return a bare array when none of
 `limit` / `starting_after` / `ending_before` is sent, and the
 `{data, pagination}` envelope when any is (transfers and wallet deposits
 always return the envelope). Decode these with
-`request.Do[request.List[Resource]](...)`, which detects the shape from the
-body and exposes `Data` plus an optional `Pagination`; never infer the shape
-from the params you sent.
+`request.DoList[Resource](cfg, ctx, path)` (rows only) or
+`request.Do[request.List[Resource]](...)` (rows plus optional `Pagination`),
+which detect the shape from the body; never infer the shape from the params
+you sent.
 
 ### Errors
 
