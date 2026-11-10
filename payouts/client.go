@@ -169,7 +169,11 @@ func NewClient(cfg *config.Config) *Client {
 	}
 }
 
-// List retrieves all payouts with optional filters.
+// List retrieves payouts with optional filters.
+//
+// The API returns every payout as a bare array when no pagination param is
+// sent, and one page wrapped in {data, pagination} when Limit is set; both
+// shapes are decoded and the page's rows are returned.
 func (c *Client) List(ctx context.Context, params *ListParams) ([]Payout, error) {
 	path := fmt.Sprintf("/instances/%s/payouts", c.instanceID)
 
@@ -189,7 +193,11 @@ func (c *Client) List(ctx context.Context, params *ListParams) ([]Payout, error)
 		}
 	}
 
-	return request.Do[[]Payout](c.cfg, ctx, "GET", path, nil)
+	list, err := request.Do[request.List[Payout]](c.cfg, ctx, "GET", path, nil)
+	if err != nil {
+		return nil, err
+	}
+	return list.Data, nil
 }
 
 // Export retrieves all payouts for export with optional pagination.

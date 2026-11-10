@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"sort"
+	"strings"
 	"testing"
 )
 
@@ -129,4 +130,29 @@ func LoadErrorFixture(t *testing.T, name string) ErrorFixture {
 		t.Fatalf("blindpaytest: decoding errors/%s: %v", name, err)
 	}
 	return ErrorFixture(raw)
+}
+
+// IsEnvelope reports whether a list variant name is the {data, pagination}
+// envelope branch (".b0") rather than the bare-array branch (".b1").
+func (v Variant) IsEnvelope() bool {
+	return strings.HasSuffix(v.Name, ".b0")
+}
+
+// RowCount returns the number of rows in a list variant, for either shape.
+func (v Variant) RowCount(t *testing.T) int {
+	t.Helper()
+
+	var rows []json.RawMessage
+	if v.IsEnvelope() {
+		var envelope struct {
+			Data []json.RawMessage `json:"data"`
+		}
+		if err := json.Unmarshal(v.Body, &envelope); err != nil {
+			t.Fatalf("blindpaytest: variant %s: %v", v.Name, err)
+		}
+		rows = envelope.Data
+	} else if err := json.Unmarshal(v.Body, &rows); err != nil {
+		t.Fatalf("blindpaytest: variant %s: %v", v.Name, err)
+	}
+	return len(rows)
 }

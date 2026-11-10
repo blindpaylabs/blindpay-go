@@ -128,7 +128,11 @@ func NewClient(cfg *config.Config) *Client {
 	}
 }
 
-// List retrieves all payins with optional filters.
+// List retrieves payins with optional filters.
+//
+// The API returns every payin as a bare array when no pagination param is
+// sent, and one page wrapped in {data, pagination} when Limit is set; both
+// shapes are decoded and the page's rows are returned.
 func (c *Client) List(ctx context.Context, params *ListParams) ([]Payin, error) {
 	path := fmt.Sprintf("/instances/%s/payins", c.instanceID)
 
@@ -151,7 +155,11 @@ func (c *Client) List(ctx context.Context, params *ListParams) ([]Payin, error) 
 		}
 	}
 
-	return request.Do[[]Payin](c.cfg, ctx, "GET", path, nil)
+	list, err := request.Do[request.List[Payin]](c.cfg, ctx, "GET", path, nil)
+	if err != nil {
+		return nil, err
+	}
+	return list.Data, nil
 }
 
 // Get retrieves a specific payin by ID.
