@@ -25,7 +25,8 @@ func TestPager_All(t *testing.T) {
 
 	// Breaking early stops fetching.
 	f = &fakePages{pages: map[string]*Page[string]{"": page([]string{"a", "b"}, "b"), "b": page([]string{"c"}, "")}}
-	for range NewPager[string](context.Background(), "", f.fetch).All() {
+	for _, err := range NewPager[string](context.Background(), "", f.fetch).All() {
+		require.NoError(t, err)
 		break
 	}
 	require.Equal(t, []string{""}, f.cursors)

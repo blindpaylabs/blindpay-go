@@ -605,7 +605,7 @@ func writeCoverageTable(t *testing.T, path string) {
 	require.NotEmpty(t, surface, "set BLINDPAY_SURFACE to sdk-surface.txt")
 	f, err := os.Open(surface)
 	require.NoError(t, err)
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	var b strings.Builder
 	sc := bufio.NewScanner(f)

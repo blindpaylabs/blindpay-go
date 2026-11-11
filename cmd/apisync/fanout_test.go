@@ -23,7 +23,7 @@ func fanoutFixture(t *testing.T, variantNames []string, policy string, propertyS
 	var structsGo strings.Builder
 	structsGo.WriteString("package variants\n\n")
 	for _, name := range variantNames {
-		structsGo.WriteString(fmt.Sprintf("type %s struct {\n\tID string `json:\"id\"`\n}\n\n", name))
+		fmt.Fprintf(&structsGo, "type %s struct {\n\tID string `json:\"id\"`\n}\n\n", name)
 	}
 
 	sdkSites := make([]map[string]any, 0, len(variantNames))

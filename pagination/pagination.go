@@ -110,10 +110,10 @@ func (p *Pager[T]) Next() bool {
 		p.items, p.idx = page.Data, 0
 
 		next := page.NextCursor()
-		switch {
-		case next == "":
+		switch next {
+		case "":
 			p.done = true
-		case next == p.cursor:
+		case p.cursor:
 			p.done = true
 			p.stopErr = errors.New("blindpay: pagination cursor did not advance")
 		default:
