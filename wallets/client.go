@@ -2,6 +2,7 @@ package wallets
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -95,6 +96,9 @@ type PrepareSolanaDelegationTransactionParams struct {
 type PrepareSolanaDelegationTransactionResponse struct {
 	Success     bool   `json:"success"`
 	Transaction string `json:"transaction"`
+	// Debug is diagnostic output the API may attach; its shape is not
+	// specified.
+	Debug json.RawMessage `json:"debug,omitempty"`
 }
 
 // Client handles blockchain wallet-related operations.

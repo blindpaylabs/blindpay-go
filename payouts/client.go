@@ -198,7 +198,10 @@ type SubmitDocumentsParams struct {
 
 // SubmitDocumentsResponse represents the response when submitting payout documents.
 type SubmitDocumentsResponse struct {
-	ID string `json:"id"`
+	// Deprecated: the API returns {"success": true}; ID is always empty.
+	// Use Success.
+	ID      string `json:"id"`
+	Success bool   `json:"success"`
 }
 
 // CreateResponse represents the response when creating a payout.

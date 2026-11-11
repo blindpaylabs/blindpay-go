@@ -33,6 +33,7 @@ type InstanceMember struct {
 	ImageURL   string             `json:"image_url"`
 	CreatedAt  time.Time          `json:"created_at"`
 	Role       InstanceMemberRole `json:"role"`
+	HasPasskey *bool              `json:"has_passkey,omitempty"`
 }
 
 // UpdateParams represents parameters for updating an instance.
