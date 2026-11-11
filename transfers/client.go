@@ -3,13 +3,13 @@ package transfers
 import (
 	"context"
 	"fmt"
-	"net/url"
 	"time"
 
 	"github.com/blindpaylabs/blindpay-go/internal/config"
 	"github.com/blindpaylabs/blindpay-go/internal/request"
 	"github.com/blindpaylabs/blindpay-go/internal/types"
 	"github.com/blindpaylabs/blindpay-go/option"
+	"github.com/blindpaylabs/blindpay-go/pagination"
 )
 
 // TrackingStep represents a transfer tracking step.
@@ -101,10 +101,23 @@ type CreateResponse struct {
 	TrackingPartnerFee            TrackingStep                  `json:"tracking_partner_fee"`
 }
 
-// ListParams represents parameters for listing transfers.
+// ListParams represents parameters for listing transfers. The API always
+// returns one page (default 10 rows).
 type ListParams struct {
-	Limit  int `json:"limit,omitempty"`
+	// Limit is the page size (10, 50, 100, 200, 500 or 1000).
+	Limit int `json:"limit,omitempty"`
+	// Deprecated: ignored by the API; use StartingAfter.
 	Offset int `json:"offset,omitempty"`
+	// StartingAfter returns the page after this transfer ID (the previous
+	// page's Pagination.NextPage).
+	StartingAfter string `json:"-"`
+	// EndingBefore returns the page before this transfer ID.
+	EndingBefore string                  `json:"-"`
+	CustomerID   string                  `json:"-"`
+	WalletID     string                  `json:"-"`
+	Status       types.TransactionStatus `json:"-"`
+	Network      types.Network           `json:"-"`
+	Token        types.StablecoinToken   `json:"-"`
 }
 
 // ListResponse represents the response when listing transfers.
@@ -159,24 +172,66 @@ func (c *Client) Create(ctx context.Context, params *CreateParams, opts ...optio
 	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, params, opts...)
 }
 
-// List retrieves all transfers with optional pagination.
+// List retrieves one page of transfers (the API always paginates them).
 func (c *Client) List(ctx context.Context, params *ListParams, opts ...option.RequestOption) (*ListResponse, error) {
-	path := request.Pathf("/instances/%s/transfers", c.instanceID)
-
-	if params != nil {
-		q := url.Values{}
-		if params.Limit > 0 {
-			q.Set("limit", fmt.Sprintf("%d", params.Limit))
-		}
-		if params.Offset > 0 {
-			q.Set("offset", fmt.Sprintf("%d", params.Offset))
-		}
-		if len(q) > 0 {
-			path += "?" + q.Encode()
-		}
+	page, err := c.ListPage(ctx, params, opts...)
+	if err != nil {
+		return nil, err
 	}
+	return &ListResponse{Data: page.Data, Pagination: page.Pagination}, nil
+}
 
-	return request.Do[*ListResponse](c.cfg, ctx, "GET", path, nil, opts...)
+// ListPage retrieves one page of transfers with its pagination metadata.
+func (c *Client) ListPage(ctx context.Context, params *ListParams, opts ...option.RequestOption) (*pagination.Page[Transfer], error) {
+	list, err := request.Do[request.List[Transfer]](c.cfg, ctx, "GET", c.listPath(params), nil, opts...)
+	if err != nil {
+		return nil, err
+	}
+	page := &pagination.Page[Transfer]{Data: list.Data}
+	if list.Pagination != nil {
+		page.Pagination = *list.Pagination
+	}
+	return page, nil
+}
+
+// ListAutoPaging iterates over every transfer matching params, one page at
+// a time (Limit defaults to 100), starting after params.StartingAfter. It
+// only pages forward: EndingBefore makes the pager fail with
+// pagination.ErrEndingBeforeUnsupported.
+func (c *Client) ListAutoPaging(ctx context.Context, params *ListParams, opts ...option.RequestOption) *pagination.Pager[Transfer] {
+	p := ListParams{}
+	if params != nil {
+		p = *params
+	}
+	if p.EndingBefore != "" {
+		return pagination.NewErrPager[Transfer](pagination.ErrEndingBeforeUnsupported)
+	}
+	if p.Limit == 0 {
+		p.Limit = pagination.DefaultLimit
+	}
+	return pagination.NewPager(ctx, p.StartingAfter, func(ctx context.Context, cursor string) (*pagination.Page[Transfer], error) {
+		page := p
+		page.StartingAfter = cursor
+		return c.ListPage(ctx, &page, opts...)
+	})
+}
+
+func (c *Client) listPath(params *ListParams) string {
+	path := request.Pathf("/instances/%s/transfers", c.instanceID)
+	if params == nil {
+		return path
+	}
+	var q request.Query
+	q.Int("limit", params.Limit)
+	q.Int("offset", params.Offset)
+	q.String("starting_after", params.StartingAfter)
+	q.String("ending_before", params.EndingBefore)
+	q.String("customer_id", params.CustomerID)
+	q.String("wallet_id", params.WalletID)
+	q.String("status", string(params.Status))
+	q.String("network", string(params.Network))
+	q.String("token", string(params.Token))
+	return q.Apply(path)
 }
 
 // Get retrieves a specific transfer by ID.

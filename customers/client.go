@@ -3,13 +3,14 @@ package customers
 import (
 	"context"
 	"fmt"
-	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/blindpaylabs/blindpay-go/internal/config"
 	"github.com/blindpaylabs/blindpay-go/internal/request"
 	"github.com/blindpaylabs/blindpay-go/internal/types"
 	"github.com/blindpaylabs/blindpay-go/option"
+	"github.com/blindpaylabs/blindpay-go/pagination"
 )
 
 // ProofOfAddressDocType represents proof of address document types.
@@ -525,7 +526,9 @@ type RequestLimitIncreaseResponse struct {
 
 // ListParams represents parameters for listing customers with pagination.
 type ListParams struct {
-	Limit         string    `json:"-"`
+	// Limit is the page size ("10", "50", "100", "200", "500" or "1000").
+	Limit string `json:"-"`
+	// Deprecated: ignored by the API; use StartingAfter.
 	Offset        string    `json:"-"`
 	StartingAfter string    `json:"-"`
 	EndingBefore  string    `json:"-"`
@@ -570,55 +573,66 @@ func (c *Client) List(ctx context.Context, opts ...option.RequestOption) ([]Cust
 // returns every matching customer as a bare array. Both shapes are decoded;
 // for a bare array Pagination is the zero value (HasMore false).
 func (c *Client) ListWithParams(ctx context.Context, params *ListParams, opts ...option.RequestOption) (*ListResponse, error) {
-	path := request.Pathf("/instances/%s/customers", c.instanceID)
-
-	if params != nil {
-		q := url.Values{}
-		if params.Limit != "" {
-			q.Set("limit", params.Limit)
-		}
-		if params.Offset != "" {
-			q.Set("offset", params.Offset)
-		}
-		if params.StartingAfter != "" {
-			q.Set("starting_after", params.StartingAfter)
-		}
-		if params.EndingBefore != "" {
-			q.Set("ending_before", params.EndingBefore)
-		}
-		if params.FullName != "" {
-			q.Set("full_name", params.FullName)
-		}
-		if params.CustomerName != "" {
-			q.Set("customer_name", params.CustomerName)
-		}
-		if params.Status != "" {
-			q.Set("status", string(params.Status))
-		}
-		if params.CustomerID != "" {
-			q.Set("customer_id", params.CustomerID)
-		}
-		if params.BankAccountID != "" {
-			q.Set("bank_account_id", params.BankAccountID)
-		}
-		if params.Country != "" {
-			q.Set("country", params.Country)
-		}
-		if len(q) > 0 {
-			path += "?" + q.Encode()
-		}
-	}
-
-	list, err := request.Do[request.List[Customer]](c.cfg, ctx, "GET", path, nil, opts...)
+	page, err := c.ListPage(ctx, params, opts...)
 	if err != nil {
 		return nil, err
 	}
+	return &ListResponse{Data: page.Data, Pagination: page.Pagination}, nil
+}
 
-	resp := &ListResponse{Data: list.Data}
-	if list.Pagination != nil {
-		resp.Pagination = *list.Pagination
+// ListPage retrieves one page of customers with its pagination metadata
+// (same request as ListWithParams).
+func (c *Client) ListPage(ctx context.Context, params *ListParams, opts ...option.RequestOption) (*pagination.Page[Customer], error) {
+	list, err := request.Do[request.List[Customer]](c.cfg, ctx, "GET", c.listPath(params), nil, opts...)
+	if err != nil {
+		return nil, err
 	}
-	return resp, nil
+	page := &pagination.Page[Customer]{Data: list.Data}
+	if list.Pagination != nil {
+		page.Pagination = *list.Pagination
+	}
+	return page, nil
+}
+
+// ListAutoPaging iterates over every customer matching params, one page at
+// a time (Limit defaults to "100"), starting after params.StartingAfter. It
+// only pages forward: EndingBefore makes the pager fail with
+// pagination.ErrEndingBeforeUnsupported.
+func (c *Client) ListAutoPaging(ctx context.Context, params *ListParams, opts ...option.RequestOption) *pagination.Pager[Customer] {
+	p := ListParams{}
+	if params != nil {
+		p = *params
+	}
+	if p.EndingBefore != "" {
+		return pagination.NewErrPager[Customer](pagination.ErrEndingBeforeUnsupported)
+	}
+	if p.Limit == "" {
+		p.Limit = strconv.Itoa(pagination.DefaultLimit)
+	}
+	return pagination.NewPager(ctx, p.StartingAfter, func(ctx context.Context, cursor string) (*pagination.Page[Customer], error) {
+		page := p
+		page.StartingAfter = cursor
+		return c.ListPage(ctx, &page, opts...)
+	})
+}
+
+func (c *Client) listPath(params *ListParams) string {
+	path := request.Pathf("/instances/%s/customers", c.instanceID)
+	if params == nil {
+		return path
+	}
+	var q request.Query
+	q.String("limit", params.Limit)
+	q.String("offset", params.Offset)
+	q.String("starting_after", params.StartingAfter)
+	q.String("ending_before", params.EndingBefore)
+	q.String("full_name", params.FullName)
+	q.String("customer_name", params.CustomerName)
+	q.String("status", string(params.Status))
+	q.String("customer_id", params.CustomerID)
+	q.String("bank_account_id", params.BankAccountID)
+	q.String("country", params.Country)
+	return q.Apply(path)
 }
 
 // CreateIndividualWithStandardKYC creates an individual customer with standard KYC.

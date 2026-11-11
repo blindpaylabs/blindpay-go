@@ -10,6 +10,7 @@ import (
 	"github.com/blindpaylabs/blindpay-go/internal/request"
 	"github.com/blindpaylabs/blindpay-go/internal/types"
 	"github.com/blindpaylabs/blindpay-go/option"
+	"github.com/blindpaylabs/blindpay-go/pagination"
 )
 
 // Payin represents a payin transaction.
@@ -89,10 +90,25 @@ type BankDetails struct {
 
 // ListParams represents parameters for listing payins.
 type ListParams struct {
-	Status     types.TransactionStatus `json:"status,omitempty"`
-	CustomerID string                  `json:"customer_id,omitempty"`
-	Limit      int                     `json:"limit,omitempty"`
-	Offset     int                     `json:"offset,omitempty"`
+	// Limit is the page size (10, 50, 100, 200, 500 or 1000). Setting Limit,
+	// StartingAfter or EndingBefore makes the API return one page; with none
+	// of them it returns every payin.
+	Limit int `json:"limit,omitempty"`
+	// Deprecated: ignored by the API; use StartingAfter.
+	Offset int `json:"offset,omitempty"`
+	// StartingAfter returns the page after this payin ID (the previous
+	// page's Pagination.NextPage).
+	StartingAfter string `json:"-"`
+	// EndingBefore returns the page before this payin ID.
+	EndingBefore  string                   `json:"-"`
+	CustomerID    string                   `json:"customer_id,omitempty"`
+	Status        types.TransactionStatus  `json:"status,omitempty"`
+	CustomerName  string                   `json:"-"`
+	BankAccountID string                   `json:"-"`
+	Country       string                   `json:"-"`
+	PaymentMethod types.PayinPaymentMethod `json:"-"`
+	Network       types.Network            `json:"-"`
+	Token         types.StablecoinToken    `json:"-"`
 }
 
 // CreateEvmResponse represents the response when creating an EVM payin.
@@ -132,31 +148,71 @@ func NewClient(cfg *config.Config) *Client {
 // List retrieves payins with optional filters.
 //
 // The API returns every payin as a bare array when no pagination param is
-// sent, and one page wrapped in {data, pagination} when Limit is set; both
-// shapes are decoded and the page's rows are returned.
+// sent, and one page wrapped in {data, pagination} when Limit,
+// StartingAfter or EndingBefore is set; both shapes are decoded and the
+// rows are returned. Use ListPage for the pagination metadata, or
+// ListAutoPaging to iterate over every payin.
 func (c *Client) List(ctx context.Context, params *ListParams, opts ...option.RequestOption) ([]Payin, error) {
-	path := request.Pathf("/instances/%s/payins", c.instanceID)
+	return request.DoList[Payin](c.cfg, ctx, c.listPath(params), opts...)
+}
 
-	if params != nil {
-		q := url.Values{}
-		if params.Status != "" {
-			q.Set("status", string(params.Status))
-		}
-		if params.CustomerID != "" {
-			q.Set("customer_id", params.CustomerID)
-		}
-		if params.Limit > 0 {
-			q.Set("limit", fmt.Sprintf("%d", params.Limit))
-		}
-		if params.Offset > 0 {
-			q.Set("offset", fmt.Sprintf("%d", params.Offset))
-		}
-		if len(q) > 0 {
-			path += "?" + q.Encode()
-		}
+// ListPage retrieves one page of payins with its pagination metadata.
+// Set Limit (or a cursor) to get a page; without them the API returns every
+// payin and Pagination is the zero value.
+func (c *Client) ListPage(ctx context.Context, params *ListParams, opts ...option.RequestOption) (*pagination.Page[Payin], error) {
+	list, err := request.Do[request.List[Payin]](c.cfg, ctx, "GET", c.listPath(params), nil, opts...)
+	if err != nil {
+		return nil, err
 	}
+	page := &pagination.Page[Payin]{Data: list.Data}
+	if list.Pagination != nil {
+		page.Pagination = *list.Pagination
+	}
+	return page, nil
+}
 
-	return request.DoList[Payin](c.cfg, ctx, path, opts...)
+// ListAutoPaging iterates over every payin matching params, one page at a
+// time (Limit defaults to 100), starting after params.StartingAfter. It only
+// pages forward: EndingBefore makes the pager fail with
+// pagination.ErrEndingBeforeUnsupported. Each page request is retried per
+// the client's retry policy.
+func (c *Client) ListAutoPaging(ctx context.Context, params *ListParams, opts ...option.RequestOption) *pagination.Pager[Payin] {
+	p := ListParams{}
+	if params != nil {
+		p = *params
+	}
+	if p.EndingBefore != "" {
+		return pagination.NewErrPager[Payin](pagination.ErrEndingBeforeUnsupported)
+	}
+	if p.Limit == 0 {
+		p.Limit = pagination.DefaultLimit
+	}
+	return pagination.NewPager(ctx, p.StartingAfter, func(ctx context.Context, cursor string) (*pagination.Page[Payin], error) {
+		page := p
+		page.StartingAfter = cursor
+		return c.ListPage(ctx, &page, opts...)
+	})
+}
+
+func (c *Client) listPath(params *ListParams) string {
+	path := request.Pathf("/instances/%s/payins", c.instanceID)
+	if params == nil {
+		return path
+	}
+	var q request.Query
+	q.Int("limit", params.Limit)
+	q.Int("offset", params.Offset)
+	q.String("starting_after", params.StartingAfter)
+	q.String("ending_before", params.EndingBefore)
+	q.String("customer_id", params.CustomerID)
+	q.String("status", string(params.Status))
+	q.String("customer_name", params.CustomerName)
+	q.String("bank_account_id", params.BankAccountID)
+	q.String("country", params.Country)
+	q.String("payment_method", string(params.PaymentMethod))
+	q.String("network", string(params.Network))
+	q.String("token", string(params.Token))
+	return q.Apply(path)
 }
 
 // Get retrieves a specific payin by ID.

@@ -15,7 +15,8 @@ import (
 // TestEveryMethodForwardsRequestOptions is the options-forwarding guard: every
 // exported resource method whose first parameter is ctx context.Context must
 // end with "opts ...option.RequestOption" and pass "opts..." to every
-// transport call (request.Do, DoList, DoMultipart) or delegated SDK call.
+// transport call (request.Do, DoList, DoMultipart) or delegated method call
+// (including the per-page fetch inside ListAutoPaging).
 func TestEveryMethodForwardsRequestOptions(t *testing.T) {
 	skip := map[string]bool{"cmd": true, "internal": true, "examples": true, "testdata": true, "option": true, "pagination": true}
 
@@ -79,9 +80,19 @@ func takesCtx(fn *ast.FuncDecl) bool {
 	return params[0].Names[0].Name == "ctx" && exprString(params[0].Type) == "context.Context"
 }
 
+// isTransportCall matches request.Do* and delegation to another exported
+// method on the same receiver (c.ListPage(...)), which must forward opts too.
 func isTransportCall(call *ast.CallExpr) bool {
 	name := exprString(call.Fun)
-	return strings.HasPrefix(name, "request.Do")
+	if strings.HasPrefix(name, "request.Do") {
+		return true
+	}
+	sel, ok := call.Fun.(*ast.SelectorExpr)
+	if !ok || !sel.Sel.IsExported() {
+		return false
+	}
+	recv, ok := sel.X.(*ast.Ident)
+	return ok && recv.Name == "c"
 }
 
 func exprString(e ast.Expr) string {

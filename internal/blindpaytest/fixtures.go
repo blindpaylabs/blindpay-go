@@ -161,7 +161,9 @@ func (v Variant) RowCount(t *testing.T) int {
 	t.Helper()
 
 	var rows []json.RawMessage
-	if v.Shape == ShapeEnvelope {
+	// Detect from the body: always-envelope lists (transfers) have no
+	// .b0/.b1 suffix.
+	if trimmed := strings.TrimSpace(string(v.Body)); strings.HasPrefix(trimmed, "{") {
 		var envelope struct {
 			Data []json.RawMessage `json:"data"`
 		}
@@ -173,4 +175,50 @@ func (v Variant) RowCount(t *testing.T) int {
 		t.Fatalf("blindpaytest: variant %s: %v", v.Name, err)
 	}
 	return len(rows)
+}
+
+// FindVariant looks up one named variant (e.g. "full.b0") of an operation's
+// success response fixture.
+func FindVariant(t *testing.T, operation, name string) Variant {
+	t.Helper()
+	for _, v := range ResponseVariants(t, operation) {
+		if v.Name == name {
+			return v
+		}
+	}
+	t.Fatalf("blindpaytest: variant %q not found for %s", name, operation)
+	return Variant{}
+}
+
+// NextPage returns the envelope's pagination.next_page ("" when absent).
+func (v Variant) NextPage(t *testing.T) string {
+	t.Helper()
+	var envelope struct {
+		Pagination struct {
+			NextPage *string `json:"next_page"`
+		} `json:"pagination"`
+	}
+	if err := json.Unmarshal(v.Body, &envelope); err != nil {
+		t.Fatalf("blindpaytest: variant %s: %v", v.Name, err)
+	}
+	if envelope.Pagination.NextPage == nil {
+		return ""
+	}
+	return *envelope.Pagination.NextPage
+}
+
+// AsLastPage returns the envelope body with pagination rewritten to a last
+// page (has_more false, next_page null), keeping the fixture's rows.
+func (v Variant) AsLastPage(t *testing.T) json.RawMessage {
+	t.Helper()
+	var envelope map[string]json.RawMessage
+	if err := json.Unmarshal(v.Body, &envelope); err != nil {
+		t.Fatalf("blindpaytest: variant %s: %v", v.Name, err)
+	}
+	envelope["pagination"] = json.RawMessage(`{"has_more":false,"next_page":null,"prev_page":null}`)
+	b, err := json.Marshal(envelope)
+	if err != nil {
+		t.Fatalf("blindpaytest: variant %s: %v", v.Name, err)
+	}
+	return b
 }

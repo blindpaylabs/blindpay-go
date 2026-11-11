@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
+	"sync"
 	"testing"
 )
 
@@ -122,4 +123,34 @@ func (rt *RoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 		Body:       io.NopCloser(bytes.NewReader(rt.Out)),
 		Request:    req,
 	}, nil
+}
+
+// Sequence replays one RoundTripper per request, in order, so a test can
+// script several responses (e.g. the pages of an auto-pager) and assert
+// each request. A request past the end fails the test.
+type Sequence struct {
+	T     *testing.T
+	Steps []*RoundTripper
+
+	mu sync.Mutex
+	n  int
+}
+
+func (s *Sequence) RoundTrip(req *http.Request) (*http.Response, error) {
+	s.mu.Lock()
+	n := s.n
+	s.n++
+	s.mu.Unlock()
+
+	if n >= len(s.Steps) {
+		s.T.Fatalf("blindpaytest: unexpected request %d to %s", n+1, req.URL)
+	}
+	return s.Steps[n].RoundTrip(req)
+}
+
+// Calls returns how many requests were made.
+func (s *Sequence) Calls() int {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.n
 }
