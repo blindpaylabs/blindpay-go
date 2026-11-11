@@ -11,14 +11,24 @@ import (
 	"github.com/blindpaylabs/blindpay-go/option"
 )
 
+// YieldStatus is whether the wallet earns yield.
+type YieldStatus string
+
+const (
+	YieldStatusDisabled  YieldStatus = "disabled"
+	YieldStatusEnabled   YieldStatus = "enabled"
+	YieldStatusDisabling YieldStatus = "disabling"
+)
+
 // CustodialWallet represents a custodial wallet.
 type CustodialWallet struct {
-	ID         string        `json:"id"`
-	Name       string        `json:"name"`
-	ExternalID *string       `json:"external_id"`
-	Address    *string       `json:"address"`
-	Network    types.Network `json:"network"`
-	CreatedAt  time.Time     `json:"created_at"`
+	ID          string        `json:"id"`
+	Name        string        `json:"name"`
+	ExternalID  *string       `json:"external_id"`
+	Address     *string       `json:"address"`
+	Network     types.Network `json:"network"`
+	CreatedAt   time.Time     `json:"created_at"`
+	YieldStatus *YieldStatus  `json:"yield_status,omitempty"`
 }
 
 // CreateParams represents parameters for creating a custodial wallet.
@@ -31,10 +41,14 @@ type CreateParams struct {
 
 // WalletTokenBalance represents a token balance in a wallet.
 type WalletTokenBalance struct {
-	Address string                `json:"address"`
-	ID      string                `json:"id"`
-	Symbol  types.StablecoinToken `json:"symbol"`
-	Amount  float64               `json:"amount"`
+	// Amounts are whole tokens (10.5 = 10.5 USDC). TotalAmount is Amount
+	// plus yield earned (EarningAmount).
+	Address       string                `json:"address"`
+	ID            string                `json:"id"`
+	Symbol        types.StablecoinToken `json:"symbol"`
+	Amount        float64               `json:"amount"`
+	EarningAmount float64               `json:"earning_amount"`
+	TotalAmount   float64               `json:"total_amount"`
 }
 
 // GetBalanceResponse represents the balance of a custodial wallet.
@@ -42,6 +56,9 @@ type GetBalanceResponse struct {
 	USDC WalletTokenBalance `json:"USDC"`
 	USDT WalletTokenBalance `json:"USDT"`
 	USDB WalletTokenBalance `json:"USDB"`
+	// EURC and EURB are present on networks that hold them.
+	EURC *WalletTokenBalance `json:"EURC,omitempty"`
+	EURB *WalletTokenBalance `json:"EURB,omitempty"`
 }
 
 // Client handles custodial wallet-related operations.

@@ -56,6 +56,11 @@ type Payin struct {
 	PseTaxId              *string                      `json:"pse_tax_id,omitempty"`
 	PartnerFeeID          *string                      `json:"partner_fee_id,omitempty"`
 	ManualExecutionStatus *types.ManualExecutionStatus `json:"manual_execution_status,omitempty"`
+	PayerRules            *PayerRules                  `json:"payer_rules,omitempty"`
+	// ManualConcludedAt (an ISO 8601 timestamp) and ManualConcludedBy
+	// record when and by whom a manual execution was concluded.
+	ManualConcludedAt *types.LooseString `json:"manual_concluded_at,omitempty"`
+	ManualConcludedBy *string            `json:"manual_concluded_by,omitempty"`
 }
 
 // BankDetails represents bank details for a payin.

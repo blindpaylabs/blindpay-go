@@ -17,28 +17,42 @@ type FeeOptions struct {
 	PayoutPercentage float64 `json:"payout_percentage"`
 }
 
+// YieldFee is how managed-wallet yield is split, in basis points
+// (100 = 1%). PartnerWallets maps a network to the partner's payout
+// address on it.
+type YieldFee struct {
+	BlindpayShareBps int64             `json:"blindpay_share_bps"`
+	PartnerShareBps  int64             `json:"partner_share_bps"`
+	PartnerWallets   map[string]string `json:"partner_wallets,omitempty"`
+}
+
 // GetResponse represents the response when retrieving fees.
 type GetResponse struct {
-	ID                 string     `json:"id"`
-	InstanceID         string     `json:"instance_id"`
-	ACH                FeeOptions `json:"ach"`
-	DomesticWire       FeeOptions `json:"domestic_wire"`
-	RTP                FeeOptions `json:"rtp"`
-	InternationalSwift FeeOptions `json:"international_swift"`
-	Pix                FeeOptions `json:"pix"`
-	PixSafe            FeeOptions `json:"pix_safe"`
-	AchColombia        FeeOptions `json:"ach_colombia"`
-	Transfers3         FeeOptions `json:"transfers_3"`
-	Spei               FeeOptions `json:"spei"`
-	Tron               FeeOptions `json:"tron"`
-	Ethereum           FeeOptions `json:"ethereum"`
-	Polygon            FeeOptions `json:"polygon"`
-	Base               FeeOptions `json:"base"`
-	Arbitrum           FeeOptions `json:"arbitrum"`
-	Stellar            FeeOptions `json:"stellar"`
-	Solana             FeeOptions `json:"solana"`
-	CreatedAt          time.Time  `json:"created_at"`
-	UpdatedAt          time.Time  `json:"updated_at"`
+	ID                 string      `json:"id"`
+	InstanceID         string      `json:"instance_id"`
+	ACH                FeeOptions  `json:"ach"`
+	DomesticWire       FeeOptions  `json:"domestic_wire"`
+	RTP                FeeOptions  `json:"rtp"`
+	InternationalSwift FeeOptions  `json:"international_swift"`
+	Pix                FeeOptions  `json:"pix"`
+	PixSafe            FeeOptions  `json:"pix_safe"`
+	AchColombia        FeeOptions  `json:"ach_colombia"`
+	Transfers3         FeeOptions  `json:"transfers_3"`
+	Spei               FeeOptions  `json:"spei"`
+	Tron               FeeOptions  `json:"tron"`
+	Ethereum           FeeOptions  `json:"ethereum"`
+	Polygon            FeeOptions  `json:"polygon"`
+	Base               FeeOptions  `json:"base"`
+	Arbitrum           FeeOptions  `json:"arbitrum"`
+	Stellar            FeeOptions  `json:"stellar"`
+	Solana             FeeOptions  `json:"solana"`
+	CreatedAt          time.Time   `json:"created_at"`
+	UpdatedAt          time.Time   `json:"updated_at"`
+	Sepa               FeeOptions  `json:"sepa"`
+	FasterPayments     FeeOptions  `json:"faster_payments"`
+	Ted                *FeeOptions `json:"ted,omitempty"`
+	// Yield is the split of managed-wallet yield, if enabled.
+	Yield *YieldFee `json:"yield,omitempty"`
 }
 
 // Client handles fee-related operations.

@@ -257,6 +257,40 @@ type Limits struct {
 	Monthly        float64 `json:"monthly"`
 }
 
+// CnaeCode is one Brazilian activity code (CNAE) with its description.
+type CnaeCode struct {
+	Code        string `json:"code"`
+	Description string `json:"description"`
+}
+
+// CnaeSet is a business's primary and secondary CNAE codes.
+type CnaeSet struct {
+	Primary   CnaeCode   `json:"primary"`
+	Secondary []CnaeCode `json:"secondary"`
+}
+
+// CnaeCondition is a check that a Brazilian business's activity codes
+// (CNAE) match what was expected at approval. Status is "pending",
+// "passed", "failed" or "cancelled".
+type CnaeCondition struct {
+	Status         string   `json:"status"`
+	ExpectedCnaes  []string `json:"expected_cnaes"`
+	CnaeAtApproval CnaeSet  `json:"cnae_at_approval"`
+	ResultCnae     *CnaeSet `json:"result_cnae,omitempty"`
+	DueAt          string   `json:"due_at"`
+	CreatedAt      string   `json:"created_at"`
+	ReviewedAt     *string  `json:"reviewed_at,omitempty"`
+}
+
+// VirtualAccountPreapproval is the review that lets a customer open US
+// virtual accounts. Status is "in_review", "approved" or "rejected".
+type VirtualAccountPreapproval struct {
+	Status          string                 `json:"status"`
+	BankingPartners []types.BankingPartner `json:"banking_partners"`
+	RejectionReason *string                `json:"rejection_reason,omitempty"`
+	ReviewedAt      *string                `json:"reviewed_at,omitempty"`
+}
+
 // Customer represents a customer with KYC information.
 type Customer struct {
 	ID                    string                `json:"id"`
@@ -322,6 +356,17 @@ type Customer struct {
 	AmlStatus               AmlStatus                    `json:"aml_status,omitempty"`
 	AmlHitsData             *AmlHits                     `json:"aml_hits,omitempty"`
 	IsTosAccepted           *bool                        `json:"is_tos_accepted,omitempty"`
+	// CustomerID is the customer's ID (same as ID).
+	CustomerID     string               `json:"customer_id"`
+	Latitude       *float64             `json:"latitude,omitempty"`
+	Longitude      *float64             `json:"longitude,omitempty"`
+	AdditionalInfo []AdditionalInfoItem `json:"additional_info,omitempty"`
+	// CnaeCondition is a pending or finished check of a Brazilian
+	// business's activity codes (CNAE).
+	CnaeCondition *CnaeCondition `json:"cnae_condition,omitempty"`
+	// VirtualAccountPreapproval is the review of the customer for US
+	// virtual accounts.
+	VirtualAccountPreapproval *VirtualAccountPreapproval `json:"virtual_account_preapproval,omitempty"`
 }
 
 // CreateIndividualStandardParams represents parameters for creating an individual with standard KYC.
@@ -537,6 +582,7 @@ type LimitIncreaseRequest struct {
 	SupportingDocumentType LimitIncreaseRequestSupportingDocumentType `json:"supporting_document_type"`
 	CreatedAt              string                                     `json:"created_at"`
 	UpdatedAt              string                                     `json:"updated_at"`
+	SupportingDocuments    []LimitIncreaseSupportingDocument          `json:"supporting_documents,omitempty"`
 }
 
 // AdditionalInfoLabel names the kind of an additional document (e.g.

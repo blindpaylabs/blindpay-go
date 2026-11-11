@@ -1,6 +1,9 @@
 package types
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 type CurrencyType string
 
@@ -113,6 +116,10 @@ type TrackingPayment struct {
 	ProviderStatus         string    `json:"provider_status,omitempty"`
 	EstimatedTimeOfArrival string    `json:"estimated_time_of_arrival,omitempty"`
 	CompletedAt            time.Time `json:"completed_at"`
+	// ReviewSources lists every risk source that sent the payout to manual
+	// review; ReviewContext is their structured context.
+	ReviewSources []string       `json:"review_sources,omitempty"`
+	ReviewContext map[string]any `json:"review_context,omitempty"`
 }
 
 type TrackingLiquidity struct {
@@ -121,6 +128,17 @@ type TrackingLiquidity struct {
 	ProviderStatus         string    `json:"provider_status"`
 	EstimatedTimeOfArrival string    `json:"estimated_time_of_arrival"`
 	CompletedAt            time.Time `json:"completed_at"`
+}
+
+// TrackingDocuments tracks the compliance documents step of a payout.
+// Step is "processing", "on_hold", "pending_review",
+// "pending_refund_review" or "completed"; Status is "waiting_documents" or
+// "compliance_reviewing".
+type TrackingDocuments struct {
+	Step        string  `json:"step"`
+	Status      *string `json:"status,omitempty"`
+	ReviewedBy  *string `json:"reviewed_by,omitempty"`
+	CompletedAt *string `json:"completed_at,omitempty"`
 }
 
 type TrackingComplete struct {
@@ -408,3 +426,19 @@ const (
 	CountryZW Country = "ZW"
 	CountryAX Country = "AX"
 )
+
+// LooseString is a string field the spec leaves untyped. A JSON string
+// decodes as-is; any other value (object, number) keeps its raw JSON text,
+// so decoding never fails.
+type LooseString string
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (s *LooseString) UnmarshalJSON(data []byte) error {
+	var str string
+	if err := json.Unmarshal(data, &str); err == nil {
+		*s = LooseString(str)
+		return nil
+	}
+	*s = LooseString(data)
+	return nil
+}

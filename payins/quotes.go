@@ -29,7 +29,27 @@ type CreateQuoteParams struct {
 
 // PayerRules represents payer rules for payin quotes.
 type PayerRules struct {
-	PixAllowedTaxIDs []string `json:"pix_allowed_tax_ids"`
+	PixAllowedTaxIDs      []string `json:"pix_allowed_tax_ids"`
+	TransfersAllowedTaxID *string  `json:"transfers_allowed_tax_id,omitempty"`
+	PseAllowedTaxIDs      []string `json:"pse_allowed_tax_ids,omitempty"`
+	PseFullName           *string  `json:"pse_full_name,omitempty"`
+	// PseDocumentType is "CC" or "NIT".
+	PseDocumentType   *string `json:"pse_document_type,omitempty"`
+	PseDocumentNumber *string `json:"pse_document_number,omitempty"`
+	PseEmail          *string `json:"pse_email,omitempty"`
+	PsePhone          *string `json:"pse_phone,omitempty"`
+	PseBankCode       *string `json:"pse_bank_code,omitempty"`
+}
+
+// CardInstruction tells a browser checkout how to collect a card payment.
+type CardInstruction struct {
+	// Provider names the card gateway, so the checkout loads its
+	// tokenization library.
+	Provider          string  `json:"provider"`
+	TokenizationKey   string  `json:"tokenization_key"`
+	CheckoutPublicKey *string `json:"checkout_public_key,omitempty"`
+	CheckoutToken     *string `json:"checkout_token,omitempty"`
+	CheckoutURL       *string `json:"checkout_url,omitempty"`
 }
 
 // CreateQuoteResponse represents the response when creating a payin quote.
@@ -42,6 +62,9 @@ type CreateQuoteResponse struct {
 	SenderAmount        float64  `json:"sender_amount"`
 	PartnerFeeAmount    *float64 `json:"partner_fee_amount,omitempty"`
 	FlatFee             *float64 `json:"flat_fee,omitempty"`
+	// CardInstruction is set for card payins: what a browser checkout needs
+	// to tokenize the card.
+	CardInstruction *CardInstruction `json:"card_instruction,omitempty"`
 }
 
 // GetFxRateParams represents parameters for getting payin FX rates.

@@ -345,6 +345,9 @@ type TrackingTransaction = types.TrackingTransaction
 type TrackingPayment = types.TrackingPayment
 type TrackingLiquidity = types.TrackingLiquidity
 type TrackingComplete = types.TrackingComplete
+
+// TrackingDocuments is the documents step of a payout.
+type TrackingDocuments = types.TrackingDocuments
 type TrackingPartnerFee = types.TrackingPartnerFee
 
 type Rail = types.Rail
@@ -440,3 +443,7 @@ const (
 
 	ManualExecutionStatusFailed = types.ManualExecutionStatusFailed
 )
+
+// LooseString is a string field the spec leaves untyped (see
+// types.LooseString).
+type LooseString = types.LooseString

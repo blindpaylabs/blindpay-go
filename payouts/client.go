@@ -86,6 +86,7 @@ type Payout struct {
 	BillingFeeAmount           *float64                        `json:"billing_fee_amount,omitempty"`
 	CpnPaymentID               *string                         `json:"cpn_payment_id,omitempty"`
 	SenderLegalName            *string                         `json:"sender_legal_name,omitempty"`
+	TrackingDocuments          *types.TrackingDocuments        `json:"tracking_documents,omitempty"`
 }
 
 // ListParams represents parameters for listing payouts.
@@ -189,6 +190,7 @@ type CreateResponse struct {
 	TrackingLiquidity   *types.TrackingLiquidity   `json:"tracking_liquidity,omitempty"`
 	TrackingComplete    *types.TrackingComplete    `json:"tracking_complete,omitempty"`
 	TrackingPartnerFee  *types.TrackingPartnerFee  `json:"tracking_partner_fee,omitempty"`
+	TrackingDocuments   *types.TrackingDocuments   `json:"tracking_documents,omitempty"`
 }
 
 // Client handles payout-related operations.

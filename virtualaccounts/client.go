@@ -38,6 +38,27 @@ type VirtualAccountUS struct {
 	} `json:"receiving_bank"`
 }
 
+// VirtualAccountBeneficiary is the name shown to senders.
+type VirtualAccountBeneficiary struct {
+	Name string `json:"name"`
+}
+
+// VirtualAccountMX holds a Mexican virtual account's SPEI details.
+type VirtualAccountMX struct {
+	Spei struct {
+		Clabe string `json:"clabe"`
+	} `json:"spei"`
+	Beneficiary *VirtualAccountBeneficiary `json:"beneficiary,omitempty"`
+}
+
+// VirtualAccountCO holds a Colombian virtual account's Bre-B details.
+type VirtualAccountCO struct {
+	BreB struct {
+		Key string `json:"key"`
+	} `json:"bre_b"`
+	Beneficiary *VirtualAccountBeneficiary `json:"beneficiary,omitempty"`
+}
+
 // VirtualAccount represents a virtual account.
 type VirtualAccount struct {
 	ID                 string                `json:"id"`
@@ -47,6 +68,11 @@ type VirtualAccount struct {
 	BankingPartner     *types.BankingPartner `json:"banking_partner,omitempty"`
 	KycStatus          *string               `json:"kyc_status,omitempty"`
 	BlockchainWallet   interface{}           `json:"blockchain_wallet,omitempty"`
+	CustomerID         *string               `json:"customer_id,omitempty"`
+	// MX is set for Mexican (SPEI) accounts and CO for Colombian (Bre-B)
+	// accounts; US is then absent.
+	MX *VirtualAccountMX `json:"mx,omitempty"`
+	CO *VirtualAccountCO `json:"co,omitempty"`
 }
 
 // CreateParams represents parameters for creating a virtual account.
