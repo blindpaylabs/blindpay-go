@@ -154,6 +154,11 @@ func (c *Client) Get(ctx context.Context, id string, opts ...option.RequestOptio
 	}
 	writeFile(t, clientPath, src)
 
+	// The root op-coverage test calls every SDK method by its hand-written
+	// name (including the two deleted here), so it cannot compile against
+	// the regenerated package; it is not under test here.
+	require.NoError(t, os.Remove(filepath.Join(work, "opcoverage_test.go")))
+
 	// The Get/Create tests belong solely to the two deleted methods; drop
 	// them (List/Delete's tests are untouched).
 	testPath := filepath.Join(work, "partnerfees", "partnerfees_test.go")
