@@ -265,7 +265,7 @@ type OfframpWallet struct {
 type CreateOfframpWalletParams struct {
 	CustomerID    string `json:"-"`
 	BankAccountID string `json:"-"`
-	ExternalID    string `json:"external_id"`
+	ExternalID    string `json:"external_id,omitempty"`
 	Network       string `json:"network"`
 	// PartnerFeeID charges this partner fee on the wallet's offramps.
 	PartnerFeeID *string `json:"partner_fee_id,omitempty"`
