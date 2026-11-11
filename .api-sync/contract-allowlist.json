@@ -328,5 +328,17 @@
     "field": "estimated_volume_per_month",
     "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
     "owner": "sdk-parity"
+  },
+  {
+    "schema": "custodialwallets.Deposit",
+    "field": "token_amount",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "custodialwallets.Deposit",
+    "field": "sender_address",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
   }
 ]

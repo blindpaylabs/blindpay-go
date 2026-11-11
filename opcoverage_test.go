@@ -491,6 +491,12 @@ var opTable = map[string]opEntry{
 		}),
 	}},
 
+	"GET /v1/instances/{instance_id}/customers/{customer_id}/wallets/{id}/deposits": {Name: "CustodialWallets.ListDeposits", Pager: "CustodialWallets.ListDepositsAutoPaging", Notes: "always paginated", Calls: []opCall{
+		call(func(ctx context.Context, c *Client) (any, error) {
+			return c.CustodialWallets.ListDeposits(ctx, tCustomer, tID, nil)
+		}),
+	}},
+
 	// Webhook endpoints.
 	"POST /v1/instances/{instance_id}/webhook-endpoints": {Name: "WebhookEndpoints.Create", Calls: []opCall{
 		call(func(ctx context.Context, c *Client) (any, error) {
@@ -509,13 +515,6 @@ var opTable = map[string]opEntry{
 	"GET /v1/instances/{instance_id}/webhook-endpoints/{id}/secret": {Name: "WebhookEndpoints.GetSecret", Calls: []opCall{
 		call(func(ctx context.Context, c *Client) (any, error) { return c.WebhookEndpoints.GetSecret(ctx, tID) }),
 	}},
-}
-
-// pendingOps are surface ops the SDK does not implement yet. The test
-// fails if one of them gains a table entry without leaving this set, so it
-// can only shrink.
-var pendingOps = map[string]bool{
-	"GET /v1/instances/{instance_id}/customers/{customer_id}/wallets/{id}/deposits": true,
 }
 
 // expectedPath fills an op's path template with the placeholder ids.
@@ -545,28 +544,26 @@ func readOpIndex(t *testing.T) []string {
 	return ops
 }
 
-// TestOperationCoverage is the A8 op-coverage test: every x-sdk operation
-// maps to SDK methods that send the right method and path and decode every
+// TestOperationCoverage is the A8 op-coverage test (and the 94/94 coverage
+// check): every x-sdk operation, and nothing else, maps to SDK methods that send the right method and path and decode every
 // variant of the operation's shared fixture.
 func TestOperationCoverage(t *testing.T) {
 	ops := readOpIndex(t)
 	require.Len(t, ops, 94)
+	require.Len(t, opTable, 94)
 
 	inIndex := map[string]bool{}
 	for _, op := range ops {
 		inIndex[op] = true
 		_, implemented := opTable[op]
-		require.NotEqual(t, implemented, pendingOps[op], "%s: must be in exactly one of opTable and pendingOps", op)
+		require.True(t, implemented, "%s: no SDK method", op)
 	}
 	for op := range opTable {
 		require.True(t, inIndex[op], "opTable has %s, which is not an x-sdk operation", op)
 	}
 
 	for _, op := range ops {
-		entry, ok := opTable[op]
-		if !ok {
-			continue
-		}
+		entry := opTable[op]
 		method, template, _ := strings.Cut(op, " ")
 		path := expectedPath(template)
 		variants := blindpaytest.ResponseVariants(t, op)
@@ -611,10 +608,7 @@ func writeCoverageTable(t *testing.T, path string) {
 		fields := strings.Fields(head)
 		op := fields[0] + " " + fields[1]
 		entry, ok := opTable[op]
-		if !ok {
-			fmt.Fprintf(&b, "%s | -- | options:no | autopager:-- | MISSING\n", op)
-			continue
-		}
+		require.True(t, ok, "%s: no SDK method", op)
 		pager, notes := "--", "--"
 		if entry.Pager != "" {
 			pager = entry.Pager
