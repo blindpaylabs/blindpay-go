@@ -16,8 +16,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go-version }}
       - name: Run tests
-        run: go test -v -race $(go list ./... | grep -v '/examples/')
+        run: go list ./... | grep -v '/examples/' | xargs go test -v -race

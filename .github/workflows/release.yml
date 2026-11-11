@@ -1,42 +1,75 @@
 name: Release
 
+# Tags and publishes a GitHub release whenever main carries a `const Version`
+# that has no tag yet. The constant in blindpay.go is the single source of the
+# version: humans bump it in their PR, and cmd/apisync bumps it in sync PRs.
+# The Go module proxy serves a version as soon as its tag exists, so the tag
+# is the release.
+#
+# Triggering on push to main (rather than on a merged, labelled PR) means
+# every merge path tags the same way, including PRs from forks, which only get
+# a read-only token on pull_request events.
+
 on:
-  pull_request:
-    types: [closed]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
 
 jobs:
   release:
-    name: Create release
-    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'release')
+    name: Tag and release
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v4
 
-      - name: Extract version from source
+      - name: Read the version from blindpay.go
         id: version
         run: |
-          VERSION=$(grep -oP 'const Version = "\K[^"]+' blindpay.go)
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
-          echo "Detected version: $VERSION (tag: v$VERSION)"
+          VERSION=$(grep -oP '^const Version = "\K[0-9]+\.[0-9]+\.[0-9]+(?=")' blindpay.go || true)
+          if [ -z "$VERSION" ]; then
+            echo "::error::could not read const Version from blindpay.go"
+            exit 1
+          fi
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Create tag and release
+      # The checkout has no tags, so ask the remote.
+      - name: Check whether the tag exists
+        id: exists
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.version.outputs.tag }}
         run: |
-          TAG="${{ steps.version.outputs.tag }}"
-
-          # Check if tag already exists
-          if git rev-parse "$TAG" >/dev/null 2>&1; then
-            echo "Tag $TAG already exists, skipping"
-            exit 0
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "$TAG already exists; nothing to release."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
-          git tag "$TAG"
-          git push origin "$TAG"
+      - name: Set up Go
+        if: steps.exists.outputs.exists == 'false'
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
 
-          gh release create "$TAG" \
-            --title "$TAG" \
-            --generate-notes
+      - name: Build and test before tagging
+        if: steps.exists.outputs.exists == 'false'
+        run: |
+          go build ./...
+          go list ./... | grep -v '/examples/' | xargs go test
+
+      - name: Tag and create the GitHub release
+        if: steps.exists.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          git tag "$TAG" "$GITHUB_SHA"
+          git push origin "refs/tags/$TAG"
+          gh release create "$TAG" --title "$TAG" --generate-notes --verify-tag
