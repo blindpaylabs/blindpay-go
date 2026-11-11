@@ -238,12 +238,28 @@ func (c *Client) Get(ctx context.Context, payinID string, opts ...option.Request
 }
 
 // GetTrack retrieves tracking information for a payin.
+//
+// This is BlindPay's public tracking endpoint for its web and iOS apps:
+// server-side calls get 401 in production. Use Client.Get instead.
 func (c *Client) GetTrack(ctx context.Context, payinID string, opts ...option.RequestOption) (*Payin, error) {
 	if payinID == "" {
 		return nil, fmt.Errorf("payin ID cannot be empty")
 	}
 
 	path := request.Pathf("/e/payins/%s", payinID)
+	return request.Do[*Payin](c.cfg, ctx, "GET", path, nil, opts...)
+}
+
+// GetTrackWithCheckoutToken is GetTrack for a card payin, passing the
+// checkout_token from the payin quote's CardInstruction.
+func (c *Client) GetTrackWithCheckoutToken(ctx context.Context, payinID, checkoutToken string, opts ...option.RequestOption) (*Payin, error) {
+	if payinID == "" {
+		return nil, fmt.Errorf("payin ID cannot be empty")
+	}
+
+	var q request.Query
+	q.String("checkout_token", checkoutToken)
+	path := q.Apply(request.Pathf("/e/payins/%s", payinID))
 	return request.Do[*Payin](c.cfg, ctx, "GET", path, nil, opts...)
 }
 

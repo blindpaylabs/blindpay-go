@@ -253,6 +253,9 @@ func (c *Client) Get(ctx context.Context, transferID string, opts ...option.Requ
 }
 
 // GetTrack retrieves tracking information for a transfer (public endpoint).
+//
+// This is BlindPay's public tracking endpoint for its web and iOS apps:
+// server-side calls get 401 in production. Use Client.Get instead.
 func (c *Client) GetTrack(ctx context.Context, transferID string, opts ...option.RequestOption) (*Transfer, error) {
 	if transferID == "" {
 		return nil, fmt.Errorf("transfer ID cannot be empty")

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"net/url"
 	"testing"
 
 	"github.com/blindpaylabs/blindpay-go/bankaccounts"
@@ -106,4 +107,12 @@ func TestRequestBodies(t *testing.T) {
 			require.NoError(t, tc.call(c))
 		})
 	}
+}
+
+func TestPayins_GetTrackWithCheckoutToken(t *testing.T) {
+	c := rtClient(t, &blindpaytest.RoundTripper{T: t, Method: http.MethodGet, Path: "/v1/e/payins/pi_1",
+		Query: url.Values{"checkout_token": {"ck_1"}}, Out: json.RawMessage(`{"id":"pi_1"}`)})
+	p, err := c.Payins.GetTrackWithCheckoutToken(context.Background(), "pi_1", "ck_1")
+	require.NoError(t, err)
+	require.Equal(t, "pi_1", p.ID)
 }

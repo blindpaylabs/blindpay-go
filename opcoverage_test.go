@@ -327,8 +327,11 @@ var opTable = map[string]opEntry{
 			return c.Payins.Quotes.GetFxRate(ctx, &payins.GetFxRateParams{})
 		}),
 	}},
-	"GET /v1/e/payins/{id}": {Name: "Payins.GetTrack", Notes: "public tracking endpoint; 401 from server-side calls in production (D19)", Calls: []opCall{
+	"GET /v1/e/payins/{id}": {Name: "Payins.GetTrack", Notes: "also GetTrackWithCheckoutToken; public tracking endpoint, 401 from server-side calls in production (D19)", Calls: []opCall{
 		call(func(ctx context.Context, c *Client) (any, error) { return c.Payins.GetTrack(ctx, tID) }),
+		call(func(ctx context.Context, c *Client) (any, error) {
+			return c.Payins.GetTrackWithCheckoutToken(ctx, tID, "ck_1")
+		}),
 	}},
 	"GET /v1/instances/{instance_id}/payins": {Name: "Payins.List", Pager: "Payins.ListAutoPaging", Notes: "also Payins.ListPage", Calls: []opCall{
 		call(func(ctx context.Context, c *Client) (any, error) { return c.Payins.List(ctx, nil) }),

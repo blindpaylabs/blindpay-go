@@ -340,6 +340,9 @@ func (c *Client) Get(ctx context.Context, payoutID string, opts ...option.Reques
 }
 
 // GetTrack retrieves tracking information for a payout.
+//
+// This is BlindPay's public tracking endpoint for its web and iOS apps:
+// server-side calls get 401 in production. Use Client.Get instead.
 func (c *Client) GetTrack(ctx context.Context, payoutID string, opts ...option.RequestOption) (*Payout, error) {
 	if payoutID == "" {
 		return nil, fmt.Errorf("payout ID cannot be empty")
