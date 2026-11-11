@@ -424,7 +424,7 @@ blindpaytest.RoundTripper{
 - MINOR bump: new features, new fields, new enums, breaking changes to existing types.
 - PATCH bump: bug fixes, typo corrections, small non-breaking fixes.
 - Every PR that changes SDK behavior must bump the Version constant.
-- After merging to main: `git tag vX.Y.Z && git push origin vX.Y.Z`, then create a GitHub release.
+- Releasing is automatic: on every push to main, `.github/workflows/release.yml` reads `const Version`. If tag `vX.Y.Z` doesn't exist yet, it builds, tests, pushes the tag and creates the GitHub release. Never tag by hand. To release, merge a PR that bumps the constant.
 - Verify on `https://pkg.go.dev/github.com/blindpaylabs/blindpay-go@vX.Y.Z`.
 
 ## 10. OpenAPI to SDK mapping rules
