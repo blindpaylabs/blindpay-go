@@ -72,12 +72,21 @@ const (
 type LimitIncreaseRequestSupportingDocumentType string
 
 const (
-	LimitIncreaseRequestSupportingDocumentTypeIndividualBankStatement     LimitIncreaseRequestSupportingDocumentType = "individual_bank_statement"
-	LimitIncreaseRequestSupportingDocumentTypeIndividualTaxReturn         LimitIncreaseRequestSupportingDocumentType = "individual_tax_return"
-	LimitIncreaseRequestSupportingDocumentTypeIndividualProofOfIncome     LimitIncreaseRequestSupportingDocumentType = "individual_proof_of_income"
-	LimitIncreaseRequestSupportingDocumentTypeBusinessBankStatement       LimitIncreaseRequestSupportingDocumentType = "business_bank_statement"
-	LimitIncreaseRequestSupportingDocumentTypeBusinessFinancialStatements LimitIncreaseRequestSupportingDocumentType = "business_financial_statements"
-	LimitIncreaseRequestSupportingDocumentTypeBusinessTaxReturn           LimitIncreaseRequestSupportingDocumentType = "business_tax_return"
+	LimitIncreaseRequestSupportingDocumentTypeIndividualBankStatement             LimitIncreaseRequestSupportingDocumentType = "individual_bank_statement"
+	LimitIncreaseRequestSupportingDocumentTypeIndividualTaxReturn                 LimitIncreaseRequestSupportingDocumentType = "individual_tax_return"
+	LimitIncreaseRequestSupportingDocumentTypeIndividualProofOfIncome             LimitIncreaseRequestSupportingDocumentType = "individual_proof_of_income"
+	LimitIncreaseRequestSupportingDocumentTypeBusinessBankStatement               LimitIncreaseRequestSupportingDocumentType = "business_bank_statement"
+	LimitIncreaseRequestSupportingDocumentTypeBusinessFinancialStatements         LimitIncreaseRequestSupportingDocumentType = "business_financial_statements"
+	LimitIncreaseRequestSupportingDocumentTypeBusinessTaxReturn                   LimitIncreaseRequestSupportingDocumentType = "business_tax_return"
+	LimitIncreaseRequestSupportingDocumentTypeBusinessAccountsReceivable          LimitIncreaseRequestSupportingDocumentType = "business_accounts_receivable"
+	LimitIncreaseRequestSupportingDocumentTypeBusinessContract                    LimitIncreaseRequestSupportingDocumentType = "business_contract"
+	LimitIncreaseRequestSupportingDocumentTypeBusinessMerchantProcessorStatement  LimitIncreaseRequestSupportingDocumentType = "business_merchant_processor_statement"
+	LimitIncreaseRequestSupportingDocumentTypeBusinessShareholderLoan             LimitIncreaseRequestSupportingDocumentType = "business_shareholder_loan"
+	LimitIncreaseRequestSupportingDocumentTypeIndividualBlockchainWalletStatement LimitIncreaseRequestSupportingDocumentType = "individual_blockchain_wallet_statement"
+	LimitIncreaseRequestSupportingDocumentTypeIndividualCryptoExchangeStatement   LimitIncreaseRequestSupportingDocumentType = "individual_crypto_exchange_statement"
+	LimitIncreaseRequestSupportingDocumentTypeIndividualEmploymentLetter          LimitIncreaseRequestSupportingDocumentType = "individual_employment_letter"
+	LimitIncreaseRequestSupportingDocumentTypeIndividualInvestmentStatement       LimitIncreaseRequestSupportingDocumentType = "individual_investment_statement"
+	LimitIncreaseRequestSupportingDocumentTypeIndividualPayStub                   LimitIncreaseRequestSupportingDocumentType = "individual_pay_stub"
 )
 
 // IdentificationDocument represents identification document types.
@@ -118,6 +127,7 @@ const (
 	KycStatusPendingReview     KycStatus = "pending_review"
 	KycStatusAwaitingContract  KycStatus = "awaiting_contract"
 	KycStatusComplianceRequest KycStatus = "compliance_request"
+	KycStatusApprovedRfi       KycStatus = "approved_rfi"
 )
 
 // AccountPurpose represents the purpose of the account.
@@ -367,6 +377,7 @@ type Customer struct {
 	// VirtualAccountPreapproval is the review of the customer for US
 	// virtual accounts.
 	VirtualAccountPreapproval *VirtualAccountPreapproval `json:"virtual_account_preapproval,omitempty"`
+	IsNested                  bool                       `json:"is_nested,omitempty"`
 }
 
 // CreateIndividualStandardParams represents parameters for creating an individual with standard KYC.

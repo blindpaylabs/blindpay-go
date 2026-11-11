@@ -62,6 +62,7 @@ type CreateResponse struct {
 	Contract            QuoteContract `json:"contract"`
 	CustomerLocalAmount float64       `json:"customer_local_amount"`
 	Description         string        `json:"description"`
+	BillingFeeAmount    *float64      `json:"billing_fee_amount,omitempty"`
 }
 
 // GetFxRateParams represents parameters for getting FX rates.

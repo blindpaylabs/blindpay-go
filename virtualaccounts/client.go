@@ -71,8 +71,9 @@ type VirtualAccount struct {
 	CustomerID         *string               `json:"customer_id,omitempty"`
 	// MX is set for Mexican (SPEI) accounts and CO for Colombian (Bre-B)
 	// accounts; US is then absent.
-	MX *VirtualAccountMX `json:"mx,omitempty"`
-	CO *VirtualAccountCO `json:"co,omitempty"`
+	MX           *VirtualAccountMX `json:"mx,omitempty"`
+	CO           *VirtualAccountCO `json:"co,omitempty"`
+	PartnerFeeID *string           `json:"partner_fee_id,omitempty"`
 }
 
 // CreateParams represents parameters for creating a virtual account.

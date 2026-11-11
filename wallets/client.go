@@ -254,6 +254,7 @@ type OfframpWallet struct {
 	Address       string    `json:"address"`
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
+	PartnerFeeID  *string   `json:"partner_fee_id,omitempty"`
 }
 
 // CreateOfframpWalletParams represents parameters for creating an offramp wallet.

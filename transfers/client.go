@@ -58,6 +58,8 @@ type Transfer struct {
 	CustomerID                    string                        `json:"customer_id"`
 	Address                       string                        `json:"address"`
 	Network                       types.Network                 `json:"network"`
+	PartnerFlatFee                int                           `json:"partner_flat_fee,omitempty"`
+	PartnerPercentageFee          int                           `json:"partner_percentage_fee,omitempty"`
 }
 
 // CreateQuoteParams represents parameters for creating a transfer quote.
@@ -79,14 +81,16 @@ type CreateQuoteParams struct {
 
 // CreateQuoteResponse represents the response when creating a transfer quote.
 type CreateQuoteResponse struct {
-	ID                  string   `json:"id"`
-	ExpiresAt           *float64 `json:"expires_at"`
-	CommercialQuotation *float64 `json:"commercial_quotation"`
-	BlindpayQuotation   *float64 `json:"blindpay_quotation"`
-	ReceiverAmount      float64  `json:"receiver_amount"`
-	SenderAmount        float64  `json:"sender_amount"`
-	PartnerFeeAmount    *float64 `json:"partner_fee_amount"`
-	FlatFee             float64  `json:"flat_fee"`
+	ID                   string   `json:"id"`
+	ExpiresAt            *float64 `json:"expires_at"`
+	CommercialQuotation  *float64 `json:"commercial_quotation"`
+	BlindpayQuotation    *float64 `json:"blindpay_quotation"`
+	ReceiverAmount       float64  `json:"receiver_amount"`
+	SenderAmount         float64  `json:"sender_amount"`
+	PartnerFeeAmount     *float64 `json:"partner_fee_amount"`
+	FlatFee              float64  `json:"flat_fee"`
+	PartnerFlatFee       *int     `json:"partner_flat_fee,omitempty"`
+	PartnerPercentageFee *int     `json:"partner_percentage_fee,omitempty"`
 }
 
 // CreateParams represents parameters for creating a transfer.

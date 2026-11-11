@@ -59,8 +59,10 @@ type Payin struct {
 	PayerRules            *PayerRules                  `json:"payer_rules,omitempty"`
 	// ManualConcludedAt (an ISO 8601 timestamp) and ManualConcludedBy
 	// record when and by whom a manual execution was concluded.
-	ManualConcludedAt *types.LooseString `json:"manual_concluded_at,omitempty"`
-	ManualConcludedBy *string            `json:"manual_concluded_by,omitempty"`
+	ManualConcludedAt    *types.LooseString `json:"manual_concluded_at,omitempty"`
+	ManualConcludedBy    *string            `json:"manual_concluded_by,omitempty"`
+	PartnerFee           *int               `json:"partner_fee,omitempty"`
+	TransactionFeeAmount *float64           `json:"transaction_fee_amount,omitempty"`
 }
 
 // BankDetails represents bank details for a payin.
@@ -118,18 +120,23 @@ type ListParams struct {
 
 // CreateEvmResponse represents the response when creating an EVM payin.
 type CreateEvmResponse struct {
-	ID                  string                     `json:"id"`
-	Status              types.TransactionStatus    `json:"status"`
-	PixCode             string                     `json:"pix_code,omitempty"`
-	MemoCode            string                     `json:"memo_code,omitempty"`
-	Clabe               string                     `json:"clabe,omitempty"`
-	TrackingComplete    *types.TrackingComplete    `json:"tracking_complete,omitempty"`
-	TrackingPayment     *types.TrackingPayment     `json:"tracking_payment,omitempty"`
-	TrackingTransaction *types.TrackingTransaction `json:"tracking_transaction,omitempty"`
-	TrackingPartnerFee  *types.TrackingPartnerFee  `json:"tracking_partner_fee,omitempty"`
-	BlindpayBankDetails BankDetails                `json:"blindpay_bank_details"`
-	CustomerID          string                     `json:"customer_id"`
-	ReceiverAmount      float64                    `json:"receiver_amount"`
+	ID                   string                     `json:"id"`
+	Status               types.TransactionStatus    `json:"status"`
+	PixCode              string                     `json:"pix_code,omitempty"`
+	MemoCode             string                     `json:"memo_code,omitempty"`
+	Clabe                string                     `json:"clabe,omitempty"`
+	TrackingComplete     *types.TrackingComplete    `json:"tracking_complete,omitempty"`
+	TrackingPayment      *types.TrackingPayment     `json:"tracking_payment,omitempty"`
+	TrackingTransaction  *types.TrackingTransaction `json:"tracking_transaction,omitempty"`
+	TrackingPartnerFee   *types.TrackingPartnerFee  `json:"tracking_partner_fee,omitempty"`
+	BlindpayBankDetails  BankDetails                `json:"blindpay_bank_details"`
+	CustomerID           string                     `json:"customer_id"`
+	ReceiverAmount       float64                    `json:"receiver_amount"`
+	BillingFeeAmount     *float64                   `json:"billing_fee_amount,omitempty"`
+	PartnerFee           *int                       `json:"partner_fee,omitempty"`
+	PaymentMethod        *string                    `json:"payment_method,omitempty"`
+	SenderAmount         *float64                   `json:"sender_amount,omitempty"`
+	TransactionFeeAmount *float64                   `json:"transaction_fee_amount,omitempty"`
 }
 
 // Client handles payin-related operations.

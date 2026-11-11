@@ -64,7 +64,9 @@ type CreateQuoteResponse struct {
 	FlatFee             *float64 `json:"flat_fee,omitempty"`
 	// CardInstruction is set for card payins: what a browser checkout needs
 	// to tokenize the card.
-	CardInstruction *CardInstruction `json:"card_instruction,omitempty"`
+	CardInstruction  *CardInstruction `json:"card_instruction,omitempty"`
+	BillingFeeAmount *float64         `json:"billing_fee_amount,omitempty"`
+	IsOtc            *bool            `json:"is_otc,omitempty"`
 }
 
 // GetFxRateParams represents parameters for getting payin FX rates.

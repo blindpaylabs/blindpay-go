@@ -30,10 +30,16 @@ const (
 	NetworkTron            = types.NetworkTron
 	NetworkSolana          = types.NetworkSolana
 	NetworkSolanaDevnet    = types.NetworkSolanaDevnet
+	NetworkArc             = types.NetworkArc
+	NetworkArcTestnet      = types.NetworkArcTestnet
+	NetworkTempo           = types.NetworkTempo
+	NetworkTempoTestnet    = types.NetworkTempoTestnet
 
-	StablecoinUSDC = types.StablecoinTokenUSDC
-	StablecoinUSDT = types.StablecoinTokenUSDT
-	StablecoinUSDB = types.StablecoinTokenUSDB
+	StablecoinUSDC      = types.StablecoinTokenUSDC
+	StablecoinUSDT      = types.StablecoinTokenUSDT
+	StablecoinUSDB      = types.StablecoinTokenUSDB
+	StablecoinTokenEURB = types.StablecoinTokenEURB
+	StablecoinTokenEURC = types.StablecoinTokenEURC
 
 	TransactionDocumentInvoice            = types.TransactionDocumentTypeInvoice
 	TransactionDocumentPurchaseOrder      = types.TransactionDocumentTypePurchaseOrder
@@ -54,6 +60,8 @@ const (
 	CurrencyMXN  = types.CurrencyMXN
 	CurrencyCOP  = types.CurrencyCOP
 	CurrencyARS  = types.CurrencyARS
+	CurrencyEUR  = types.CurrencyEUR
+	CurrencyGBP  = types.CurrencyGBP
 
 	AccountClassIndividual = types.AccountClassIndividual
 	AccountClassBusiness   = types.AccountClassBusiness
@@ -77,6 +85,9 @@ const (
 	BankingPartnerJpmorgan = types.BankingPartnerJpmorgan
 	BankingPartnerPortage  = types.BankingPartnerPortage
 	BankingPartnerSsb      = types.BankingPartnerSsb
+	BankingPartnerBreB     = types.BankingPartnerBreB
+	BankingPartnerPortageG = types.BankingPartnerPortageG
+	BankingPartnerSpei     = types.BankingPartnerSpei
 
 	SoleProprietorDocTypeBankStatement          = types.SoleProprietorDocTypeBankStatement
 	SoleProprietorDocTypeMasterServiceAgreement = types.SoleProprietorDocTypeMasterServiceAgreement
@@ -366,6 +377,8 @@ const (
 	RailInternationalSwift = types.RailInternationalSwift
 	RailRTP                = types.RailRTP
 	RailTed                = types.RailTed
+	RailFasterPayments     = types.RailFasterPayments
+	RailSepa               = types.RailSepa
 )
 
 const (
@@ -392,6 +405,11 @@ const (
 	WebhookEventTransferComplete       = types.WebhookEventTransferComplete
 	WebhookEventWalletNew              = types.WebhookEventWalletNew
 	WebhookEventWalletInbound          = types.WebhookEventWalletInbound
+	WebhookEventBlockchainWalletUpdate = types.WebhookEventBlockchainWalletUpdate
+	WebhookEventPayableComplete        = types.WebhookEventPayableComplete
+	WebhookEventPayableNew             = types.WebhookEventPayableNew
+	WebhookEventPayableUpdate          = types.WebhookEventPayableUpdate
+	WebhookEventWalletUpdate           = types.WebhookEventWalletUpdate
 )
 
 type RecipientRelationship = types.RecipientRelationship
@@ -423,11 +441,15 @@ const (
 	PayinPaymentMethodInternationalSwift = types.PayinPaymentMethodInternationalSwift
 	PayinPaymentMethodRTP                = types.PayinPaymentMethodRTP
 	PayinPaymentMethodTed                = types.PayinPaymentMethodTed
+	PayinPaymentMethodAchPull            = types.PayinPaymentMethodAchPull
+	PayinPaymentMethodBreB               = types.PayinPaymentMethodBreB
+	PayinPaymentMethodCard               = types.PayinPaymentMethodCard
 
-	TrackingStatusProcessing    = types.TrackingStatusProcessing
-	TrackingStatusOnHold        = types.TrackingStatusOnHold
-	TrackingStatusCompleted     = types.TrackingStatusCompleted
-	TrackingStatusPendingReview = types.TrackingStatusPendingReview
+	TrackingStatusProcessing          = types.TrackingStatusProcessing
+	TrackingStatusOnHold              = types.TrackingStatusOnHold
+	TrackingStatusCompleted           = types.TrackingStatusCompleted
+	TrackingStatusPendingReview       = types.TrackingStatusPendingReview
+	TrackingStatusPendingRefundReview = types.TrackingStatusPendingRefundReview
 
 	AipriseDocumentTypeAddressProofDocument  = types.AipriseDocumentTypeAddressProofDocument
 	AipriseDocumentTypeBankStatementDocument = types.AipriseDocumentTypeBankStatementDocument
@@ -441,7 +463,9 @@ const (
 	ApprovalRateLow    = types.ApprovalRateLow
 	ApprovalRateMedium = types.ApprovalRateMedium
 
-	ManualExecutionStatusFailed = types.ManualExecutionStatusFailed
+	ManualExecutionStatusFailed    = types.ManualExecutionStatusFailed
+	ManualExecutionStatusConcluded = types.ManualExecutionStatusConcluded
+	ManualExecutionStatusPending   = types.ManualExecutionStatusPending
 )
 
 // LooseString is a string field the spec leaves untyped (see
