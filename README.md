@@ -42,6 +42,32 @@ func main() {
 Every method takes a `context.Context` first; cancelling it stops the request
 and any retry wait.
 
+## Resources
+
+| Field on `*blindpay.Client` | API |
+|---|---|
+| `Available` | Rails, bank details, NAICS codes, SWIFT lookup |
+| `BankAccounts` | Customer bank accounts (one `Create<Rail>` per rail, incl. `CreateFasterPayments`), Plaid link |
+| `Customers` | Customers (KYC/KYB), limits, limit increases, RFIs (`GetRfi`, `SubmitRfi`) |
+| `CustodialWallets` | Managed wallets, balances, deposits (`ListDeposits`, `ListDepositsAutoPaging`) |
+| `Wallets` / `OfframpWallets` | Customer blockchain wallets (`SetSelfCustody`), offramp wallets, Solana/Stellar helpers |
+| `Instances` | The instance, members, onboarding details, instance RFIs |
+| `Payables` | Bills to pay (boletos, PIX codes, invoices) |
+| `Quotes` / `Payouts` | Payout quotes and payouts |
+| `Payins` (`Payins.Quotes`) | Payin quotes and payins |
+| `Transfers` (`Transfers.Quotes`) | Wallet-to-wallet transfers |
+| `VirtualAccounts`, `PartnerFees`, `Fees`, `WebhookEndpoints`, `Tos`, `Upload` | The matching resources |
+
+Request and response types live in each resource's package (`payouts.CreateEvmParams`,
+`customers.Customer`, ...). Shared enums are re-exported from the root package
+(`blindpay.NetworkBase`, `blindpay.TransactionStatusCompleted`). Enum types are plain
+strings: a value newer than this SDK decodes as-is instead of failing.
+
+Inputs that take "exactly one of" two fields document it on the field. Payouts
+take `SenderWalletAddress` (the customer's wallet) or `WalletID` (a managed
+wallet); payout quotes take `BankAccountID` or `PayableID`. The API answers 400
+otherwise.
+
 ## Configuration
 
 ```go
@@ -153,7 +179,9 @@ idempotency key on a 5xx and a retry would run the operation again. You get an
 
 ## Pagination
 
-Payouts, payins, customers and transfers have three list methods:
+Payouts, payins, customers, transfers and payables have three list methods
+(wallet deposits, which are always paginated, have `ListDeposits` and
+`ListDepositsAutoPaging`):
 
 ```go
 // Every row (the API returns all rows when no page size is sent).
@@ -249,7 +277,12 @@ if err != nil {
 fmt.Println(res.FileURL)
 ```
 
-Uploads are sent as `multipart/form-data` and are not retried.
+Uploads are sent as `multipart/form-data` and are not retried. Set
+`ContentType` to the file's MIME type (default `application/octet-stream`).
+
+`client.Upload.Analyze` checks a document before you submit it and returns how
+likely it is to be approved; `client.Upload.Presign` returns a temporary signed
+URL for an uploaded file.
 
 ## Amounts
 
@@ -266,6 +299,30 @@ Development instances settle with the test token USDB and move no real money:
 - Quotes expire after 5 minutes.
 - Development instances are limited to 40 requests per minute (HTTP 429; the
   SDK retries it).
+
+## Examples
+
+[`examples/`](examples) has compile-checked programs for the common workflows:
+webhook setup and verification, a managed-wallet payout, a fiat payin, and
+reconciliation with the auto-pager.
+
+## Upgrading to 1.21
+
+1.21 is source-compatible with 1.20, but some runtime behaviour changes:
+
+- Requests now have a 60-second per-attempt timeout (`WithTimeout`) and are
+  retried (`WithMaxRetries`, default 2); see "Idempotency and retries". Use
+  `WithMaxRetries(0)` for the old single-attempt behaviour.
+- Mutations carry an auto-generated `Idempotency-Key` when retries are on.
+- Optional request fields the spec marks optional are no longer sent when
+  unset (for example `sender_wallet_address`, quote `bank_account_id`,
+  `cover_fees: false`).
+- Errors expose `Code`, `Description`, `RequestID`, `IdempotencyKey` and
+  `Retryable`; network failures are `*blindpay.NetworkError`.
+- Path parameters are percent-encoded.
+- The webhook verifier is native; the `svix` dependency is gone.
+- `Payins.Export` and `Payouts.Export` are deprecated: their route does not
+  exist and they always fail.
 
 ## Documentation
 
