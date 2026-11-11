@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: "1.21"
       - name: Format
@@ -18,4 +18,6 @@ jobs:
       - name: Vet
         run: go vet ./...
       - name: Run linter
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.64.8

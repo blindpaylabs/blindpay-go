@@ -505,9 +505,7 @@ Response-decoding tests must use these instead of hand-written JSON.
   "Upgrading" section.
 - PATCH bump: bug fixes, typo corrections, small non-breaking fixes.
 - Every PR that changes SDK behavior must bump the Version constant.
-- Releases are automated: merging a PR labelled `release` makes
-  `.github/workflows/release.yml` read `const Version`, push tag `vX.Y.Z` and
-  create the GitHub release. Never tag by hand.
+- Releasing is automatic: on every push to main, `.github/workflows/release.yml` reads `const Version`. If tag `vX.Y.Z` doesn't exist yet, it builds, tests, pushes the tag and creates the GitHub release. Never tag by hand. To release, merge a PR that bumps the constant.
 - Verify on `https://pkg.go.dev/github.com/blindpaylabs/blindpay-go@vX.Y.Z`.
 
 ## 10. OpenAPI to SDK mapping rules
