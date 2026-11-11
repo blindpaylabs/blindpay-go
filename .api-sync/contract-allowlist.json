@@ -268,5 +268,65 @@
     "field": "bank_account",
     "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
     "owner": "sdk-parity"
+  },
+  {
+    "schema": "instances.Instance",
+    "field": "onboarding_step",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "instances.BusinessDetails",
+    "field": "trading_names",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "instances.BusinessDetails",
+    "field": "entity_type",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "instances.BusinessDetails",
+    "field": "state_of_incorporation",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "instances.BusinessProfile",
+    "field": "scenario",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "instances.BusinessProfile",
+    "field": "scenario_description",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "instances.BusinessProfile",
+    "field": "has_kyc_screening",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "instances.BusinessProfile",
+    "field": "is_regulated",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "instances.BusinessProfile",
+    "field": "top_volume_by_country",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "instances.BusinessProfile",
+    "field": "estimated_volume_per_month",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
   }
 ]

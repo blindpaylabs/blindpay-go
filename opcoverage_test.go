@@ -21,6 +21,7 @@ import (
 	"github.com/blindpaylabs/blindpay-go/payins"
 	"github.com/blindpaylabs/blindpay-go/payouts"
 	"github.com/blindpaylabs/blindpay-go/quotes"
+	"github.com/blindpaylabs/blindpay-go/rfi"
 	"github.com/blindpaylabs/blindpay-go/termsofservice"
 	"github.com/blindpaylabs/blindpay-go/transfers"
 	"github.com/blindpaylabs/blindpay-go/upload"
@@ -28,16 +29,6 @@ import (
 	"github.com/blindpaylabs/blindpay-go/wallets"
 	"github.com/blindpaylabs/blindpay-go/webhookendpoints"
 	"github.com/stretchr/testify/require"
-)
-
-// Placeholder ids used both to call the SDK and to build the expected path.
-const (
-	tInstance    = "in_000000000000"
-	tCustomer    = "cu_000000000000"
-	tID          = "id_000000000000"
-	tBankAccount = "ba_000000000000"
-	tUser        = "us_000000000000"
-	tSwift       = "AAAABBCCXXX"
 )
 
 // opCall invokes one SDK method and returns its error. The decoded result
@@ -224,6 +215,36 @@ var opTable = map[string]opEntry{
 	"POST /v1/instances/{id}/ownership": {Name: "Instances.MigrateOwnership", Calls: []opCall{
 		call(func(ctx context.Context, c *Client) (any, error) {
 			return c.Instances.MigrateOwnership(ctx, &instances.MigrateOwnershipParams{UserID: tUser})
+		}),
+	}},
+
+	// Instance onboarding and RFIs; customer RFIs.
+	"GET /v1/instances/{instance_id}/customers/{customer_id}/rfi": {Name: "Customers.GetRfi", Notes: "nil when no RFI is open", Calls: []opCall{
+		call(func(ctx context.Context, c *Client) (any, error) { return c.Customers.GetRfi(ctx, tCustomer) }),
+	}},
+	"POST /v1/instances/{instance_id}/customers/{customer_id}/rfi": {Name: "Customers.SubmitRfi", Notes: "rfi.Response is the whole body", Calls: []opCall{
+		call(func(ctx context.Context, c *Client) (any, error) {
+			return c.Customers.SubmitRfi(ctx, tCustomer, rfi.Response{"k": "v"})
+		}),
+	}},
+	"GET /v1/instances/{id}": {Name: "Instances.Get", Calls: []opCall{
+		call(func(ctx context.Context, c *Client) (any, error) { return c.Instances.Get(ctx) }),
+	}},
+	"GET /v1/instances/{instance_id}/onboarding/business_details": {Name: "Instances.GetBusinessDetails", Calls: []opCall{
+		call(func(ctx context.Context, c *Client) (any, error) { return c.Instances.GetBusinessDetails(ctx) }),
+	}},
+	"GET /v1/instances/{instance_id}/onboarding/business_profile": {Name: "Instances.GetBusinessProfile", Calls: []opCall{
+		call(func(ctx context.Context, c *Client) (any, error) { return c.Instances.GetBusinessProfile(ctx) }),
+	}},
+	"GET /v1/instances/{instance_id}/onboarding/ownership_documents": {Name: "Instances.GetOwnershipDocuments", Calls: []opCall{
+		call(func(ctx context.Context, c *Client) (any, error) { return c.Instances.GetOwnershipDocuments(ctx) }),
+	}},
+	"GET /v1/instances/{instance_id}/rfi": {Name: "Instances.GetRfi", Notes: "nil when no RFI is open", Calls: []opCall{
+		call(func(ctx context.Context, c *Client) (any, error) { return c.Instances.GetRfi(ctx) }),
+	}},
+	"POST /v1/instances/{instance_id}/rfi": {Name: "Instances.SubmitRfi", Notes: "rfi.Response is the whole body", Calls: []opCall{
+		call(func(ctx context.Context, c *Client) (any, error) {
+			return c.Instances.SubmitRfi(ctx, rfi.Response{"k": "v"})
 		}),
 	}},
 
@@ -468,16 +489,8 @@ var opTable = map[string]opEntry{
 // fails if one of them gains a table entry without leaving this set, so it
 // can only shrink.
 var pendingOps = map[string]bool{
-	"POST /v1/instances/{instance_id}/customers/{customer_id}/bank-accounts/plaid":      true,
-	"PATCH /v1/instances/{instance_id}/customers/{customer_id}/blockchain-wallets/{id}": true,
-	"GET /v1/instances/{instance_id}/customers/{customer_id}/rfi":                       true,
-	"POST /v1/instances/{instance_id}/customers/{customer_id}/rfi":                      true,
-	"GET /v1/instances/{id}": true,
-	"GET /v1/instances/{instance_id}/onboarding/business_details":                                                  true,
-	"GET /v1/instances/{instance_id}/onboarding/business_profile":                                                  true,
-	"GET /v1/instances/{instance_id}/onboarding/ownership_documents":                                               true,
-	"GET /v1/instances/{instance_id}/rfi":                                                                          true,
-	"POST /v1/instances/{instance_id}/rfi":                                                                         true,
+	"POST /v1/instances/{instance_id}/customers/{customer_id}/bank-accounts/plaid":                                 true,
+	"PATCH /v1/instances/{instance_id}/customers/{customer_id}/blockchain-wallets/{id}":                            true,
 	"PUT /v1/instances/{instance_id}/customers/{customer_id}/bank-accounts/{bank_account_id}/offramp-wallets/{id}": true,
 	"POST /v1/presign":        true,
 	"POST /v1/upload/analyze": true,
