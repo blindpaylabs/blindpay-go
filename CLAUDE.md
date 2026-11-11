@@ -24,7 +24,7 @@ blindpay-go/
     request/options.go     # RequestOptions / RequestOption (what option.* builds).
     request/path.go        # request.Pathf: builds paths, percent-encoding every segment.
     request/query.go       # request.Query: query builder that skips unset values.
-    request/list.go        # request.List[T] / DoList[T]: decodes bare-array and {data, pagination} lists.
+    request/list.go        # request.List[T] / DoList[T] / DoPage[T]: decode bare-array and {data, pagination} lists.
     request/body.go        # request.BodyWith: params struct + injected members (e.g. a "type" discriminator).
     types/
       shared.go            # Shared enums: CurrencyType, Network, StablecoinToken, etc.
