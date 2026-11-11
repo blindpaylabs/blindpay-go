@@ -85,9 +85,9 @@
     },
     {
       "sdk": { "file": "internal/types/types.go", "symbol": "BusinessIndustry" },
-      "reexport": null,
+      "reexport": { "file": "types.go", "symbol": "BusinessIndustry" },
       "spec": { "schema": "CreateCustomerIn", "property": "business_industry" },
-      "note": "PRE-EXISTING BUG, not introduced by this PR: root types.go declares 'type BusinessIndustry = types.BusinessIndustry' but re-exports none of the 154 value constants (every other shared enum in this file has a matching const block; this one does not). Consumers of the public blindpay package cannot currently reference any BusinessIndustry value at all. Flagged prominently in this PR's description for a human to fix in its own PR (add the missing ~154-line const block to types.go); reexport intentionally left null here so map-validity does not fail on a re-export block that does not exist, and so a future enum-member addition does not try to patch it either. SDK also carries 11 qualitative categories (dapp, exchange, gambling, gaming, infra, marketplace, neo_bank, other, saas, social, wallet) absent from the current spec entirely; harmless (SDK superset)."
+      "note": "The root types.go re-exports every BusinessIndustry value (fixed in the SDK parity PR; it used to re-export the type only). Values are NAICS codes; the SDK also keeps 11 legacy qualitative categories (dapp, exchange, gambling, gaming, infra, marketplace, neo_bank, other, saas, social, wallet) that the spec no longer lists (harmless superset)."
     },
     {
       "sdk": { "file": "internal/types/types.go", "symbol": "AipriseDocumentType" },
