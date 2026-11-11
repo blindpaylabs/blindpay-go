@@ -431,10 +431,9 @@ func (p *planResult) reconcileOneLevel(repoRoot, unmodeledSchemaKey, humanLabelP
 			}
 
 			goName := goIdent(name)
-			var fieldLine string
 			// Only optional properties reach here (a missing required one is
 			// NEEDS_HUMAN above), and optional fields are pointer + omitempty.
-			fieldLine = fmt.Sprintf("\t%s *%s `json:\"%s,omitempty\"`", goName, goType, name)
+			fieldLine := fmt.Sprintf("\t%s *%s `json:\"%s,omitempty\"`", goName, goType, name)
 
 			p.Actions = append(p.Actions, action{
 				description: fmt.Sprintf("field %s.%s: add %s (%s)", shape.Symbol, goName, name, shape.File),
