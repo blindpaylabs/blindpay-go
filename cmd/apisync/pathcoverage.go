@@ -13,21 +13,12 @@ import (
 	"strings"
 )
 
-// operationSet returns every "METHOD /path" key in the spec's paths object.
+// operationSet returns every SDK "METHOD /path" key in the spec's paths
+// object (x-sdk: false operations are skipped, see operationEntries).
 func operationSet(spec *specDoc) map[string]bool {
 	out := map[string]bool{}
-	paths, _ := spec.raw["paths"].(map[string]any)
-	for p, methodsRaw := range paths {
-		methods, ok := methodsRaw.(map[string]any)
-		if !ok {
-			continue
-		}
-		for m := range methods {
-			switch m {
-			case "get", "post", "put", "patch", "delete":
-				out[strings.ToUpper(m)+" "+p] = true
-			}
-		}
+	for key := range operationEntries(spec) {
+		out[key] = true
 	}
 	return out
 }

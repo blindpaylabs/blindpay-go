@@ -152,3 +152,52 @@ func TestCheckUnclassifiedSchemas_NewSchemaAbsentFromCommittedSnapshotIsNeedsHum
 	require.True(t, containsString(issues, "BrandNewThing"))
 	require.True(t, containsString(issues, "NEEDS_HUMAN"))
 }
+
+func TestOperationEntries_SkipsXSDKFalse(t *testing.T) {
+	sdkOp := getOp("")
+	sdkOp["x-sdk"] = true
+	nonSDK := getOp("")
+	nonSDK["x-sdk"] = false
+	spec := specWithPaths(t, map[string]string{}, map[string]any{
+		"/v1/instances/{instance_id}/payouts":        map[string]any{"get": sdkOp},
+		"/v1/instances/{instance_id}/yield":          map[string]any{"get": nonSDK},
+		"/v1/instances/{instance_id}/legacy-no-flag": map[string]any{"get": getOp("")},
+	})
+
+	ops := operationEntries(spec)
+	require.Contains(t, ops, "GET /v1/instances/{instance_id}/payouts")
+	require.Contains(t, ops, "GET /v1/instances/{instance_id}/legacy-no-flag", "no x-sdk extension counts as an SDK op (older snapshots)")
+	require.NotContains(t, ops, "GET /v1/instances/{instance_id}/yield")
+	require.NotContains(t, operationSet(spec), "GET /v1/instances/{instance_id}/yield")
+}
+
+func TestCheckOperationChanges_NewXSDKFalseOperationIsNotBlocking(t *testing.T) {
+	repoRoot := writeFixture(t, map[string]string{"go.mod": "module example.com/fixture\n\ngo 1.21\n"})
+	sm := &SpecMap{}
+	op := getOp("YieldOut")
+	op["x-sdk"] = false
+	oldSpec := specWithPaths(t, map[string]string{"YieldOut": `{"type":"object","properties":{}}`}, map[string]any{})
+	newSpec := specWithPaths(t, map[string]string{"YieldOut": `{"type":"object","properties":{}}`}, map[string]any{
+		"/v1/instances/{instance_id}/yield": map[string]any{"get": op},
+	})
+
+	require.Empty(t, checkOperationChanges(repoRoot, sm, oldSpec, newSpec).NeedsHuman)
+}
+
+func TestReachableSchemas_IgnoresXSDKFalseOperations(t *testing.T) {
+	sdkOp := getOp("PayoutOut")
+	sdkOp["x-sdk"] = true
+	nonSDK := getOp("YieldOut")
+	nonSDK["x-sdk"] = false
+	spec := specWithPaths(t, map[string]string{
+		"PayoutOut": `{"type":"object","properties":{}}`,
+		"YieldOut":  `{"type":"object","properties":{}}`,
+	}, map[string]any{
+		"/v1/payouts": map[string]any{"get": sdkOp},
+		"/v1/yield":   map[string]any{"get": nonSDK},
+	})
+
+	reachable := reachableSchemas(spec)
+	require.True(t, reachable["PayoutOut"])
+	require.False(t, reachable["YieldOut"], "a schema used only by an x-sdk: false op needs no SDK mapping")
+}
