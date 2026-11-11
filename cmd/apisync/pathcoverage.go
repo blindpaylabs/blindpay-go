@@ -61,7 +61,7 @@ type funcFacts struct {
 // as the spec would be after normalizeSpecPath ("GET /instances/%s/payouts").
 //
 // It pairs, per function, the HTTP method of each request.Do* call
-// (request.Do's method argument; DoList is GET, DoMultipart is POST) with
+// (request.Do's method argument; DoList and DoPage are GET, DoMultipart is POST) with
 // the path literals of that function and of the same-package functions it
 // calls (e.g. a listPath helper). Methods are what make the match exact:
 // GET and PATCH on the same path are two operations.
@@ -190,7 +190,7 @@ func transportMethod(call *ast.CallExpr) string {
 		return ""
 	}
 	switch sel.Sel.Name {
-	case "DoList":
+	case "DoList", "DoPage":
 		return "GET"
 	case "DoMultipart":
 		return "POST"

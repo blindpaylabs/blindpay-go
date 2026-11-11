@@ -692,15 +692,7 @@ func (c *Client) ListWithParams(ctx context.Context, params *ListParams, opts ..
 // ListPage retrieves one page of customers with its pagination metadata
 // (same request as ListWithParams).
 func (c *Client) ListPage(ctx context.Context, params *ListParams, opts ...option.RequestOption) (*pagination.Page[Customer], error) {
-	list, err := request.Do[request.List[Customer]](c.cfg, ctx, "GET", c.listPath(params), nil, opts...)
-	if err != nil {
-		return nil, err
-	}
-	page := &pagination.Page[Customer]{Data: list.Data}
-	if list.Pagination != nil {
-		page.Pagination = *list.Pagination
-	}
-	return page, nil
+	return request.DoPage[Customer](c.cfg, ctx, c.listPath(params), opts...)
 }
 
 // ListAutoPaging iterates over every customer matching params, one page at

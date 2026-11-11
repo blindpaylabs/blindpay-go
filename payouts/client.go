@@ -252,15 +252,7 @@ func (c *Client) List(ctx context.Context, params *ListParams, opts ...option.Re
 // Set Limit (or a cursor) to get a page; without them the API returns every
 // payout and Pagination is the zero value.
 func (c *Client) ListPage(ctx context.Context, params *ListParams, opts ...option.RequestOption) (*pagination.Page[Payout], error) {
-	list, err := request.Do[request.List[Payout]](c.cfg, ctx, "GET", c.listPath(params), nil, opts...)
-	if err != nil {
-		return nil, err
-	}
-	page := &pagination.Page[Payout]{Data: list.Data}
-	if list.Pagination != nil {
-		page.Pagination = *list.Pagination
-	}
-	return page, nil
+	return request.DoPage[Payout](c.cfg, ctx, c.listPath(params), opts...)
 }
 
 // ListAutoPaging iterates over every payout matching params, one page at a

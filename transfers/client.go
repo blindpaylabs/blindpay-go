@@ -191,15 +191,7 @@ func (c *Client) List(ctx context.Context, params *ListParams, opts ...option.Re
 
 // ListPage retrieves one page of transfers with its pagination metadata.
 func (c *Client) ListPage(ctx context.Context, params *ListParams, opts ...option.RequestOption) (*pagination.Page[Transfer], error) {
-	list, err := request.Do[request.List[Transfer]](c.cfg, ctx, "GET", c.listPath(params), nil, opts...)
-	if err != nil {
-		return nil, err
-	}
-	page := &pagination.Page[Transfer]{Data: list.Data}
-	if list.Pagination != nil {
-		page.Pagination = *list.Pagination
-	}
-	return page, nil
+	return request.DoPage[Transfer](c.cfg, ctx, c.listPath(params), opts...)
 }
 
 // ListAutoPaging iterates over every transfer matching params, one page at

@@ -72,15 +72,7 @@ func (c *Client) ListDeposits(ctx context.Context, customerID, walletID string, 
 		path = q.Apply(path)
 	}
 
-	list, err := request.Do[request.List[Deposit]](c.cfg, ctx, "GET", path, nil, opts...)
-	if err != nil {
-		return nil, err
-	}
-	page := &pagination.Page[Deposit]{Data: list.Data}
-	if list.Pagination != nil {
-		page.Pagination = *list.Pagination
-	}
-	return page, nil
+	return request.DoPage[Deposit](c.cfg, ctx, path, opts...)
 }
 
 // ListDepositsAutoPaging iterates over every deposit of a managed wallet,
