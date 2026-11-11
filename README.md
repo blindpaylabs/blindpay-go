@@ -308,7 +308,21 @@ reconciliation with the auto-pager.
 
 ## Upgrading to 1.21
 
-1.21 is source-compatible with 1.20, but some runtime behaviour changes:
+Calls written for 1.20 compile unchanged, with two exceptions that only
+affect unusual code:
+
+- Every method gained a trailing `opts ...option.RequestOption` parameter.
+  Calls compile as before; a method value stored in a variable of the old
+  function type, or an interface/mock declaring the old signature, must add
+  the parameter.
+- These structs gained slice or map fields and can no longer be compared
+  with `==`: `customers.CreateIndividualStandardParams`,
+  `customers.CreateIndividualEnhancedParams`,
+  `customers.RequestLimitIncreaseParams`, `customers.LimitIncreaseRequest`,
+  `instances.UpdateParams` and
+  `wallets.PrepareSolanaDelegationTransactionResponse`.
+
+Runtime behaviour changes:
 
 - Requests now have a 60-second per-attempt timeout (`WithTimeout`) and are
   retried (`WithMaxRetries`, default 2); see "Idempotency and retries". Use
