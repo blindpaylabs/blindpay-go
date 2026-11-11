@@ -67,7 +67,9 @@ func VerifyWebhook(payload []byte, header http.Header, secret string, opts ...We
 }
 
 // VerifyWebhookSignature verifies a webhook from its individual header
-// values. It is kept for compatibility; prefer VerifyWebhook.
+// values.
+//
+// Deprecated: use VerifyWebhook, which takes the request headers.
 //
 // Parameters:
 //   - secret: the webhook secret from the BlindPay dashboard
