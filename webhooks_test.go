@@ -1,26 +1,31 @@
 package blindpay
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
-
-	svix "github.com/svix/svix-webhooks/go"
 
 	"github.com/stretchr/testify/require"
 )
 
-// generateTestSignature creates a valid Svix signature for testing
+// generateTestSignature signs payload the way Svix does (HMAC-SHA256 over
+// "{id}.{timestamp}.{payload}" with the base64-decoded secret), at the
+// current time. Its output was cross-checked against the official svix
+// library by the shared vectors (testdata/webhook-vectors.json).
 func generateTestSignature(t *testing.T, secret, id, payload string) (timestamp, signature string) {
-	wh, err := svix.NewWebhook(secret)
+	t.Helper()
+	key, err := base64.StdEncoding.DecodeString(strings.TrimPrefix(secret, "whsec_"))
 	require.NoError(t, err)
 
-	ts := time.Now()
-	sig, err := wh.Sign(id, ts, []byte(payload))
-	require.NoError(t, err)
-
-	return fmt.Sprintf("%d", ts.Unix()), sig
+	ts := fmt.Sprintf("%d", time.Now().Unix())
+	mac := hmac.New(sha256.New, key)
+	mac.Write([]byte(id + "." + ts + "." + payload))
+	return ts, "v1," + base64.StdEncoding.EncodeToString(mac.Sum(nil))
 }
 
 func TestVerifyWebhookSignature(t *testing.T) {

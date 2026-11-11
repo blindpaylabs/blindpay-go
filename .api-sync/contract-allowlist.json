@@ -118,5 +118,95 @@
     "field": "is_self_custody",
     "reason": "Temporary; removed in PR 2 with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2: CreateBlockchainWalletIn / BlockchainWalletOut) but missing from the stale committed spec-snapshot.json, which cannot be refreshed in PR 1 without turning apisync -check red (135 needs-human). Required for BR customers since 2026-10-10 (post.instances.[instance_id].customers.[customer_id].blockchain-wallets.ts:64).",
     "owner": "sdk-parity"
+  },
+  {
+    "schema": "payables.LineItem",
+    "field": "quantity",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2 webhooks / PayableOut, WalletInboundWebhookOut) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "payables.LineItem",
+    "field": "price",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2 webhooks / PayableOut, WalletInboundWebhookOut) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "payables.Payable",
+    "field": "line_items",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2 webhooks / PayableOut, WalletInboundWebhookOut) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "payables.Payable",
+    "field": "note",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2 webhooks / PayableOut, WalletInboundWebhookOut) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "payables.Payable",
+    "field": "discount",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2 webhooks / PayableOut, WalletInboundWebhookOut) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "payables.Payable",
+    "field": "taxes",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2 webhooks / PayableOut, WalletInboundWebhookOut) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "payables.Payable",
+    "field": "boleto_barcode",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2 webhooks / PayableOut, WalletInboundWebhookOut) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "payables.Payable",
+    "field": "pix_qrcode",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2 webhooks / PayableOut, WalletInboundWebhookOut) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "payables.Payable",
+    "field": "document_file",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2 webhooks / PayableOut, WalletInboundWebhookOut) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "payables.Payable",
+    "field": "due_date",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2 webhooks / PayableOut, WalletInboundWebhookOut) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "payables.Payable",
+    "field": "scheduled_at",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2 webhooks / PayableOut, WalletInboundWebhookOut) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "payables.Payable",
+    "field": "payout_id",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2 webhooks / PayableOut, WalletInboundWebhookOut) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "payables.Payable",
+    "field": "bank_account",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2 webhooks / PayableOut, WalletInboundWebhookOut) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "payables.Payable",
+    "field": "last_attempt_status",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2 webhooks / PayableOut, WalletInboundWebhookOut) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "blindpay.WalletInboundWebhook",
+    "field": "deposit_id",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2 webhooks / PayableOut, WalletInboundWebhookOut) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
   }
 ]
