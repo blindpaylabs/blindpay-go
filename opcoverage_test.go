@@ -441,6 +441,17 @@ var opTable = map[string]opEntry{
 		}),
 	}},
 
+	"POST /v1/presign": {Name: "Upload.Presign", Calls: []opCall{
+		call(func(ctx context.Context, c *Client) (any, error) {
+			return c.Upload.Presign(ctx, &upload.PresignParams{FileURL: "https://x/1.pdf"})
+		}),
+	}},
+	"POST /v1/upload/analyze": {Name: "Upload.Analyze", Notes: "multipart; never retried, no idempotency key", Calls: []opCall{
+		call(func(ctx context.Context, c *Client) (any, error) {
+			return c.Upload.Analyze(ctx, &upload.AnalyzeParams{File: strings.NewReader("x"), FileName: "a.pdf", Type: upload.AnalyzeTypeSelfie})
+		}),
+	}},
+
 	// Virtual accounts.
 	"POST /v1/instances/{instance_id}/customers/{customer_id}/virtual-accounts": {Name: "VirtualAccounts.Create", Calls: []opCall{
 		call(func(ctx context.Context, c *Client) (any, error) {
@@ -504,8 +515,6 @@ var opTable = map[string]opEntry{
 // fails if one of them gains a table entry without leaving this set, so it
 // can only shrink.
 var pendingOps = map[string]bool{
-	"POST /v1/presign":        true,
-	"POST /v1/upload/analyze": true,
 	"GET /v1/instances/{instance_id}/customers/{customer_id}/wallets/{id}/deposits": true,
 }
 
