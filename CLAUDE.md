@@ -79,8 +79,11 @@ Each resource lives in its own Go package (directory). The package name is the p
 
 ### Types and fields
 
-- Required fields: bare type (`string`, `float64`, `types.Country`).
-- Optional fields: pointer type (`*string`, `*float64`, `*types.Country`).
+- Required fields (in the spec's `required` list): bare type (`string`, `float64`, `types.Country`).
+- Optional or nullable fields: pointer type + `omitempty` (`*string`, `*float64`, `*types.Country`);
+  slices and maps need no pointer. This applies to every new field, request or response
+  (apisync generates them this way). Older structs still have bare optional fields; leave
+  them (changing a field type breaks callers).
 - ID fields that are path parameters (not sent in JSON body): tagged `json:"-"`. E.g. `CustomerID string \`json:"-"\``.
 - All JSON tags use `snake_case` matching the API.
 - Optional JSON fields include `omitempty`.
@@ -122,9 +125,16 @@ Each resource lives in its own Go package (directory). The package name is the p
 - Code must build and vet on Go 1.21 (`GOTOOLCHAIN=go1.21.13 go build ./... && go vet ./...`):
   no range-over-func and no `iter` package outside files guarded by
   `//go:build go1.23` (see `pagination/all_go123.go`).
-- Additive changes only (the module stays v1): never change an exported
-  field's type or a method's signature. Add a new field or method instead and
-  mark the old one `// Deprecated:`.
+- Compatibility policy (the module stays v1 forever, see section 9): changes are
+  additive. Never rename or remove an exported identifier and never change a
+  field's type or a method's parameters; add a new field or method and mark
+  the old one `// Deprecated:`. Two exceptions:
+  - A trailing variadic `opts ...option.RequestOption` is the sanctioned way to
+    extend a method. Call sites keep compiling; method values, interfaces and
+    mocks written against the old signature may not.
+  - A type change that cannot be avoided (the old type can never work, or
+    adding a slice/map field makes a struct non-comparable) ships in a MINOR
+    and is listed in the README "Upgrading" section.
 
 ### Internal wiring
 
@@ -335,24 +345,23 @@ const NewEnumValue MyEnumType = "new_value"
 
 Bump version: MINOR.
 
-### Renaming a field
+### Renaming a field or changing its type
 
-Change the Go field name. If the API field name changed, also update the JSON tag. Bump version: MINOR (breaking).
-
-### Changing a field type (e.g. string to *string)
-
-Update the type. Bump version: MINOR (breaking).
+Don't (section 2, compatibility policy). Add a new field next to the old one
+(new JSON tag, or a new Go name for the same tag on a different struct) and
+mark the old one `// Deprecated:`. Only an unavoidable type change ships, in a
+MINOR, listed in the README "Upgrading" section.
 
 ### Fixing a JSON tag typo
 
 Fix the tag. Bump version: PATCH.
 
-## 6. How to: Remove a resource
+## 6. How to: Retire a resource or method
 
-1. Delete the resource directory (e.g. `rm -rf invoices/`).
-2. In `blindpay.go`: remove the import, the struct field, and the initialization line.
-3. If the resource's types were re-exported in root `types.go`, remove those aliases too.
-4. Bump version: MINOR (breaking).
+Never delete it (the module stays v1). Mark the package, client field or
+method `// Deprecated:` with the replacement, keep it compiling, and bump
+MINOR. A method whose route no longer exists stays too, documented as
+always failing (see `Payouts.Export`).
 
 ## 7. How to: Add a sub-resource (nested client pattern)
 
@@ -372,7 +381,7 @@ type QuotesClient struct {
     instanceID string
 }
 
-func (c *QuotesClient) Create(ctx context.Context, params *CreateQuoteParams) (*CreateQuoteResponse, error) {
+func (c *QuotesClient) Create(ctx context.Context, params *CreateQuoteParams, opts ...option.RequestOption) (*CreateQuoteResponse, error) {
     // ...
 }
 ```
@@ -491,7 +500,9 @@ Response-decoding tests must use these instead of hand-written JSON.
 - The SDK version is stored in `blindpay.go` as `const Version = "X.Y.Z"` (no `v` prefix).
 - Git tags use `v` prefix: `v1.4.0`.
 - The SDK stays on **v1.x forever**. Never create v2+ tags (Go module path would need `/v2`).
-- MINOR bump: new features, new fields, new enums, breaking changes to existing types.
+- MINOR bump: new features, methods, fields and enum values, and the rare
+  unavoidable type change (section 2), which must be listed in the README
+  "Upgrading" section.
 - PATCH bump: bug fixes, typo corrections, small non-breaking fixes.
 - Every PR that changes SDK behavior must bump the Version constant.
 - Releases are automated: merging a PR labelled `release` makes
@@ -522,8 +533,8 @@ Response-decoding tests must use these instead of hand-written JSON.
 | `/instances/{id}/payables` | `payables` | |
 | `/instances/{id}/customers/{cid}/wallets/{wid}/deposits` | `custodialwallets` (`ListDeposits`, `ListDepositsAutoPaging`) | Always an envelope |
 | `/upload`, `/upload/analyze`, `/presign` | `upload` (`Upload`, `Analyze`, `Presign`) | Send `?instance_id=` = the client's instance |
-| `/instances/{id}/export/payins` | `payins` (method `Export`) | Deprecated: route does not exist (always 404); remove in next major |
-| `/instances/{id}/export/payouts` | `payouts` (method `Export`) | Deprecated: route does not exist (always 404); remove in next major |
+| `/instances/{id}/export/payins` | `payins` (method `Export`) | Deprecated: route does not exist (always 404); kept for compatibility (v1 forever) |
+| `/instances/{id}/export/payouts` | `payouts` (method `Export`) | Deprecated: route does not exist (always 404); kept for compatibility (v1 forever) |
 
 ### HTTP method to Go function
 
@@ -532,8 +543,8 @@ Response-decoding tests must use these instead of hand-written JSON.
 | `GET` (single) | `Get` | `(*Resource, error)` |
 | `GET` (list) | `List` | `(*ListResponse, error)` or `([]Resource, error)` |
 | `POST` (create) | `Create` or `Create<Variant>` | `(*CreateResponse, error)` |
-| `PUT` (update) | `Update` | `error` (no response body) |
-| `DELETE` | `Delete` | `error` (no response body) |
+| `PUT` / `PATCH` (update) | `Update`, or an action name (`SetSelfCustody`) | `error` when the API returns only `{success}`, else the resource |
+| `DELETE` | `Delete` | `error` when the API returns nothing or `{success}`, else the resource (`Payables.Delete`) |
 | `POST` (action) | Descriptive name: `Export`, `SubmitDocuments`, `AuthorizeStellarToken` | Varies |
 
 ### Schema to struct

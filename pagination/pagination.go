@@ -1,6 +1,7 @@
 // Package pagination holds the page and auto-pager types returned by the
-// cursor-paginated list methods (ListPage and ListAutoPaging on payouts,
-// payins, customers and transfers).
+// cursor-paginated list methods: ListPage and ListAutoPaging on payouts,
+// payins, customers, transfers and payables, and ListDeposits /
+// ListDepositsAutoPaging on custodial wallets.
 //
 //	pager := client.Payouts.ListAutoPaging(ctx, &payouts.ListParams{Status: blindpay.TransactionStatusCompleted})
 //	for pager.Next() {

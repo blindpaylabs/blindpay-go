@@ -311,7 +311,7 @@ func (c *Client) listPath(params *ListParams) string {
 // Export retrieves all payouts for export with optional pagination.
 //
 // Deprecated: the API has no GET /instances/{id}/export/payouts route, so this
-// method always fails (404). It will be removed in the next major version.
+// method always fails (404). It is kept only for source compatibility.
 // Use List instead.
 func (c *Client) Export(ctx context.Context, params *ExportParams, opts ...option.RequestOption) ([]Payout, error) {
 	path := request.Pathf("/instances/%s/export/payouts", c.instanceID)

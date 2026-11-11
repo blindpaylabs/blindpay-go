@@ -266,7 +266,7 @@ func (c *Client) GetTrackWithCheckoutToken(ctx context.Context, payinID, checkou
 // Export exports payins with filters.
 //
 // Deprecated: the API has no GET /instances/{id}/export/payins route, so this
-// method always fails (404). It will be removed in the next major version.
+// method always fails (404). It is kept only for source compatibility.
 // Use List instead.
 func (c *Client) Export(ctx context.Context, status types.TransactionStatus, limit, offset int, opts ...option.RequestOption) ([]Payin, error) {
 	path := request.Pathf("/instances/%s/export/payins", c.instanceID)
