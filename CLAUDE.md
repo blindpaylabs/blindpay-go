@@ -9,14 +9,21 @@ Read it fully before making any changes.
 blindpay-go/
   blindpay.go              # Root client. Creates all sub-clients. Holds `const Version`.
   types.go                 # Re-exports internal/types as public type aliases + constants.
-  errors.go                # Re-exports internal/request.APIError as public type alias.
-  options.go               # Functional options: WithHTTPClient, WithBaseURL.
-  webhooks.go              # VerifyWebhookSignature (standalone, uses svix).
-  go.mod                   # Module: github.com/blindpaylabs/blindpay-go (go 1.21)
-  VERSIONING.md            # Release process docs.
+  errors.go                # Re-exports APIError, ErrorItem, NetworkError, ErrInvalidIdempotencyKey.
+  options.go               # Client options (WithHTTPClient, WithBaseURL, WithTimeout, WithMaxRetries)
+                           # + root re-exports of request options (WithIdempotencyKey, WithHeader, WithRequestTimeout).
+  webhooks.go              # VerifyWebhook / ConstructWebhookEvent (native Svix verifier, no client needed).
+  webhook_events.go        # Typed webhook payloads (WebhookPayload union, UnknownWebhook) + ParseWebhookEvent.
+  go.mod                   # Module: github.com/blindpaylabs/blindpay-go (go 1.21 -- never raise it)
+  option/option.go         # Public per-request options: WithIdempotencyKey, WithHeader, WithTimeout.
+  pagination/              # Page[T], Pager[T] (Next/Current/Err); all_go123.go adds All() behind //go:build go1.23.
   internal/
     config/config.go       # config.Config -- bridges top-level config to request.Config.
-    request/request.go     # Generic HTTP helper: request.Do[T](...). APIError, ParseAPIError.
+    request/request.go     # APIError, ErrorItem, ParseAPIError, request.Config.
+    request/do.go          # request.Do[T] / DoMultipart[T]: retries (A2 table), timeouts, idempotency keys.
+    request/options.go     # RequestOptions / RequestOption (what option.* builds).
+    request/path.go        # request.Pathf: builds paths, percent-encoding every segment.
+    request/query.go       # request.Query: query builder that skips unset values.
     request/list.go        # request.List[T] / DoList[T]: decodes bare-array and {data, pagination} lists.
     types/
       shared.go            # Shared enums: CurrencyType, Network, StablecoinToken, etc.
@@ -31,6 +38,7 @@ blindpay-go/
   fees/client.go           # GET /instances/{id}/billing/fees.
   instances/...            # Instance management.
   partnerfees/...          # Partner fee configuration.
+  payables/                # Payables (bills to pay); types.go holds Payable (also the payable.* webhook payload).
   payins/
     client.go              # Payin CRUD (+ deprecated Export). Has sub-client: Quotes.
     quotes.go              # QuotesClient -- payin quote creation + FX rates.
@@ -42,7 +50,10 @@ blindpay-go/
   wallets/client.go        # Blockchain wallet CRUD + OfframpClient (second client in same pkg).
   webhookendpoints/...     # Webhook endpoint management.
   cmd/contractcheck/       # `go run ./cmd/contractcheck` -- wire-contract check, see section 8.
+  cmd/apisync/             # `go run ./cmd/apisync` -- spec sync tool (-check / -apply / -coverage).
   testdata/fixtures/       # Shared spec-shaped fixtures (verbatim copy of the cross-SDK set), see section 8.
+  testdata/webhook-vectors.json # Shared Svix conformance vectors (14), run by webhooks_vectors_test.go.
+  requestoptions_guard_test.go  # go/ast guard: every ctx method ends with opts ...option.RequestOption and forwards it.
 ```
 
 Each resource lives in its own Go package (directory). The package name is the plural lowercase resource name (e.g. `payins`, `customers`, `wallets`). Multi-word resources use a single lowercase word (e.g. `bankaccounts`, `custodialwallets`, `webhookendpoints`, `virtualaccounts`, `partnerfees`). There is no `receivers` or `apikeys` package: `receivers` was fully replaced by `customers`, and API Keys is intentionally absent from the public API reference.
@@ -73,19 +84,32 @@ Each resource lives in its own Go package (directory). The package name is the p
 
 ### Go idioms
 
-- Every method takes `context.Context` as the first parameter.
-- All HTTP calls go through `request.Do[T](cfg, ctx, method, path, body)`.
-- For GET with query params: build `url.Values{}`, append as `?` + `q.Encode()`.
+- Every method takes `context.Context` as the first parameter and ends with
+  `opts ...option.RequestOption`, which it forwards (`opts...`) to every
+  `request.Do*` call. `requestoptions_guard_test.go` enforces this for every
+  exported method whose first parameter is `ctx`.
+- All HTTP calls go through `request.Do[T](cfg, ctx, method, path, body, opts...)`
+  (JSON) or `request.DoMultipart[T]` (multipart). Never call `http.Client`
+  directly: retries, timeouts, idempotency keys and error parsing live there.
+- Build paths with `request.Pathf("/instances/%s/payouts/%s", c.instanceID, id)`,
+  which percent-encodes every segment. Never `fmt.Sprintf` user input into a path.
+- Build query strings with `request.Query` (`q.String`, `q.Int`, `q.Apply(path)`),
+  which skips unset values. Never send `""`, `0` or `null` for an unset param.
 - For DELETE returning 204: return `error` only (no response struct). Call `request.Do[struct{}]`.
 - For PUT returning no body: same pattern, return `error` only.
 - Validate required parameters at the top of each method. Return `fmt.Errorf(...)` for validation.
-- No custom HTTP client usage -- always delegate to `request.Do`.
+- Code must build and vet on Go 1.21 (`GOTOOLCHAIN=go1.21.13 go build ./... && go vet ./...`):
+  no range-over-func and no `iter` package outside files guarded by
+  `//go:build go1.23` (see `pagination/all_go123.go`).
+- Additive changes only (the module stays v1): never change an exported
+  field's type or a method's signature. Add a new field or method instead and
+  mark the old one `// Deprecated:`.
 
 ### Internal wiring
 
-- `config.Config` holds `BaseURL`, `APIKey`, `InstanceID`, `HTTPClient`, `UserAgent`.
+- `config.Config` holds `BaseURL`, `APIKey`, `InstanceID`, `HTTPClient`, `UserAgent`, `Timeout`, `MaxRetries`.
 - Each sub-client stores `cfg *request.Config` and `instanceID string` (extracted via `cfg.ToRequestConfig()`).
-- `request.Config` is a subset: `BaseURL`, `APIKey`, `HTTPClient`, `UserAgent` (no InstanceID).
+- `request.Config` is the same minus `InstanceID`, plus test seams (`Sleep`, `NewKey`, `Jitter`). It is shared and must never be mutated after construction; per-request settings travel in `RequestOptions`.
 - Exception: `available.Client` does not need `instanceID` (its endpoints are not instance-scoped).
 
 ## 3. How to: Add a new resource
@@ -105,6 +129,7 @@ import (
 
     "github.com/blindpaylabs/blindpay-go/internal/config"
     "github.com/blindpaylabs/blindpay-go/internal/request"
+    "github.com/blindpaylabs/blindpay-go/option"
 )
 
 // Invoice represents an invoice.
@@ -142,19 +167,19 @@ func NewClient(cfg *config.Config) *Client {
 }
 
 // List retrieves all invoices.
-func (c *Client) List(ctx context.Context) ([]Invoice, error) {
-    path := fmt.Sprintf("/instances/%s/invoices", c.instanceID)
-    return request.Do[[]Invoice](c.cfg, ctx, "GET", path, nil)
+func (c *Client) List(ctx context.Context, opts ...option.RequestOption) ([]Invoice, error) {
+    path := request.Pathf("/instances/%s/invoices", c.instanceID)
+    return request.Do[[]Invoice](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // Create creates a new invoice.
-func (c *Client) Create(ctx context.Context, params *CreateParams) (*CreateResponse, error) {
+func (c *Client) Create(ctx context.Context, params *CreateParams, opts ...option.RequestOption) (*CreateResponse, error) {
     if params == nil {
         return nil, fmt.Errorf("params cannot be nil")
     }
 
-    path := fmt.Sprintf("/instances/%s/invoices", c.instanceID)
-    return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, params)
+    path := request.Pathf("/instances/%s/invoices", c.instanceID)
+    return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, params, opts...)
 }
 ```
 
@@ -237,13 +262,13 @@ Example -- adding `GetByExternalID` to `customers`:
 // In customers/client.go
 
 // GetByExternalID retrieves a customer by external ID.
-func (c *Client) GetByExternalID(ctx context.Context, externalID string) (*Customer, error) {
+func (c *Client) GetByExternalID(ctx context.Context, externalID string, opts ...option.RequestOption) (*Customer, error) {
     if externalID == "" {
         return nil, fmt.Errorf("external ID cannot be empty")
     }
 
-    path := fmt.Sprintf("/instances/%s/customers/external/%s", c.instanceID, externalID)
-    return request.Do[*Customer](c.cfg, ctx, "GET", path, nil)
+    path := request.Pathf("/instances/%s/customers/external/%s", c.instanceID, externalID)
+    return request.Do[*Customer](c.cfg, ctx, "GET", path, nil, opts...)
 }
 ```
 
@@ -441,7 +466,9 @@ Response-decoding tests must use these instead of hand-written JSON.
 - MINOR bump: new features, new fields, new enums, breaking changes to existing types.
 - PATCH bump: bug fixes, typo corrections, small non-breaking fixes.
 - Every PR that changes SDK behavior must bump the Version constant.
-- After merging to main: `git tag vX.Y.Z && git push origin vX.Y.Z`, then create a GitHub release.
+- Releases are automated: merging a PR labelled `release` makes
+  `.github/workflows/release.yml` read `const Version`, push tag `vX.Y.Z` and
+  create the GitHub release. Never tag by hand.
 - Verify on `https://pkg.go.dev/github.com/blindpaylabs/blindpay-go@vX.Y.Z`.
 
 ## 10. OpenAPI to SDK mapping rules
@@ -525,17 +552,33 @@ Every non-2xx response becomes `*request.APIError` (re-exported as
 
 ### Query parameters
 
-Build query params manually with `url.Values{}`. Do not use struct tags for query encoding:
+Build query params with `request.Query`, which skips unset values. Do not use
+struct tags for query encoding:
 
 ```go
-q := url.Values{}
-if params.Status != "" {
-    q.Set("status", string(params.Status))
-}
-if params.Limit > 0 {
-    q.Set("limit", fmt.Sprintf("%d", params.Limit))
-}
-if len(q) > 0 {
-    path += "?" + q.Encode()
-}
+var q request.Query
+q.Int("limit", params.Limit)                 // skipped when 0
+q.String("starting_after", params.StartingAfter)
+q.String("status", string(params.Status))    // skipped when ""
+path = q.Apply(path)
 ```
+
+### Cursor-paginated lists
+
+Ops whose spec accepts `starting_after` (payouts, payins, customers, transfers,
+payables, wallet deposits) expose `ListPage(ctx, *ListParams, opts...)
+(*pagination.Page[T], error)` and `ListAutoPaging(ctx, *ListParams, opts...)
+*pagination.Pager[T]`. Copy `payouts/client.go`: `ListAutoPaging` defaults
+`Limit` to `pagination.DefaultLimit` (100), rejects `EndingBefore` with
+`pagination.ErrEndingBeforeUnsupported`, and fetches each page through
+`ListPage` with `opts...`. Never change an existing `List` return type.
+
+### Webhooks
+
+`webhooks.go` verifies Svix signatures natively (no dependency): keep it
+stdlib-only. `webhook_events.go` maps every spec `webhook_event` to a typed
+payload (`webhookTypes`); a payload embeds `WebhookHeader` plus the resource
+struct. When the spec adds an event, add it to `webhookTypes`, the
+`WebhookEvent` enum, and the fixture copy; `webhook_events_test.go` fails
+otherwise. Never give an embedded resource struct an `UnmarshalJSON` method:
+it would be promoted to the webhook wrapper and drop `webhook_event`.
