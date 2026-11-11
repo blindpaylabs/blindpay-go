@@ -25,6 +25,7 @@ blindpay-go/
     request/path.go        # request.Pathf: builds paths, percent-encoding every segment.
     request/query.go       # request.Query: query builder that skips unset values.
     request/list.go        # request.List[T] / DoList[T]: decodes bare-array and {data, pagination} lists.
+    request/body.go        # request.BodyWith: params struct + injected members (e.g. a "type" discriminator).
     types/
       shared.go            # Shared enums: CurrencyType, Network, StablecoinToken, etc.
       types.go             # More shared enums: Rail, WebhookEvent, RecipientRelationship, etc.
@@ -38,7 +39,8 @@ blindpay-go/
   fees/client.go           # GET /instances/{id}/billing/fees.
   instances/...            # Instance management.
   partnerfees/...          # Partner fee configuration.
-  payables/                # Payables (bills to pay); types.go holds Payable (also the payable.* webhook payload).
+  payables/                # Payables client (Create/List/ListPage/ListAutoPaging/Get/Delete); types.go holds Payable (also the payable.* webhook payload).
+  rfi/                     # RFI types shared by Customers.GetRfi/SubmitRfi and Instances.GetRfi/SubmitRfi.
   payins/
     client.go              # Payin CRUD (+ deprecated Export). Has sub-client: Quotes.
     quotes.go              # QuotesClient -- payin quote creation + FX rates.
@@ -54,6 +56,9 @@ blindpay-go/
   testdata/fixtures/       # Shared spec-shaped fixtures (verbatim copy of the cross-SDK set), see section 8.
   testdata/webhook-vectors.json # Shared Svix conformance vectors (14), run by webhooks_vectors_test.go.
   requestoptions_guard_test.go  # go/ast guard: every ctx method ends with opts ...option.RequestOption and forwards it.
+  opcoverage_test.go       # One entry per x-sdk operation: method + path + decode of every fixture variant (94/94).
+  requestbody_test.go      # Wire-body assertions for request fields.
+  examples/                # Compile-checked workflow programs (webhooks, payouts, payins, reconciliation).
 ```
 
 Each resource lives in its own Go package (directory). The package name is the plural lowercase resource name (e.g. `payins`, `customers`, `wallets`). Multi-word resources use a single lowercase word (e.g. `bankaccounts`, `custodialwallets`, `webhookendpoints`, `virtualaccounts`, `partnerfees`). There is no `receivers` or `apikeys` package: `receivers` was fully replaced by `customers`, and API Keys is intentionally absent from the public API reference.
@@ -97,6 +102,22 @@ Each resource lives in its own Go package (directory). The package name is the p
   which skips unset values. Never send `""`, `0` or `null` for an unset param.
 - For DELETE returning 204: return `error` only (no response struct). Call `request.Do[struct{}]`.
 - For PUT returning no body: same pattern, return `error` only.
+- Send the params struct itself as the body (`request.Do(..., params, opts...)`) so
+  every json-tagged field reaches the wire; never copy fields into a
+  `map[string]any` or an anonymous struct (a field added later, by hand or by
+  apisync, would silently never be sent). When the method injects members
+  (a rail `type`, `kyc_type`), use `request.BodyWith(params, map[string]any{...})`.
+  Path parameters on params structs are tagged `json:"-"`.
+- Spec-optional request fields get `omitempty` (or a pointer + `omitempty` when
+  the zero value is meaningful). "Exactly one of" inputs (payout
+  `SenderWalletAddress`/`WalletID`, quote `BankAccountID`/`PayableID`) are both
+  optional and documented on the field; never validate them client-side.
+- New response fields are pointers (or slices/maps) with `omitempty`. A field
+  the spec leaves untyped uses `types.LooseString` (or `json.RawMessage`), never
+  a type the shared fixtures can break.
+- Provider-named spec fields (`checkbook_*`, `onemoney_*`, `circle_wallet_id`,
+  `jpm_*`, `aiprise_*`) are not modeled; they are excused in
+  `.api-sync/unmodeled.json`.
 - Validate required parameters at the top of each method. Return `fmt.Errorf(...)` for validation.
 - Code must build and vet on Go 1.21 (`GOTOOLCHAIN=go1.21.13 go build ./... && go vet ./...`):
   no range-over-func and no `iter` package outside files guarded by
@@ -245,7 +266,14 @@ func TestInvoices_List(t *testing.T) {
 }
 ```
 
-### Step 4: Bump version
+### Step 4: Register the operation
+
+Add one entry per new operation to `opTable` in `opcoverage_test.go` (it fails
+for any operation in `testdata/fixtures/index.json` without one) and, for list
+operations with cursors, `ListPage`/`ListAutoPaging` (section 10, "Cursor-paginated
+lists"). Map new spec schemas in `.api-sync/spec-map.json` (section 11).
+
+### Step 5: Bump version
 
 Update `const Version` in `blindpay.go` (MINOR bump for new resource).
 
@@ -489,6 +517,11 @@ Response-decoding tests must use these instead of hand-written JSON.
 | `/available/*` | `available` | No instanceID in path |
 | `/e/payins/{id}` | `payins` (method `GetTrack`) | External/public tracking |
 | `/e/payouts/{id}` | `payouts` (method `GetTrack`) | External/public tracking |
+| `/instances/{id}` (GET), `/instances/{id}/onboarding/*`, `/instances/{id}/rfi` | `instances` (`Get`, `GetBusinessDetails`/`GetBusinessProfile`/`GetOwnershipDocuments`, `GetRfi`/`SubmitRfi`) | RFI types in `rfi` |
+| `/instances/{id}/customers/{cid}/rfi` | `customers` (`GetRfi`/`SubmitRfi`) | RFI types in `rfi` |
+| `/instances/{id}/payables` | `payables` | |
+| `/instances/{id}/customers/{cid}/wallets/{wid}/deposits` | `custodialwallets` (`ListDeposits`, `ListDepositsAutoPaging`) | Always an envelope |
+| `/upload`, `/upload/analyze`, `/presign` | `upload` (`Upload`, `Analyze`, `Presign`) | Send `?instance_id=` = the client's instance |
 | `/instances/{id}/export/payins` | `payins` (method `Export`) | Deprecated: route does not exist (always 404); remove in next major |
 | `/instances/{id}/export/payouts` | `payouts` (method `Export`) | Deprecated: route does not exist (always 404); remove in next major |
 
@@ -582,3 +615,32 @@ struct. When the spec adds an event, add it to `webhookTypes`, the
 `WebhookEvent` enum, and the fixture copy; `webhook_events_test.go` fails
 otherwise. Never give an embedded resource struct an `UnmarshalJSON` method:
 it would be promoted to the webhook wrapper and drop `webhook_event`.
+
+## 11. api-sync (`cmd/apisync`)
+
+```bash
+go run ./cmd/apisync -validate-map                 # spec-map.json anchors resolve
+go run ./cmd/apisync -check                        # vs the committed snapshot (CI)
+go run ./cmd/apisync -check -spec <openapi.json>   # vs another spec, read-only
+go run ./cmd/apisync -apply -spec <openapi.json>   # WRITES code, Version, snapshot
+go run ./cmd/apisync -coverage [-spec <openapi.json>]   # METHOD+path coverage report
+```
+
+- Only `x-sdk: true` operations count; `x-sdk: false` ones (yield, card
+  payment, simulators, tos passthrough, upload/extract) are ignored, and their
+  schemas need no mapping. `-coverage` reports them if the SDK ever sends one.
+- Coverage is METHOD + path: it pairs each `request.Do*` call's HTTP method with
+  the path literals of the function and of same-package helpers it calls.
+- A new spec operation the SDK already sends (hand-written) is not
+  regenerated. Generated identifiers use Go initialisms (`PartnerFeeID`,
+  `LogoURL`); existing identifiers are never renamed.
+- `.api-sync/spec-snapshot.json` must be byte-identical to the spec the SDK was
+  synced against; `-apply` copies it. `-check` must be silent before merging.
+- `-apply` bumps `Version`; inside a PR that already bumped it, reset it to the
+  PR's version.
+- Classifying a new schema: map it in `spec-map.json` `types[]` (union-policy
+  types need a `property_sites` entry per new property), tie enum properties
+  to an `enums[]` symbol, or excuse it in `unmodeled.json` with a real reason.
+  Both files are hand-formatted: edit them in place, keeping one-line entries.
+- `cmd/apisync/golden_test.go` deletes and regenerates `partnerfees.Get`/`Create`
+  in a copy of the repo; keep its quoted source in sync when you edit them.
