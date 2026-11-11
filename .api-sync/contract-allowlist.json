@@ -208,5 +208,65 @@
     "field": "deposit_id",
     "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2 webhooks / PayableOut, WalletInboundWebhookOut) but missing from the stale committed spec-snapshot.json.",
     "owner": "sdk-parity"
+  },
+  {
+    "schema": "payables.CreateParams",
+    "field": "line_items",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "payables.CreateParams",
+    "field": "note",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "payables.CreateParams",
+    "field": "discount",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "payables.CreateParams",
+    "field": "taxes",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "payables.CreateParams",
+    "field": "boleto_barcode",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "payables.CreateParams",
+    "field": "pix_qrcode",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "payables.CreateParams",
+    "field": "document_file",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "payables.CreateParams",
+    "field": "due_date",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "payables.CreateParams",
+    "field": "scheduled_at",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "payables.CreateParams",
+    "field": "bank_account",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
   }
 ]

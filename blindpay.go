@@ -13,6 +13,7 @@ import (
 	"github.com/blindpaylabs/blindpay-go/instances"
 	"github.com/blindpaylabs/blindpay-go/internal/config"
 	"github.com/blindpaylabs/blindpay-go/partnerfees"
+	"github.com/blindpaylabs/blindpay-go/payables"
 	"github.com/blindpaylabs/blindpay-go/payins"
 	"github.com/blindpaylabs/blindpay-go/payouts"
 	"github.com/blindpaylabs/blindpay-go/quotes"
@@ -44,6 +45,7 @@ type Client struct {
 	Fees             *fees.Client
 	Instances        *instances.Client
 	PartnerFees      *partnerfees.Client
+	Payables         *payables.Client
 	Payins           *payins.Client
 	Payouts          *payouts.Client
 	Quotes           *quotes.Client
@@ -98,6 +100,7 @@ func New(apiKey, instanceID string, opts ...Option) (*Client, error) {
 	c.Fees = fees.NewClient(cfg)
 	c.Instances = instances.NewClient(cfg)
 	c.PartnerFees = partnerfees.NewClient(cfg)
+	c.Payables = payables.NewClient(cfg)
 	c.Payins = payins.NewClient(cfg)
 	c.Payouts = payouts.NewClient(cfg)
 	c.Quotes = quotes.NewClient(cfg)

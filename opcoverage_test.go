@@ -17,6 +17,7 @@ import (
 	"github.com/blindpaylabs/blindpay-go/instances"
 	"github.com/blindpaylabs/blindpay-go/internal/blindpaytest"
 	"github.com/blindpaylabs/blindpay-go/partnerfees"
+	"github.com/blindpaylabs/blindpay-go/payables"
 	"github.com/blindpaylabs/blindpay-go/payins"
 	"github.com/blindpaylabs/blindpay-go/payouts"
 	"github.com/blindpaylabs/blindpay-go/quotes"
@@ -259,6 +260,23 @@ var opTable = map[string]opEntry{
 		func(ctx context.Context, c *Client) error { return c.PartnerFees.Delete(ctx, tID) },
 	}},
 
+	// Payables.
+	"POST /v1/instances/{instance_id}/payables": {Name: "Payables.Create", Calls: []opCall{
+		call(func(ctx context.Context, c *Client) (any, error) {
+			return c.Payables.Create(ctx, &payables.CreateParams{})
+		}),
+	}},
+	"GET /v1/instances/{instance_id}/payables": {Name: "Payables.List", Pager: "Payables.ListAutoPaging", Notes: "also Payables.ListPage", Calls: []opCall{
+		call(func(ctx context.Context, c *Client) (any, error) { return c.Payables.List(ctx, nil) }),
+		call(func(ctx context.Context, c *Client) (any, error) { return c.Payables.ListPage(ctx, nil) }),
+	}},
+	"GET /v1/instances/{instance_id}/payables/{id}": {Name: "Payables.Get", Calls: []opCall{
+		call(func(ctx context.Context, c *Client) (any, error) { return c.Payables.Get(ctx, tID) }),
+	}},
+	"DELETE /v1/instances/{instance_id}/payables/{id}": {Name: "Payables.Delete", Calls: []opCall{
+		call(func(ctx context.Context, c *Client) (any, error) { return c.Payables.Delete(ctx, tID) }),
+	}},
+
 	// Payins and payin quotes.
 	"POST /v1/instances/{instance_id}/payin-quotes": {Name: "Payins.Quotes.Create", Calls: []opCall{
 		call(func(ctx context.Context, c *Client) (any, error) {
@@ -461,10 +479,6 @@ var pendingOps = map[string]bool{
 	"GET /v1/instances/{instance_id}/rfi":                                                                          true,
 	"POST /v1/instances/{instance_id}/rfi":                                                                         true,
 	"PUT /v1/instances/{instance_id}/customers/{customer_id}/bank-accounts/{bank_account_id}/offramp-wallets/{id}": true,
-	"POST /v1/instances/{instance_id}/payables":                                                                    true,
-	"GET /v1/instances/{instance_id}/payables":                                                                     true,
-	"GET /v1/instances/{instance_id}/payables/{id}":                                                                true,
-	"DELETE /v1/instances/{instance_id}/payables/{id}":                                                             true,
 	"POST /v1/presign":        true,
 	"POST /v1/upload/analyze": true,
 	"GET /v1/instances/{instance_id}/customers/{customer_id}/wallets/{id}/deposits": true,
