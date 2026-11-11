@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/blindpaylabs/blindpay-go/bankaccounts"
 	"github.com/blindpaylabs/blindpay-go/customers"
 	"github.com/blindpaylabs/blindpay-go/instances"
 	"github.com/blindpaylabs/blindpay-go/internal/blindpaytest"
@@ -81,6 +82,16 @@ func TestRequestBodies(t *testing.T) {
 		{"limit increase several documents", `{"daily":100000,"monthly":500000,"per_transaction":50000,"supporting_documents":[{"type":"individual_bank_statement","file":"https://x/1.pdf"}]}`, func(c *Client) error {
 			_, err := c.Customers.RequestLimitIncrease(ctx, &customers.RequestLimitIncreaseParams{CustomerID: tCustomer, Daily: 100000, Monthly: 500000, PerTransaction: 50000,
 				SupportingDocuments: []customers.LimitIncreaseSupportingDocument{{Type: "individual_bank_statement", File: "https://x/1.pdf"}}})
+			return err
+		}},
+		{"faster payments account", `{"type":"faster_payments","name":"GBP","account_class":"individual","faster_payments_sort_code":"040004","faster_payments_account_number":"12345678","faster_payments_beneficiary_legal_name":"Jane","faster_payments_beneficiary_address_line_1":"1 High St","faster_payments_beneficiary_city":"London","faster_payments_beneficiary_country":"GB"}`, func(c *Client) error {
+			_, err := c.BankAccounts.CreateFasterPayments(ctx, &bankaccounts.CreateFasterPaymentsParams{CustomerID: tCustomer, Name: "GBP", AccountClass: "individual",
+				FasterPaymentsSortCode: "040004", FasterPaymentsAccountNumber: "12345678", FasterPaymentsBeneficiaryLegalName: "Jane",
+				FasterPaymentsBeneficiaryAddressLine1: "1 High St", FasterPaymentsBeneficiaryCity: "London", FasterPaymentsBeneficiaryCountry: "GB"})
+			return err
+		}},
+		{"swift india ifsc", `{"type":"international_swift","name":"","account_class":"","swift_code_bic":"","swift_account_holder_name":"","swift_account_number_iban":"","swift_beneficiary_address_line_1":"","swift_beneficiary_country":"","swift_beneficiary_city":"","swift_beneficiary_state_province_region":"","swift_beneficiary_postal_code":"","swift_bank_name":"","swift_bank_address_line_1":"","swift_bank_country":"","swift_bank_city":"","swift_bank_state_province_region":"","swift_bank_postal_code":"","swift_intermediary_bank_swift_code_bic":null,"recipient_relationship":"","swift_ifsc_branch_code":"HDFC0000001","swift_intermediary_bank_account_number_iban":null,"swift_intermediary_bank_country":null,"swift_intermediary_bank_name":null}`, func(c *Client) error {
+			_, err := c.BankAccounts.CreateInternationalSwift(ctx, &bankaccounts.CreateInternationalSwiftParams{CustomerID: tCustomer, SwiftIfscBranchCode: ptr("HDFC0000001")})
 			return err
 		}},
 		{"customer update location", `{"latitude":-23.5,"longitude":-46.6,"additional_info":[{"label":"BANK_STATEMENT","value":"https://x/1.pdf"}]}`, func(c *Client) error {

@@ -83,7 +83,7 @@ var opTable = map[string]opEntry{
 			return c.BankAccounts.CreatePlaidLink(ctx, &bankaccounts.CreatePlaidLinkParams{CustomerID: tCustomer})
 		}),
 	}},
-	"POST /v1/instances/{instance_id}/customers/{customer_id}/bank-accounts": {Name: "BankAccounts.CreateAch", Notes: "one method per rail: CreatePix, CreateAch, CreateWire, CreateArgentinaTransfers, CreateSpei, CreateColombiaAch, CreateInternationalSwift, CreatePixSafe, CreateRtp, CreateTed, CreateSepa", Calls: []opCall{
+	"POST /v1/instances/{instance_id}/customers/{customer_id}/bank-accounts": {Name: "BankAccounts.CreateAch", Notes: "one method per rail: CreatePix, CreateAch, CreateWire, CreateArgentinaTransfers, CreateSpei, CreateColombiaAch, CreateInternationalSwift, CreatePixSafe, CreateRtp, CreateTed, CreateSepa, CreateFasterPayments", Calls: []opCall{
 		call(func(ctx context.Context, c *Client) (any, error) {
 			return c.BankAccounts.CreateAch(ctx, &bankaccounts.CreateAchParams{CustomerID: tCustomer})
 		}),
@@ -116,6 +116,9 @@ var opTable = map[string]opEntry{
 		}),
 		call(func(ctx context.Context, c *Client) (any, error) {
 			return c.BankAccounts.CreateSepa(ctx, &bankaccounts.CreateSepaParams{CustomerID: tCustomer})
+		}),
+		call(func(ctx context.Context, c *Client) (any, error) {
+			return c.BankAccounts.CreateFasterPayments(ctx, &bankaccounts.CreateFasterPaymentsParams{CustomerID: tCustomer})
 		}),
 	}},
 	"GET /v1/instances/{instance_id}/customers/{customer_id}/bank-accounts": {Name: "BankAccounts.List", Calls: []opCall{

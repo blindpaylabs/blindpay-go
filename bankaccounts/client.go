@@ -98,6 +98,39 @@ type BankAccount struct {
 	TedCpfCnpj                             *string               `json:"ted_cpf_cnpj,omitempty"`
 	SepaBeneficiaryBic                     *string               `json:"sepa_beneficiary_bic,omitempty"`
 	CreatedAt                              time.Time             `json:"created_at"`
+	// Status is the account's review status ("verifying", "approved",
+	// "rejected", "deprecated").
+	Status                                       *string                      `json:"status,omitempty"`
+	RecipientRelationship                        *types.RecipientRelationship `json:"recipient_relationship,omitempty"`
+	BusinessIndustry                             *types.BusinessIndustry      `json:"business_industry,omitempty"`
+	PhoneNumber                                  *string                      `json:"phone_number,omitempty"`
+	TaxID                                        *string                      `json:"tax_id,omitempty"`
+	DateOfBirth                                  *string                      `json:"date_of_birth,omitempty"`
+	PixSafeBankCode                              *string                      `json:"pix_safe_bank_code,omitempty"`
+	PixSafeBranchCode                            *string                      `json:"pix_safe_branch_code,omitempty"`
+	PixSafeCpfCnpj                               *string                      `json:"pix_safe_cpf_cnpj,omitempty"`
+	SwiftPaymentCode                             *string                      `json:"swift_payment_code,omitempty"`
+	SwiftIfscBranchCode                          *string                      `json:"swift_ifsc_branch_code,omitempty"`
+	SwiftIntermediaryBankRoutingNumber           *string                      `json:"swift_intermediary_bank_routing_number,omitempty"`
+	SepaIban                                     *string                      `json:"sepa_iban,omitempty"`
+	SepaBeneficiaryLegalName                     *string                      `json:"sepa_beneficiary_legal_name,omitempty"`
+	SepaBeneficiaryAddressLine1                  *string                      `json:"sepa_beneficiary_address_line_1,omitempty"`
+	SepaBeneficiaryAddressLine2                  *string                      `json:"sepa_beneficiary_address_line_2,omitempty"`
+	SepaBeneficiaryCity                          *string                      `json:"sepa_beneficiary_city,omitempty"`
+	SepaBeneficiaryStateProvinceRegion           *string                      `json:"sepa_beneficiary_state_province_region,omitempty"`
+	SepaBeneficiaryPostalCode                    *string                      `json:"sepa_beneficiary_postal_code,omitempty"`
+	SepaBeneficiaryCountry                       *types.Country               `json:"sepa_beneficiary_country,omitempty"`
+	FasterPaymentsSortCode                       *string                      `json:"faster_payments_sort_code,omitempty"`
+	FasterPaymentsAccountNumber                  *string                      `json:"faster_payments_account_number,omitempty"`
+	FasterPaymentsBeneficiaryLegalName           *string                      `json:"faster_payments_beneficiary_legal_name,omitempty"`
+	FasterPaymentsBeneficiaryAddressLine1        *string                      `json:"faster_payments_beneficiary_address_line_1,omitempty"`
+	FasterPaymentsBeneficiaryAddressLine2        *string                      `json:"faster_payments_beneficiary_address_line_2,omitempty"`
+	FasterPaymentsBeneficiaryCity                *string                      `json:"faster_payments_beneficiary_city,omitempty"`
+	FasterPaymentsBeneficiaryStateProvinceRegion *string                      `json:"faster_payments_beneficiary_state_province_region,omitempty"`
+	FasterPaymentsBeneficiaryPostalCode          *string                      `json:"faster_payments_beneficiary_postal_code,omitempty"`
+	FasterPaymentsBeneficiaryCountry             *types.Country               `json:"faster_payments_beneficiary_country,omitempty"`
+	// PlaidConnectedAt is set when the account was linked through Plaid.
+	PlaidConnectedAt *time.Time `json:"plaid_connected_at,omitempty"`
 }
 
 // OfframpWalletInfo represents offramp wallet information.
@@ -171,6 +204,9 @@ type CreatePixParams struct {
 	CustomerID string `json:"-"`
 	Name       string `json:"name"`
 	PixKey     string `json:"pix_key"`
+	// ForceCpfCnpj treats PixKey as a CPF/CNPJ even when it could also be
+	// read as a phone number.
+	ForceCpfCnpj *bool `json:"force_cpf_cnpj,omitempty"`
 }
 
 // CreatePixResponse represents the response when creating a PIX bank account.
@@ -511,6 +547,9 @@ type CreateInternationalSwiftParams struct {
 	TaxID                                  string                      `json:"tax_id,omitempty"`
 	DateOfBirth                            string                      `json:"date_of_birth,omitempty"`
 	SepaBeneficiaryBic                     *string                     `json:"sepa_beneficiary_bic,omitempty"`
+	// SwiftIfscBranchCode is required when SwiftBankCountry is IN.
+	SwiftIfscBranchCode                *string `json:"swift_ifsc_branch_code,omitempty"`
+	SwiftIntermediaryBankRoutingNumber *string `json:"swift_intermediary_bank_routing_number,omitempty"`
 }
 
 // CreateRtpParams represents parameters for creating an RTP (Real-Time Payments) bank account.
@@ -800,6 +839,23 @@ func (c *Client) CreateTed(ctx context.Context, params *CreateTedParams, opts ..
 	return request.Do[*CreateTedResponse](c.cfg, ctx, "POST", path, body, opts...)
 }
 
+// CreateFasterPaymentsParams creates a UK Faster Payments (GBP) bank
+// account.
+type CreateFasterPaymentsParams struct {
+	CustomerID                                   string             `json:"-"`
+	Name                                         string             `json:"name"`
+	AccountClass                                 types.AccountClass `json:"account_class"`
+	FasterPaymentsSortCode                       string             `json:"faster_payments_sort_code"`
+	FasterPaymentsAccountNumber                  string             `json:"faster_payments_account_number"`
+	FasterPaymentsBeneficiaryLegalName           string             `json:"faster_payments_beneficiary_legal_name"`
+	FasterPaymentsBeneficiaryAddressLine1        string             `json:"faster_payments_beneficiary_address_line_1"`
+	FasterPaymentsBeneficiaryAddressLine2        *string            `json:"faster_payments_beneficiary_address_line_2,omitempty"`
+	FasterPaymentsBeneficiaryCity                string             `json:"faster_payments_beneficiary_city"`
+	FasterPaymentsBeneficiaryStateProvinceRegion *string            `json:"faster_payments_beneficiary_state_province_region,omitempty"`
+	FasterPaymentsBeneficiaryPostalCode          *string            `json:"faster_payments_beneficiary_postal_code,omitempty"`
+	FasterPaymentsBeneficiaryCountry             types.Country      `json:"faster_payments_beneficiary_country"`
+}
+
 // CreateSepaParams represents parameters for creating a SEPA bank account.
 type CreateSepaParams struct {
 	CustomerID                         string             `json:"-"`
@@ -852,4 +908,24 @@ func (c *Client) CreateSepa(ctx context.Context, params *CreateSepaParams, opts 
 	}
 
 	return request.Do[*CreateSepaResponse](c.cfg, ctx, "POST", path, body, opts...)
+}
+
+// CreateFasterPayments adds a UK Faster Payments (GBP) bank account. It
+// returns the full bank account.
+func (c *Client) CreateFasterPayments(ctx context.Context, params *CreateFasterPaymentsParams, opts ...option.RequestOption) (*BankAccount, error) {
+	if params == nil {
+		return nil, fmt.Errorf("params cannot be nil")
+	}
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
+	}
+
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
+
+	body, err := request.BodyWith(params, map[string]any{"type": "faster_payments"})
+	if err != nil {
+		return nil, err
+	}
+
+	return request.Do[*BankAccount](c.cfg, ctx, "POST", path, body, opts...)
 }
