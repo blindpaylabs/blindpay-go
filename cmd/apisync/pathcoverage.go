@@ -47,13 +47,26 @@ var skipDirsCoverage = map[string]bool{
 	"examples":  true,
 	"cmd":       true,
 	".api-sync": true,
+	"testdata":  true,
 }
 
-// sdkPathLiterals scans every non-test .go file for string literals that
-// look like path templates (leading "/", %s placeholders already in the
-// SDK's own interpolation style).
-func sdkPathLiterals(repoRoot string) (map[string]bool, error) {
-	out := map[string]bool{}
+// funcFacts is what sdkOperations needs to know about one function.
+type funcFacts struct {
+	methods map[string]bool // HTTP methods passed to request.Do* calls
+	paths   map[string]bool // path-template string literals
+	callees []string        // same-package functions/methods it calls
+}
+
+// sdkOperations returns every "METHOD /path-template" the SDK sends, keyed
+// as the spec would be after normalizeSpecPath ("GET /instances/%s/payouts").
+//
+// It pairs, per function, the HTTP method of each request.Do* call
+// (request.Do's method argument; DoList is GET, DoMultipart is POST) with
+// the path literals of that function and of the same-package functions it
+// calls (e.g. a listPath helper). Methods are what make the match exact:
+// GET and PATCH on the same path are two operations.
+func sdkOperations(repoRoot string) (map[string]bool, error) {
+	byPkg := map[string]map[string]*funcFacts{}
 	err := filepath.WalkDir(repoRoot, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -67,38 +80,138 @@ func sdkPathLiterals(repoRoot string) (map[string]bool, error) {
 		if !strings.HasSuffix(path, ".go") || strings.HasSuffix(path, "_test.go") {
 			return nil
 		}
-		fset := token.NewFileSet()
-		file, err := parser.ParseFile(fset, path, nil, 0)
+		file, err := parser.ParseFile(token.NewFileSet(), path, nil, 0)
 		if err != nil {
 			return err
 		}
-		ast.Inspect(file, func(n ast.Node) bool {
-			lit, ok := n.(*ast.BasicLit)
-			if !ok || lit.Kind != token.STRING {
-				return true
+		dir := filepath.Dir(path)
+		if byPkg[dir] == nil {
+			byPkg[dir] = map[string]*funcFacts{}
+		}
+		for _, decl := range file.Decls {
+			fn, ok := decl.(*ast.FuncDecl)
+			if !ok || fn.Body == nil {
+				continue
 			}
-			val, err := strconv.Unquote(lit.Value)
-			if err != nil {
-				return true
+			facts := byPkg[dir][fn.Name.Name]
+			if facts == nil {
+				facts = &funcFacts{methods: map[string]bool{}, paths: map[string]bool{}}
+				byPkg[dir][fn.Name.Name] = facts
 			}
-			if idx := strings.Index(val, "?"); idx != -1 {
-				val = val[:idx] // strip a literal query string, e.g. "...?rail=%s"
-			}
-			if pathLiteralRE.MatchString(val) {
-				out[val] = true
-			}
-			return true
-		})
+			collectFuncFacts(fn.Body, facts)
+		}
 		return nil
 	})
 	if err != nil {
 		return nil, err
 	}
+
+	out := map[string]bool{}
+	for _, funcs := range byPkg {
+		for _, facts := range funcs {
+			if len(facts.methods) == 0 {
+				continue
+			}
+			paths := map[string]bool{}
+			seen := map[*funcFacts]bool{}
+			var visit func(f *funcFacts)
+			visit = func(f *funcFacts) {
+				if f == nil || seen[f] {
+					return
+				}
+				seen[f] = true
+				for p := range f.paths {
+					paths[p] = true
+				}
+				for _, callee := range f.callees {
+					visit(funcs[callee])
+				}
+			}
+			visit(facts)
+			for m := range facts.methods {
+				for p := range paths {
+					out[m+" "+p] = true
+				}
+			}
+		}
+	}
 	return out, nil
 }
 
+func collectFuncFacts(body ast.Node, facts *funcFacts) {
+	ast.Inspect(body, func(n ast.Node) bool {
+		switch v := n.(type) {
+		case *ast.BasicLit:
+			if v.Kind != token.STRING {
+				return true
+			}
+			val, err := strconv.Unquote(v.Value)
+			if err != nil {
+				return true
+			}
+			if idx := strings.Index(val, "?"); idx != -1 {
+				val = val[:idx] // strip a literal query string, e.g. "/upload?"
+			}
+			if len(val) > 1 && pathLiteralRE.MatchString(val) {
+				facts.paths[val] = true
+			}
+		case *ast.CallExpr:
+			if m := transportMethod(v); m != "" {
+				facts.methods[m] = true
+				return true
+			}
+			switch fun := v.Fun.(type) {
+			case *ast.Ident:
+				facts.callees = append(facts.callees, fun.Name)
+			case *ast.SelectorExpr:
+				if x, ok := fun.X.(*ast.Ident); ok && x.Name != "request" {
+					facts.callees = append(facts.callees, fun.Sel.Name)
+				}
+			}
+		}
+		return true
+	})
+}
+
+// transportMethod returns the HTTP method of a request.Do* call, or "".
+func transportMethod(call *ast.CallExpr) string {
+	fun := call.Fun
+	switch f := fun.(type) {
+	case *ast.IndexExpr:
+		fun = f.X
+	case *ast.IndexListExpr:
+		fun = f.X
+	}
+	sel, ok := fun.(*ast.SelectorExpr)
+	if !ok {
+		return ""
+	}
+	if pkg, ok := sel.X.(*ast.Ident); !ok || pkg.Name != "request" {
+		return ""
+	}
+	switch sel.Sel.Name {
+	case "DoList":
+		return "GET"
+	case "DoMultipart":
+		return "POST"
+	case "Do":
+		if len(call.Args) < 3 {
+			return ""
+		}
+		switch a := call.Args[2].(type) {
+		case *ast.BasicLit:
+			if m, err := strconv.Unquote(a.Value); err == nil {
+				return strings.ToUpper(m)
+			}
+		case *ast.SelectorExpr: // http.MethodGet etc.
+			return strings.ToUpper(strings.TrimPrefix(a.Sel.Name, "Method"))
+		}
+	}
+	return ""
+}
+
 // normalizeSpecPath strips the "/v1" version prefix and turns "{param}"
-// segments into "%s", matching this SDK's fmt.Sprintf path-template style.
+// segments into "%s", matching this SDK's path-template style.
 var pathParamRE = regexp.MustCompile(`\{[^}]+\}`)
 
 func normalizeSpecPath(p string) string {
@@ -106,53 +219,79 @@ func normalizeSpecPath(p string) string {
 	return pathParamRE.ReplaceAllString(p, "%s")
 }
 
-// computeCoverageGaps returns a human-readable, sorted, non-blocking list
-// of (a) spec operations with no matching SDK path literal and (b) SDK path
-// literals with no matching spec operation (e.g. this repo's known
-// pre-existing drift: the two spec-absent /export/* paths, which have no
-// corresponding operation in the current public spec). Scope note: this is a path-shape match
-// only (method is not correlated back to the literal, since the SDK builds
-// path variables separately from the request.Do method argument); good
-// enough for a non-blocking survey, not a substitute for the map-validity
-// or removal checks above. Known false positive: upload.Client.Upload
-// builds its URL as "%s/upload?..." with the base URL prepended (not a
-// path-only literal starting with "/"), so POST /v1/upload is reported as
-// an apparent gap even though it is implemented; harmless since this
-// report never fails the build.
+// specOperationKeys returns normalized "METHOD /path" -> spec key for the
+// spec's SDK operations (sdk) and for its x-sdk: false operations (excluded).
+func specOperationKeys(spec *specDoc) (sdk, excluded map[string]string) {
+	sdk, excluded = map[string]string{}, map[string]string{}
+	paths, _ := spec.raw["paths"].(map[string]any)
+	for p, methodsRaw := range paths {
+		methods, ok := methodsRaw.(map[string]any)
+		if !ok {
+			continue
+		}
+		for m, opRaw := range methods {
+			if !isHTTPMethod(m) {
+				continue
+			}
+			op, _ := opRaw.(map[string]any)
+			method := strings.ToUpper(m)
+			norm := method + " " + normalizeSpecPath(p)
+			if excludedFromSDK(op) {
+				excluded[norm] = method + " " + p
+			} else {
+				sdk[norm] = method + " " + p
+			}
+		}
+	}
+	return sdk, excluded
+}
+
+// computeCoverageGaps returns a sorted, non-blocking list of (a) spec SDK
+// operations no SDK method sends, (b) x-sdk: false operations the SDK does
+// send (it must not), and (c) SDK method+path pairs with no spec operation
+// (e.g. the deprecated Export methods' /export/* routes). Matching is on
+// METHOD + path, so PUT and GET on one path are distinct operations.
 func computeCoverageGaps(repoRoot string, spec *specDoc) []string {
-	sdkPaths, err := sdkPathLiterals(repoRoot)
+	sdkOps, err := sdkOperations(repoRoot)
 	if err != nil {
 		return []string{fmt.Sprintf("coverage report unavailable: %v", err)}
 	}
-
-	specNormalized := map[string]string{} // normalized -> original spec path
-	paths, _ := spec.raw["paths"].(map[string]any)
-	for p := range paths {
-		specNormalized[normalizeSpecPath(p)] = p
-	}
+	specOps, excluded := specOperationKeys(spec)
 
 	var gaps []string
-	for norm, orig := range specNormalized {
-		if !sdkPaths[norm] {
-			gaps = append(gaps, fmt.Sprintf("spec operation with no SDK path: %s (normalized %s)", orig, norm))
+	for norm, orig := range specOps {
+		if !sdkOps[norm] {
+			gaps = append(gaps, fmt.Sprintf("spec operation with no SDK method: %s", orig))
 		}
 	}
-	for sdkPath := range sdkPaths {
-		if _, ok := specNormalized[sdkPath]; !ok {
-			gaps = append(gaps, fmt.Sprintf("SDK path with no matching spec operation: %s", sdkPath))
+	for norm := range sdkOps {
+		if orig, ok := excluded[norm]; ok {
+			gaps = append(gaps, fmt.Sprintf("SDK implements x-sdk: false operation: %s", orig))
+			continue
+		}
+		if _, ok := specOps[norm]; !ok {
+			gaps = append(gaps, fmt.Sprintf("SDK operation with no matching spec operation: %s", norm))
 		}
 	}
 	sort.Strings(gaps)
 	return gaps
 }
 
-func runCoverage(repoRoot string) error {
-	_, newRaw, err := readSpecFile(repoRoot, ".api-sync/spec-snapshot.json")
+// runCoverage prints the coverage report against specPath (default: the
+// committed snapshot).
+func runCoverage(repoRoot, specPath string) error {
+	if specPath == "" {
+		specPath = ".api-sync/spec-snapshot.json"
+	}
+	_, newRaw, err := readSpecFile(repoRoot, specPath)
 	if err != nil {
 		return err
 	}
-	gaps := computeCoverageGaps(repoRoot, loadSpecDoc(newRaw))
+	spec := loadSpecDoc(newRaw)
+	gaps := computeCoverageGaps(repoRoot, spec)
+	sdkOps, _ := specOperationKeys(spec)
 	fmt.Println("=== apisync coverage report (non-blocking) ===")
+	fmt.Printf("spec SDK operations: %d, covered: %d\n", len(sdkOps), len(sdkOps)-countPrefix(gaps, "spec operation with no SDK method"))
 	if len(gaps) == 0 {
 		fmt.Println("no gaps found")
 		return nil
@@ -161,4 +300,14 @@ func runCoverage(repoRoot string) error {
 		fmt.Println("  -", g)
 	}
 	return nil
+}
+
+func countPrefix(lines []string, prefix string) int {
+	n := 0
+	for _, l := range lines {
+		if strings.HasPrefix(l, prefix) {
+			n++
+		}
+	}
+	return n
 }
