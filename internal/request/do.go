@@ -20,22 +20,27 @@ import (
 const MaxIdempotencyKeyLength = 255
 
 // ErrInvalidIdempotencyKey is returned, before any request is sent, when a
-// caller-supplied idempotency key is empty or longer than 255 characters.
+// caller-supplied idempotency key (WithIdempotencyKey or an Idempotency-Key
+// header) is empty, has leading or trailing whitespace, is longer than 255
+// characters, or when two different keys are given.
 // The API silently ignores an empty key, so sending one would look
 // protected without being protected.
 var ErrInvalidIdempotencyKey = errors.New("blindpay: idempotency key must be 1-255 characters")
 
-// NetworkError is returned when no HTTP response was received (connection
-// failure, DNS, TLS, per-attempt timeout, or caller cancellation). Use
-// errors.Is on it for context.Canceled / context.DeadlineExceeded.
+// NetworkError is returned when no usable HTTP response was received
+// (connection failure, DNS, TLS, per-attempt timeout, caller cancellation, a
+// 2xx whose body could not be read) or when the request could not be built
+// (bad base URL, invalid header). Use errors.Is on it for context.Canceled /
+// context.DeadlineExceeded.
 type NetworkError struct {
 	Err error
 	// IdempotencyKey is the key the request carried, if any. Resending with
 	// it is safe: the API replays the stored response or reports that the
 	// first attempt is still in flight.
 	IdempotencyKey string
-	// Retryable is false only when the caller cancelled the context or the
-	// request cannot be retried safely (a mutation without a key, multipart).
+	// Retryable is false when the caller cancelled the context, the request
+	// could not be built, or it cannot be resent safely (a mutation without
+	// a key, multipart).
 	Retryable bool
 }
 
@@ -61,7 +66,7 @@ type outgoing struct {
 
 // Do sends a JSON request and decodes a 2xx body into T. A 204 or empty body
 // returns the zero value. Non-2xx responses return *APIError and transport
-// failures *NetworkError. Retries follow the A2 decision table (see send).
+// failures *NetworkError. Retries follow the rules documented on send.
 func Do[T any](cfg *Config, ctx context.Context, method, path string, body any, opts ...RequestOption) (T, error) {
 	var zero T
 
@@ -118,29 +123,37 @@ func isMutation(method string) bool {
 	return false
 }
 
-// send runs the attempt loop. Decision table (first match wins):
+// send runs the attempt loop. The rules, first match wins:
 //
-//  1. caller cancelled                       -> stop
-//  2. multipart                              -> never retried
-//  3. mutation without Idempotency-Key       -> never retried
-//  4. no response (network error, timeout)   -> retry, backoff
-//  5. 409 idempotency_key_in_flight          -> retry, Retry-After <= 60s else backoff
-//  6. 429                                    -> retry, Retry-After <= 60s else backoff
-//  7. mutation + 5xx                         -> stop, APIError.Retryable = true
-//  8. GET + 5xx with a terminal code         -> stop
-//  9. GET + 408/500/502/503/504              -> retry, Retry-After <= 60s else backoff
-//  10. anything else                         -> stop
+//   - the caller cancelled the context: stop;
+//   - the request could not be built (bad URL, invalid header): stop;
+//   - multipart, or a POST/PUT/PATCH/DELETE without an Idempotency-Key:
+//     never resent;
+//   - no response (connection error, per-attempt timeout before the status
+//     line): resend after a backoff;
+//   - 409 idempotency_key_in_flight or 429: resend, waiting Retry-After when
+//     it is at most 60s, else the backoff;
+//   - POST/PUT/PATCH/DELETE with a 5xx: stop with APIError.Retryable set (the
+//     API released the key, so a resend would run the operation again);
+//   - GET with 408, 500, 502, 503 or 504 (unless the code is terminal):
+//     resend;
+//   - anything else: stop.
+//
+// Once a status line arrives the attempt is classified by that status, even
+// if reading the body then fails.
 func send(cfg *Config, ctx context.Context, req outgoing, o RequestOptions) (int, []byte, error) {
 	mutation := isMutation(req.method)
 
+	callerKey, err := callerIdempotencyKey(&o)
+	if err != nil {
+		return 0, nil, err
+	}
+
 	key := ""
-	if mutation && !req.multipart {
+	if mutation && !req.multipart { // multipart is never keyed (the API skips it)
 		switch {
-		case o.IdempotencyKey != nil:
-			if *o.IdempotencyKey == "" || len(*o.IdempotencyKey) > MaxIdempotencyKeyLength {
-				return 0, nil, ErrInvalidIdempotencyKey
-			}
-			key = *o.IdempotencyKey
+		case callerKey != nil:
+			key = *callerKey
 		case cfg.MaxRetries > 0:
 			// Generated before attempt 0: the first attempt may already
 			// execute, so a key added only on retry would not protect it.
@@ -152,8 +165,7 @@ func send(cfg *Config, ctx context.Context, req outgoing, o RequestOptions) (int
 		}
 	}
 
-	// Rows 2 and 3: requests that may never be retried.
-	retryable := !req.multipart && (!mutation || key != "")
+	resendable := !req.multipart && (!mutation || key != "")
 
 	timeout := cfg.Timeout
 	if o.Timeout > 0 {
@@ -161,41 +173,101 @@ func send(cfg *Config, ctx context.Context, req outgoing, o RequestOptions) (int
 	}
 
 	for attempt := 0; ; attempt++ {
-		status, header, body, err := attemptOnce(cfg, ctx, req, o, key, timeout)
-		canRetry := retryable && attempt < cfg.MaxRetries
+		res := attemptOnce(cfg, ctx, req, o, key, timeout)
+		canRetry := resendable && attempt < cfg.MaxRetries
 
-		if err != nil {
+		if res.buildErr != nil {
+			return 0, nil, &NetworkError{Err: res.buildErr, IdempotencyKey: key}
+		}
+
+		if res.status == 0 { // no response
 			callerDone := ctx.Err() != nil
-			netErr := &NetworkError{Err: err, IdempotencyKey: key, Retryable: retryable && !callerDone}
-			if callerDone || !canRetry { // row 1
+			netErr := &NetworkError{Err: res.err, IdempotencyKey: key, Retryable: resendable && !callerDone}
+			if callerDone || !canRetry {
 				return 0, nil, netErr
 			}
 			if serr := sleep(cfg, ctx, backoff(cfg, attempt)); serr != nil {
 				return 0, nil, netErr
 			}
-			continue // row 4
+			continue
 		}
 
-		if status >= 200 && status < 300 {
-			return status, body, nil
+		if res.status >= 200 && res.status < 300 {
+			if res.err == nil {
+				return res.status, res.body, nil
+			}
+			// Success, but the body was lost. Resending is safe for a GET and
+			// for a keyed mutation (the API replays the stored response).
+			netErr := &NetworkError{Err: res.err, IdempotencyKey: key, Retryable: resendable && ctx.Err() == nil}
+			if !canRetry || ctx.Err() != nil {
+				return 0, nil, netErr
+			}
+			if serr := sleep(cfg, ctx, backoff(cfg, attempt)); serr != nil {
+				return 0, nil, netErr
+			}
+			continue
 		}
 
-		apiErr := ParseAPIError(status, body)
-		apiErr.Header = header
-		apiErr.RequestID = header.Get("X-Request-Id")
+		apiErr := ParseAPIError(res.status, res.body)
+		if res.err != nil {
+			apiErr.Message += " (response body unreadable: " + res.err.Error() + ")"
+		}
+		apiErr.Header = res.header
+		apiErr.RequestID = res.header.Get("X-Request-Id")
 		apiErr.IdempotencyKey = key
-		apiErr.Retryable = isRetryableStatus(status, apiErr)
+		transient, autoRetry := classifyStatus(req.method, res.status, apiErr)
+		apiErr.Retryable = transient
 
-		if !canRetry || !shouldRetry(req.method, status, apiErr) {
+		if !canRetry || !autoRetry {
 			return 0, nil, apiErr
 		}
-		if serr := sleep(cfg, ctx, retryDelay(cfg, header, attempt)); serr != nil {
-			return 0, nil, &NetworkError{Err: serr, IdempotencyKey: key}
+		if serr := sleep(cfg, ctx, retryDelay(cfg, res.header, attempt)); serr != nil {
+			// The caller gave up while waiting: report what the API said,
+			// wrapped with the context error (errors.As finds *APIError).
+			return 0, nil, fmt.Errorf("%w: %w", serr, apiErr)
 		}
 	}
 }
 
-func attemptOnce(cfg *Config, ctx context.Context, req outgoing, o RequestOptions, key string, timeout time.Duration) (int, http.Header, []byte, error) {
+// callerIdempotencyKey returns the caller's key, taken from
+// WithIdempotencyKey or from an Idempotency-Key header (any casing; the
+// header is removed so it is sent once, through the same validation). A key
+// must be 1-255 characters without surrounding whitespace.
+func callerIdempotencyKey(o *RequestOptions) (*string, error) {
+	key := o.IdempotencyKey
+	for name, values := range o.Header {
+		if !strings.EqualFold(name, "Idempotency-Key") {
+			continue
+		}
+		delete(o.Header, name)
+		if len(values) != 1 || (key != nil && *key != values[0]) {
+			return nil, ErrInvalidIdempotencyKey
+		}
+		v := values[0]
+		key = &v
+	}
+	if key == nil {
+		return nil, nil
+	}
+	k := *key
+	if k == "" || k != strings.TrimSpace(k) || len(k) > MaxIdempotencyKeyLength {
+		return nil, ErrInvalidIdempotencyKey
+	}
+	return key, nil
+}
+
+// attemptResult is the outcome of one attempt. status is 0 when no response
+// arrived; err may be set together with a status when reading the body
+// failed.
+type attemptResult struct {
+	status   int
+	header   http.Header
+	body     []byte
+	err      error
+	buildErr error
+}
+
+func attemptOnce(cfg *Config, ctx context.Context, req outgoing, o RequestOptions, key string, timeout time.Duration) attemptResult {
 	attemptCtx := ctx
 	if timeout > 0 {
 		var cancel context.CancelFunc
@@ -209,11 +281,14 @@ func attemptOnce(cfg *Config, ctx context.Context, req outgoing, o RequestOption
 	}
 	httpReq, err := http.NewRequestWithContext(attemptCtx, req.method, cfg.BaseURL+req.path, reader)
 	if err != nil {
-		return 0, nil, nil, fmt.Errorf("failed to create request: %w", err)
+		return attemptResult{buildErr: fmt.Errorf("failed to create request: %w", err)}
 	}
 
 	for name, values := range o.Header {
 		for _, v := range values {
+			if !validHeaderName(name) || !validHeaderValue(v) {
+				return attemptResult{buildErr: fmt.Errorf("blindpay: invalid request header %q", name)}
+			}
 			httpReq.Header.Add(name, v)
 		}
 	}
@@ -229,45 +304,66 @@ func attemptOnce(cfg *Config, ctx context.Context, req outgoing, o RequestOption
 
 	resp, err := httpClient(cfg).Do(httpReq)
 	if err != nil {
-		return 0, nil, nil, err
+		return attemptResult{err: err}
 	}
 	body, err := io.ReadAll(resp.Body)
 	_ = resp.Body.Close()
+	res := attemptResult{status: resp.StatusCode, header: resp.Header, body: body}
 	if err != nil {
-		return 0, nil, nil, fmt.Errorf("failed to read response body: %w", err)
+		res.err = fmt.Errorf("failed to read response body: %w", err)
 	}
-	return resp.StatusCode, resp.Header, body, nil
+	return res
 }
 
-func shouldRetry(method string, status int, apiErr *APIError) bool {
-	switch {
-	case status == http.StatusConflict && apiErr.Message == "idempotency_key_in_flight": // row 5
-		return true
-	case status == http.StatusTooManyRequests: // row 6
-		return true
-	case isMutation(method): // rows 7 and 10 (mutation 408)
-		return false
-	case status >= 500 && terminalCodes[apiErr.Code]: // row 8
+// validHeaderName reports whether name is an RFC 7230 token, as net/http
+// requires (it would otherwise fail the request without sending it).
+func validHeaderName(name string) bool {
+	if name == "" {
 		return false
 	}
-	switch status { // row 9
-	case http.StatusRequestTimeout, http.StatusInternalServerError, http.StatusBadGateway,
-		http.StatusServiceUnavailable, http.StatusGatewayTimeout:
-		return true
+	for i := 0; i < len(name); i++ {
+		c := name[i]
+		if c <= ' ' || c >= 0x7f || strings.IndexByte("\"(),/:;<=>?@[\\]{}", c) >= 0 {
+			return false
+		}
 	}
-	return false
+	return true
 }
 
-func isRetryableStatus(status int, apiErr *APIError) bool {
+// validHeaderValue rejects control characters other than tab (CR/LF would
+// split the header).
+func validHeaderValue(v string) bool {
+	for i := 0; i < len(v); i++ {
+		if c := v[i]; (c < ' ' && c != '\t') || c == 0x7f {
+			return false
+		}
+	}
+	return true
+}
+
+// classifyStatus decides an error response. transient reports a failure that
+// may succeed when resent (APIError.Retryable): 408, 429, 409
+// idempotency_key_in_flight, and any 5xx whose code is not terminal.
+// autoRetry reports whether the SDK resends it itself: 429 and the in-flight
+// 409 for every method; 408, 500, 502, 503 and 504 for GET only.
+func classifyStatus(method string, status int, apiErr *APIError) (transient, autoRetry bool) {
 	switch {
-	case status == http.StatusConflict:
-		return apiErr.Message == "idempotency_key_in_flight"
-	case status == http.StatusRequestTimeout, status == http.StatusTooManyRequests:
-		return true
+	case status == http.StatusTooManyRequests,
+		status == http.StatusConflict && apiErr.Message == "idempotency_key_in_flight":
+		return true, true
+	case status == http.StatusRequestTimeout:
+		return true, !isMutation(method)
 	case status >= 500:
-		return !terminalCodes[apiErr.Code]
+		if terminalCodes[apiErr.Code] {
+			return false, false
+		}
+		switch status {
+		case http.StatusInternalServerError, http.StatusBadGateway, http.StatusServiceUnavailable, http.StatusGatewayTimeout:
+			return true, !isMutation(method)
+		}
+		return true, false
 	}
-	return false
+	return false, false
 }
 
 // retryDelay honours an integer Retry-After of at most 60 seconds; anything

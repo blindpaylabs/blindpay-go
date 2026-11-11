@@ -22,7 +22,14 @@ type step struct {
 	status int
 	header map[string]string
 	body   string
+	// bodyErr, when set, fails the body read after body has been read
+	// (a connection reset mid-body).
+	bodyErr error
 }
+
+type failingReader struct{ err error }
+
+func (f failingReader) Read([]byte) (int, error) { return 0, f.err }
 
 type recorded struct {
 	method string
@@ -58,10 +65,14 @@ func (s *scriptedTransport) RoundTrip(req *http.Request) (*http.Response, error)
 	for k, v := range st.header {
 		h.Set(k, v)
 	}
+	var respBody io.Reader = strings.NewReader(st.body)
+	if st.bodyErr != nil {
+		respBody = io.MultiReader(respBody, failingReader{st.bodyErr})
+	}
 	return &http.Response{
 		StatusCode: st.status,
 		Header:     h,
-		Body:       io.NopCloser(strings.NewReader(st.body)),
+		Body:       io.NopCloser(respBody),
 		Request:    req,
 	}, nil
 }

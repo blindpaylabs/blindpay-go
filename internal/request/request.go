@@ -20,8 +20,8 @@ type Config struct {
 	// Timeout bounds each attempt (connect, headers and body). Zero means no
 	// per-attempt timeout beyond the caller's context.
 	Timeout time.Duration
-	// MaxRetries is the number of retries after the first attempt (A2
-	// decision table). Zero disables retries and automatic idempotency keys.
+	// MaxRetries is the number of retries after the first attempt (rules on
+	// send). Zero disables retries and automatic idempotency keys.
 	MaxRetries int
 
 	// Test seams. Nil means the production implementation.

@@ -25,8 +25,10 @@ type RequestOption = request.RequestOption
 // POST/PUT/PATCH/DELETE JSON requests (it is ignored on GET and on
 // multipart uploads, which the API does not protect). The API replays the
 // stored response for 24 hours when the same key and body are resent.
-// The key must be 1-255 characters; otherwise the method returns
-// blindpay.ErrInvalidIdempotencyKey without sending anything.
+// The key must be 1-255 characters with no leading or trailing whitespace;
+// otherwise the method returns blindpay.ErrInvalidIdempotencyKey without
+// sending anything. An Idempotency-Key passed through WithHeader is treated
+// the same way.
 //
 // When the client has retries enabled (the default) and no key is given,
 // the SDK generates one before the first attempt; it is available on
