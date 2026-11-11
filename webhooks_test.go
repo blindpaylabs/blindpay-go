@@ -188,11 +188,20 @@ func TestVerifyWebhookSignature_TimingAttackResistance(t *testing.T) {
 	require.True(t, valid, "Correct signature should be accepted")
 
 	// Test almost-correct signatures (modify the signature slightly)
-	almostCorrectOne := correctSignature[:len(correctSignature)-2] + "X="
-	almostCorrectTwo := "v1,X" + correctSignature[4:]
-	almostCorrectThree := correctSignature[:20] + "XXXXX" + correctSignature[25:]
+	// flip changes the base64 character at i to a different one, so the
+	// result never equals the correct signature.
+	flip := func(i int) string {
+		b := []byte(correctSignature)
+		if b[i] == 'A' {
+			b[i] = 'B'
+		} else {
+			b[i] = 'A'
+		}
+		return string(b)
+	}
 
-	for _, sig := range []string{almostCorrectOne, almostCorrectTwo, almostCorrectThree} {
+	for _, sig := range []string{flip(len(correctSignature) - 2), flip(3), flip(20)} {
+		require.NotEqual(t, correctSignature, sig)
 		valid := VerifyWebhookSignature(secret, id, timestamp, payload, sig)
 		require.False(t, valid, "Almost-correct signature should be rejected")
 	}
