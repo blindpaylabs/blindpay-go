@@ -160,3 +160,23 @@ func TestApplyInsertions_SameLineOrderingAndLineShiftSafety(t *testing.T) {
 	got := readFixture(t, root, "f.go")
 	require.Equal(t, "line1\ninsertedAfter1\nline2\nline3\ninsertedAfter3-a\ninsertedAfter3-b\n", got)
 }
+
+func TestGoIdent_Initialisms(t *testing.T) {
+	for in, want := range map[string]string{
+		"partner_fee_id":          "PartnerFeeID",
+		"id":                      "ID",
+		"logo_url":                "LogoURL",
+		"ip_address":              "IPAddress",
+		"payable_id":              "PayableID",
+		"funding_bank_account_id": "FundingBankAccountID",
+		"provider_uetr":           "ProviderUetr",
+		"identity":                "Identity",
+		"portal-access":           "PortalAccess",
+		"pending_review":          "PendingReview",
+		"111120":                  "111120",
+	} {
+		require.Equal(t, want, goIdent(in), in)
+	}
+	require.Equal(t, "PartnerFeeID", fieldGoName("partner_fee_id"))
+	require.Equal(t, "GetPresignURL", deriveMethodName("GET", []string{"presign-url"}))
+}

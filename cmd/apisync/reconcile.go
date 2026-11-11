@@ -209,7 +209,7 @@ func reconcileEnums(repoRoot string, sm *SpecMap, um *Unmodeled, oldSpec, newSpe
 			if um.excusesEnumMember(e.SDK.Symbol, member) {
 				continue
 			}
-			goName := e.SDK.Symbol + pascalCase(member)
+			goName := e.SDK.Symbol + goIdent(member)
 			line := fmt.Sprintf("\t%s %s = %q", goName, e.SDK.Symbol, member)
 			act := action{
 				description: fmt.Sprintf("enum %s: add member %s = %q (%s)", e.SDK.Symbol, goName, member, e.SDK.File),
@@ -422,7 +422,7 @@ func (p *planResult) reconcileOneLevel(repoRoot, unmodeledSchemaKey, humanLabelP
 				continue
 			}
 
-			goName := pascalCase(name)
+			goName := goIdent(name)
 			var fieldLine string
 			if shape.preferPointerStyle() {
 				fieldLine = fmt.Sprintf("\t%s *%s `json:\"%s,omitempty\"`", goName, goType, name)

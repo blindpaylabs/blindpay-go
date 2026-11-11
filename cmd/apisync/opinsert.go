@@ -10,7 +10,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"unicode"
 )
 
 // pkgTarget is one resolved landing spot for a brand-new operation: the
@@ -388,23 +387,9 @@ func flatSchemaFields(schema map[string]any) ([]synthField, bool) {
 	return fields, true
 }
 
-// fieldGoName is pascalCase specialized for struct field names: an "id"
-// segment (whole word, any position, e.g. "id" or "instance_id") is
-// capitalized "ID" throughout, matching this repo's existing hand-written
-// fields (PartnerFee.ID, VirtualAccountOut's InstanceID, etc.) rather than
-// pascalCase's generic "Id".
+// fieldGoName names a generated struct field (see goIdent).
 func fieldGoName(jsonName string) string {
-	var b strings.Builder
-	for _, part := range strings.FieldsFunc(jsonName, func(r rune) bool {
-		return !unicode.IsLetter(r) && !unicode.IsDigit(r)
-	}) {
-		if strings.EqualFold(part, "id") {
-			b.WriteString("ID")
-			continue
-		}
-		b.WriteString(pascalCase(part))
-	}
-	return b.String()
+	return goIdent(jsonName)
 }
 
 func renderStruct(name string, fields []synthField) string {
@@ -643,7 +628,7 @@ func deriveMethodName(httpMethod string, tailSegs []string) string {
 			hasParam = true
 			continue
 		}
-		suffix.WriteString(pascalCase(seg))
+		suffix.WriteString(goIdent(seg))
 	}
 	tail := suffix.String()
 
