@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/url"
 	"time"
 
 	"github.com/blindpaylabs/blindpay-go/internal/config"
@@ -598,25 +597,13 @@ func (c *Client) List(ctx context.Context, params *ListParams, opts ...option.Re
 
 	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
-	q := url.Values{}
-	if params.Status != "" {
-		q.Set("status", params.Status)
-	}
-	if params.Type != "" {
-		q.Set("type", string(params.Type))
-	}
-	if params.Name != "" {
-		q.Set("name", params.Name)
-	}
-	if params.BankAccountID != "" {
-		q.Set("bank_account_id", params.BankAccountID)
-	}
-	if params.Country != "" {
-		q.Set("country", params.Country)
-	}
-	if len(q) > 0 {
-		path += "?" + q.Encode()
-	}
+	var q request.Query
+	q.String("status", params.Status)
+	q.String("type", string(params.Type))
+	q.String("name", params.Name)
+	q.String("bank_account_id", params.BankAccountID)
+	q.String("country", params.Country)
+	path = q.Apply(path)
 
 	return request.Do[[]BankAccount](c.cfg, ctx, "GET", path, nil, opts...)
 }

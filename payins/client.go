@@ -3,7 +3,6 @@ package payins
 import (
 	"context"
 	"fmt"
-	"net/url"
 	"time"
 
 	"github.com/blindpaylabs/blindpay-go/internal/config"
@@ -271,19 +270,11 @@ func (c *Client) GetTrackWithCheckoutToken(ctx context.Context, payinID, checkou
 func (c *Client) Export(ctx context.Context, status types.TransactionStatus, limit, offset int, opts ...option.RequestOption) ([]Payin, error) {
 	path := request.Pathf("/instances/%s/export/payins", c.instanceID)
 
-	q := url.Values{}
-	if status != "" {
-		q.Set("status", string(status))
-	}
-	if limit > 0 {
-		q.Set("limit", fmt.Sprintf("%d", limit))
-	}
-	if offset > 0 {
-		q.Set("offset", fmt.Sprintf("%d", offset))
-	}
-	if len(q) > 0 {
-		path += "?" + q.Encode()
-	}
+	var q request.Query
+	q.String("status", string(status))
+	q.Int("limit", limit)
+	q.Int("offset", offset)
+	path = q.Apply(path)
 
 	return request.Do[[]Payin](c.cfg, ctx, "GET", path, nil, opts...)
 }

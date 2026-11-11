@@ -3,7 +3,6 @@ package payouts
 import (
 	"context"
 	"fmt"
-	"net/url"
 	"time"
 
 	"github.com/blindpaylabs/blindpay-go/bankaccounts"
@@ -317,16 +316,10 @@ func (c *Client) Export(ctx context.Context, params *ExportParams, opts ...optio
 	path := request.Pathf("/instances/%s/export/payouts", c.instanceID)
 
 	if params != nil {
-		q := url.Values{}
-		if params.Limit > 0 {
-			q.Set("limit", fmt.Sprintf("%d", params.Limit))
-		}
-		if params.Offset > 0 {
-			q.Set("offset", fmt.Sprintf("%d", params.Offset))
-		}
-		if len(q) > 0 {
-			path += "?" + q.Encode()
-		}
+		var q request.Query
+		q.Int("limit", params.Limit)
+		q.Int("offset", params.Offset)
+		path = q.Apply(path)
 	}
 
 	return request.Do[[]Payout](c.cfg, ctx, "GET", path, nil, opts...)

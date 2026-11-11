@@ -7,7 +7,6 @@ import (
 	"io"
 	"mime/multipart"
 	"net/textproto"
-	"net/url"
 	"strings"
 
 	"github.com/blindpaylabs/blindpay-go/internal/config"
@@ -146,7 +145,9 @@ func (c *Client) Upload(ctx context.Context, params *UploadParams, opts ...optio
 		instanceID = c.instanceID
 	}
 
-	path := "/upload?" + url.Values{"instance_id": {instanceID}}.Encode()
+	var q request.Query
+	q.String("instance_id", instanceID)
+	path := q.Apply("/upload")
 	return request.DoMultipart[*UploadResponse](c.cfg, ctx, path, body, contentType, opts...)
 }
 
@@ -170,7 +171,9 @@ func (c *Client) Analyze(ctx context.Context, params *AnalyzeParams, opts ...opt
 		return nil, err
 	}
 
-	path := "/upload/analyze?" + url.Values{"instance_id": {c.instanceID}}.Encode()
+	var q request.Query
+	q.String("instance_id", c.instanceID)
+	path := q.Apply("/upload/analyze")
 	return request.DoMultipart[*AnalyzeResponse](c.cfg, ctx, path, body, contentType, opts...)
 }
 
@@ -183,7 +186,9 @@ func (c *Client) Presign(ctx context.Context, params *PresignParams, opts ...opt
 		return nil, fmt.Errorf("file URL cannot be empty")
 	}
 
-	path := "/presign?" + url.Values{"instance_id": {c.instanceID}}.Encode()
+	var q request.Query
+	q.String("instance_id", c.instanceID)
+	path := q.Apply("/presign")
 	return request.Do[*PresignResponse](c.cfg, ctx, "POST", path, params, opts...)
 }
 

@@ -3,7 +3,6 @@ package available
 import (
 	"context"
 	"fmt"
-	"net/url"
 
 	"github.com/blindpaylabs/blindpay-go/internal/config"
 	"github.com/blindpaylabs/blindpay-go/internal/request"
@@ -41,7 +40,9 @@ func (c *Client) GetBankDetails(ctx context.Context, rail types.Rail, opts ...op
 		return nil, fmt.Errorf("rail cannot be empty")
 	}
 
-	path := "/available/bank-details?" + url.Values{"rail": {string(rail)}}.Encode()
+	var q request.Query
+	q.String("rail", string(rail))
+	path := q.Apply("/available/bank-details")
 	return request.Do[[]types.BankDetail](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
