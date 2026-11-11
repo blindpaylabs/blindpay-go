@@ -22,10 +22,12 @@ func (c *Client) SetSelfCustody(ctx context.Context, customerID, id string, isSe
 	}
 
 	path := request.Pathf("/instances/%s/customers/%s/blockchain-wallets/%s", c.instanceID, customerID, id)
-	body := struct {
-		IsSelfCustody bool `json:"is_self_custody"`
-	}{isSelfCustody}
-	return request.Do[*BlockchainWallet](c.cfg, ctx, "PATCH", path, body, opts...)
+	return request.Do[*BlockchainWallet](c.cfg, ctx, "PATCH", path, &selfCustodyBody{IsSelfCustody: isSelfCustody}, opts...)
+}
+
+// selfCustodyBody is the body of PATCH .../blockchain-wallets/{id}.
+type selfCustodyBody struct {
+	IsSelfCustody bool `json:"is_self_custody"`
 }
 
 // UpdateOfframpWalletParams updates an offramp wallet. partner_fee_id is
@@ -42,14 +44,33 @@ type UpdateOfframpWalletParams struct {
 // MarshalJSON sends partner_fee_id as the value, as null (ClearPartnerFee)
 // or not at all.
 func (p UpdateOfframpWalletParams) MarshalJSON() ([]byte, error) {
-	body := map[string]any{}
+	var body updateOfframpWalletBody
 	switch {
 	case p.ClearPartnerFee:
-		body["partner_fee_id"] = nil
+		body.PartnerFeeID = &nullableString{}
 	case p.PartnerFeeID != nil:
-		body["partner_fee_id"] = *p.PartnerFeeID
+		body.PartnerFeeID = &nullableString{value: p.PartnerFeeID}
 	}
 	return json.Marshal(body)
+}
+
+// updateOfframpWalletBody is the wire body of an offramp wallet update; a
+// nil PartnerFeeID omits the member.
+type updateOfframpWalletBody struct {
+	PartnerFeeID *nullableString `json:"partner_fee_id,omitempty"`
+}
+
+// nullableString encodes as its value, or as null when value is nil.
+type nullableString struct {
+	value *string
+}
+
+// MarshalJSON implements json.Marshaler.
+func (n nullableString) MarshalJSON() ([]byte, error) {
+	if n.value == nil {
+		return []byte("null"), nil
+	}
+	return json.Marshal(*n.value)
 }
 
 // Update changes an offramp wallet's partner fee.
