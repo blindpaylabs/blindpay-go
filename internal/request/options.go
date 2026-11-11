@@ -13,8 +13,10 @@ type RequestOptions struct {
 	IdempotencyKey *string
 	// Header holds extra request headers.
 	Header http.Header
-	// Timeout overrides the client's per-attempt timeout when > 0.
-	Timeout time.Duration
+	// Timeout overrides the client's per-attempt timeout. A WithTimeout of
+	// zero or less is rejected (ErrInvalidTimeout).
+	Timeout    time.Duration
+	TimeoutSet bool
 }
 
 // RequestOption configures a single request.
@@ -42,6 +44,7 @@ func WithHeader(name, value string) RequestOption {
 func WithTimeout(d time.Duration) RequestOption {
 	return func(o *RequestOptions) {
 		o.Timeout = d
+		o.TimeoutSet = true
 	}
 }
 

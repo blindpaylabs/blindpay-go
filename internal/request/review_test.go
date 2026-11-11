@@ -131,3 +131,76 @@ func TestDo_CancelDuringRateLimitWaitReturnsAPIError(t *testing.T) {
 	require.Equal(t, "auto-key-1", apiErr.IdempotencyKey)
 	require.Len(t, tr.requests, 1)
 }
+
+// Rows that may never be resent are never Retryable either.
+func TestDo_RetryableMatchesTheRules(t *testing.T) {
+	cases := []struct {
+		name      string
+		method    string
+		status    int
+		retries   int
+		retryable bool
+		requests  int
+	}{
+		{"unkeyed mutation 5xx", http.MethodPost, 500, 0, false, 1},
+		{"unkeyed mutation 429", http.MethodPost, 429, 0, false, 1},
+		{"keyed mutation 5xx", http.MethodPost, 500, 2, true, 1},
+		{"keyed mutation 408", http.MethodPost, 408, 2, false, 1},
+		{"GET 408", http.MethodGet, 408, 0, true, 1},
+	}
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			tr := &scriptedTransport{steps: []step{{status: tc.status, body: `{"message":"x"}`}}}
+			cfg := retryConfig(tr, &fakeSleeper{}, tc.retries)
+			var body any
+			if tc.method == http.MethodPost {
+				body = map[string]any{}
+			}
+			_, err := Do[map[string]any](cfg, context.Background(), tc.method, "/x", body)
+			apiErr := asAPIError(t, err)
+			require.Equal(t, tc.retryable, apiErr.Retryable)
+			require.Len(t, tr.requests, tc.requests)
+		})
+	}
+}
+
+func TestDo_NonPositiveRequestTimeoutRejected(t *testing.T) {
+	for _, d := range []time.Duration{0, -time.Second} {
+		tr := &scriptedTransport{}
+		cfg := retryConfig(tr, &fakeSleeper{}, 2)
+		_, err := Do[map[string]any](cfg, context.Background(), http.MethodGet, "/x", nil, WithTimeout(d))
+		require.ErrorIs(t, err, ErrInvalidTimeout)
+		require.Empty(t, tr.requests)
+	}
+}
+
+func TestDo_CancelDuringInFlightWaitReturnsAPIError(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	tr := &scriptedTransport{steps: []step{{status: 409, body: `{"message":"idempotency_key_in_flight"}`}}}
+	sl := &fakeSleeper{}
+	cfg := retryConfig(tr, sl, 2)
+	cfg.Sleep = func(ctx context.Context, d time.Duration) error {
+		cancel()
+		return sl.Sleep(ctx, d)
+	}
+	_, err := Do[map[string]any](cfg, ctx, http.MethodPost, "/x", map[string]any{})
+	require.ErrorIs(t, err, context.Canceled)
+	apiErr := asAPIError(t, err)
+	require.Equal(t, 409, apiErr.StatusCode)
+	require.True(t, apiErr.Retryable)
+}
+
+func TestDo_SuccessDecodeFailureKeepsStatusAndKey(t *testing.T) {
+	tr := &scriptedTransport{steps: []step{{status: 201, header: map[string]string{"X-Request-Id": "req_1"}, body: `{"id":42}`}}}
+	cfg := retryConfig(tr, &fakeSleeper{}, 2)
+	_, err := Do[struct {
+		ID string `json:"id"`
+	}](cfg, context.Background(), http.MethodPost, "/x", map[string]any{})
+	var decErr *DecodeError
+	require.True(t, errors.As(err, &decErr), "%T", err)
+	require.Equal(t, 201, decErr.StatusCode)
+	require.Equal(t, "auto-key-1", decErr.IdempotencyKey)
+	require.Equal(t, "req_1", decErr.RequestID)
+	require.Len(t, tr.requests, 1)
+}

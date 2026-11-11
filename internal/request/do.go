@@ -50,6 +50,27 @@ func (e *NetworkError) Error() string {
 
 func (e *NetworkError) Unwrap() error { return e.Err }
 
+// ErrInvalidTimeout is returned, before any request is sent, when a
+// per-request timeout is zero or negative.
+var ErrInvalidTimeout = errors.New("blindpay: request timeout must be positive")
+
+// DecodeError is returned when a 2xx response body cannot be decoded into the
+// method's result type. The request succeeded on the server: do not resend it
+// without checking; IdempotencyKey replays the same response.
+type DecodeError struct {
+	StatusCode     int
+	RequestID      string
+	IdempotencyKey string
+	RawBody        []byte
+	Err            error
+}
+
+func (e *DecodeError) Error() string {
+	return fmt.Sprintf("blindpay: failed to decode response (status %d): %v", e.StatusCode, e.Err)
+}
+
+func (e *DecodeError) Unwrap() error { return e.Err }
+
 // terminalCodes are 5xx codes the spec's error table classifies terminal.
 var terminalCodes = map[string]bool{
 	"PAYINS_CARD_PAYMENT_PENDING": true,
@@ -100,17 +121,18 @@ func DoMultipart[T any](cfg *Config, ctx context.Context, path string, body []by
 func sendAndDecode[T any](cfg *Config, ctx context.Context, req outgoing, opts []RequestOption) (T, error) {
 	var zero T
 
-	status, respBody, err := send(cfg, ctx, req, applyOptions(opts))
+	res, err := send(cfg, ctx, req, applyOptions(opts))
 	if err != nil {
 		return zero, err
 	}
-	if status == http.StatusNoContent || len(bytes.TrimSpace(respBody)) == 0 {
+	if res.status == http.StatusNoContent || len(bytes.TrimSpace(res.body)) == 0 {
 		return zero, nil
 	}
 
 	var result T
-	if err := json.Unmarshal(respBody, &result); err != nil {
-		return zero, fmt.Errorf("failed to decode response: %w", err)
+	if err := json.Unmarshal(res.body, &result); err != nil {
+		return zero, &DecodeError{StatusCode: res.status, RequestID: res.header.Get("X-Request-Id"),
+			IdempotencyKey: res.key, RawBody: res.body, Err: err}
 	}
 	return result, nil
 }
@@ -141,12 +163,23 @@ func isMutation(method string) bool {
 //
 // Once a status line arrives the attempt is classified by that status, even
 // if reading the body then fails.
-func send(cfg *Config, ctx context.Context, req outgoing, o RequestOptions) (int, []byte, error) {
+// success is a 2xx response.
+type success struct {
+	status int
+	header http.Header
+	body   []byte
+	key    string
+}
+
+func send(cfg *Config, ctx context.Context, req outgoing, o RequestOptions) (success, error) {
 	mutation := isMutation(req.method)
 
 	callerKey, err := callerIdempotencyKey(&o)
 	if err != nil {
-		return 0, nil, err
+		return success{}, err
+	}
+	if o.TimeoutSet && o.Timeout <= 0 {
+		return success{}, ErrInvalidTimeout
 	}
 
 	key := ""
@@ -159,7 +192,7 @@ func send(cfg *Config, ctx context.Context, req outgoing, o RequestOptions) (int
 			// execute, so a key added only on retry would not protect it.
 			k, err := newKey(cfg)
 			if err != nil {
-				return 0, nil, fmt.Errorf("blindpay: generating idempotency key: %w", err)
+				return success{}, fmt.Errorf("blindpay: generating idempotency key: %w", err)
 			}
 			key = k
 		}
@@ -177,33 +210,33 @@ func send(cfg *Config, ctx context.Context, req outgoing, o RequestOptions) (int
 		canRetry := resendable && attempt < cfg.MaxRetries
 
 		if res.buildErr != nil {
-			return 0, nil, &NetworkError{Err: res.buildErr, IdempotencyKey: key}
+			return success{}, &NetworkError{Err: res.buildErr, IdempotencyKey: key}
 		}
 
 		if res.status == 0 { // no response
 			callerDone := ctx.Err() != nil
 			netErr := &NetworkError{Err: res.err, IdempotencyKey: key, Retryable: resendable && !callerDone}
 			if callerDone || !canRetry {
-				return 0, nil, netErr
+				return success{}, netErr
 			}
 			if serr := sleep(cfg, ctx, backoff(cfg, attempt)); serr != nil {
-				return 0, nil, netErr
+				return success{}, netErr
 			}
 			continue
 		}
 
 		if res.status >= 200 && res.status < 300 {
 			if res.err == nil {
-				return res.status, res.body, nil
+				return success{status: res.status, header: res.header, body: res.body, key: key}, nil
 			}
 			// Success, but the body was lost. Resending is safe for a GET and
 			// for a keyed mutation (the API replays the stored response).
 			netErr := &NetworkError{Err: res.err, IdempotencyKey: key, Retryable: resendable && ctx.Err() == nil}
 			if !canRetry || ctx.Err() != nil {
-				return 0, nil, netErr
+				return success{}, netErr
 			}
 			if serr := sleep(cfg, ctx, backoff(cfg, attempt)); serr != nil {
-				return 0, nil, netErr
+				return success{}, netErr
 			}
 			continue
 		}
@@ -216,15 +249,17 @@ func send(cfg *Config, ctx context.Context, req outgoing, o RequestOptions) (int
 		apiErr.RequestID = res.header.Get("X-Request-Id")
 		apiErr.IdempotencyKey = key
 		transient, autoRetry := classifyStatus(req.method, res.status, apiErr)
-		apiErr.Retryable = transient
+		// Multipart and unkeyed mutations are never resent, so they are
+		// never Retryable either.
+		apiErr.Retryable = transient && resendable
 
 		if !canRetry || !autoRetry {
-			return 0, nil, apiErr
+			return success{}, apiErr
 		}
 		if serr := sleep(cfg, ctx, retryDelay(cfg, res.header, attempt)); serr != nil {
 			// The caller gave up while waiting: report what the API said,
 			// wrapped with the context error (errors.As finds *APIError).
-			return 0, nil, fmt.Errorf("%w: %w", serr, apiErr)
+			return success{}, fmt.Errorf("%w: %w", serr, apiErr)
 		}
 	}
 }
@@ -342,8 +377,9 @@ func validHeaderValue(v string) bool {
 }
 
 // classifyStatus decides an error response. transient reports a failure that
-// may succeed when resent (APIError.Retryable): 408, 429, 409
-// idempotency_key_in_flight, and any 5xx whose code is not terminal.
+// may succeed when resent (APIError.Retryable, which send also clears for
+// multipart and unkeyed mutations): 429, 409 idempotency_key_in_flight, any
+// 5xx whose code is not terminal, and 408 on GET.
 // autoRetry reports whether the SDK resends it itself: 429 and the in-flight
 // 409 for every method; 408, 500, 502, 503 and 504 for GET only.
 func classifyStatus(method string, status int, apiErr *APIError) (transient, autoRetry bool) {
@@ -352,7 +388,8 @@ func classifyStatus(method string, status int, apiErr *APIError) (transient, aut
 		status == http.StatusConflict && apiErr.Message == "idempotency_key_in_flight":
 		return true, true
 	case status == http.StatusRequestTimeout:
-		return true, !isMutation(method)
+		mutation := isMutation(method)
+		return !mutation, !mutation
 	case status >= 500:
 		if terminalCodes[apiErr.Code] {
 			return false, false
