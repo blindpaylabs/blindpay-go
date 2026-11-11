@@ -201,3 +201,19 @@ func TestReachableSchemas_IgnoresXSDKFalseOperations(t *testing.T) {
 	require.True(t, reachable["PayoutOut"])
 	require.False(t, reachable["YieldOut"], "a schema used only by an x-sdk: false op needs no SDK mapping")
 }
+
+func TestCheckOperationChanges_HandWrittenOperationIsNotRegenerated(t *testing.T) {
+	repoRoot := writeFixture(t, map[string]string{
+		"go.mod":            "module example.com/fixture\n\ngo 1.21\n",
+		"widgets/client.go": coverageFixtureClient,
+	})
+	sm := &SpecMap{}
+	oldSpec := specWithPaths(t, map[string]string{}, map[string]any{})
+	newSpec := specWithPaths(t, map[string]string{}, map[string]any{
+		"/v1/instances/{instance_id}/widgets/{id}": map[string]any{"get": getOp("")},
+	})
+
+	plan := checkOperationChanges(repoRoot, sm, oldSpec, newSpec)
+	require.Empty(t, plan.NeedsHuman)
+	require.Empty(t, plan.Actions, "the SDK already sends GET /instances/%s/widgets/%s")
+}

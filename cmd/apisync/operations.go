@@ -235,12 +235,23 @@ func checkOperationChanges(repoRoot string, sm *SpecMap, oldSpec, newSpec *specD
 	}
 	sort.Strings(newKeys)
 
+	// Operations a human already implemented (the SDK sends METHOD+path)
+	// need no generated method; generating one would duplicate it.
+	implemented, err := sdkOperations(repoRoot)
+	if err != nil {
+		p.addNeedsHuman("NEEDS_HUMAN: cannot scan SDK operations: %v", err)
+		return p
+	}
+
 	for _, key := range newKeys {
 		entry := newOps[key]
 		if _, existed := oldOps[key]; existed {
 			continue
 		}
 		if operationIsIgnored(entry, sm) {
+			continue
+		}
+		if implemented[entry.Method+" "+normalizeSpecPath(entry.Path)] {
 			continue
 		}
 
