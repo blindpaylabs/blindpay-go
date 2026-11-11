@@ -65,7 +65,7 @@ type CreateAssetTrustlineResponse struct {
 type MintUsdbStellarParams struct {
 	Address   string `json:"address"`
 	Amount    string `json:"amount"`
-	SignedXDR string `json:"signedXdr"`
+	SignedXDR string `json:"signedXdr,omitempty"`
 }
 
 // MintUsdbSolanaParams represents parameters for minting USDB on Solana.
@@ -83,8 +83,11 @@ type MintUsdbSolanaResponse struct {
 
 // PrepareSolanaDelegationTransactionParams represents parameters for preparing a Solana delegation transaction.
 type PrepareSolanaDelegationTransactionParams struct {
-	TokenAddress string `json:"token_address"`
-	Amount       string `json:"amount"`
+	// QuoteID (recommended) makes the API take the amount and token from
+	// the quote; otherwise set TokenAddress and Amount.
+	QuoteID      string `json:"quote_id,omitempty"`
+	TokenAddress string `json:"token_address,omitempty"`
+	Amount       string `json:"amount,omitempty"`
 	OwnerAddress string `json:"owner_address"`
 }
 
@@ -259,6 +262,8 @@ type CreateOfframpWalletParams struct {
 	BankAccountID string `json:"-"`
 	ExternalID    string `json:"external_id"`
 	Network       string `json:"network"`
+	// PartnerFeeID charges this partner fee on the wallet's offramps.
+	PartnerFeeID *string `json:"partner_fee_id,omitempty"`
 }
 
 // CreateOfframpWalletResponse represents the response when creating an offramp wallet.

@@ -12,17 +12,27 @@ import (
 
 // CreateParams represents parameters for creating a quote.
 type CreateParams struct {
-	BankAccountID           string                        `json:"bank_account_id"`
-	CurrencyType            types.CurrencyType            `json:"currency_type"`
-	Network                 *types.Network                `json:"network,omitempty"`
-	RequestAmount           float64                       `json:"request_amount"`
-	Token                   *types.StablecoinToken        `json:"token,omitempty"`
-	CoverFees               *bool                         `json:"cover_fees,omitempty"`
-	Description             *string                       `json:"description,omitempty"`
-	PartnerFeeID            *string                       `json:"partner_fee_id,omitempty"`
-	TransactionDocumentFile *string                       `json:"transaction_document_file"`
-	TransactionDocumentID   *string                       `json:"transaction_document_id"`
-	TransactionDocumentType types.TransactionDocumentType `json:"transaction_document_type"`
+	// BankAccountID and PayableID: set exactly one. BankAccountID quotes a
+	// payout to a bank account; PayableID quotes paying a payable.
+	BankAccountID string  `json:"bank_account_id,omitempty"`
+	PayableID     *string `json:"payable_id,omitempty"`
+	// CurrencyType says whether RequestAmount is in the sender's token
+	// ("sender") or the receiver's currency ("receiver").
+	CurrencyType types.CurrencyType `json:"currency_type,omitempty"`
+	Network      *types.Network     `json:"network,omitempty"`
+	// RequestAmount is in integer cents (1000 = 10.00).
+	RequestAmount float64                `json:"request_amount,omitempty"`
+	Token         *types.StablecoinToken `json:"token,omitempty"`
+	CoverFees     *bool                  `json:"cover_fees,omitempty"`
+	Description   *string                `json:"description,omitempty"`
+	PartnerFeeID  *string                `json:"partner_fee_id,omitempty"`
+	// Deprecated: not part of the quote API; submit documents with
+	// Payouts.SubmitDocuments instead.
+	TransactionDocumentFile *string `json:"transaction_document_file,omitempty"`
+	// Deprecated: not part of the quote API; see TransactionDocumentFile.
+	TransactionDocumentID *string `json:"transaction_document_id,omitempty"`
+	// Deprecated: not part of the quote API; see TransactionDocumentFile.
+	TransactionDocumentType types.TransactionDocumentType `json:"transaction_document_type,omitempty"`
 	RefundWalletAddress     *string                       `json:"refund_wallet_address,omitempty"`
 }
 

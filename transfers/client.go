@@ -68,9 +68,13 @@ type CreateQuoteParams struct {
 	CustomerToken         types.StablecoinToken `json:"customer_token"`
 	CustomerNetwork       types.Network         `json:"customer_network"`
 	RequestAmount         float64               `json:"request_amount"`
-	CoverFees             bool                  `json:"cover_fees"`
+	CoverFees             bool                  `json:"cover_fees,omitempty"`
 	AmountReference       string                `json:"amount_reference"`
 	PartnerFeeID          *string               `json:"partner_fee_id,omitempty"`
+	// PartnerPercentageFee is in basis points (100 = 1%) and PartnerFlatFee
+	// in integer cents; they override the partner fee for this quote.
+	PartnerPercentageFee *int64 `json:"partner_percentage_fee,omitempty"`
+	PartnerFlatFee       *int64 `json:"partner_flat_fee,omitempty"`
 }
 
 // CreateQuoteResponse represents the response when creating a transfer quote.

@@ -121,8 +121,12 @@ type ExportParams struct {
 
 // AuthorizeStellarTokenParams represents parameters for authorizing a Stellar token.
 type AuthorizeStellarTokenParams struct {
-	QuoteID             string `json:"quote_id"`
-	SenderWalletAddress string `json:"sender_wallet_address"`
+	QuoteID string `json:"quote_id"`
+	// SenderWalletAddress and WalletID: set exactly one. WalletID pays from
+	// a BlindPay managed wallet; SenderWalletAddress from the customer's own
+	// wallet. The API rejects both or neither (400).
+	SenderWalletAddress string `json:"sender_wallet_address,omitempty"`
+	WalletID            string `json:"wallet_id,omitempty"`
 }
 
 // AuthorizeStellarTokenResponse represents the response when authorizing a Stellar token.
@@ -132,22 +136,34 @@ type AuthorizeStellarTokenResponse struct {
 
 // CreateStellarParams represents parameters for creating a Stellar payout.
 type CreateStellarParams struct {
-	QuoteID             string  `json:"quote_id"`
-	SenderWalletAddress string  `json:"sender_wallet_address"`
+	QuoteID string `json:"quote_id"`
+	// SenderWalletAddress and WalletID: set exactly one. WalletID pays from
+	// a BlindPay managed wallet; SenderWalletAddress from the customer's own
+	// wallet. The API rejects both or neither (400).
+	SenderWalletAddress string  `json:"sender_wallet_address,omitempty"`
+	WalletID            string  `json:"wallet_id,omitempty"`
 	SignedTransaction   *string `json:"signed_transaction,omitempty"`
 }
 
 // CreateSolanaParams represents parameters for creating a Solana payout.
 type CreateSolanaParams struct {
-	QuoteID             string  `json:"quote_id"`
-	SenderWalletAddress string  `json:"sender_wallet_address"`
+	QuoteID string `json:"quote_id"`
+	// SenderWalletAddress and WalletID: set exactly one. WalletID pays from
+	// a BlindPay managed wallet; SenderWalletAddress from the customer's own
+	// wallet. The API rejects both or neither (400).
+	SenderWalletAddress string  `json:"sender_wallet_address,omitempty"`
+	WalletID            string  `json:"wallet_id,omitempty"`
 	SignedTransaction   *string `json:"signed_transaction"`
 }
 
 // CreateEvmParams represents parameters for creating an EVM payout.
 type CreateEvmParams struct {
-	QuoteID             string `json:"quote_id"`
-	SenderWalletAddress string `json:"sender_wallet_address"`
+	QuoteID string `json:"quote_id"`
+	// SenderWalletAddress and WalletID: set exactly one. WalletID pays from
+	// a BlindPay managed wallet; SenderWalletAddress from the customer's own
+	// wallet. The API rejects both or neither (400).
+	SenderWalletAddress string `json:"sender_wallet_address,omitempty"`
+	WalletID            string `json:"wallet_id,omitempty"`
 }
 
 // SubmitDocumentsParams represents parameters for submitting payout documents.

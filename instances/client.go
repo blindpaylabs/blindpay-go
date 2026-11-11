@@ -41,6 +41,17 @@ type UpdateParams struct {
 	CustomerInviteRedirectURL *string `json:"customer_invite_redirect_url,omitempty"`
 	EmailNotifications        *bool   `json:"email_notifications,omitempty"`
 	RequirePasskey            *bool   `json:"require_passkey,omitempty"`
+	LogoURL                   *string `json:"logo_url,omitempty"`
+	// AccentColor is a hex color for hosted pages (e.g. "#1A2B3C").
+	AccentColor              *string  `json:"accent_color,omitempty"`
+	ComplianceEmails         []string `json:"compliance_emails,omitempty"`
+	CustomerRfiEmailsEnabled *bool    `json:"customer_rfi_emails_enabled,omitempty"`
+	// PartnerTosLink, PartnerTosScreenshot and PartnerTosTermsAccepted
+	// record your own terms of service; PartnerTosTermsAccepted can only be
+	// true.
+	PartnerTosLink          *string `json:"partner_tos_link,omitempty"`
+	PartnerTosScreenshot    *string `json:"partner_tos_screenshot,omitempty"`
+	PartnerTosTermsAccepted *bool   `json:"partner_tos_terms_accepted,omitempty"`
 }
 
 // UpdateMemberRoleParams represents parameters for updating a member's role.

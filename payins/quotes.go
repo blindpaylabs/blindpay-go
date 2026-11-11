@@ -11,16 +11,20 @@ import (
 
 // CreateQuoteParams represents parameters for creating a payin quote.
 type CreateQuoteParams struct {
-	BlockchainWalletID string                `json:"blockchain_wallet_id"`
+	// BlockchainWalletID or WalletID (a managed wallet) receives the tokens.
+	BlockchainWalletID string                `json:"blockchain_wallet_id,omitempty"`
 	CurrencyType       types.CurrencyType    `json:"currency_type"`
 	PaymentMethod      string                `json:"payment_method"`
 	RequestAmount      float64               `json:"request_amount"`
 	Token              types.StablecoinToken `json:"token"`
-	CoverFees          bool                  `json:"cover_fees"`
+	CoverFees          bool                  `json:"cover_fees,omitempty"`
 	PartnerFeeID       *string               `json:"partner_fee_id,omitempty"`
 	PayerRules         PayerRules            `json:"payer_rules"`
 	IsOtc              *bool                 `json:"is_otc,omitempty"`
 	WalletID           *string               `json:"wallet_id,omitempty"`
+	// FundingBankAccountID is the customer's linked bank account to pull
+	// from (ACH pull payins).
+	FundingBankAccountID *string `json:"funding_bank_account_id,omitempty"`
 }
 
 // PayerRules represents payer rules for payin quotes.

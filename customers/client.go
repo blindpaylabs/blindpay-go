@@ -351,6 +351,16 @@ type CreateIndividualStandardParams struct {
 	Occupation            *string                      `json:"occupation,omitempty"`
 	RecipientRelationship *types.RecipientRelationship `json:"recipient_relationship,omitempty"`
 	SoleProprietorDocType *types.SoleProprietorDocType `json:"sole_proprietor_doc_type,omitempty"`
+	// Latitude and Longitude are the customer's location, if known.
+	Latitude  *float64 `json:"latitude,omitempty"`
+	Longitude *float64 `json:"longitude,omitempty"`
+	// AdditionalInfo attaches extra documents (label + file URL).
+	AdditionalInfo                   []AdditionalInfoItem   `json:"additional_info,omitempty"`
+	SelfieFile                       *string                `json:"selfie_file,omitempty"`
+	SourceOfFundsDocType             *SourceOfFundsDocType  `json:"source_of_funds_doc_type,omitempty"`
+	SourceOfFundsDocFile             *string                `json:"source_of_funds_doc_file,omitempty"`
+	PurposeOfTransactions            *PurposeOfTransactions `json:"purpose_of_transactions,omitempty"`
+	PurposeOfTransactionsExplanation *string                `json:"purpose_of_transactions_explanation,omitempty"`
 }
 
 // CreateIndividualEnhancedParams represents parameters for creating an individual with enhanced KYC.
@@ -385,6 +395,11 @@ type CreateIndividualEnhancedParams struct {
 	Occupation                       *string                      `json:"occupation,omitempty"`
 	RecipientRelationship            *types.RecipientRelationship `json:"recipient_relationship,omitempty"`
 	SoleProprietorDocType            *types.SoleProprietorDocType `json:"sole_proprietor_doc_type,omitempty"`
+	// Latitude and Longitude are the customer's location, if known.
+	Latitude  *float64 `json:"latitude,omitempty"`
+	Longitude *float64 `json:"longitude,omitempty"`
+	// AdditionalInfo attaches extra documents (label + file URL).
+	AdditionalInfo []AdditionalInfoItem `json:"additional_info,omitempty"`
 }
 
 // CreateBusinessStandardParams represents parameters for creating a business with standard KYB.
@@ -421,6 +436,16 @@ type CreateBusinessStandardParams struct {
 	PubliclyTraded          *bool                        `json:"publicly_traded,omitempty"`
 	RecipientRelationship   *types.RecipientRelationship `json:"recipient_relationship,omitempty"`
 	SoleProprietorDocType   *types.SoleProprietorDocType `json:"sole_proprietor_doc_type,omitempty"`
+	// Latitude and Longitude are the customer's location, if known.
+	Latitude  *float64 `json:"latitude,omitempty"`
+	Longitude *float64 `json:"longitude,omitempty"`
+	// AdditionalInfo attaches extra documents (label + file URL).
+	AdditionalInfo                   []AdditionalInfoItem   `json:"additional_info,omitempty"`
+	SelfieFile                       *string                `json:"selfie_file,omitempty"`
+	SourceOfFundsDocType             *SourceOfFundsDocType  `json:"source_of_funds_doc_type,omitempty"`
+	SourceOfFundsDocFile             *string                `json:"source_of_funds_doc_file,omitempty"`
+	PurposeOfTransactions            *PurposeOfTransactions `json:"purpose_of_transactions,omitempty"`
+	PurposeOfTransactionsExplanation *string                `json:"purpose_of_transactions_explanation,omitempty"`
 }
 
 // CreateResponse represents the response when creating a customer.
@@ -476,6 +501,11 @@ type UpdateParams struct {
 	Occupation                       *string                      `json:"occupation,omitempty"`
 	RecipientRelationship            *types.RecipientRelationship `json:"recipient_relationship,omitempty"`
 	SoleProprietorDocType            *types.SoleProprietorDocType `json:"sole_proprietor_doc_type,omitempty"`
+	// Latitude and Longitude are the customer's location, if known.
+	Latitude  *float64 `json:"latitude,omitempty"`
+	Longitude *float64 `json:"longitude,omitempty"`
+	// AdditionalInfo attaches extra documents (label + file URL).
+	AdditionalInfo []AdditionalInfoItem `json:"additional_info,omitempty"`
 }
 
 // LimitsResponse represents customer limits.
@@ -509,14 +539,36 @@ type LimitIncreaseRequest struct {
 	UpdatedAt              string                                     `json:"updated_at"`
 }
 
+// AdditionalInfoLabel names the kind of an additional document (e.g.
+// "BANK_STATEMENT"). Unknown future values decode as-is.
+type AdditionalInfoLabel string
+
+// AdditionalInfoItem is an extra document attached to a customer.
+type AdditionalInfoItem struct {
+	Label AdditionalInfoLabel `json:"label"`
+	// Value is the document's file URL (from Upload).
+	Value string `json:"value"`
+}
+
+// LimitIncreaseSupportingDocument is one document backing a limit increase
+// request.
+type LimitIncreaseSupportingDocument struct {
+	Type LimitIncreaseRequestSupportingDocumentType `json:"type"`
+	// File is the document's URL (from Upload).
+	File string `json:"file"`
+}
+
 // RequestLimitIncreaseParams represents parameters for requesting a limit increase.
 type RequestLimitIncreaseParams struct {
-	CustomerID             string                                     `json:"-"`
-	Daily                  float64                                    `json:"daily"`
-	Monthly                float64                                    `json:"monthly"`
-	PerTransaction         float64                                    `json:"per_transaction"`
-	SupportingDocumentFile string                                     `json:"supporting_document_file"`
-	SupportingDocumentType LimitIncreaseRequestSupportingDocumentType `json:"supporting_document_type"`
+	CustomerID     string  `json:"-"`
+	Daily          float64 `json:"daily"`
+	Monthly        float64 `json:"monthly"`
+	PerTransaction float64 `json:"per_transaction"`
+	// SupportingDocumentFile and SupportingDocumentType attach one
+	// document; SupportingDocuments attaches several.
+	SupportingDocumentFile string                                     `json:"supporting_document_file,omitempty"`
+	SupportingDocumentType LimitIncreaseRequestSupportingDocumentType `json:"supporting_document_type,omitempty"`
+	SupportingDocuments    []LimitIncreaseSupportingDocument          `json:"supporting_documents,omitempty"`
 }
 
 // RequestLimitIncreaseResponse represents the response when requesting a limit increase.
@@ -704,146 +756,7 @@ func (c *Client) Update(ctx context.Context, params *UpdateParams, opts ...optio
 
 	path := request.Pathf("/instances/%s/customers/%s", c.instanceID, params.CustomerID)
 
-	// Build the request body with only non-nil fields
-	body := make(map[string]any)
-
-	if params.Email != nil {
-		body["email"] = params.Email
-	}
-	if params.TaxID != nil {
-		body["tax_id"] = params.TaxID
-	}
-	if params.AddressLine1 != nil {
-		body["address_line_1"] = params.AddressLine1
-	}
-	if params.AddressLine2 != nil {
-		body["address_line_2"] = params.AddressLine2
-	}
-	if params.City != nil {
-		body["city"] = params.City
-	}
-	if params.StateProvinceRegion != nil {
-		body["state_province_region"] = params.StateProvinceRegion
-	}
-	if params.Country != nil {
-		body["country"] = params.Country
-	}
-	if params.PostalCode != nil {
-		body["postal_code"] = params.PostalCode
-	}
-	if params.IPAddress != nil {
-		body["ip_address"] = params.IPAddress
-	}
-	if params.ImageURL != nil {
-		body["image_url"] = params.ImageURL
-	}
-	if params.PhoneNumber != nil {
-		body["phone_number"] = params.PhoneNumber
-	}
-	if params.ProofOfAddressDocType != nil {
-		body["proof_of_address_doc_type"] = params.ProofOfAddressDocType
-	}
-	if params.ProofOfAddressDocFile != nil {
-		body["proof_of_address_doc_file"] = params.ProofOfAddressDocFile
-	}
-	if params.FirstName != nil {
-		body["first_name"] = params.FirstName
-	}
-	if params.LastName != nil {
-		body["last_name"] = params.LastName
-	}
-	if params.DateOfBirth != nil {
-		body["date_of_birth"] = params.DateOfBirth
-	}
-	if params.IDDocCountry != nil {
-		body["id_doc_country"] = params.IDDocCountry
-	}
-	if params.IDDocType != nil {
-		body["id_doc_type"] = params.IDDocType
-	}
-	if params.IDDocFrontFile != nil {
-		body["id_doc_front_file"] = params.IDDocFrontFile
-	}
-	if params.IDDocBackFile != nil {
-		body["id_doc_back_file"] = params.IDDocBackFile
-	}
-	if params.LegalName != nil {
-		body["legal_name"] = params.LegalName
-	}
-	if params.AlternateName != nil {
-		body["alternate_name"] = params.AlternateName
-	}
-	if params.FormationDate != nil {
-		body["formation_date"] = params.FormationDate
-	}
-	if params.Website != nil {
-		body["website"] = params.Website
-	}
-	if params.Owners != nil {
-		body["owners"] = params.Owners
-	}
-	if params.IncorporationDocFile != nil {
-		body["incorporation_doc_file"] = params.IncorporationDocFile
-	}
-	if params.ProofOfOwnershipDocFile != nil {
-		body["proof_of_ownership_doc_file"] = params.ProofOfOwnershipDocFile
-	}
-	if params.SourceOfFundsDocType != nil {
-		body["source_of_funds_doc_type"] = params.SourceOfFundsDocType
-	}
-	if params.SourceOfFundsDocFile != nil {
-		body["source_of_funds_doc_file"] = params.SourceOfFundsDocFile
-	}
-	if params.SelfieFile != nil {
-		body["selfie_file"] = params.SelfieFile
-	}
-	if params.PurposeOfTransactions != nil {
-		body["purpose_of_transactions"] = params.PurposeOfTransactions
-	}
-	if params.PurposeOfTransactionsExplanation != nil {
-		body["purpose_of_transactions_explanation"] = params.PurposeOfTransactionsExplanation
-	}
-	if params.ExternalID != nil {
-		body["external_id"] = params.ExternalID
-	}
-	if params.TosID != nil {
-		body["tos_id"] = params.TosID
-	}
-	if params.AccountPurpose != nil {
-		body["account_purpose"] = params.AccountPurpose
-	}
-	if params.AccountPurposeOther != nil {
-		body["account_purpose_other"] = params.AccountPurposeOther
-	}
-	if params.BusinessTypeField != nil {
-		body["business_type"] = params.BusinessTypeField
-	}
-	if params.BusinessDescription != nil {
-		body["business_description"] = params.BusinessDescription
-	}
-	if params.BusinessIndustry != nil {
-		body["business_industry"] = params.BusinessIndustry
-	}
-	if params.EstimatedAnnualRevenue != nil {
-		body["estimated_annual_revenue"] = params.EstimatedAnnualRevenue
-	}
-	if params.SourceOfWealth != nil {
-		body["source_of_wealth"] = params.SourceOfWealth
-	}
-	if params.PubliclyTraded != nil {
-		body["publicly_traded"] = params.PubliclyTraded
-	}
-	if params.Occupation != nil {
-		body["occupation"] = params.Occupation
-	}
-	if params.RecipientRelationship != nil {
-		body["recipient_relationship"] = params.RecipientRelationship
-	}
-	if params.SoleProprietorDocType != nil {
-		body["sole_proprietor_doc_type"] = params.SoleProprietorDocType
-	}
-
-	_, err := request.Do[struct{}](c.cfg, ctx, "PUT", path, body, opts...)
+	_, err := request.Do[struct{}](c.cfg, ctx, "PUT", path, params, opts...)
 	return err
 }
 

@@ -57,6 +57,23 @@ type CreateParams struct {
 	BankingPartner        types.BankingPartner  `json:"banking_partner"`
 	SoleProprietorDocType *string               `json:"sole_proprietor_doc_type,omitempty"`
 	SoleProprietorDocFile *string               `json:"sole_proprietor_doc_file,omitempty"`
+	// PartnerFeeID charges this partner fee on the account's payins.
+	PartnerFeeID *string `json:"partner_fee_id,omitempty"`
+	// BreB is required for Colombian (bre_b) accounts.
+	BreB *BreBParams `json:"bre_b,omitempty"`
+}
+
+// BreBGender is the account holder's gender for a Bre-B account.
+type BreBGender string
+
+const (
+	BreBGenderMale   BreBGender = "male"
+	BreBGenderFemale BreBGender = "female"
+)
+
+// BreBParams holds the Bre-B (Colombia) details of a virtual account.
+type BreBParams struct {
+	Gender BreBGender `json:"gender"`
 }
 
 // UpdateParams represents parameters for updating a virtual account.
@@ -65,6 +82,8 @@ type UpdateParams struct {
 	VirtualAccountID   string                `json:"-"`
 	BlockchainWalletID string                `json:"blockchain_wallet_id"`
 	Token              types.StablecoinToken `json:"token"`
+	// PartnerFeeID charges this partner fee on the account's payins.
+	PartnerFeeID *string `json:"partner_fee_id,omitempty"`
 }
 
 // ListResponse represents the response when listing virtual accounts.

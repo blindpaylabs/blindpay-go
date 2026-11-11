@@ -340,5 +340,77 @@
     "field": "sender_address",
     "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
     "owner": "sdk-parity"
+  },
+  {
+    "schema": "customers.RequestLimitIncreaseParams",
+    "field": "supporting_documents",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "instances.UpdateParams",
+    "field": "logo_url",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "instances.UpdateParams",
+    "field": "accent_color",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "instances.UpdateParams",
+    "field": "partner_tos_link",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "instances.UpdateParams",
+    "field": "partner_tos_screenshot",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "instances.UpdateParams",
+    "field": "partner_tos_terms_accepted",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "payins.CreateQuoteParams",
+    "field": "funding_bank_account_id",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "quotes.CreateParams",
+    "field": "payable_id",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "transfers.CreateQuoteParams",
+    "field": "partner_percentage_fee",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "transfers.CreateQuoteParams",
+    "field": "partner_flat_fee",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "virtualaccounts.CreateParams",
+    "field": "bre_b",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
+  },
+  {
+    "schema": "virtualaccounts.BreBParams",
+    "field": "gender",
+    "reason": "Temporary; removed with the snapshot refresh (M3). Present in the reference spec (blindpay-v2@66144f3b2) but missing from the stale committed spec-snapshot.json.",
+    "owner": "sdk-parity"
   }
 ]
