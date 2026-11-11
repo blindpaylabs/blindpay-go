@@ -5,8 +5,8 @@ import "strings"
 // typeCategory is a coarse wire-shape bucket used to compare a spec
 // property's declared JSON Schema type against the Go type of the field
 // already modeling it, independent of pointer-vs-bare or nullable-vs-not
-// (this repo uses both optionality styles interchangeably, see
-// StructShape.preferPointerStyle).
+// (older structs use bare+omitempty for optional fields; generated ones use
+// pointers).
 type typeCategory int
 
 const (

@@ -377,7 +377,7 @@ type Customer struct {
 	// VirtualAccountPreapproval is the review of the customer for US
 	// virtual accounts.
 	VirtualAccountPreapproval *VirtualAccountPreapproval `json:"virtual_account_preapproval,omitempty"`
-	IsNested                  bool                       `json:"is_nested,omitempty"`
+	IsNested                  *bool                      `json:"is_nested,omitempty"`
 }
 
 // CreateIndividualStandardParams represents parameters for creating an individual with standard KYC.

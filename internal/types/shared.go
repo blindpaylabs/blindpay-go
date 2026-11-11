@@ -146,24 +146,24 @@ type TrackingPayment struct {
 	// review; ReviewContext is their structured context.
 	ReviewSources          []string       `json:"review_sources,omitempty"`
 	ReviewContext          map[string]any `json:"review_context,omitempty"`
-	CoelsaID               string         `json:"coelsa_id,omitempty"`
-	EndToEndID             string         `json:"end_to_end_id,omitempty"`
-	ProviderClearingSystem string         `json:"provider_clearing_system,omitempty"`
-	ProviderErrorReason    string         `json:"provider_error_reason,omitempty"`
-	ProviderImad           string         `json:"provider_imad,omitempty"`
-	ProviderReference      string         `json:"provider_reference,omitempty"`
-	ProviderUetr           string         `json:"provider_uetr,omitempty"`
-	RecipientAccountNumber string         `json:"recipient_account_number,omitempty"`
-	RecipientAccountType   string         `json:"recipient_account_type,omitempty"`
-	RecipientBankCode      string         `json:"recipient_bank_code,omitempty"`
-	RecipientBranchCode    string         `json:"recipient_branch_code,omitempty"`
-	RecipientName          string         `json:"recipient_name,omitempty"`
-	RecipientTaxID         string         `json:"recipient_tax_id,omitempty"`
-	RefundReviewActionedAt string         `json:"refund_review_actioned_at,omitempty"`
-	RefundReviewDetectedAt string         `json:"refund_review_detected_at,omitempty"`
-	RefundReviewReason     string         `json:"refund_review_reason,omitempty"`
-	ReturnedAmount         int            `json:"returned_amount,omitempty"`
-	ReviewSource           string         `json:"review_source,omitempty"`
+	CoelsaID               *string        `json:"coelsa_id,omitempty"`
+	EndToEndID             *string        `json:"end_to_end_id,omitempty"`
+	ProviderClearingSystem *string        `json:"provider_clearing_system,omitempty"`
+	ProviderErrorReason    *string        `json:"provider_error_reason,omitempty"`
+	ProviderImad           *string        `json:"provider_imad,omitempty"`
+	ProviderReference      *string        `json:"provider_reference,omitempty"`
+	ProviderUetr           *string        `json:"provider_uetr,omitempty"`
+	RecipientAccountNumber *string        `json:"recipient_account_number,omitempty"`
+	RecipientAccountType   *string        `json:"recipient_account_type,omitempty"`
+	RecipientBankCode      *string        `json:"recipient_bank_code,omitempty"`
+	RecipientBranchCode    *string        `json:"recipient_branch_code,omitempty"`
+	RecipientName          *string        `json:"recipient_name,omitempty"`
+	RecipientTaxID         *string        `json:"recipient_tax_id,omitempty"`
+	RefundReviewActionedAt *string        `json:"refund_review_actioned_at,omitempty"`
+	RefundReviewDetectedAt *string        `json:"refund_review_detected_at,omitempty"`
+	RefundReviewReason     *string        `json:"refund_review_reason,omitempty"`
+	ReturnedAmount         *int           `json:"returned_amount,omitempty"`
+	ReviewSource           *string        `json:"review_source,omitempty"`
 	// ReviewContexts and ApprovedRiskSources describe a payin's risk review.
 	ReviewContexts      map[string]any `json:"review_contexts,omitempty"`
 	ApprovedRiskSources []string       `json:"approved_risk_sources,omitempty"`

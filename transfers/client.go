@@ -58,8 +58,8 @@ type Transfer struct {
 	CustomerID                    string                        `json:"customer_id"`
 	Address                       string                        `json:"address"`
 	Network                       types.Network                 `json:"network"`
-	PartnerFlatFee                int                           `json:"partner_flat_fee,omitempty"`
-	PartnerPercentageFee          int                           `json:"partner_percentage_fee,omitempty"`
+	PartnerFlatFee                *int                          `json:"partner_flat_fee,omitempty"`
+	PartnerPercentageFee          *int                          `json:"partner_percentage_fee,omitempty"`
 }
 
 // CreateQuoteParams represents parameters for creating a transfer quote.

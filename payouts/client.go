@@ -87,26 +87,26 @@ type Payout struct {
 	CpnPaymentID                          *string                         `json:"cpn_payment_id,omitempty"`
 	SenderLegalName                       *string                         `json:"sender_legal_name,omitempty"`
 	TrackingDocuments                     *types.TrackingDocuments        `json:"tracking_documents,omitempty"`
-	BankAccountID                         string                          `json:"bank_account_id,omitempty"`
-	FasterPaymentsAccountNumber           string                          `json:"faster_payments_account_number,omitempty"`
-	FasterPaymentsBeneficiaryAddressLine1 string                          `json:"faster_payments_beneficiary_address_line_1,omitempty"`
-	FasterPaymentsBeneficiaryCity         string                          `json:"faster_payments_beneficiary_city,omitempty"`
-	FasterPaymentsBeneficiaryCountry      string                          `json:"faster_payments_beneficiary_country,omitempty"`
-	FasterPaymentsBeneficiaryLegalName    string                          `json:"faster_payments_beneficiary_legal_name,omitempty"`
-	FasterPaymentsBeneficiaryPostalCode   string                          `json:"faster_payments_beneficiary_postal_code,omitempty"`
-	FasterPaymentsSortCode                string                          `json:"faster_payments_sort_code,omitempty"`
-	PartnerFee                            int                             `json:"partner_fee,omitempty"`
-	PayableID                             string                          `json:"payable_id,omitempty"`
-	PixSafeBankCode                       string                          `json:"pix_safe_bank_code,omitempty"`
-	PixSafeBranchCode                     string                          `json:"pix_safe_branch_code,omitempty"`
-	PixSafeCpfCnpj                        string                          `json:"pix_safe_cpf_cnpj,omitempty"`
-	SepaBeneficiaryAddressLine1           string                          `json:"sepa_beneficiary_address_line_1,omitempty"`
-	SepaBeneficiaryCity                   string                          `json:"sepa_beneficiary_city,omitempty"`
-	SepaBeneficiaryCountry                string                          `json:"sepa_beneficiary_country,omitempty"`
-	SepaBeneficiaryLegalName              string                          `json:"sepa_beneficiary_legal_name,omitempty"`
-	SepaBeneficiaryPostalCode             string                          `json:"sepa_beneficiary_postal_code,omitempty"`
-	SepaIban                              string                          `json:"sepa_iban,omitempty"`
-	TransactionFeeAmount                  float64                         `json:"transaction_fee_amount,omitempty"`
+	BankAccountID                         *string                         `json:"bank_account_id,omitempty"`
+	FasterPaymentsAccountNumber           *string                         `json:"faster_payments_account_number,omitempty"`
+	FasterPaymentsBeneficiaryAddressLine1 *string                         `json:"faster_payments_beneficiary_address_line_1,omitempty"`
+	FasterPaymentsBeneficiaryCity         *string                         `json:"faster_payments_beneficiary_city,omitempty"`
+	FasterPaymentsBeneficiaryCountry      *string                         `json:"faster_payments_beneficiary_country,omitempty"`
+	FasterPaymentsBeneficiaryLegalName    *string                         `json:"faster_payments_beneficiary_legal_name,omitempty"`
+	FasterPaymentsBeneficiaryPostalCode   *string                         `json:"faster_payments_beneficiary_postal_code,omitempty"`
+	FasterPaymentsSortCode                *string                         `json:"faster_payments_sort_code,omitempty"`
+	PartnerFee                            *int                            `json:"partner_fee,omitempty"`
+	PayableID                             *string                         `json:"payable_id,omitempty"`
+	PixSafeBankCode                       *string                         `json:"pix_safe_bank_code,omitempty"`
+	PixSafeBranchCode                     *string                         `json:"pix_safe_branch_code,omitempty"`
+	PixSafeCpfCnpj                        *string                         `json:"pix_safe_cpf_cnpj,omitempty"`
+	SepaBeneficiaryAddressLine1           *string                         `json:"sepa_beneficiary_address_line_1,omitempty"`
+	SepaBeneficiaryCity                   *string                         `json:"sepa_beneficiary_city,omitempty"`
+	SepaBeneficiaryCountry                *string                         `json:"sepa_beneficiary_country,omitempty"`
+	SepaBeneficiaryLegalName              *string                         `json:"sepa_beneficiary_legal_name,omitempty"`
+	SepaBeneficiaryPostalCode             *string                         `json:"sepa_beneficiary_postal_code,omitempty"`
+	SepaIban                              *string                         `json:"sepa_iban,omitempty"`
+	TransactionFeeAmount                  *float64                        `json:"transaction_fee_amount,omitempty"`
 }
 
 // ListParams represents parameters for listing payouts.

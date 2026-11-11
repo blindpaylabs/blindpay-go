@@ -145,29 +145,6 @@ func typeExprString(expr ast.Expr) string {
 	}
 }
 
-// preferPointerStyle inspects the struct's existing optional (omitempty)
-// siblings and returns true if the majority use a pointer type, matching
-// "the sibling style within each struct" rather than a repo-wide default.
-// Defaults to pointer style when there are no optional siblings to learn
-// from, matching this repo's general convention (CLAUDE.md section 2).
-func (s *StructShape) preferPointerStyle() bool {
-	pointerCount, bareCount := 0, 0
-	for _, f := range s.Fields {
-		if !f.Omitempty {
-			continue
-		}
-		if f.Pointer {
-			pointerCount++
-		} else {
-			bareCount++
-		}
-	}
-	if pointerCount == 0 && bareCount == 0 {
-		return true
-	}
-	return pointerCount >= bareCount
-}
-
 // EnumShape locates a set of `X Symbol = "value"` (typed, internal enum) or
 // `X = types.SymbolX` (untyped alias, root re-export) const declarations.
 type EnumShape struct {

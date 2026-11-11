@@ -21,41 +21,9 @@ type CreateParams struct {
 	shape, err := findStructShape(root, "pkg/client.go", "CreateParams")
 	require.NoError(t, err)
 	require.Len(t, shape.Fields, 3)
-	require.True(t, shape.preferPointerStyle(), "majority of optional siblings are pointer-typed")
+	require.True(t, shape.Fields[1].Pointer && shape.Fields[1].Omitempty)
 	require.True(t, shape.hasJSONField("token"))
 	require.False(t, shape.hasJSONField("missing"))
-}
-
-func TestFindStructShape_BareSiblingStyle(t *testing.T) {
-	root := writeFixture(t, map[string]string{
-		"pkg/client.go": `package pkg
-
-type BankAccount struct {
-	ID       string ` + "`json:\"id\"`" + `
-	PixKey   string ` + "`json:\"pix_key,omitempty\"`" + `
-	SpeiCode string ` + "`json:\"spei_code,omitempty\"`" + `
-}
-`,
-	})
-
-	shape, err := findStructShape(root, "pkg/client.go", "BankAccount")
-	require.NoError(t, err)
-	require.False(t, shape.preferPointerStyle(), "majority of optional siblings are bare+omitempty")
-}
-
-func TestFindStructShape_NoOptionalSiblingsDefaultsToPointer(t *testing.T) {
-	root := writeFixture(t, map[string]string{
-		"pkg/client.go": `package pkg
-
-type Minimal struct {
-	ID string ` + "`json:\"id\"`" + `
-}
-`,
-	})
-
-	shape, err := findStructShape(root, "pkg/client.go", "Minimal")
-	require.NoError(t, err)
-	require.True(t, shape.preferPointerStyle(), "no optional siblings to learn from: defaults to this repo's general pointer convention")
 }
 
 func TestFindStructShape_NotFound(t *testing.T) {
