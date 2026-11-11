@@ -317,7 +317,7 @@ reconciliation with the auto-pager.
 - Optional request fields the spec marks optional are no longer sent when
   unset (for example `sender_wallet_address`, quote `bank_account_id`,
   `cover_fees: false`).
-- Errors expose `Code`, `Description`, `RequestID`, `IdempotencyKey` and
+- Errors also expose `RequestID`, `IdempotencyKey` and
   `Retryable`; network failures are `*blindpay.NetworkError`.
 - Path parameters are percent-encoded.
 - The webhook verifier is native; the `svix` dependency is gone.
