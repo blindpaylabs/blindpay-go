@@ -335,6 +335,32 @@ const (
 	require.True(t, sawReexport)
 }
 
+func TestReconcileEnums_SharedSymbolPlansEachMemberOnce(t *testing.T) {
+	root := writeFixture(t, map[string]string{
+		"internal/types/enums.go": `package types
+
+type Color string
+
+const (
+	ColorRed Color = "red"
+)
+`,
+	})
+	site := SDKSite{File: "internal/types/enums.go", Symbol: "Color"}
+	sm := &SpecMap{Enums: []EnumMapping{
+		{SDK: site, Spec: SpecPointer{Schema: "Widget", Property: "color"}},
+		{SDK: site, Spec: SpecPointer{Schema: "Gadget", Property: "color"}},
+	}}
+	spec := mustSpec(t, map[string]string{
+		"Widget": `{"type":"object","properties":{"color":{"type":"string","enum":["red","green"]}}}`,
+		"Gadget": `{"type":"object","properties":{"color":{"type":"string","enum":["red","green"]}}}`,
+	})
+
+	plan := reconcileEnums(root, sm, &Unmodeled{}, spec, spec)
+	require.Empty(t, plan.NeedsHuman)
+	require.Len(t, plan.Actions, 1, "ColorGreen must be inserted once, not once per mapped property")
+}
+
 func TestReconcileEnums_UnmodeledJSONExcusesMissingMember(t *testing.T) {
 	root := writeFixture(t, map[string]string{
 		"internal/types/enums.go": `package types

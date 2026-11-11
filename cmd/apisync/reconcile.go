@@ -152,6 +152,10 @@ func checkUnclassifiedSchemas(sm *SpecMap, spec *specDoc, pending map[string]boo
 // relative to the old (snapshot) spec.
 func reconcileEnums(repoRoot string, sm *SpecMap, um *Unmodeled, oldSpec, newSpec *specDoc) *planResult {
 	p := &planResult{}
+	// One SDK enum symbol can back several spec properties (Network on
+	// QuoteIn.network and WalletDepositOut.network, ...); plan each missing
+	// member once, or -apply would insert duplicate constants.
+	planned := map[string]bool{}
 
 	for _, e := range sm.Enums {
 		if strings.HasPrefix(e.Spec.Schema, "inline:") {
@@ -210,6 +214,10 @@ func reconcileEnums(repoRoot string, sm *SpecMap, um *Unmodeled, oldSpec, newSpe
 				continue
 			}
 			goName := e.SDK.Symbol + goIdent(member)
+			if planned[e.SDK.File+"\x00"+goName] {
+				continue
+			}
+			planned[e.SDK.File+"\x00"+goName] = true
 			line := fmt.Sprintf("\t%s %s = %q", goName, e.SDK.Symbol, member)
 			act := action{
 				description: fmt.Sprintf("enum %s: add member %s = %q (%s)", e.SDK.Symbol, goName, member, e.SDK.File),
