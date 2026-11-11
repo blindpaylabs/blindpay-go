@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"testing"
 
 	"github.com/blindpaylabs/blindpay-go/internal/blindpaytest"
@@ -677,4 +678,53 @@ func TestBankAccounts_Delete(t *testing.T) {
 	client := NewClient(cfg)
 	err := client.Delete(context.Background(), customerID, id)
 	require.NoError(t, err)
+}
+
+// TestBankAccounts_GetFixtures decodes every shared fixture variant of
+// GET .../bank-accounts/{id} (BankAccountOut). Before the fix, GetResponse
+// only modelled a non-spec shape, so name, type and every rail field were
+// lost.
+func TestBankAccounts_GetFixtures(t *testing.T) {
+	instanceID := "in_000000000000"
+	customerID := "re_000000000000"
+	id := "ba_000000000000"
+
+	for _, v := range blindpaytest.ResponseVariants(t, "GET /v1/instances/{instance_id}/customers/{customer_id}/bank-accounts/{id}") {
+		v := v
+		t.Run(v.Name, func(t *testing.T) {
+			var want BankAccount
+			require.NoError(t, json.Unmarshal(v.Body, &want))
+			require.NotEmpty(t, want.ID)
+			require.NotEmpty(t, want.Name)
+			require.NotEmpty(t, want.Type)
+
+			client := NewClient(&config.Config{
+				BaseURL:    "https://api.blindpay.com/v1",
+				InstanceID: instanceID,
+				APIKey:     "test_key",
+				HTTPClient: &http.Client{Transport: &blindpaytest.RoundTripper{
+					T:      t,
+					Method: http.MethodGet,
+					Path:   fmt.Sprintf("/v1/instances/%s/customers/%s/bank-accounts/%s", instanceID, customerID, id),
+					Query:  url.Values{},
+					Out:    v.Body,
+				}},
+				UserAgent: "blindpay-go/test",
+			})
+
+			resp, err := client.Get(context.Background(), customerID, id)
+			require.NoError(t, err)
+			require.Equal(t, want, resp.BankAccount)
+
+			// Promoted and compatibility fields agree with the embedded account.
+			require.Equal(t, want.Name, resp.Name)
+			require.Equal(t, want.Type, resp.Type)
+			require.Equal(t, want.ID, resp.ID)
+			require.Equal(t, want.AccountNumber, resp.AccountNumber)
+			require.Equal(t, want.RoutingNumber, resp.RoutingNumber)
+			require.Equal(t, want.AccountType, resp.AccountType)
+			require.Equal(t, want.SepaBeneficiaryBic, resp.SepaBeneficiaryBic)
+			require.Equal(t, want.CreatedAt, resp.CreatedAt)
+		})
+	}
 }

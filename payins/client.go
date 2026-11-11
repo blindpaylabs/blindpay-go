@@ -128,7 +128,11 @@ func NewClient(cfg *config.Config) *Client {
 	}
 }
 
-// List retrieves all payins with optional filters.
+// List retrieves payins with optional filters.
+//
+// The API returns every payin as a bare array when no pagination param is
+// sent, and one page wrapped in {data, pagination} when Limit is set; both
+// shapes are decoded and the page's rows are returned.
 func (c *Client) List(ctx context.Context, params *ListParams) ([]Payin, error) {
 	path := fmt.Sprintf("/instances/%s/payins", c.instanceID)
 
@@ -151,7 +155,7 @@ func (c *Client) List(ctx context.Context, params *ListParams) ([]Payin, error) 
 		}
 	}
 
-	return request.Do[[]Payin](c.cfg, ctx, "GET", path, nil)
+	return request.DoList[Payin](c.cfg, ctx, path)
 }
 
 // Get retrieves a specific payin by ID.
@@ -175,6 +179,10 @@ func (c *Client) GetTrack(ctx context.Context, payinID string) (*Payin, error) {
 }
 
 // Export exports payins with filters.
+//
+// Deprecated: the API has no GET /instances/{id}/export/payins route, so this
+// method always fails (404). It will be removed in the next major version.
+// Use List instead.
 func (c *Client) Export(ctx context.Context, status types.TransactionStatus, limit, offset int) ([]Payin, error) {
 	path := fmt.Sprintf("/instances/%s/export/payins", c.instanceID)
 

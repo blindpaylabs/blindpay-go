@@ -559,10 +559,15 @@ func NewClient(cfg *config.Config) *Client {
 // List retrieves all customers for the instance.
 func (c *Client) List(ctx context.Context) ([]Customer, error) {
 	path := fmt.Sprintf("/instances/%s/customers", c.instanceID)
-	return request.Do[[]Customer](c.cfg, ctx, "GET", path, nil)
+	return request.DoList[Customer](c.cfg, ctx, path)
 }
 
 // ListWithParams retrieves customers with pagination and filtering.
+//
+// The API wraps the result in {data, pagination} only when Limit,
+// StartingAfter or EndingBefore is set; with filters alone (or nil params) it
+// returns every matching customer as a bare array. Both shapes are decoded;
+// for a bare array Pagination is the zero value (HasMore false).
 func (c *Client) ListWithParams(ctx context.Context, params *ListParams) (*ListResponse, error) {
 	path := fmt.Sprintf("/instances/%s/customers", c.instanceID)
 
@@ -603,7 +608,16 @@ func (c *Client) ListWithParams(ctx context.Context, params *ListParams) (*ListR
 		}
 	}
 
-	return request.Do[*ListResponse](c.cfg, ctx, "GET", path, nil)
+	list, err := request.Do[request.List[Customer]](c.cfg, ctx, "GET", path, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &ListResponse{Data: list.Data}
+	if list.Pagination != nil {
+		resp.Pagination = *list.Pagination
+	}
+	return resp, nil
 }
 
 // CreateIndividualWithStandardKYC creates an individual customer with standard KYC.
