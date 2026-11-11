@@ -126,24 +126,24 @@ type CreatePartnerFeeParams struct {
 
 `,
 		`// Create creates a new partner fee configuration.
-func (c *Client) Create(ctx context.Context, params *CreatePartnerFeeParams) (*PartnerFee, error) {
+func (c *Client) Create(ctx context.Context, params *CreatePartnerFeeParams, opts ...option.RequestOption) (*PartnerFee, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	path := fmt.Sprintf("/instances/%s/partner-fees", c.instanceID)
-	return request.Do[*PartnerFee](c.cfg, ctx, "POST", path, params)
+	path := request.Pathf("/instances/%s/partner-fees", c.instanceID)
+	return request.Do[*PartnerFee](c.cfg, ctx, "POST", path, params, opts...)
 }
 
 `,
 		`// Get retrieves a specific partner fee by ID.
-func (c *Client) Get(ctx context.Context, id string) (*PartnerFee, error) {
+func (c *Client) Get(ctx context.Context, id string, opts ...option.RequestOption) (*PartnerFee, error) {
 	if id == "" {
 		return nil, fmt.Errorf("id cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/partner-fees/%s", c.instanceID, id)
-	return request.Do[*PartnerFee](c.cfg, ctx, "GET", path, nil)
+	path := request.Pathf("/instances/%s/partner-fees/%s", c.instanceID, id)
+	return request.Do[*PartnerFee](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 `,
@@ -153,6 +153,11 @@ func (c *Client) Get(ctx context.Context, id string) (*PartnerFee, error) {
 		src = strings.Replace(src, r, "", 1)
 	}
 	writeFile(t, clientPath, src)
+
+	// The root op-coverage test calls every SDK method by its hand-written
+	// name (including the two deleted here), so it cannot compile against
+	// the regenerated package; it is not under test here.
+	require.NoError(t, os.Remove(filepath.Join(work, "opcoverage_test.go")))
 
 	// The Get/Create tests belong solely to the two deleted methods; drop
 	// them (List/Delete's tests are untouched).
@@ -188,12 +193,12 @@ func (c *Client) Get(ctx context.Context, id string) (*PartnerFee, error) {
 	require.False(t, quiet)
 
 	regenerated := readFile(t, clientPath)
-	require.Contains(t, regenerated, `func (c *Client) Get(ctx context.Context, id string)`)
-	require.Contains(t, regenerated, `fmt.Sprintf("/instances/%s/partner-fees/%s", c.instanceID, id)`)
-	require.Contains(t, regenerated, `request.Do[*GetResponse](c.cfg, ctx, "GET", path, nil)`)
-	require.Contains(t, regenerated, `func (c *Client) Create(ctx context.Context, params *CreateParams)`)
-	require.Contains(t, regenerated, `fmt.Sprintf("/instances/%s/partner-fees", c.instanceID)`)
-	require.Contains(t, regenerated, `request.Do[*CreateResponse](c.cfg, ctx, "POST", path, params)`)
+	require.Contains(t, regenerated, `func (c *Client) Get(ctx context.Context, id string, opts ...option.RequestOption)`)
+	require.Contains(t, regenerated, `request.Pathf("/instances/%s/partner-fees/%s", c.instanceID, id)`)
+	require.Contains(t, regenerated, `request.Do[*GetResponse](c.cfg, ctx, "GET", path, nil, opts...)`)
+	require.Contains(t, regenerated, `func (c *Client) Create(ctx context.Context, params *CreateParams, opts ...option.RequestOption)`)
+	require.Contains(t, regenerated, `request.Pathf("/instances/%s/partner-fees", c.instanceID)`)
+	require.Contains(t, regenerated, `request.Do[*CreateResponse](c.cfg, ctx, "POST", path, params, opts...)`)
 
 	blindpayGo := readFile(t, filepath.Join(work, "blindpay.go"))
 	require.Contains(t, blindpayGo, fmt.Sprintf(`const Version = "%s"`, expectedVersion), "operationSetChanged escalates the bump to minor")

@@ -59,7 +59,7 @@ func run() error {
 	}
 
 	if *coverage {
-		return runCoverage(repoRoot)
+		return runCoverage(repoRoot, *specFlag)
 	}
 
 	if *auditTypesFlag {

@@ -17,7 +17,17 @@ type operationEntry struct {
 
 func (e operationEntry) key() string { return e.Method + " " + e.Path }
 
-// operationEntries returns every operation in a spec, keyed by "METHOD /path".
+// excludedFromSDK reports whether an operation is marked "x-sdk": false:
+// public in the spec but deliberately not part of any SDK (yield, card
+// payment, simulators, tos passthrough, upload/extract). Operations without
+// the extension (older snapshots) count as SDK operations.
+func excludedFromSDK(op map[string]any) bool {
+	v, ok := op["x-sdk"].(bool)
+	return ok && !v
+}
+
+// operationEntries returns every SDK operation in a spec (x-sdk: false
+// operations are skipped), keyed by "METHOD /path".
 func operationEntries(spec *specDoc) map[string]operationEntry {
 	out := map[string]operationEntry{}
 	paths, _ := spec.raw["paths"].(map[string]any)
@@ -33,6 +43,9 @@ func operationEntries(spec *specDoc) map[string]operationEntry {
 				continue
 			}
 			op, _ := opRaw.(map[string]any)
+			if excludedFromSDK(op) {
+				continue
+			}
 			var tags []string
 			if rawTags, ok := op["tags"].([]any); ok {
 				for _, t := range rawTags {
@@ -47,6 +60,14 @@ func operationEntries(spec *specDoc) map[string]operationEntry {
 		}
 	}
 	return out
+}
+
+func isHTTPMethod(key string) bool {
+	switch key {
+	case "get", "post", "put", "patch", "delete":
+		return true
+	}
+	return false
 }
 
 // collectRefSchemaNames recursively walks a JSON subtree collecting every
@@ -153,8 +174,21 @@ func reachableSchemas(spec *specDoc) map[string]bool {
 	reachable := map[string]bool{}
 	var queue []string
 
+	// Only SDK operations count: a schema used solely by an x-sdk: false
+	// operation is unreachable for this SDK.
 	if paths, ok := spec.raw["paths"].(map[string]any); ok {
-		queue = append(queue, collectRefSchemaNames(paths)...)
+		for _, methodsRaw := range paths {
+			methods, ok := methodsRaw.(map[string]any)
+			if !ok {
+				continue
+			}
+			for key, val := range methods {
+				if op, ok := val.(map[string]any); ok && isHTTPMethod(key) && excludedFromSDK(op) {
+					continue
+				}
+				queue = append(queue, collectRefSchemaNames(val)...)
+			}
+		}
 	}
 	if webhooks, ok := spec.raw["webhooks"].(map[string]any); ok {
 		queue = append(queue, collectRefSchemaNames(webhooks)...)
@@ -201,12 +235,23 @@ func checkOperationChanges(repoRoot string, sm *SpecMap, oldSpec, newSpec *specD
 	}
 	sort.Strings(newKeys)
 
+	// Operations a human already implemented (the SDK sends METHOD+path)
+	// need no generated method; generating one would duplicate it.
+	implemented, err := sdkOperations(repoRoot)
+	if err != nil {
+		p.addNeedsHuman("NEEDS_HUMAN: cannot scan SDK operations: %v", err)
+		return p
+	}
+
 	for _, key := range newKeys {
 		entry := newOps[key]
 		if _, existed := oldOps[key]; existed {
 			continue
 		}
 		if operationIsIgnored(entry, sm) {
+			continue
+		}
+		if implemented[entry.Method+" "+normalizeSpecPath(entry.Path)] {
 			continue
 		}
 

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
+	"sync"
 	"testing"
 )
 
@@ -14,7 +15,8 @@ import (
 // request and replies with a canned response.
 //
 // Request-side assertions (each is skipped when left at its zero value):
-//   - Method, Path: exact match on req.Method / req.URL.Path.
+//   - Method, Path: exact match on req.Method / req.URL.EscapedPath()
+//     (percent-encoding included, e.g. "/payouts/a%2Fb").
 //   - Query: exact match on the parsed query string. A non-nil empty
 //     url.Values{} asserts that no query string is sent at all.
 //   - RequestHeader: every listed header must be present with exactly these
@@ -45,8 +47,9 @@ func (rt *RoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 		rt.T.Errorf("expected method %s, got %s", rt.Method, req.Method)
 	}
 
-	if rt.Path != "" && req.URL.Path != rt.Path {
-		rt.T.Errorf("expected path %s, got %s", rt.Path, req.URL.Path)
+	// EscapedPath, so tests can assert percent-encoded path segments.
+	if rt.Path != "" && req.URL.EscapedPath() != rt.Path {
+		rt.T.Errorf("expected path %s, got %s", rt.Path, req.URL.EscapedPath())
 	}
 
 	if rt.Query != nil {
@@ -120,4 +123,34 @@ func (rt *RoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 		Body:       io.NopCloser(bytes.NewReader(rt.Out)),
 		Request:    req,
 	}, nil
+}
+
+// Sequence replays one RoundTripper per request, in order, so a test can
+// script several responses (e.g. the pages of an auto-pager) and assert
+// each request. A request past the end fails the test.
+type Sequence struct {
+	T     *testing.T
+	Steps []*RoundTripper
+
+	mu sync.Mutex
+	n  int
+}
+
+func (s *Sequence) RoundTrip(req *http.Request) (*http.Response, error) {
+	s.mu.Lock()
+	n := s.n
+	s.n++
+	s.mu.Unlock()
+
+	if n >= len(s.Steps) {
+		s.T.Fatalf("blindpaytest: unexpected request %d to %s", n+1, req.URL)
+	}
+	return s.Steps[n].RoundTrip(req)
+}
+
+// Calls returns how many requests were made.
+func (s *Sequence) Calls() int {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.n
 }

@@ -7,6 +7,7 @@ import (
 
 	"github.com/blindpaylabs/blindpay-go/internal/config"
 	"github.com/blindpaylabs/blindpay-go/internal/request"
+	"github.com/blindpaylabs/blindpay-go/option"
 )
 
 // InstanceMemberRole represents the role of an instance member.
@@ -32,6 +33,7 @@ type InstanceMember struct {
 	ImageURL   string             `json:"image_url"`
 	CreatedAt  time.Time          `json:"created_at"`
 	Role       InstanceMemberRole `json:"role"`
+	HasPasskey *bool              `json:"has_passkey,omitempty"`
 }
 
 // UpdateParams represents parameters for updating an instance.
@@ -40,6 +42,17 @@ type UpdateParams struct {
 	CustomerInviteRedirectURL *string `json:"customer_invite_redirect_url,omitempty"`
 	EmailNotifications        *bool   `json:"email_notifications,omitempty"`
 	RequirePasskey            *bool   `json:"require_passkey,omitempty"`
+	LogoURL                   *string `json:"logo_url,omitempty"`
+	// AccentColor is a hex color for hosted pages (e.g. "#1A2B3C").
+	AccentColor              *string  `json:"accent_color,omitempty"`
+	ComplianceEmails         []string `json:"compliance_emails,omitempty"`
+	CustomerRfiEmailsEnabled *bool    `json:"customer_rfi_emails_enabled,omitempty"`
+	// PartnerTosLink, PartnerTosScreenshot and PartnerTosTermsAccepted
+	// record your own terms of service; PartnerTosTermsAccepted can only be
+	// true.
+	PartnerTosLink          *string `json:"partner_tos_link,omitempty"`
+	PartnerTosScreenshot    *string `json:"partner_tos_screenshot,omitempty"`
+	PartnerTosTermsAccepted *bool   `json:"partner_tos_terms_accepted,omitempty"`
 }
 
 // UpdateMemberRoleParams represents parameters for updating a member's role.
@@ -73,57 +86,43 @@ func NewClient(cfg *config.Config) *Client {
 }
 
 // GetMembers retrieves all members of the instance.
-func (c *Client) GetMembers(ctx context.Context) ([]InstanceMember, error) {
-	path := fmt.Sprintf("/instances/%s/members", c.instanceID)
-	return request.Do[[]InstanceMember](c.cfg, ctx, "GET", path, nil)
+func (c *Client) GetMembers(ctx context.Context, opts ...option.RequestOption) ([]InstanceMember, error) {
+	path := request.Pathf("/instances/%s/members", c.instanceID)
+	return request.Do[[]InstanceMember](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // Update updates the instance settings.
-func (c *Client) Update(ctx context.Context, params *UpdateParams) error {
+func (c *Client) Update(ctx context.Context, params *UpdateParams, opts ...option.RequestOption) error {
 	if params == nil {
 		return fmt.Errorf("params cannot be nil")
 	}
 
-	path := fmt.Sprintf("/instances/%s", c.instanceID)
+	path := request.Pathf("/instances/%s", c.instanceID)
 
-	body := map[string]any{
-		"name": params.Name,
-	}
-
-	if params.CustomerInviteRedirectURL != nil {
-		body["customer_invite_redirect_url"] = params.CustomerInviteRedirectURL
-	}
-	if params.EmailNotifications != nil {
-		body["email_notifications"] = *params.EmailNotifications
-	}
-	if params.RequirePasskey != nil {
-		body["require_passkey"] = *params.RequirePasskey
-	}
-
-	_, err := request.Do[struct{}](c.cfg, ctx, "PUT", path, body)
+	_, err := request.Do[struct{}](c.cfg, ctx, "PUT", path, params, opts...)
 	return err
 }
 
 // Delete deletes the instance.
-func (c *Client) Delete(ctx context.Context) error {
-	path := fmt.Sprintf("/instances/%s", c.instanceID)
-	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil)
+func (c *Client) Delete(ctx context.Context, opts ...option.RequestOption) error {
+	path := request.Pathf("/instances/%s", c.instanceID)
+	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil, opts...)
 	return err
 }
 
 // DeleteMember removes a member from the instance.
-func (c *Client) DeleteMember(ctx context.Context, memberID string) error {
+func (c *Client) DeleteMember(ctx context.Context, memberID string, opts ...option.RequestOption) error {
 	if memberID == "" {
 		return fmt.Errorf("member ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/members/%s", c.instanceID, memberID)
-	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil)
+	path := request.Pathf("/instances/%s/members/%s", c.instanceID, memberID)
+	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil, opts...)
 	return err
 }
 
 // UpdateMemberRole updates a member's role in the instance.
-func (c *Client) UpdateMemberRole(ctx context.Context, params *UpdateMemberRoleParams) error {
+func (c *Client) UpdateMemberRole(ctx context.Context, params *UpdateMemberRoleParams, opts ...option.RequestOption) error {
 	if params == nil {
 		return fmt.Errorf("params cannot be nil")
 	}
@@ -131,18 +130,14 @@ func (c *Client) UpdateMemberRole(ctx context.Context, params *UpdateMemberRoleP
 		return fmt.Errorf("member ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/members/%s", c.instanceID, params.MemberID)
+	path := request.Pathf("/instances/%s/members/%s", c.instanceID, params.MemberID)
 
-	body := map[string]any{
-		"user_role": params.Role,
-	}
-
-	_, err := request.Do[struct{}](c.cfg, ctx, "PUT", path, body)
+	_, err := request.Do[struct{}](c.cfg, ctx, "PUT", path, params, opts...)
 	return err
 }
 
 // MigrateOwnership migrates instance ownership to another user.
-func (c *Client) MigrateOwnership(ctx context.Context, params *MigrateOwnershipParams) (*MigrateOwnershipResponse, error) {
+func (c *Client) MigrateOwnership(ctx context.Context, params *MigrateOwnershipParams, opts ...option.RequestOption) (*MigrateOwnershipResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -150,6 +145,6 @@ func (c *Client) MigrateOwnership(ctx context.Context, params *MigrateOwnershipP
 		return nil, fmt.Errorf("user ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/ownership", c.instanceID)
-	return request.Do[*MigrateOwnershipResponse](c.cfg, ctx, "POST", path, params)
+	path := request.Pathf("/instances/%s/ownership", c.instanceID)
+	return request.Do[*MigrateOwnershipResponse](c.cfg, ctx, "POST", path, params, opts...)
 }

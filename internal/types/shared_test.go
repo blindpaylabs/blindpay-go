@@ -69,3 +69,15 @@ func TestPaginationMetadata_Unmarshal(t *testing.T) {
 }
 
 func strPtr(s string) *string { return &s }
+
+func TestLooseString(t *testing.T) {
+	var v struct {
+		A *LooseString `json:"a"`
+		B *LooseString `json:"b"`
+		C *LooseString `json:"c"`
+	}
+	require.NoError(t, json.Unmarshal([]byte(`{"a":"2026-01-01T00:00:00Z","b":{},"c":null}`), &v))
+	require.Equal(t, LooseString("2026-01-01T00:00:00Z"), *v.A)
+	require.Equal(t, LooseString("{}"), *v.B)
+	require.Nil(t, v.C)
+}

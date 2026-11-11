@@ -4,12 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/url"
 	"time"
 
 	"github.com/blindpaylabs/blindpay-go/internal/config"
 	"github.com/blindpaylabs/blindpay-go/internal/request"
 	"github.com/blindpaylabs/blindpay-go/internal/types"
+	"github.com/blindpaylabs/blindpay-go/option"
 )
 
 // ArgentinaTransfers represents Argentina transfer types.
@@ -97,6 +97,39 @@ type BankAccount struct {
 	TedCpfCnpj                             *string               `json:"ted_cpf_cnpj,omitempty"`
 	SepaBeneficiaryBic                     *string               `json:"sepa_beneficiary_bic,omitempty"`
 	CreatedAt                              time.Time             `json:"created_at"`
+	// Status is the account's review status ("verifying", "approved",
+	// "rejected", "deprecated").
+	Status                                       *string                      `json:"status,omitempty"`
+	RecipientRelationship                        *types.RecipientRelationship `json:"recipient_relationship,omitempty"`
+	BusinessIndustry                             *types.BusinessIndustry      `json:"business_industry,omitempty"`
+	PhoneNumber                                  *string                      `json:"phone_number,omitempty"`
+	TaxID                                        *string                      `json:"tax_id,omitempty"`
+	DateOfBirth                                  *string                      `json:"date_of_birth,omitempty"`
+	PixSafeBankCode                              *string                      `json:"pix_safe_bank_code,omitempty"`
+	PixSafeBranchCode                            *string                      `json:"pix_safe_branch_code,omitempty"`
+	PixSafeCpfCnpj                               *string                      `json:"pix_safe_cpf_cnpj,omitempty"`
+	SwiftPaymentCode                             *string                      `json:"swift_payment_code,omitempty"`
+	SwiftIfscBranchCode                          *string                      `json:"swift_ifsc_branch_code,omitempty"`
+	SwiftIntermediaryBankRoutingNumber           *string                      `json:"swift_intermediary_bank_routing_number,omitempty"`
+	SepaIban                                     *string                      `json:"sepa_iban,omitempty"`
+	SepaBeneficiaryLegalName                     *string                      `json:"sepa_beneficiary_legal_name,omitempty"`
+	SepaBeneficiaryAddressLine1                  *string                      `json:"sepa_beneficiary_address_line_1,omitempty"`
+	SepaBeneficiaryAddressLine2                  *string                      `json:"sepa_beneficiary_address_line_2,omitempty"`
+	SepaBeneficiaryCity                          *string                      `json:"sepa_beneficiary_city,omitempty"`
+	SepaBeneficiaryStateProvinceRegion           *string                      `json:"sepa_beneficiary_state_province_region,omitempty"`
+	SepaBeneficiaryPostalCode                    *string                      `json:"sepa_beneficiary_postal_code,omitempty"`
+	SepaBeneficiaryCountry                       *types.Country               `json:"sepa_beneficiary_country,omitempty"`
+	FasterPaymentsSortCode                       *string                      `json:"faster_payments_sort_code,omitempty"`
+	FasterPaymentsAccountNumber                  *string                      `json:"faster_payments_account_number,omitempty"`
+	FasterPaymentsBeneficiaryLegalName           *string                      `json:"faster_payments_beneficiary_legal_name,omitempty"`
+	FasterPaymentsBeneficiaryAddressLine1        *string                      `json:"faster_payments_beneficiary_address_line_1,omitempty"`
+	FasterPaymentsBeneficiaryAddressLine2        *string                      `json:"faster_payments_beneficiary_address_line_2,omitempty"`
+	FasterPaymentsBeneficiaryCity                *string                      `json:"faster_payments_beneficiary_city,omitempty"`
+	FasterPaymentsBeneficiaryStateProvinceRegion *string                      `json:"faster_payments_beneficiary_state_province_region,omitempty"`
+	FasterPaymentsBeneficiaryPostalCode          *string                      `json:"faster_payments_beneficiary_postal_code,omitempty"`
+	FasterPaymentsBeneficiaryCountry             *types.Country               `json:"faster_payments_beneficiary_country,omitempty"`
+	// PlaidConnectedAt is set when the account was linked through Plaid.
+	PlaidConnectedAt *time.Time `json:"plaid_connected_at,omitempty"`
 }
 
 // OfframpWalletInfo represents offramp wallet information.
@@ -170,6 +203,9 @@ type CreatePixParams struct {
 	CustomerID string `json:"-"`
 	Name       string `json:"name"`
 	PixKey     string `json:"pix_key"`
+	// ForceCpfCnpj treats PixKey as a CPF/CNPJ even when it could also be
+	// read as a phone number.
+	ForceCpfCnpj *bool `json:"force_cpf_cnpj,omitempty"`
 }
 
 // CreatePixResponse represents the response when creating a PIX bank account.
@@ -510,6 +546,9 @@ type CreateInternationalSwiftParams struct {
 	TaxID                                  string                      `json:"tax_id,omitempty"`
 	DateOfBirth                            string                      `json:"date_of_birth,omitempty"`
 	SepaBeneficiaryBic                     *string                     `json:"sepa_beneficiary_bic,omitempty"`
+	// SwiftIfscBranchCode is required when SwiftBankCountry is IN.
+	SwiftIfscBranchCode                *string `json:"swift_ifsc_branch_code,omitempty"`
+	SwiftIntermediaryBankRoutingNumber *string `json:"swift_intermediary_bank_routing_number,omitempty"`
 }
 
 // CreateRtpParams represents parameters for creating an RTP (Real-Time Payments) bank account.
@@ -548,7 +587,7 @@ func NewClient(cfg *config.Config) *Client {
 }
 
 // List retrieves all bank accounts for a customer with optional filters.
-func (c *Client) List(ctx context.Context, params *ListParams) ([]BankAccount, error) {
+func (c *Client) List(ctx context.Context, params *ListParams, opts ...option.RequestOption) ([]BankAccount, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -556,34 +595,22 @@ func (c *Client) List(ctx context.Context, params *ListParams) ([]BankAccount, e
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
-	q := url.Values{}
-	if params.Status != "" {
-		q.Set("status", params.Status)
-	}
-	if params.Type != "" {
-		q.Set("type", string(params.Type))
-	}
-	if params.Name != "" {
-		q.Set("name", params.Name)
-	}
-	if params.BankAccountID != "" {
-		q.Set("bank_account_id", params.BankAccountID)
-	}
-	if params.Country != "" {
-		q.Set("country", params.Country)
-	}
-	if len(q) > 0 {
-		path += "?" + q.Encode()
-	}
+	var q request.Query
+	q.String("status", params.Status)
+	q.String("type", string(params.Type))
+	q.String("name", params.Name)
+	q.String("bank_account_id", params.BankAccountID)
+	q.String("country", params.Country)
+	path = q.Apply(path)
 
-	return request.Do[[]BankAccount](c.cfg, ctx, "GET", path, nil)
+	return request.Do[[]BankAccount](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // Get retrieves a specific bank account. The account is in the embedded
 // GetResponse.BankAccount (same shape as List).
-func (c *Client) Get(ctx context.Context, customerID, id string) (*GetResponse, error) {
+func (c *Client) Get(ctx context.Context, customerID, id string, opts ...option.RequestOption) (*GetResponse, error) {
 	if customerID == "" {
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
@@ -591,12 +618,12 @@ func (c *Client) Get(ctx context.Context, customerID, id string) (*GetResponse, 
 		return nil, fmt.Errorf("id cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts/%s", c.instanceID, customerID, id)
-	return request.Do[*GetResponse](c.cfg, ctx, "GET", path, nil)
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts/%s", c.instanceID, customerID, id)
+	return request.Do[*GetResponse](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // Delete deletes a bank account.
-func (c *Client) Delete(ctx context.Context, customerID, id string) error {
+func (c *Client) Delete(ctx context.Context, customerID, id string, opts ...option.RequestOption) error {
 	if customerID == "" {
 		return fmt.Errorf("customer ID cannot be empty")
 	}
@@ -604,13 +631,13 @@ func (c *Client) Delete(ctx context.Context, customerID, id string) error {
 		return fmt.Errorf("id cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts/%s", c.instanceID, customerID, id)
-	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil)
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts/%s", c.instanceID, customerID, id)
+	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil, opts...)
 	return err
 }
 
 // CreatePix creates a PIX bank account.
-func (c *Client) CreatePix(ctx context.Context, params *CreatePixParams) (*CreatePixResponse, error) {
+func (c *Client) CreatePix(ctx context.Context, params *CreatePixParams, opts ...option.RequestOption) (*CreatePixResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -618,19 +645,18 @@ func (c *Client) CreatePix(ctx context.Context, params *CreatePixParams) (*Creat
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
-	body := map[string]any{
-		"type":    "pix",
-		"name":    params.Name,
-		"pix_key": params.PixKey,
+	body, err := request.BodyWith(params, map[string]any{"type": "pix"})
+	if err != nil {
+		return nil, err
 	}
 
-	return request.Do[*CreatePixResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreatePixResponse](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // CreateAch creates an ACH bank account.
-func (c *Client) CreateAch(ctx context.Context, params *CreateAchParams) (*CreateAchResponse, error) {
+func (c *Client) CreateAch(ctx context.Context, params *CreateAchParams, opts ...option.RequestOption) (*CreateAchResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -638,45 +664,18 @@ func (c *Client) CreateAch(ctx context.Context, params *CreateAchParams) (*Creat
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
-	body := map[string]any{
-		"type":                   "ach",
-		"name":                   params.Name,
-		"account_class":          params.AccountClass,
-		"account_number":         params.AccountNumber,
-		"account_type":           params.AccountType,
-		"beneficiary_name":       params.BeneficiaryName,
-		"routing_number":         params.RoutingNumber,
-		"recipient_relationship": params.RecipientRelationship,
-		"address_line_1":         params.AddressLine1,
-		"city":                   params.City,
-		"state_province_region":  params.StateProvinceRegion,
-		"country":                params.Country,
-		"postal_code":            params.PostalCode,
+	body, err := request.BodyWith(params, map[string]any{"type": "ach"})
+	if err != nil {
+		return nil, err
 	}
 
-	if params.AddressLine2 != "" {
-		body["address_line_2"] = params.AddressLine2
-	}
-	if params.BusinessIndustry != "" {
-		body["business_industry"] = params.BusinessIndustry
-	}
-	if params.PhoneNumber != "" {
-		body["phone_number"] = params.PhoneNumber
-	}
-	if params.TaxID != "" {
-		body["tax_id"] = params.TaxID
-	}
-	if params.DateOfBirth != "" {
-		body["date_of_birth"] = params.DateOfBirth
-	}
-
-	return request.Do[*CreateAchResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateAchResponse](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // CreateWire creates a Wire bank account.
-func (c *Client) CreateWire(ctx context.Context, params *CreateWireParams) (*CreateWireResponse, error) {
+func (c *Client) CreateWire(ctx context.Context, params *CreateWireParams, opts ...option.RequestOption) (*CreateWireResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -684,44 +683,18 @@ func (c *Client) CreateWire(ctx context.Context, params *CreateWireParams) (*Cre
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
-	body := map[string]any{
-		"type":                   "wire",
-		"name":                   params.Name,
-		"account_class":          params.AccountClass,
-		"account_number":         params.AccountNumber,
-		"beneficiary_name":       params.BeneficiaryName,
-		"routing_number":         params.RoutingNumber,
-		"recipient_relationship": params.RecipientRelationship,
-		"address_line_1":         params.AddressLine1,
-		"city":                   params.City,
-		"state_province_region":  params.StateProvinceRegion,
-		"country":                params.Country,
-		"postal_code":            params.PostalCode,
+	body, err := request.BodyWith(params, map[string]any{"type": "wire"})
+	if err != nil {
+		return nil, err
 	}
 
-	if params.AddressLine2 != "" {
-		body["address_line_2"] = params.AddressLine2
-	}
-	if params.BusinessIndustry != "" {
-		body["business_industry"] = params.BusinessIndustry
-	}
-	if params.PhoneNumber != "" {
-		body["phone_number"] = params.PhoneNumber
-	}
-	if params.TaxID != "" {
-		body["tax_id"] = params.TaxID
-	}
-	if params.DateOfBirth != "" {
-		body["date_of_birth"] = params.DateOfBirth
-	}
-
-	return request.Do[*CreateWireResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateWireResponse](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // CreateArgentinaTransfers creates an Argentina transfers bank account.
-func (c *Client) CreateArgentinaTransfers(ctx context.Context, params *CreateArgentinaTransfersParams) (*CreateArgentinaTransfersResponse, error) {
+func (c *Client) CreateArgentinaTransfers(ctx context.Context, params *CreateArgentinaTransfersParams, opts ...option.RequestOption) (*CreateArgentinaTransfersResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -729,21 +702,18 @@ func (c *Client) CreateArgentinaTransfers(ctx context.Context, params *CreateArg
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
-	body := map[string]any{
-		"type":              "transfers_bitso",
-		"name":              params.Name,
-		"beneficiary_name":  params.BeneficiaryName,
-		"transfers_account": params.TransfersAccount,
-		"transfers_type":    params.TransfersType,
+	body, err := request.BodyWith(params, map[string]any{"type": "transfers_bitso"})
+	if err != nil {
+		return nil, err
 	}
 
-	return request.Do[*CreateArgentinaTransfersResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateArgentinaTransfersResponse](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // CreateSpei creates a SPEI bank account.
-func (c *Client) CreateSpei(ctx context.Context, params *CreateSpeiParams) (*CreateSpeiResponse, error) {
+func (c *Client) CreateSpei(ctx context.Context, params *CreateSpeiParams, opts ...option.RequestOption) (*CreateSpeiResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -751,22 +721,18 @@ func (c *Client) CreateSpei(ctx context.Context, params *CreateSpeiParams) (*Cre
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
-	body := map[string]any{
-		"type":                  "spei_bitso",
-		"beneficiary_name":      params.BeneficiaryName,
-		"name":                  params.Name,
-		"spei_clabe":            params.SpeiClabe,
-		"spei_institution_code": params.SpeiInstitutionCode,
-		"spei_protocol":         params.SpeiProtocol,
+	body, err := request.BodyWith(params, map[string]any{"type": "spei_bitso"})
+	if err != nil {
+		return nil, err
 	}
 
-	return request.Do[*CreateSpeiResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateSpeiResponse](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // CreateColombiaAch creates a Colombia ACH bank account.
-func (c *Client) CreateColombiaAch(ctx context.Context, params *CreateColombiaAchParams) (*CreateColombiaAchResponse, error) {
+func (c *Client) CreateColombiaAch(ctx context.Context, params *CreateColombiaAchParams, opts ...option.RequestOption) (*CreateColombiaAchResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -774,26 +740,18 @@ func (c *Client) CreateColombiaAch(ctx context.Context, params *CreateColombiaAc
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
-	body := map[string]any{
-		"type":                           "ach_cop_bitso",
-		"name":                           params.Name,
-		"account_type":                   params.AccountType,
-		"ach_cop_beneficiary_first_name": params.AchCopBeneficiaryFirstName,
-		"ach_cop_beneficiary_last_name":  params.AchCopBeneficiaryLastName,
-		"ach_cop_document_id":            params.AchCopDocumentID,
-		"ach_cop_document_type":          params.AchCopDocumentType,
-		"ach_cop_email":                  params.AchCopEmail,
-		"ach_cop_bank_code":              params.AchCopBankCode,
-		"ach_cop_bank_account":           params.AchCopBankAccount,
+	body, err := request.BodyWith(params, map[string]any{"type": "ach_cop_bitso"})
+	if err != nil {
+		return nil, err
 	}
 
-	return request.Do[*CreateColombiaAchResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateColombiaAchResponse](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // CreateInternationalSwift creates an international SWIFT bank account.
-func (c *Client) CreateInternationalSwift(ctx context.Context, params *CreateInternationalSwiftParams) (*CreateInternationalSwiftResponse, error) {
+func (c *Client) CreateInternationalSwift(ctx context.Context, params *CreateInternationalSwiftParams, opts ...option.RequestOption) (*CreateInternationalSwiftResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -801,63 +759,18 @@ func (c *Client) CreateInternationalSwift(ctx context.Context, params *CreateInt
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
-	body := map[string]any{
-		"type":                                        "international_swift",
-		"name":                                        params.Name,
-		"account_class":                               params.AccountClass,
-		"recipient_relationship":                      params.RecipientRelationship,
-		"swift_account_holder_name":                   params.SwiftAccountHolderName,
-		"swift_account_number_iban":                   params.SwiftAccountNumberIban,
-		"swift_bank_address_line_1":                   params.SwiftBankAddressLine1,
-		"swift_bank_city":                             params.SwiftBankCity,
-		"swift_bank_country":                          params.SwiftBankCountry,
-		"swift_bank_name":                             params.SwiftBankName,
-		"swift_bank_postal_code":                      params.SwiftBankPostalCode,
-		"swift_bank_state_province_region":            params.SwiftBankStateProvinceRegion,
-		"swift_beneficiary_address_line_1":            params.SwiftBeneficiaryAddressLine1,
-		"swift_beneficiary_city":                      params.SwiftBeneficiaryCity,
-		"swift_beneficiary_country":                   params.SwiftBeneficiaryCountry,
-		"swift_beneficiary_postal_code":               params.SwiftBeneficiaryPostalCode,
-		"swift_beneficiary_state_province_region":     params.SwiftBeneficiaryStateProvinceRegion,
-		"swift_code_bic":                              params.SwiftCodeBic,
-		"swift_intermediary_bank_account_number_iban": params.SwiftIntermediaryBankAccountNumberIban,
-		"swift_intermediary_bank_country":             params.SwiftIntermediaryBankCountry,
-		"swift_intermediary_bank_name":                params.SwiftIntermediaryBankName,
-		"swift_intermediary_bank_swift_code_bic":      params.SwiftIntermediaryBankSwiftCodeBic,
+	body, err := request.BodyWith(params, map[string]any{"type": "international_swift"})
+	if err != nil {
+		return nil, err
 	}
 
-	if params.SwiftBankAddressLine2 != "" {
-		body["swift_bank_address_line_2"] = params.SwiftBankAddressLine2
-	}
-	if params.SwiftBeneficiaryAddressLine2 != "" {
-		body["swift_beneficiary_address_line_2"] = params.SwiftBeneficiaryAddressLine2
-	}
-	if params.SwiftPaymentCode != "" {
-		body["swift_payment_code"] = params.SwiftPaymentCode
-	}
-	if params.BusinessIndustry != "" {
-		body["business_industry"] = params.BusinessIndustry
-	}
-	if params.PhoneNumber != "" {
-		body["phone_number"] = params.PhoneNumber
-	}
-	if params.TaxID != "" {
-		body["tax_id"] = params.TaxID
-	}
-	if params.DateOfBirth != "" {
-		body["date_of_birth"] = params.DateOfBirth
-	}
-	if params.SepaBeneficiaryBic != nil {
-		body["sepa_beneficiary_bic"] = params.SepaBeneficiaryBic
-	}
-
-	return request.Do[*CreateInternationalSwiftResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateInternationalSwiftResponse](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // CreatePixSafe creates a PIX Safe bank account.
-func (c *Client) CreatePixSafe(ctx context.Context, params *CreatePixSafeParams) (*CreatePixSafeResponse, error) {
+func (c *Client) CreatePixSafe(ctx context.Context, params *CreatePixSafeParams, opts ...option.RequestOption) (*CreatePixSafeResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -865,24 +778,18 @@ func (c *Client) CreatePixSafe(ctx context.Context, params *CreatePixSafeParams)
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
-	body := map[string]any{
-		"type":                 "pix_safe",
-		"name":                 params.Name,
-		"beneficiary_name":     params.BeneficiaryName,
-		"account_number":       params.AccountNumber,
-		"account_type":         params.AccountType,
-		"pix_safe_bank_code":   params.PixSafeBankCode,
-		"pix_safe_branch_code": params.PixSafeBranchCode,
-		"pix_safe_cpf_cnpj":    params.PixSafeCpfCnpj,
+	body, err := request.BodyWith(params, map[string]any{"type": "pix_safe"})
+	if err != nil {
+		return nil, err
 	}
 
-	return request.Do[*CreatePixSafeResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreatePixSafeResponse](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // CreateRtp creates an RTP (Real-Time Payments) bank account.
-func (c *Client) CreateRtp(ctx context.Context, params *CreateRtpParams) (*CreateRtpResponse, error) {
+func (c *Client) CreateRtp(ctx context.Context, params *CreateRtpParams, opts ...option.RequestOption) (*CreateRtpResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -890,44 +797,18 @@ func (c *Client) CreateRtp(ctx context.Context, params *CreateRtpParams) (*Creat
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
-	body := map[string]any{
-		"type":                   "rtp",
-		"name":                   params.Name,
-		"account_class":          params.AccountClass,
-		"beneficiary_name":       params.BeneficiaryName,
-		"routing_number":         params.RoutingNumber,
-		"account_number":         params.AccountNumber,
-		"recipient_relationship": params.RecipientRelationship,
-		"address_line_1":         params.AddressLine1,
-		"city":                   params.City,
-		"state_province_region":  params.StateProvinceRegion,
-		"country":                params.Country,
-		"postal_code":            params.PostalCode,
+	body, err := request.BodyWith(params, map[string]any{"type": "rtp"})
+	if err != nil {
+		return nil, err
 	}
 
-	if params.AddressLine2 != "" {
-		body["address_line_2"] = params.AddressLine2
-	}
-	if params.BusinessIndustry != "" {
-		body["business_industry"] = params.BusinessIndustry
-	}
-	if params.PhoneNumber != "" {
-		body["phone_number"] = params.PhoneNumber
-	}
-	if params.TaxID != "" {
-		body["tax_id"] = params.TaxID
-	}
-	if params.DateOfBirth != "" {
-		body["date_of_birth"] = params.DateOfBirth
-	}
-
-	return request.Do[*CreateRtpResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateRtpResponse](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // CreateTed creates a TED bank account.
-func (c *Client) CreateTed(ctx context.Context, params *CreateTedParams) (*CreateTedResponse, error) {
+func (c *Client) CreateTed(ctx context.Context, params *CreateTedParams, opts ...option.RequestOption) (*CreateTedResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -935,41 +816,31 @@ func (c *Client) CreateTed(ctx context.Context, params *CreateTedParams) (*Creat
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
-	body := map[string]any{
-		"type":                   "ted",
-		"name":                   params.Name,
-		"beneficiary_name":       params.BeneficiaryName,
-		"ted_bank_code":          params.TedBankCode,
-		"ted_branch_code":        params.TedBranchCode,
-		"ted_cpf_cnpj":           params.TedCpfCnpj,
-		"account_class":          params.AccountClass,
-		"recipient_relationship": params.RecipientRelationship,
-		"address_line_1":         params.AddressLine1,
-		"city":                   params.City,
-		"state_province_region":  params.StateProvinceRegion,
-		"country":                params.Country,
-		"postal_code":            params.PostalCode,
+	body, err := request.BodyWith(params, map[string]any{"type": "ted"})
+	if err != nil {
+		return nil, err
 	}
 
-	if params.AddressLine2 != "" {
-		body["address_line_2"] = params.AddressLine2
-	}
-	if params.BusinessIndustry != "" {
-		body["business_industry"] = params.BusinessIndustry
-	}
-	if params.PhoneNumber != "" {
-		body["phone_number"] = params.PhoneNumber
-	}
-	if params.TaxID != "" {
-		body["tax_id"] = params.TaxID
-	}
-	if params.DateOfBirth != "" {
-		body["date_of_birth"] = params.DateOfBirth
-	}
+	return request.Do[*CreateTedResponse](c.cfg, ctx, "POST", path, body, opts...)
+}
 
-	return request.Do[*CreateTedResponse](c.cfg, ctx, "POST", path, body)
+// CreateFasterPaymentsParams creates a UK Faster Payments (GBP) bank
+// account.
+type CreateFasterPaymentsParams struct {
+	CustomerID                                   string             `json:"-"`
+	Name                                         string             `json:"name"`
+	AccountClass                                 types.AccountClass `json:"account_class"`
+	FasterPaymentsSortCode                       string             `json:"faster_payments_sort_code"`
+	FasterPaymentsAccountNumber                  string             `json:"faster_payments_account_number"`
+	FasterPaymentsBeneficiaryLegalName           string             `json:"faster_payments_beneficiary_legal_name"`
+	FasterPaymentsBeneficiaryAddressLine1        string             `json:"faster_payments_beneficiary_address_line_1"`
+	FasterPaymentsBeneficiaryAddressLine2        *string            `json:"faster_payments_beneficiary_address_line_2,omitempty"`
+	FasterPaymentsBeneficiaryCity                string             `json:"faster_payments_beneficiary_city"`
+	FasterPaymentsBeneficiaryStateProvinceRegion *string            `json:"faster_payments_beneficiary_state_province_region,omitempty"`
+	FasterPaymentsBeneficiaryPostalCode          *string            `json:"faster_payments_beneficiary_postal_code,omitempty"`
+	FasterPaymentsBeneficiaryCountry             types.Country      `json:"faster_payments_beneficiary_country"`
 }
 
 // CreateSepaParams represents parameters for creating a SEPA bank account.
@@ -1008,7 +879,7 @@ type CreateSepaResponse struct {
 }
 
 // CreateSepa creates a SEPA bank account.
-func (c *Client) CreateSepa(ctx context.Context, params *CreateSepaParams) (*CreateSepaResponse, error) {
+func (c *Client) CreateSepa(ctx context.Context, params *CreateSepaParams, opts ...option.RequestOption) (*CreateSepaResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -1016,27 +887,32 @@ func (c *Client) CreateSepa(ctx context.Context, params *CreateSepaParams) (*Cre
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
-	body := map[string]any{
-		"type":                            "sepa",
-		"name":                            params.Name,
-		"account_class":                   params.AccountClass,
-		"sepa_iban":                       params.SepaIban,
-		"sepa_beneficiary_bic":            params.SepaBeneficiaryBic,
-		"sepa_beneficiary_legal_name":     params.SepaBeneficiaryLegalName,
-		"sepa_beneficiary_address_line_1": params.SepaBeneficiaryAddressLine1,
-		"sepa_beneficiary_city":           params.SepaBeneficiaryCity,
-		"sepa_beneficiary_postal_code":    params.SepaBeneficiaryPostalCode,
-		"sepa_beneficiary_country":        params.SepaBeneficiaryCountry,
+	body, err := request.BodyWith(params, map[string]any{"type": "sepa"})
+	if err != nil {
+		return nil, err
 	}
 
-	if params.SepaBeneficiaryAddressLine2 != nil {
-		body["sepa_beneficiary_address_line_2"] = *params.SepaBeneficiaryAddressLine2
+	return request.Do[*CreateSepaResponse](c.cfg, ctx, "POST", path, body, opts...)
+}
+
+// CreateFasterPayments adds a UK Faster Payments (GBP) bank account. It
+// returns the full bank account.
+func (c *Client) CreateFasterPayments(ctx context.Context, params *CreateFasterPaymentsParams, opts ...option.RequestOption) (*BankAccount, error) {
+	if params == nil {
+		return nil, fmt.Errorf("params cannot be nil")
 	}
-	if params.SepaBeneficiaryStateProvinceRegion != nil {
-		body["sepa_beneficiary_state_province_region"] = *params.SepaBeneficiaryStateProvinceRegion
+	if params.CustomerID == "" {
+		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	return request.Do[*CreateSepaResponse](c.cfg, ctx, "POST", path, body)
+	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
+
+	body, err := request.BodyWith(params, map[string]any{"type": "faster_payments"})
+	if err != nil {
+		return nil, err
+	}
+
+	return request.Do[*BankAccount](c.cfg, ctx, "POST", path, body, opts...)
 }

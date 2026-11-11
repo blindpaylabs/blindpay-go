@@ -145,29 +145,6 @@ func typeExprString(expr ast.Expr) string {
 	}
 }
 
-// preferPointerStyle inspects the struct's existing optional (omitempty)
-// siblings and returns true if the majority use a pointer type, matching
-// "the sibling style within each struct" rather than a repo-wide default.
-// Defaults to pointer style when there are no optional siblings to learn
-// from, matching this repo's general convention (CLAUDE.md section 2).
-func (s *StructShape) preferPointerStyle() bool {
-	pointerCount, bareCount := 0, 0
-	for _, f := range s.Fields {
-		if !f.Omitempty {
-			continue
-		}
-		if f.Pointer {
-			pointerCount++
-		} else {
-			bareCount++
-		}
-	}
-	if pointerCount == 0 && bareCount == 0 {
-		return true
-	}
-	return pointerCount >= bareCount
-}
-
 // EnumShape locates a set of `X Symbol = "value"` (typed, internal enum) or
 // `X = types.SymbolX` (untyped alias, root re-export) const declarations.
 type EnumShape struct {
@@ -316,6 +293,30 @@ func parseJSONTag(tag string) (string, bool) {
 // name is always valid Go and additive; it just may not match a
 // hand-tuned identifier's casing for acronyms (e.g. produces "Uetr" rather
 // than "UETR"). Acceptable for an auto-applied, reviewable PR.
+// initialisms are the words Go style writes in all caps (ID, URL, ...).
+var initialisms = map[string]bool{
+	"api": true, "http": true, "id": true, "ip": true, "json": true,
+	"url": true, "uri": true, "uuid": true,
+}
+
+// goIdent is pascalCase with Go initialisms upper-cased ("partner_fee_id"
+// -> "PartnerFeeID", "logo_url" -> "LogoURL"). Use it for every identifier
+// the tool generates; existing identifiers are never renamed (that would
+// break callers).
+func goIdent(name string) string {
+	var b strings.Builder
+	for _, part := range strings.FieldsFunc(name, func(r rune) bool {
+		return !unicode.IsLetter(r) && !unicode.IsDigit(r)
+	}) {
+		if initialisms[strings.ToLower(part)] {
+			b.WriteString(strings.ToUpper(part))
+			continue
+		}
+		b.WriteString(pascalCase(part))
+	}
+	return b.String()
+}
+
 func pascalCase(name string) string {
 	parts := strings.FieldsFunc(name, func(r rune) bool {
 		return !unicode.IsLetter(r) && !unicode.IsDigit(r)

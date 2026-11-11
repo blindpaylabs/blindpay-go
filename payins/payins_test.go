@@ -248,7 +248,6 @@ func TestPayins_CreateQuote(t *testing.T) {
 					"payment_method":"pix",
 					"request_amount":5240,
 					"token":"USDC",
-					"cover_fees":false,
 					"payer_rules":{"pix_allowed_tax_ids":null}
 				}`),
 				Out: json.RawMessage(fmt.Sprintf(`{

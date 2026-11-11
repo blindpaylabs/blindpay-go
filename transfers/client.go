@@ -3,12 +3,13 @@ package transfers
 import (
 	"context"
 	"fmt"
-	"net/url"
 	"time"
 
 	"github.com/blindpaylabs/blindpay-go/internal/config"
 	"github.com/blindpaylabs/blindpay-go/internal/request"
 	"github.com/blindpaylabs/blindpay-go/internal/types"
+	"github.com/blindpaylabs/blindpay-go/option"
+	"github.com/blindpaylabs/blindpay-go/pagination"
 )
 
 // TrackingStep represents a transfer tracking step.
@@ -57,6 +58,8 @@ type Transfer struct {
 	CustomerID                    string                        `json:"customer_id"`
 	Address                       string                        `json:"address"`
 	Network                       types.Network                 `json:"network"`
+	PartnerFlatFee                *int                          `json:"partner_flat_fee,omitempty"`
+	PartnerPercentageFee          *int                          `json:"partner_percentage_fee,omitempty"`
 }
 
 // CreateQuoteParams represents parameters for creating a transfer quote.
@@ -67,21 +70,27 @@ type CreateQuoteParams struct {
 	CustomerToken         types.StablecoinToken `json:"customer_token"`
 	CustomerNetwork       types.Network         `json:"customer_network"`
 	RequestAmount         float64               `json:"request_amount"`
-	CoverFees             bool                  `json:"cover_fees"`
+	CoverFees             bool                  `json:"cover_fees,omitempty"`
 	AmountReference       string                `json:"amount_reference"`
 	PartnerFeeID          *string               `json:"partner_fee_id,omitempty"`
+	// PartnerPercentageFee is in basis points (100 = 1%) and PartnerFlatFee
+	// in integer cents; they override the partner fee for this quote.
+	PartnerPercentageFee *int64 `json:"partner_percentage_fee,omitempty"`
+	PartnerFlatFee       *int64 `json:"partner_flat_fee,omitempty"`
 }
 
 // CreateQuoteResponse represents the response when creating a transfer quote.
 type CreateQuoteResponse struct {
-	ID                  string   `json:"id"`
-	ExpiresAt           *float64 `json:"expires_at"`
-	CommercialQuotation *float64 `json:"commercial_quotation"`
-	BlindpayQuotation   *float64 `json:"blindpay_quotation"`
-	ReceiverAmount      float64  `json:"receiver_amount"`
-	SenderAmount        float64  `json:"sender_amount"`
-	PartnerFeeAmount    *float64 `json:"partner_fee_amount"`
-	FlatFee             float64  `json:"flat_fee"`
+	ID                   string   `json:"id"`
+	ExpiresAt            *float64 `json:"expires_at"`
+	CommercialQuotation  *float64 `json:"commercial_quotation"`
+	BlindpayQuotation    *float64 `json:"blindpay_quotation"`
+	ReceiverAmount       float64  `json:"receiver_amount"`
+	SenderAmount         float64  `json:"sender_amount"`
+	PartnerFeeAmount     *float64 `json:"partner_fee_amount"`
+	FlatFee              float64  `json:"flat_fee"`
+	PartnerFlatFee       *int     `json:"partner_flat_fee,omitempty"`
+	PartnerPercentageFee *int     `json:"partner_percentage_fee,omitempty"`
 }
 
 // CreateParams represents parameters for creating a transfer.
@@ -100,10 +109,23 @@ type CreateResponse struct {
 	TrackingPartnerFee            TrackingStep                  `json:"tracking_partner_fee"`
 }
 
-// ListParams represents parameters for listing transfers.
+// ListParams represents parameters for listing transfers. The API always
+// returns one page (default 10 rows).
 type ListParams struct {
-	Limit  int `json:"limit,omitempty"`
+	// Limit is the page size (10, 50, 100, 200, 500 or 1000).
+	Limit int `json:"limit,omitempty"`
+	// Deprecated: ignored by the API; use StartingAfter.
 	Offset int `json:"offset,omitempty"`
+	// StartingAfter returns the page after this transfer ID (the previous
+	// page's Pagination.NextPage).
+	StartingAfter string `json:"-"`
+	// EndingBefore returns the page before this transfer ID.
+	EndingBefore string                  `json:"-"`
+	CustomerID   string                  `json:"-"`
+	WalletID     string                  `json:"-"`
+	Status       types.TransactionStatus `json:"-"`
+	Network      types.Network           `json:"-"`
+	Token        types.StablecoinToken   `json:"-"`
 }
 
 // ListResponse represents the response when listing transfers.
@@ -139,61 +161,98 @@ func NewClient(cfg *config.Config) *Client {
 }
 
 // Create creates a new transfer quote.
-func (c *QuotesClient) Create(ctx context.Context, params *CreateQuoteParams) (*CreateQuoteResponse, error) {
+func (c *QuotesClient) Create(ctx context.Context, params *CreateQuoteParams, opts ...option.RequestOption) (*CreateQuoteResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	path := fmt.Sprintf("/instances/%s/transfer-quotes", c.instanceID)
-	return request.Do[*CreateQuoteResponse](c.cfg, ctx, "POST", path, params)
+	path := request.Pathf("/instances/%s/transfer-quotes", c.instanceID)
+	return request.Do[*CreateQuoteResponse](c.cfg, ctx, "POST", path, params, opts...)
 }
 
 // Create creates a new transfer.
-func (c *Client) Create(ctx context.Context, params *CreateParams) (*CreateResponse, error) {
+func (c *Client) Create(ctx context.Context, params *CreateParams, opts ...option.RequestOption) (*CreateResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	path := fmt.Sprintf("/instances/%s/transfers", c.instanceID)
-	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, params)
+	path := request.Pathf("/instances/%s/transfers", c.instanceID)
+	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, params, opts...)
 }
 
-// List retrieves all transfers with optional pagination.
-func (c *Client) List(ctx context.Context, params *ListParams) (*ListResponse, error) {
-	path := fmt.Sprintf("/instances/%s/transfers", c.instanceID)
-
-	if params != nil {
-		q := url.Values{}
-		if params.Limit > 0 {
-			q.Set("limit", fmt.Sprintf("%d", params.Limit))
-		}
-		if params.Offset > 0 {
-			q.Set("offset", fmt.Sprintf("%d", params.Offset))
-		}
-		if len(q) > 0 {
-			path += "?" + q.Encode()
-		}
+// List retrieves one page of transfers (the API always paginates them).
+func (c *Client) List(ctx context.Context, params *ListParams, opts ...option.RequestOption) (*ListResponse, error) {
+	page, err := c.ListPage(ctx, params, opts...)
+	if err != nil {
+		return nil, err
 	}
+	return &ListResponse{Data: page.Data, Pagination: page.Pagination}, nil
+}
 
-	return request.Do[*ListResponse](c.cfg, ctx, "GET", path, nil)
+// ListPage retrieves one page of transfers with its pagination metadata.
+func (c *Client) ListPage(ctx context.Context, params *ListParams, opts ...option.RequestOption) (*pagination.Page[Transfer], error) {
+	return request.DoPage[Transfer](c.cfg, ctx, c.listPath(params), opts...)
+}
+
+// ListAutoPaging iterates over every transfer matching params, one page at
+// a time (Limit defaults to 100), starting after params.StartingAfter. It
+// only pages forward: EndingBefore makes the pager fail with
+// pagination.ErrEndingBeforeUnsupported.
+func (c *Client) ListAutoPaging(ctx context.Context, params *ListParams, opts ...option.RequestOption) *pagination.Pager[Transfer] {
+	p := ListParams{}
+	if params != nil {
+		p = *params
+	}
+	if p.EndingBefore != "" {
+		return pagination.NewErrPager[Transfer](pagination.ErrEndingBeforeUnsupported)
+	}
+	if p.Limit == 0 {
+		p.Limit = pagination.DefaultLimit
+	}
+	return pagination.NewPager(ctx, p.StartingAfter, func(ctx context.Context, cursor string) (*pagination.Page[Transfer], error) {
+		page := p
+		page.StartingAfter = cursor
+		return c.ListPage(ctx, &page, opts...)
+	})
+}
+
+func (c *Client) listPath(params *ListParams) string {
+	path := request.Pathf("/instances/%s/transfers", c.instanceID)
+	if params == nil {
+		return path
+	}
+	var q request.Query
+	q.Int("limit", params.Limit)
+	q.Int("offset", params.Offset)
+	q.String("starting_after", params.StartingAfter)
+	q.String("ending_before", params.EndingBefore)
+	q.String("customer_id", params.CustomerID)
+	q.String("wallet_id", params.WalletID)
+	q.String("status", string(params.Status))
+	q.String("network", string(params.Network))
+	q.String("token", string(params.Token))
+	return q.Apply(path)
 }
 
 // Get retrieves a specific transfer by ID.
-func (c *Client) Get(ctx context.Context, transferID string) (*Transfer, error) {
+func (c *Client) Get(ctx context.Context, transferID string, opts ...option.RequestOption) (*Transfer, error) {
 	if transferID == "" {
 		return nil, fmt.Errorf("transfer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/transfers/%s", c.instanceID, transferID)
-	return request.Do[*Transfer](c.cfg, ctx, "GET", path, nil)
+	path := request.Pathf("/instances/%s/transfers/%s", c.instanceID, transferID)
+	return request.Do[*Transfer](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // GetTrack retrieves tracking information for a transfer (public endpoint).
-func (c *Client) GetTrack(ctx context.Context, transferID string) (*Transfer, error) {
+//
+// This is BlindPay's public tracking endpoint for its web and iOS apps:
+// server-side calls get 401 in production. Use Client.Get instead.
+func (c *Client) GetTrack(ctx context.Context, transferID string, opts ...option.RequestOption) (*Transfer, error) {
 	if transferID == "" {
 		return nil, fmt.Errorf("transfer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/e/transfers/%s", transferID)
-	return request.Do[*Transfer](c.cfg, ctx, "GET", path, nil)
+	path := request.Pathf("/e/transfers/%s", transferID)
+	return request.Do[*Transfer](c.cfg, ctx, "GET", path, nil, opts...)
 }

@@ -6,6 +6,7 @@ import (
 
 	"github.com/blindpaylabs/blindpay-go/internal/config"
 	"github.com/blindpaylabs/blindpay-go/internal/request"
+	"github.com/blindpaylabs/blindpay-go/option"
 )
 
 // PartnerFee represents a partner fee configuration.
@@ -48,38 +49,38 @@ func NewClient(cfg *config.Config) *Client {
 }
 
 // List retrieves all partner fees for the instance.
-func (c *Client) List(ctx context.Context) ([]PartnerFee, error) {
-	path := fmt.Sprintf("/instances/%s/partner-fees", c.instanceID)
-	return request.Do[[]PartnerFee](c.cfg, ctx, "GET", path, nil)
+func (c *Client) List(ctx context.Context, opts ...option.RequestOption) ([]PartnerFee, error) {
+	path := request.Pathf("/instances/%s/partner-fees", c.instanceID)
+	return request.Do[[]PartnerFee](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // Create creates a new partner fee configuration.
-func (c *Client) Create(ctx context.Context, params *CreatePartnerFeeParams) (*PartnerFee, error) {
+func (c *Client) Create(ctx context.Context, params *CreatePartnerFeeParams, opts ...option.RequestOption) (*PartnerFee, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	path := fmt.Sprintf("/instances/%s/partner-fees", c.instanceID)
-	return request.Do[*PartnerFee](c.cfg, ctx, "POST", path, params)
+	path := request.Pathf("/instances/%s/partner-fees", c.instanceID)
+	return request.Do[*PartnerFee](c.cfg, ctx, "POST", path, params, opts...)
 }
 
 // Get retrieves a specific partner fee by ID.
-func (c *Client) Get(ctx context.Context, id string) (*PartnerFee, error) {
+func (c *Client) Get(ctx context.Context, id string, opts ...option.RequestOption) (*PartnerFee, error) {
 	if id == "" {
 		return nil, fmt.Errorf("id cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/partner-fees/%s", c.instanceID, id)
-	return request.Do[*PartnerFee](c.cfg, ctx, "GET", path, nil)
+	path := request.Pathf("/instances/%s/partner-fees/%s", c.instanceID, id)
+	return request.Do[*PartnerFee](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // Delete deletes a partner fee configuration.
-func (c *Client) Delete(ctx context.Context, id string) error {
+func (c *Client) Delete(ctx context.Context, id string, opts ...option.RequestOption) error {
 	if id == "" {
 		return fmt.Errorf("id cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/partner-fees/%s", c.instanceID, id)
-	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil)
+	path := request.Pathf("/instances/%s/partner-fees/%s", c.instanceID, id)
+	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil, opts...)
 	return err
 }

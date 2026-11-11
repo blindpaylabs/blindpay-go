@@ -1,6 +1,9 @@
 package types
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 type CurrencyType string
 
@@ -25,6 +28,10 @@ const (
 	NetworkTron            Network = "tron"
 	NetworkSolana          Network = "solana"
 	NetworkSolanaDevnet    Network = "solana_devnet"
+	NetworkArc             Network = "arc"
+	NetworkArcTestnet      Network = "arc_testnet"
+	NetworkTempo           Network = "tempo"
+	NetworkTempoTestnet    Network = "tempo_testnet"
 )
 
 type StablecoinToken string
@@ -33,6 +40,8 @@ const (
 	StablecoinTokenUSDC StablecoinToken = "USDC"
 	StablecoinTokenUSDT StablecoinToken = "USDT"
 	StablecoinTokenUSDB StablecoinToken = "USDB"
+	StablecoinTokenEURB StablecoinToken = "EURB"
+	StablecoinTokenEURC StablecoinToken = "EURC"
 )
 
 type TransactionDocumentType string
@@ -65,6 +74,8 @@ const (
 	CurrencyMXN  Currency = "MXN"
 	CurrencyCOP  Currency = "COP"
 	CurrencyARS  Currency = "ARS"
+	CurrencyEUR  Currency = "EUR"
+	CurrencyGBP  Currency = "GBP"
 )
 
 type AccountClass string
@@ -92,18 +103,36 @@ type PaginationMetadata struct {
 }
 
 type TrackingTransaction struct {
-	Step                 string    `json:"step"`
-	Status               string    `json:"status"`
-	TransactionHash      string    `json:"transaction_hash,omitempty"`
-	ExternalID           string    `json:"external_id,omitempty"`
-	CompletedAt          time.Time `json:"completed_at"`
-	SenderName           string    `json:"sender_name,omitempty"`
-	SenderTaxID          string    `json:"sender_tax_id,omitempty"`
-	SenderBankCode       string    `json:"sender_bank_code,omitempty"`
-	SenderAccountNumber  string    `json:"sender_account_number,omitempty"`
-	TraceNumber          string    `json:"trace_number,omitempty"`
-	TransactionReference string    `json:"transaction_reference,omitempty"`
-	Description          string    `json:"description,omitempty"`
+	Step                   string    `json:"step"`
+	Status                 string    `json:"status"`
+	TransactionHash        string    `json:"transaction_hash,omitempty"`
+	ExternalID             string    `json:"external_id,omitempty"`
+	CompletedAt            time.Time `json:"completed_at"`
+	SenderName             string    `json:"sender_name,omitempty"`
+	SenderTaxID            string    `json:"sender_tax_id,omitempty"`
+	SenderBankCode         string    `json:"sender_bank_code,omitempty"`
+	SenderAccountNumber    string    `json:"sender_account_number,omitempty"`
+	TraceNumber            string    `json:"trace_number,omitempty"`
+	TransactionReference   string    `json:"transaction_reference,omitempty"`
+	Description            string    `json:"description,omitempty"`
+	ProviderName           *string   `json:"provider_name,omitempty"`
+	ProviderTransactionID  *string   `json:"provider_transaction_id,omitempty"`
+	ProviderErrorReason    *string   `json:"provider_error_reason,omitempty"`
+	LedgerInTransactionID  *string   `json:"ledger_in_transaction_id,omitempty"`
+	LedgerOutTransactionID *string   `json:"ledger_out_transaction_id,omitempty"`
+	SenderBankName         *string   `json:"sender_bank_name,omitempty"`
+	EndToEndID             *string   `json:"end_to_end_id,omitempty"`
+	// PseInstruction, TransfersInstruction and TedInstruction are the
+	// payment instructions of a PSE, Transfers or TED payin.
+	PseInstruction       map[string]any `json:"pse_instruction,omitempty"`
+	TransfersInstruction map[string]any `json:"transfers_instruction,omitempty"`
+	TedInstruction       map[string]any `json:"ted_instruction,omitempty"`
+	// Card* track a card payin.
+	CardInstruction    map[string]any `json:"card_instruction,omitempty"`
+	CardEvidence       map[string]any `json:"card_evidence,omitempty"`
+	CardFailedAttempts *int           `json:"card_failed_attempts,omitempty"`
+	CardClaimAt        *string        `json:"card_claim_at,omitempty"`
+	CardGatesFailedAt  *string        `json:"card_gates_failed_at,omitempty"`
 }
 
 type TrackingPayment struct {
@@ -113,6 +142,31 @@ type TrackingPayment struct {
 	ProviderStatus         string    `json:"provider_status,omitempty"`
 	EstimatedTimeOfArrival string    `json:"estimated_time_of_arrival,omitempty"`
 	CompletedAt            time.Time `json:"completed_at"`
+	// ReviewSources lists every risk source that sent the payout to manual
+	// review; ReviewContext is their structured context.
+	ReviewSources          []string       `json:"review_sources,omitempty"`
+	ReviewContext          map[string]any `json:"review_context,omitempty"`
+	CoelsaID               *string        `json:"coelsa_id,omitempty"`
+	EndToEndID             *string        `json:"end_to_end_id,omitempty"`
+	ProviderClearingSystem *string        `json:"provider_clearing_system,omitempty"`
+	ProviderErrorReason    *string        `json:"provider_error_reason,omitempty"`
+	ProviderImad           *string        `json:"provider_imad,omitempty"`
+	ProviderReference      *string        `json:"provider_reference,omitempty"`
+	ProviderUetr           *string        `json:"provider_uetr,omitempty"`
+	RecipientAccountNumber *string        `json:"recipient_account_number,omitempty"`
+	RecipientAccountType   *string        `json:"recipient_account_type,omitempty"`
+	RecipientBankCode      *string        `json:"recipient_bank_code,omitempty"`
+	RecipientBranchCode    *string        `json:"recipient_branch_code,omitempty"`
+	RecipientName          *string        `json:"recipient_name,omitempty"`
+	RecipientTaxID         *string        `json:"recipient_tax_id,omitempty"`
+	RefundReviewActionedAt *string        `json:"refund_review_actioned_at,omitempty"`
+	RefundReviewDetectedAt *string        `json:"refund_review_detected_at,omitempty"`
+	RefundReviewReason     *string        `json:"refund_review_reason,omitempty"`
+	ReturnedAmount         *int           `json:"returned_amount,omitempty"`
+	ReviewSource           *string        `json:"review_source,omitempty"`
+	// ReviewContexts and ApprovedRiskSources describe a payin's risk review.
+	ReviewContexts      map[string]any `json:"review_contexts,omitempty"`
+	ApprovedRiskSources []string       `json:"approved_risk_sources,omitempty"`
 }
 
 type TrackingLiquidity struct {
@@ -123,11 +177,24 @@ type TrackingLiquidity struct {
 	CompletedAt            time.Time `json:"completed_at"`
 }
 
+// TrackingDocuments tracks the compliance documents step of a payout.
+// Step is "processing", "on_hold", "pending_review",
+// "pending_refund_review" or "completed"; Status is "waiting_documents" or
+// "compliance_reviewing".
+type TrackingDocuments struct {
+	Step        string  `json:"step"`
+	Status      *string `json:"status,omitempty"`
+	ReviewedBy  *string `json:"reviewed_by,omitempty"`
+	CompletedAt *string `json:"completed_at,omitempty"`
+}
+
 type TrackingComplete struct {
-	Step            string    `json:"step"`
-	Status          string    `json:"status"`
-	TransactionHash string    `json:"transaction_hash"`
-	CompletedAt     time.Time `json:"completed_at"`
+	Step                  string    `json:"step"`
+	Status                string    `json:"status"`
+	TransactionHash       string    `json:"transaction_hash"`
+	CompletedAt           time.Time `json:"completed_at"`
+	RefundReason          *string   `json:"refund_reason,omitempty"`
+	ProviderTransactionID *string   `json:"provider_transaction_id,omitempty"`
 }
 
 type TrackingPartnerFee struct {
@@ -145,6 +212,9 @@ const (
 	BankingPartnerJpmorgan BankingPartner = "jpmorgan"
 	BankingPartnerPortage  BankingPartner = "portage"
 	BankingPartnerSsb      BankingPartner = "ssb"
+	BankingPartnerBreB     BankingPartner = "bre_b"
+	BankingPartnerPortageG BankingPartner = "portage_g"
+	BankingPartnerSpei     BankingPartner = "spei"
 )
 
 type SoleProprietorDocType string
@@ -408,3 +478,19 @@ const (
 	CountryZW Country = "ZW"
 	CountryAX Country = "AX"
 )
+
+// LooseString is a string field the spec leaves untyped. A JSON string
+// decodes as-is; any other value (object, number) keeps its raw JSON text,
+// so decoding never fails.
+type LooseString string
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (s *LooseString) UnmarshalJSON(data []byte) error {
+	var str string
+	if err := json.Unmarshal(data, &str); err == nil {
+		*s = LooseString(str)
+		return nil
+	}
+	*s = LooseString(data)
+	return nil
+}

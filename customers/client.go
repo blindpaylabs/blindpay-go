@@ -3,12 +3,14 @@ package customers
 import (
 	"context"
 	"fmt"
-	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/blindpaylabs/blindpay-go/internal/config"
 	"github.com/blindpaylabs/blindpay-go/internal/request"
 	"github.com/blindpaylabs/blindpay-go/internal/types"
+	"github.com/blindpaylabs/blindpay-go/option"
+	"github.com/blindpaylabs/blindpay-go/pagination"
 )
 
 // ProofOfAddressDocType represents proof of address document types.
@@ -70,12 +72,21 @@ const (
 type LimitIncreaseRequestSupportingDocumentType string
 
 const (
-	LimitIncreaseRequestSupportingDocumentTypeIndividualBankStatement     LimitIncreaseRequestSupportingDocumentType = "individual_bank_statement"
-	LimitIncreaseRequestSupportingDocumentTypeIndividualTaxReturn         LimitIncreaseRequestSupportingDocumentType = "individual_tax_return"
-	LimitIncreaseRequestSupportingDocumentTypeIndividualProofOfIncome     LimitIncreaseRequestSupportingDocumentType = "individual_proof_of_income"
-	LimitIncreaseRequestSupportingDocumentTypeBusinessBankStatement       LimitIncreaseRequestSupportingDocumentType = "business_bank_statement"
-	LimitIncreaseRequestSupportingDocumentTypeBusinessFinancialStatements LimitIncreaseRequestSupportingDocumentType = "business_financial_statements"
-	LimitIncreaseRequestSupportingDocumentTypeBusinessTaxReturn           LimitIncreaseRequestSupportingDocumentType = "business_tax_return"
+	LimitIncreaseRequestSupportingDocumentTypeIndividualBankStatement             LimitIncreaseRequestSupportingDocumentType = "individual_bank_statement"
+	LimitIncreaseRequestSupportingDocumentTypeIndividualTaxReturn                 LimitIncreaseRequestSupportingDocumentType = "individual_tax_return"
+	LimitIncreaseRequestSupportingDocumentTypeIndividualProofOfIncome             LimitIncreaseRequestSupportingDocumentType = "individual_proof_of_income"
+	LimitIncreaseRequestSupportingDocumentTypeBusinessBankStatement               LimitIncreaseRequestSupportingDocumentType = "business_bank_statement"
+	LimitIncreaseRequestSupportingDocumentTypeBusinessFinancialStatements         LimitIncreaseRequestSupportingDocumentType = "business_financial_statements"
+	LimitIncreaseRequestSupportingDocumentTypeBusinessTaxReturn                   LimitIncreaseRequestSupportingDocumentType = "business_tax_return"
+	LimitIncreaseRequestSupportingDocumentTypeBusinessAccountsReceivable          LimitIncreaseRequestSupportingDocumentType = "business_accounts_receivable"
+	LimitIncreaseRequestSupportingDocumentTypeBusinessContract                    LimitIncreaseRequestSupportingDocumentType = "business_contract"
+	LimitIncreaseRequestSupportingDocumentTypeBusinessMerchantProcessorStatement  LimitIncreaseRequestSupportingDocumentType = "business_merchant_processor_statement"
+	LimitIncreaseRequestSupportingDocumentTypeBusinessShareholderLoan             LimitIncreaseRequestSupportingDocumentType = "business_shareholder_loan"
+	LimitIncreaseRequestSupportingDocumentTypeIndividualBlockchainWalletStatement LimitIncreaseRequestSupportingDocumentType = "individual_blockchain_wallet_statement"
+	LimitIncreaseRequestSupportingDocumentTypeIndividualCryptoExchangeStatement   LimitIncreaseRequestSupportingDocumentType = "individual_crypto_exchange_statement"
+	LimitIncreaseRequestSupportingDocumentTypeIndividualEmploymentLetter          LimitIncreaseRequestSupportingDocumentType = "individual_employment_letter"
+	LimitIncreaseRequestSupportingDocumentTypeIndividualInvestmentStatement       LimitIncreaseRequestSupportingDocumentType = "individual_investment_statement"
+	LimitIncreaseRequestSupportingDocumentTypeIndividualPayStub                   LimitIncreaseRequestSupportingDocumentType = "individual_pay_stub"
 )
 
 // IdentificationDocument represents identification document types.
@@ -116,6 +127,7 @@ const (
 	KycStatusPendingReview     KycStatus = "pending_review"
 	KycStatusAwaitingContract  KycStatus = "awaiting_contract"
 	KycStatusComplianceRequest KycStatus = "compliance_request"
+	KycStatusApprovedRfi       KycStatus = "approved_rfi"
 )
 
 // AccountPurpose represents the purpose of the account.
@@ -255,6 +267,40 @@ type Limits struct {
 	Monthly        float64 `json:"monthly"`
 }
 
+// CnaeCode is one Brazilian activity code (CNAE) with its description.
+type CnaeCode struct {
+	Code        string `json:"code"`
+	Description string `json:"description"`
+}
+
+// CnaeSet is a business's primary and secondary CNAE codes.
+type CnaeSet struct {
+	Primary   CnaeCode   `json:"primary"`
+	Secondary []CnaeCode `json:"secondary"`
+}
+
+// CnaeCondition is a check that a Brazilian business's activity codes
+// (CNAE) match what was expected at approval. Status is "pending",
+// "passed", "failed" or "cancelled".
+type CnaeCondition struct {
+	Status         string   `json:"status"`
+	ExpectedCnaes  []string `json:"expected_cnaes"`
+	CnaeAtApproval CnaeSet  `json:"cnae_at_approval"`
+	ResultCnae     *CnaeSet `json:"result_cnae,omitempty"`
+	DueAt          string   `json:"due_at"`
+	CreatedAt      string   `json:"created_at"`
+	ReviewedAt     *string  `json:"reviewed_at,omitempty"`
+}
+
+// VirtualAccountPreapproval is the review that lets a customer open US
+// virtual accounts. Status is "in_review", "approved" or "rejected".
+type VirtualAccountPreapproval struct {
+	Status          string                 `json:"status"`
+	BankingPartners []types.BankingPartner `json:"banking_partners"`
+	RejectionReason *string                `json:"rejection_reason,omitempty"`
+	ReviewedAt      *string                `json:"reviewed_at,omitempty"`
+}
+
 // Customer represents a customer with KYC information.
 type Customer struct {
 	ID                    string                `json:"id"`
@@ -320,6 +366,18 @@ type Customer struct {
 	AmlStatus               AmlStatus                    `json:"aml_status,omitempty"`
 	AmlHitsData             *AmlHits                     `json:"aml_hits,omitempty"`
 	IsTosAccepted           *bool                        `json:"is_tos_accepted,omitempty"`
+	// CustomerID is the customer's ID (same as ID).
+	CustomerID     string               `json:"customer_id"`
+	Latitude       *float64             `json:"latitude,omitempty"`
+	Longitude      *float64             `json:"longitude,omitempty"`
+	AdditionalInfo []AdditionalInfoItem `json:"additional_info,omitempty"`
+	// CnaeCondition is a pending or finished check of a Brazilian
+	// business's activity codes (CNAE).
+	CnaeCondition *CnaeCondition `json:"cnae_condition,omitempty"`
+	// VirtualAccountPreapproval is the review of the customer for US
+	// virtual accounts.
+	VirtualAccountPreapproval *VirtualAccountPreapproval `json:"virtual_account_preapproval,omitempty"`
+	IsNested                  *bool                      `json:"is_nested,omitempty"`
 }
 
 // CreateIndividualStandardParams represents parameters for creating an individual with standard KYC.
@@ -332,7 +390,7 @@ type CreateIndividualStandardParams struct {
 	DateOfBirth           string                       `json:"date_of_birth"`
 	Email                 string                       `json:"email"`
 	FirstName             string                       `json:"first_name"`
-	PhoneNumber           *string                      `json:"phone_number"`
+	PhoneNumber           *string                      `json:"phone_number,omitempty"`
 	IDDocCountry          types.Country                `json:"id_doc_country"`
 	IDDocFrontFile        string                       `json:"id_doc_front_file"`
 	IDDocType             IdentificationDocument       `json:"id_doc_type"`
@@ -349,6 +407,16 @@ type CreateIndividualStandardParams struct {
 	Occupation            *string                      `json:"occupation,omitempty"`
 	RecipientRelationship *types.RecipientRelationship `json:"recipient_relationship,omitempty"`
 	SoleProprietorDocType *types.SoleProprietorDocType `json:"sole_proprietor_doc_type,omitempty"`
+	// Latitude and Longitude are the customer's location, if known.
+	Latitude  *float64 `json:"latitude,omitempty"`
+	Longitude *float64 `json:"longitude,omitempty"`
+	// AdditionalInfo attaches extra documents (label + file URL).
+	AdditionalInfo                   []AdditionalInfoItem   `json:"additional_info,omitempty"`
+	SelfieFile                       *string                `json:"selfie_file,omitempty"`
+	SourceOfFundsDocType             *SourceOfFundsDocType  `json:"source_of_funds_doc_type,omitempty"`
+	SourceOfFundsDocFile             *string                `json:"source_of_funds_doc_file,omitempty"`
+	PurposeOfTransactions            *PurposeOfTransactions `json:"purpose_of_transactions,omitempty"`
+	PurposeOfTransactionsExplanation *string                `json:"purpose_of_transactions_explanation,omitempty"`
 }
 
 // CreateIndividualEnhancedParams represents parameters for creating an individual with enhanced KYC.
@@ -368,7 +436,7 @@ type CreateIndividualEnhancedParams struct {
 	SelfieFile                       string                       `json:"selfie_file"`
 	LastName                         string                       `json:"last_name"`
 	PostalCode                       string                       `json:"postal_code"`
-	PhoneNumber                      *string                      `json:"phone_number"`
+	PhoneNumber                      *string                      `json:"phone_number,omitempty"`
 	ProofOfAddressDocFile            string                       `json:"proof_of_address_doc_file"`
 	ProofOfAddressDocType            ProofOfAddressDocType        `json:"proof_of_address_doc_type"`
 	PurposeOfTransactions            PurposeOfTransactions        `json:"purpose_of_transactions"`
@@ -383,6 +451,11 @@ type CreateIndividualEnhancedParams struct {
 	Occupation                       *string                      `json:"occupation,omitempty"`
 	RecipientRelationship            *types.RecipientRelationship `json:"recipient_relationship,omitempty"`
 	SoleProprietorDocType            *types.SoleProprietorDocType `json:"sole_proprietor_doc_type,omitempty"`
+	// Latitude and Longitude are the customer's location, if known.
+	Latitude  *float64 `json:"latitude,omitempty"`
+	Longitude *float64 `json:"longitude,omitempty"`
+	// AdditionalInfo attaches extra documents (label + file URL).
+	AdditionalInfo []AdditionalInfoItem `json:"additional_info,omitempty"`
 }
 
 // CreateBusinessStandardParams represents parameters for creating a business with standard KYB.
@@ -419,6 +492,16 @@ type CreateBusinessStandardParams struct {
 	PubliclyTraded          *bool                        `json:"publicly_traded,omitempty"`
 	RecipientRelationship   *types.RecipientRelationship `json:"recipient_relationship,omitempty"`
 	SoleProprietorDocType   *types.SoleProprietorDocType `json:"sole_proprietor_doc_type,omitempty"`
+	// Latitude and Longitude are the customer's location, if known.
+	Latitude  *float64 `json:"latitude,omitempty"`
+	Longitude *float64 `json:"longitude,omitempty"`
+	// AdditionalInfo attaches extra documents (label + file URL).
+	AdditionalInfo                   []AdditionalInfoItem   `json:"additional_info,omitempty"`
+	SelfieFile                       *string                `json:"selfie_file,omitempty"`
+	SourceOfFundsDocType             *SourceOfFundsDocType  `json:"source_of_funds_doc_type,omitempty"`
+	SourceOfFundsDocFile             *string                `json:"source_of_funds_doc_file,omitempty"`
+	PurposeOfTransactions            *PurposeOfTransactions `json:"purpose_of_transactions,omitempty"`
+	PurposeOfTransactionsExplanation *string                `json:"purpose_of_transactions_explanation,omitempty"`
 }
 
 // CreateResponse represents the response when creating a customer.
@@ -474,6 +557,11 @@ type UpdateParams struct {
 	Occupation                       *string                      `json:"occupation,omitempty"`
 	RecipientRelationship            *types.RecipientRelationship `json:"recipient_relationship,omitempty"`
 	SoleProprietorDocType            *types.SoleProprietorDocType `json:"sole_proprietor_doc_type,omitempty"`
+	// Latitude and Longitude are the customer's location, if known.
+	Latitude  *float64 `json:"latitude,omitempty"`
+	Longitude *float64 `json:"longitude,omitempty"`
+	// AdditionalInfo attaches extra documents (label + file URL).
+	AdditionalInfo []AdditionalInfoItem `json:"additional_info,omitempty"`
 }
 
 // LimitsResponse represents customer limits.
@@ -505,16 +593,39 @@ type LimitIncreaseRequest struct {
 	SupportingDocumentType LimitIncreaseRequestSupportingDocumentType `json:"supporting_document_type"`
 	CreatedAt              string                                     `json:"created_at"`
 	UpdatedAt              string                                     `json:"updated_at"`
+	SupportingDocuments    []LimitIncreaseSupportingDocument          `json:"supporting_documents,omitempty"`
+}
+
+// AdditionalInfoLabel names the kind of an additional document (e.g.
+// "BANK_STATEMENT"). Unknown future values decode as-is.
+type AdditionalInfoLabel string
+
+// AdditionalInfoItem is an extra document attached to a customer.
+type AdditionalInfoItem struct {
+	Label AdditionalInfoLabel `json:"label"`
+	// Value is the document's file URL (from Upload).
+	Value string `json:"value"`
+}
+
+// LimitIncreaseSupportingDocument is one document backing a limit increase
+// request.
+type LimitIncreaseSupportingDocument struct {
+	Type LimitIncreaseRequestSupportingDocumentType `json:"type"`
+	// File is the document's URL (from Upload).
+	File string `json:"file"`
 }
 
 // RequestLimitIncreaseParams represents parameters for requesting a limit increase.
 type RequestLimitIncreaseParams struct {
-	CustomerID             string                                     `json:"-"`
-	Daily                  float64                                    `json:"daily"`
-	Monthly                float64                                    `json:"monthly"`
-	PerTransaction         float64                                    `json:"per_transaction"`
-	SupportingDocumentFile string                                     `json:"supporting_document_file"`
-	SupportingDocumentType LimitIncreaseRequestSupportingDocumentType `json:"supporting_document_type"`
+	CustomerID     string  `json:"-"`
+	Daily          float64 `json:"daily"`
+	Monthly        float64 `json:"monthly"`
+	PerTransaction float64 `json:"per_transaction"`
+	// SupportingDocumentFile and SupportingDocumentType attach one
+	// document; SupportingDocuments attaches several.
+	SupportingDocumentFile string                                     `json:"supporting_document_file,omitempty"`
+	SupportingDocumentType LimitIncreaseRequestSupportingDocumentType `json:"supporting_document_type,omitempty"`
+	SupportingDocuments    []LimitIncreaseSupportingDocument          `json:"supporting_documents,omitempty"`
 }
 
 // RequestLimitIncreaseResponse represents the response when requesting a limit increase.
@@ -524,7 +635,9 @@ type RequestLimitIncreaseResponse struct {
 
 // ListParams represents parameters for listing customers with pagination.
 type ListParams struct {
-	Limit         string    `json:"-"`
+	// Limit is the page size ("10", "50", "100", "200", "500" or "1000").
+	Limit string `json:"-"`
+	// Deprecated: ignored by the API; use StartingAfter.
 	Offset        string    `json:"-"`
 	StartingAfter string    `json:"-"`
 	EndingBefore  string    `json:"-"`
@@ -557,9 +670,9 @@ func NewClient(cfg *config.Config) *Client {
 }
 
 // List retrieves all customers for the instance.
-func (c *Client) List(ctx context.Context) ([]Customer, error) {
-	path := fmt.Sprintf("/instances/%s/customers", c.instanceID)
-	return request.DoList[Customer](c.cfg, ctx, path)
+func (c *Client) List(ctx context.Context, opts ...option.RequestOption) ([]Customer, error) {
+	path := request.Pathf("/instances/%s/customers", c.instanceID)
+	return request.DoList[Customer](c.cfg, ctx, path, opts...)
 }
 
 // ListWithParams retrieves customers with pagination and filtering.
@@ -568,278 +681,121 @@ func (c *Client) List(ctx context.Context) ([]Customer, error) {
 // StartingAfter or EndingBefore is set; with filters alone (or nil params) it
 // returns every matching customer as a bare array. Both shapes are decoded;
 // for a bare array Pagination is the zero value (HasMore false).
-func (c *Client) ListWithParams(ctx context.Context, params *ListParams) (*ListResponse, error) {
-	path := fmt.Sprintf("/instances/%s/customers", c.instanceID)
+func (c *Client) ListWithParams(ctx context.Context, params *ListParams, opts ...option.RequestOption) (*ListResponse, error) {
+	page, err := c.ListPage(ctx, params, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &ListResponse{Data: page.Data, Pagination: page.Pagination}, nil
+}
 
+// ListPage retrieves one page of customers with its pagination metadata
+// (same request as ListWithParams).
+func (c *Client) ListPage(ctx context.Context, params *ListParams, opts ...option.RequestOption) (*pagination.Page[Customer], error) {
+	return request.DoPage[Customer](c.cfg, ctx, c.listPath(params), opts...)
+}
+
+// ListAutoPaging iterates over every customer matching params, one page at
+// a time (Limit defaults to "100"), starting after params.StartingAfter. It
+// only pages forward: EndingBefore makes the pager fail with
+// pagination.ErrEndingBeforeUnsupported.
+func (c *Client) ListAutoPaging(ctx context.Context, params *ListParams, opts ...option.RequestOption) *pagination.Pager[Customer] {
+	p := ListParams{}
 	if params != nil {
-		q := url.Values{}
-		if params.Limit != "" {
-			q.Set("limit", params.Limit)
-		}
-		if params.Offset != "" {
-			q.Set("offset", params.Offset)
-		}
-		if params.StartingAfter != "" {
-			q.Set("starting_after", params.StartingAfter)
-		}
-		if params.EndingBefore != "" {
-			q.Set("ending_before", params.EndingBefore)
-		}
-		if params.FullName != "" {
-			q.Set("full_name", params.FullName)
-		}
-		if params.CustomerName != "" {
-			q.Set("customer_name", params.CustomerName)
-		}
-		if params.Status != "" {
-			q.Set("status", string(params.Status))
-		}
-		if params.CustomerID != "" {
-			q.Set("customer_id", params.CustomerID)
-		}
-		if params.BankAccountID != "" {
-			q.Set("bank_account_id", params.BankAccountID)
-		}
-		if params.Country != "" {
-			q.Set("country", params.Country)
-		}
-		if len(q) > 0 {
-			path += "?" + q.Encode()
-		}
+		p = *params
+	}
+	if p.EndingBefore != "" {
+		return pagination.NewErrPager[Customer](pagination.ErrEndingBeforeUnsupported)
+	}
+	if p.Limit == "" {
+		p.Limit = strconv.Itoa(pagination.DefaultLimit)
+	}
+	return pagination.NewPager(ctx, p.StartingAfter, func(ctx context.Context, cursor string) (*pagination.Page[Customer], error) {
+		page := p
+		page.StartingAfter = cursor
+		return c.ListPage(ctx, &page, opts...)
+	})
+}
+
+func (c *Client) listPath(params *ListParams) string {
+	path := request.Pathf("/instances/%s/customers", c.instanceID)
+	if params == nil {
+		return path
+	}
+	var q request.Query
+	q.String("limit", params.Limit)
+	q.String("offset", params.Offset)
+	q.String("starting_after", params.StartingAfter)
+	q.String("ending_before", params.EndingBefore)
+	q.String("full_name", params.FullName)
+	q.String("customer_name", params.CustomerName)
+	q.String("status", string(params.Status))
+	q.String("customer_id", params.CustomerID)
+	q.String("bank_account_id", params.BankAccountID)
+	q.String("country", params.Country)
+	return q.Apply(path)
+}
+
+// CreateIndividualWithStandardKYC creates an individual customer with standard KYC.
+func (c *Client) CreateIndividualWithStandardKYC(ctx context.Context, params *CreateIndividualStandardParams, opts ...option.RequestOption) (*CreateResponse, error) {
+	if params == nil {
+		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	list, err := request.Do[request.List[Customer]](c.cfg, ctx, "GET", path, nil)
+	path := request.Pathf("/instances/%s/customers", c.instanceID)
+
+	body, err := request.BodyWith(params, map[string]any{"kyc_type": "standard", "type": "individual"})
 	if err != nil {
 		return nil, err
 	}
 
-	resp := &ListResponse{Data: list.Data}
-	if list.Pagination != nil {
-		resp.Pagination = *list.Pagination
-	}
-	return resp, nil
-}
-
-// CreateIndividualWithStandardKYC creates an individual customer with standard KYC.
-func (c *Client) CreateIndividualWithStandardKYC(ctx context.Context, params *CreateIndividualStandardParams) (*CreateResponse, error) {
-	if params == nil {
-		return nil, fmt.Errorf("params cannot be nil")
-	}
-
-	path := fmt.Sprintf("/instances/%s/customers", c.instanceID)
-
-	body := map[string]any{
-		"kyc_type":                  "standard",
-		"type":                      "individual",
-		"address_line_1":            params.AddressLine1,
-		"city":                      params.City,
-		"country":                   params.Country,
-		"date_of_birth":             params.DateOfBirth,
-		"email":                     params.Email,
-		"first_name":                params.FirstName,
-		"id_doc_country":            params.IDDocCountry,
-		"id_doc_front_file":         params.IDDocFrontFile,
-		"id_doc_type":               params.IDDocType,
-		"last_name":                 params.LastName,
-		"postal_code":               params.PostalCode,
-		"proof_of_address_doc_file": params.ProofOfAddressDocFile,
-		"proof_of_address_doc_type": params.ProofOfAddressDocType,
-		"state_province_region":     params.StateProvinceRegion,
-		"tax_id":                    params.TaxID,
-		"tos_id":                    params.TosID,
-	}
-
-	if params.AddressLine2 != nil {
-		body["address_line_2"] = params.AddressLine2
-	}
-	if params.PhoneNumber != nil {
-		body["phone_number"] = params.PhoneNumber
-	}
-	if params.IDDocBackFile != nil {
-		body["id_doc_back_file"] = params.IDDocBackFile
-	}
-	if params.ExternalID != nil {
-		body["external_id"] = params.ExternalID
-	}
-	if params.IPAddress != nil {
-		body["ip_address"] = params.IPAddress
-	}
-	if params.ImageURL != nil {
-		body["image_url"] = params.ImageURL
-	}
-	if params.Occupation != nil {
-		body["occupation"] = params.Occupation
-	}
-	if params.RecipientRelationship != nil {
-		body["recipient_relationship"] = params.RecipientRelationship
-	}
-	if params.SoleProprietorDocType != nil {
-		body["sole_proprietor_doc_type"] = params.SoleProprietorDocType
-	}
-
-	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // CreateIndividualWithEnhancedKYC creates an individual customer with enhanced KYC.
-func (c *Client) CreateIndividualWithEnhancedKYC(ctx context.Context, params *CreateIndividualEnhancedParams) (*CreateResponse, error) {
+func (c *Client) CreateIndividualWithEnhancedKYC(ctx context.Context, params *CreateIndividualEnhancedParams, opts ...option.RequestOption) (*CreateResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers", c.instanceID)
+	path := request.Pathf("/instances/%s/customers", c.instanceID)
 
-	body := map[string]any{
-		"kyc_type":                  "enhanced",
-		"type":                      "individual",
-		"address_line_1":            params.AddressLine1,
-		"city":                      params.City,
-		"country":                   params.Country,
-		"date_of_birth":             params.DateOfBirth,
-		"email":                     params.Email,
-		"first_name":                params.FirstName,
-		"id_doc_country":            params.IDDocCountry,
-		"id_doc_front_file":         params.IDDocFrontFile,
-		"id_doc_type":               params.IDDocType,
-		"selfie_file":               params.SelfieFile,
-		"last_name":                 params.LastName,
-		"postal_code":               params.PostalCode,
-		"proof_of_address_doc_file": params.ProofOfAddressDocFile,
-		"proof_of_address_doc_type": params.ProofOfAddressDocType,
-		"purpose_of_transactions":   params.PurposeOfTransactions,
-		"source_of_funds_doc_file":  params.SourceOfFundsDocFile,
-		"source_of_funds_doc_type":  params.SourceOfFundsDocType,
-		"state_province_region":     params.StateProvinceRegion,
-		"tax_id":                    params.TaxID,
-		"tos_id":                    params.TosID,
+	body, err := request.BodyWith(params, map[string]any{"kyc_type": "enhanced", "type": "individual"})
+	if err != nil {
+		return nil, err
 	}
 
-	if params.AddressLine2 != nil {
-		body["address_line_2"] = params.AddressLine2
-	}
-	if params.PhoneNumber != nil {
-		body["phone_number"] = params.PhoneNumber
-	}
-	if params.IDDocBackFile != nil {
-		body["id_doc_back_file"] = params.IDDocBackFile
-	}
-	if params.PurposeOfTransactionsExplanation != nil {
-		body["purpose_of_transactions_explanation"] = params.PurposeOfTransactionsExplanation
-	}
-	if params.ExternalID != nil {
-		body["external_id"] = params.ExternalID
-	}
-	if params.IPAddress != nil {
-		body["ip_address"] = params.IPAddress
-	}
-	if params.ImageURL != nil {
-		body["image_url"] = params.ImageURL
-	}
-	if params.Occupation != nil {
-		body["occupation"] = params.Occupation
-	}
-	if params.RecipientRelationship != nil {
-		body["recipient_relationship"] = params.RecipientRelationship
-	}
-	if params.SoleProprietorDocType != nil {
-		body["sole_proprietor_doc_type"] = params.SoleProprietorDocType
-	}
-
-	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // CreateBusinessWithStandardKYB creates a business customer with standard KYB.
-func (c *Client) CreateBusinessWithStandardKYB(ctx context.Context, params *CreateBusinessStandardParams) (*CreateResponse, error) {
+func (c *Client) CreateBusinessWithStandardKYB(ctx context.Context, params *CreateBusinessStandardParams, opts ...option.RequestOption) (*CreateResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers", c.instanceID)
+	path := request.Pathf("/instances/%s/customers", c.instanceID)
 
-	body := map[string]any{
-		"kyc_type":                    "standard",
-		"type":                        "business",
-		"address_line_1":              params.AddressLine1,
-		"alternate_name":              params.AlternateName,
-		"city":                        params.City,
-		"country":                     params.Country,
-		"email":                       params.Email,
-		"formation_date":              params.FormationDate,
-		"incorporation_doc_file":      params.IncorporationDocFile,
-		"legal_name":                  params.LegalName,
-		"owners":                      params.Owners,
-		"postal_code":                 params.PostalCode,
-		"proof_of_address_doc_file":   params.ProofOfAddressDocFile,
-		"proof_of_address_doc_type":   params.ProofOfAddressDocType,
-		"proof_of_ownership_doc_file": params.ProofOfOwnershipDocFile,
-		"state_province_region":       params.StateProvinceRegion,
-		"tax_id":                      params.TaxID,
-		"tos_id":                      params.TosID,
+	body, err := request.BodyWith(params, map[string]any{"kyc_type": "standard", "type": "business"})
+	if err != nil {
+		return nil, err
 	}
 
-	if params.AddressLine2 != nil {
-		body["address_line_2"] = params.AddressLine2
-	}
-	if params.Website != nil {
-		body["website"] = params.Website
-	}
-	if params.ExternalID != nil {
-		body["external_id"] = params.ExternalID
-	}
-	if params.PhoneNumber != nil {
-		body["phone_number"] = params.PhoneNumber
-	}
-	if params.IPAddress != nil {
-		body["ip_address"] = params.IPAddress
-	}
-	if params.ImageURL != nil {
-		body["image_url"] = params.ImageURL
-	}
-	if params.AccountPurpose != nil {
-		body["account_purpose"] = params.AccountPurpose
-	}
-	if params.AccountPurposeOther != nil {
-		body["account_purpose_other"] = params.AccountPurposeOther
-	}
-	if params.BusinessTypeField != nil {
-		body["business_type"] = params.BusinessTypeField
-	}
-	if params.BusinessDescription != nil {
-		body["business_description"] = params.BusinessDescription
-	}
-	if params.BusinessIndustry != nil {
-		body["business_industry"] = params.BusinessIndustry
-	}
-	if params.EstimatedAnnualRevenue != nil {
-		body["estimated_annual_revenue"] = params.EstimatedAnnualRevenue
-	}
-	if params.SourceOfWealth != nil {
-		body["source_of_wealth"] = params.SourceOfWealth
-	}
-	if params.PubliclyTraded != nil {
-		body["publicly_traded"] = params.PubliclyTraded
-	}
-	if params.RecipientRelationship != nil {
-		body["recipient_relationship"] = params.RecipientRelationship
-	}
-	if params.SoleProprietorDocType != nil {
-		body["sole_proprietor_doc_type"] = params.SoleProprietorDocType
-	}
-
-	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, body, opts...)
 }
 
 // Get retrieves a specific customer by ID.
-func (c *Client) Get(ctx context.Context, customerID string) (*Customer, error) {
+func (c *Client) Get(ctx context.Context, customerID string, opts ...option.RequestOption) (*Customer, error) {
 	if customerID == "" {
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s", c.instanceID, customerID)
-	return request.Do[*Customer](c.cfg, ctx, "GET", path, nil)
+	path := request.Pathf("/instances/%s/customers/%s", c.instanceID, customerID)
+	return request.Do[*Customer](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // Update updates a customer.
-func (c *Client) Update(ctx context.Context, params *UpdateParams) error {
+func (c *Client) Update(ctx context.Context, params *UpdateParams, opts ...option.RequestOption) error {
 	if params == nil {
 		return fmt.Errorf("params cannot be nil")
 	}
@@ -847,184 +803,45 @@ func (c *Client) Update(ctx context.Context, params *UpdateParams) error {
 		return fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s", c.instanceID, params.CustomerID)
 
-	// Build the request body with only non-nil fields
-	body := make(map[string]any)
-
-	if params.Email != nil {
-		body["email"] = params.Email
-	}
-	if params.TaxID != nil {
-		body["tax_id"] = params.TaxID
-	}
-	if params.AddressLine1 != nil {
-		body["address_line_1"] = params.AddressLine1
-	}
-	if params.AddressLine2 != nil {
-		body["address_line_2"] = params.AddressLine2
-	}
-	if params.City != nil {
-		body["city"] = params.City
-	}
-	if params.StateProvinceRegion != nil {
-		body["state_province_region"] = params.StateProvinceRegion
-	}
-	if params.Country != nil {
-		body["country"] = params.Country
-	}
-	if params.PostalCode != nil {
-		body["postal_code"] = params.PostalCode
-	}
-	if params.IPAddress != nil {
-		body["ip_address"] = params.IPAddress
-	}
-	if params.ImageURL != nil {
-		body["image_url"] = params.ImageURL
-	}
-	if params.PhoneNumber != nil {
-		body["phone_number"] = params.PhoneNumber
-	}
-	if params.ProofOfAddressDocType != nil {
-		body["proof_of_address_doc_type"] = params.ProofOfAddressDocType
-	}
-	if params.ProofOfAddressDocFile != nil {
-		body["proof_of_address_doc_file"] = params.ProofOfAddressDocFile
-	}
-	if params.FirstName != nil {
-		body["first_name"] = params.FirstName
-	}
-	if params.LastName != nil {
-		body["last_name"] = params.LastName
-	}
-	if params.DateOfBirth != nil {
-		body["date_of_birth"] = params.DateOfBirth
-	}
-	if params.IDDocCountry != nil {
-		body["id_doc_country"] = params.IDDocCountry
-	}
-	if params.IDDocType != nil {
-		body["id_doc_type"] = params.IDDocType
-	}
-	if params.IDDocFrontFile != nil {
-		body["id_doc_front_file"] = params.IDDocFrontFile
-	}
-	if params.IDDocBackFile != nil {
-		body["id_doc_back_file"] = params.IDDocBackFile
-	}
-	if params.LegalName != nil {
-		body["legal_name"] = params.LegalName
-	}
-	if params.AlternateName != nil {
-		body["alternate_name"] = params.AlternateName
-	}
-	if params.FormationDate != nil {
-		body["formation_date"] = params.FormationDate
-	}
-	if params.Website != nil {
-		body["website"] = params.Website
-	}
-	if params.Owners != nil {
-		body["owners"] = params.Owners
-	}
-	if params.IncorporationDocFile != nil {
-		body["incorporation_doc_file"] = params.IncorporationDocFile
-	}
-	if params.ProofOfOwnershipDocFile != nil {
-		body["proof_of_ownership_doc_file"] = params.ProofOfOwnershipDocFile
-	}
-	if params.SourceOfFundsDocType != nil {
-		body["source_of_funds_doc_type"] = params.SourceOfFundsDocType
-	}
-	if params.SourceOfFundsDocFile != nil {
-		body["source_of_funds_doc_file"] = params.SourceOfFundsDocFile
-	}
-	if params.SelfieFile != nil {
-		body["selfie_file"] = params.SelfieFile
-	}
-	if params.PurposeOfTransactions != nil {
-		body["purpose_of_transactions"] = params.PurposeOfTransactions
-	}
-	if params.PurposeOfTransactionsExplanation != nil {
-		body["purpose_of_transactions_explanation"] = params.PurposeOfTransactionsExplanation
-	}
-	if params.ExternalID != nil {
-		body["external_id"] = params.ExternalID
-	}
-	if params.TosID != nil {
-		body["tos_id"] = params.TosID
-	}
-	if params.AccountPurpose != nil {
-		body["account_purpose"] = params.AccountPurpose
-	}
-	if params.AccountPurposeOther != nil {
-		body["account_purpose_other"] = params.AccountPurposeOther
-	}
-	if params.BusinessTypeField != nil {
-		body["business_type"] = params.BusinessTypeField
-	}
-	if params.BusinessDescription != nil {
-		body["business_description"] = params.BusinessDescription
-	}
-	if params.BusinessIndustry != nil {
-		body["business_industry"] = params.BusinessIndustry
-	}
-	if params.EstimatedAnnualRevenue != nil {
-		body["estimated_annual_revenue"] = params.EstimatedAnnualRevenue
-	}
-	if params.SourceOfWealth != nil {
-		body["source_of_wealth"] = params.SourceOfWealth
-	}
-	if params.PubliclyTraded != nil {
-		body["publicly_traded"] = params.PubliclyTraded
-	}
-	if params.Occupation != nil {
-		body["occupation"] = params.Occupation
-	}
-	if params.RecipientRelationship != nil {
-		body["recipient_relationship"] = params.RecipientRelationship
-	}
-	if params.SoleProprietorDocType != nil {
-		body["sole_proprietor_doc_type"] = params.SoleProprietorDocType
-	}
-
-	_, err := request.Do[struct{}](c.cfg, ctx, "PUT", path, body)
+	_, err := request.Do[struct{}](c.cfg, ctx, "PUT", path, params, opts...)
 	return err
 }
 
 // Delete deletes a customer.
-func (c *Client) Delete(ctx context.Context, customerID string) error {
+func (c *Client) Delete(ctx context.Context, customerID string, opts ...option.RequestOption) error {
 	if customerID == "" {
 		return fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s", c.instanceID, customerID)
-	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil)
+	path := request.Pathf("/instances/%s/customers/%s", c.instanceID, customerID)
+	_, err := request.Do[struct{}](c.cfg, ctx, "DELETE", path, nil, opts...)
 	return err
 }
 
 // GetLimits retrieves transaction limits for a customer.
-func (c *Client) GetLimits(ctx context.Context, customerID string) (*LimitsResponse, error) {
+func (c *Client) GetLimits(ctx context.Context, customerID string, opts ...option.RequestOption) (*LimitsResponse, error) {
 	if customerID == "" {
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/limits/customers/%s", c.instanceID, customerID)
-	return request.Do[*LimitsResponse](c.cfg, ctx, "GET", path, nil)
+	path := request.Pathf("/instances/%s/limits/customers/%s", c.instanceID, customerID)
+	return request.Do[*LimitsResponse](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // GetLimitIncreaseRequests retrieves all limit increase requests for a customer.
-func (c *Client) GetLimitIncreaseRequests(ctx context.Context, customerID string) ([]LimitIncreaseRequest, error) {
+func (c *Client) GetLimitIncreaseRequests(ctx context.Context, customerID string, opts ...option.RequestOption) ([]LimitIncreaseRequest, error) {
 	if customerID == "" {
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/limit-increase", c.instanceID, customerID)
-	return request.Do[[]LimitIncreaseRequest](c.cfg, ctx, "GET", path, nil)
+	path := request.Pathf("/instances/%s/customers/%s/limit-increase", c.instanceID, customerID)
+	return request.Do[[]LimitIncreaseRequest](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // RequestLimitIncrease creates a new limit increase request for a customer.
-func (c *Client) RequestLimitIncrease(ctx context.Context, params *RequestLimitIncreaseParams) (*RequestLimitIncreaseResponse, error) {
+func (c *Client) RequestLimitIncrease(ctx context.Context, params *RequestLimitIncreaseParams, opts ...option.RequestOption) (*RequestLimitIncreaseResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
@@ -1032,15 +849,7 @@ func (c *Client) RequestLimitIncrease(ctx context.Context, params *RequestLimitI
 		return nil, fmt.Errorf("customer ID cannot be empty")
 	}
 
-	path := fmt.Sprintf("/instances/%s/customers/%s/limit-increase", c.instanceID, params.CustomerID)
+	path := request.Pathf("/instances/%s/customers/%s/limit-increase", c.instanceID, params.CustomerID)
 
-	body := map[string]any{
-		"daily":                    params.Daily,
-		"monthly":                  params.Monthly,
-		"per_transaction":          params.PerTransaction,
-		"supporting_document_file": params.SupportingDocumentFile,
-		"supporting_document_type": params.SupportingDocumentType,
-	}
-
-	return request.Do[*RequestLimitIncreaseResponse](c.cfg, ctx, "POST", path, body)
+	return request.Do[*RequestLimitIncreaseResponse](c.cfg, ctx, "POST", path, params, opts...)
 }

@@ -9,15 +9,23 @@ Read it fully before making any changes.
 blindpay-go/
   blindpay.go              # Root client. Creates all sub-clients. Holds `const Version`.
   types.go                 # Re-exports internal/types as public type aliases + constants.
-  errors.go                # Re-exports internal/request.APIError as public type alias.
-  options.go               # Functional options: WithHTTPClient, WithBaseURL.
-  webhooks.go              # VerifyWebhookSignature (standalone, uses svix).
-  go.mod                   # Module: github.com/blindpaylabs/blindpay-go (go 1.21)
-  VERSIONING.md            # Release process docs.
+  errors.go                # Re-exports APIError, ErrorItem, NetworkError, ErrInvalidIdempotencyKey.
+  options.go               # Client options (WithHTTPClient, WithBaseURL, WithTimeout, WithMaxRetries)
+                           # + root re-exports of request options (WithIdempotencyKey, WithHeader, WithRequestTimeout).
+  webhooks.go              # VerifyWebhook / ConstructWebhookEvent (native Svix verifier, no client needed).
+  webhook_events.go        # Typed webhook payloads (WebhookPayload union, UnknownWebhook) + ParseWebhookEvent.
+  go.mod                   # Module: github.com/blindpaylabs/blindpay-go (go 1.21 -- never raise it)
+  option/option.go         # Public per-request options: WithIdempotencyKey, WithHeader, WithTimeout.
+  pagination/              # Page[T], Pager[T] (Next/Current/Err); all_go123.go adds All() behind //go:build go1.23.
   internal/
     config/config.go       # config.Config -- bridges top-level config to request.Config.
-    request/request.go     # Generic HTTP helper: request.Do[T](...). APIError, ParseAPIError.
-    request/list.go        # request.List[T] / DoList[T]: decodes bare-array and {data, pagination} lists.
+    request/request.go     # APIError, ErrorItem, ParseAPIError, request.Config.
+    request/do.go          # request.Do[T] / DoMultipart[T]: retries (A2 table), timeouts, idempotency keys.
+    request/options.go     # RequestOptions / RequestOption (what option.* builds).
+    request/path.go        # request.Pathf: builds paths, percent-encoding every segment.
+    request/query.go       # request.Query: query builder that skips unset values.
+    request/list.go        # request.List[T] / DoList[T] / DoPage[T]: decode bare-array and {data, pagination} lists.
+    request/body.go        # request.BodyWith: params struct + injected members (e.g. a "type" discriminator).
     types/
       shared.go            # Shared enums: CurrencyType, Network, StablecoinToken, etc.
       types.go             # More shared enums: Rail, WebhookEvent, RecipientRelationship, etc.
@@ -31,6 +39,8 @@ blindpay-go/
   fees/client.go           # GET /instances/{id}/billing/fees.
   instances/...            # Instance management.
   partnerfees/...          # Partner fee configuration.
+  payables/                # Payables client (Create/List/ListPage/ListAutoPaging/Get/Delete); types.go holds Payable (also the payable.* webhook payload).
+  rfi/                     # RFI types shared by Customers.GetRfi/SubmitRfi and Instances.GetRfi/SubmitRfi.
   payins/
     client.go              # Payin CRUD (+ deprecated Export). Has sub-client: Quotes.
     quotes.go              # QuotesClient -- payin quote creation + FX rates.
@@ -42,7 +52,13 @@ blindpay-go/
   wallets/client.go        # Blockchain wallet CRUD + OfframpClient (second client in same pkg).
   webhookendpoints/...     # Webhook endpoint management.
   cmd/contractcheck/       # `go run ./cmd/contractcheck` -- wire-contract check, see section 8.
+  cmd/apisync/             # `go run ./cmd/apisync` -- spec sync tool (-check / -apply / -coverage).
   testdata/fixtures/       # Shared spec-shaped fixtures (verbatim copy of the cross-SDK set), see section 8.
+  testdata/webhook-vectors.json # Shared Svix conformance vectors (14), run by webhooks_vectors_test.go.
+  requestoptions_guard_test.go  # go/ast guard: every ctx method ends with opts ...option.RequestOption and forwards it.
+  opcoverage_test.go       # One entry per x-sdk operation: method + path + decode of every fixture variant (94/94).
+  requestbody_test.go      # Wire-body assertions for request fields.
+  examples/                # Compile-checked workflow programs (webhooks, payouts, payins, reconciliation).
 ```
 
 Each resource lives in its own Go package (directory). The package name is the plural lowercase resource name (e.g. `payins`, `customers`, `wallets`). Multi-word resources use a single lowercase word (e.g. `bankaccounts`, `custodialwallets`, `webhookendpoints`, `virtualaccounts`, `partnerfees`). There is no `receivers` or `apikeys` package: `receivers` was fully replaced by `customers`, and API Keys is intentionally absent from the public API reference.
@@ -63,8 +79,11 @@ Each resource lives in its own Go package (directory). The package name is the p
 
 ### Types and fields
 
-- Required fields: bare type (`string`, `float64`, `types.Country`).
-- Optional fields: pointer type (`*string`, `*float64`, `*types.Country`).
+- Required fields (in the spec's `required` list): bare type (`string`, `float64`, `types.Country`).
+- Optional or nullable fields: pointer type + `omitempty` (`*string`, `*float64`, `*types.Country`);
+  slices and maps need no pointer. This applies to every new field, request or response
+  (apisync generates them this way). Older structs still have bare optional fields; leave
+  them (changing a field type breaks callers).
 - ID fields that are path parameters (not sent in JSON body): tagged `json:"-"`. E.g. `CustomerID string \`json:"-"\``.
 - All JSON tags use `snake_case` matching the API.
 - Optional JSON fields include `omitempty`.
@@ -73,19 +92,55 @@ Each resource lives in its own Go package (directory). The package name is the p
 
 ### Go idioms
 
-- Every method takes `context.Context` as the first parameter.
-- All HTTP calls go through `request.Do[T](cfg, ctx, method, path, body)`.
-- For GET with query params: build `url.Values{}`, append as `?` + `q.Encode()`.
+- Every method takes `context.Context` as the first parameter and ends with
+  `opts ...option.RequestOption`, which it forwards (`opts...`) to every
+  `request.Do*` call. `requestoptions_guard_test.go` enforces this for every
+  exported method whose first parameter is `ctx`.
+- All HTTP calls go through `request.Do[T](cfg, ctx, method, path, body, opts...)`
+  (JSON) or `request.DoMultipart[T]` (multipart). Never call `http.Client`
+  directly: retries, timeouts, idempotency keys and error parsing live there.
+- Build paths with `request.Pathf("/instances/%s/payouts/%s", c.instanceID, id)`,
+  which percent-encodes every segment. Never `fmt.Sprintf` user input into a path.
+- Build query strings with `request.Query` (`q.String`, `q.Int`, `q.Apply(path)`),
+  which skips unset values. Never send `""`, `0` or `null` for an unset param.
 - For DELETE returning 204: return `error` only (no response struct). Call `request.Do[struct{}]`.
 - For PUT returning no body: same pattern, return `error` only.
+- Send the params struct itself as the body (`request.Do(..., params, opts...)`) so
+  every json-tagged field reaches the wire; never copy fields into a
+  `map[string]any` or an anonymous struct (a field added later, by hand or by
+  apisync, would silently never be sent). When the method injects members
+  (a rail `type`, `kyc_type`), use `request.BodyWith(params, map[string]any{...})`.
+  Path parameters on params structs are tagged `json:"-"`.
+- Spec-optional request fields get `omitempty` (or a pointer + `omitempty` when
+  the zero value is meaningful). "Exactly one of" inputs (payout
+  `SenderWalletAddress`/`WalletID`, quote `BankAccountID`/`PayableID`) are both
+  optional and documented on the field; never validate them client-side.
+- New response fields are pointers (or slices/maps) with `omitempty`. A field
+  the spec leaves untyped uses `types.LooseString` (or `json.RawMessage`), never
+  a type the shared fixtures can break.
+- Provider-named spec fields (`checkbook_*`, `onemoney_*`, `circle_wallet_id`,
+  `jpm_*`, `aiprise_*`) are not modeled; they are excused in
+  `.api-sync/unmodeled.json`.
 - Validate required parameters at the top of each method. Return `fmt.Errorf(...)` for validation.
-- No custom HTTP client usage -- always delegate to `request.Do`.
+- Code must build and vet on Go 1.21 (`GOTOOLCHAIN=go1.21.13 go build ./... && go vet ./...`):
+  no range-over-func and no `iter` package outside files guarded by
+  `//go:build go1.23` (see `pagination/all_go123.go`).
+- Compatibility policy (the module stays v1 forever, see section 9): changes are
+  additive. Never rename or remove an exported identifier and never change a
+  field's type or a method's parameters; add a new field or method and mark
+  the old one `// Deprecated:`. Two exceptions:
+  - A trailing variadic `opts ...option.RequestOption` is the sanctioned way to
+    extend a method. Call sites keep compiling; method values, interfaces and
+    mocks written against the old signature may not.
+  - A type change that cannot be avoided (the old type can never work, or
+    adding a slice/map field makes a struct non-comparable) ships in a MINOR
+    and is listed in the README "Upgrading" section.
 
 ### Internal wiring
 
-- `config.Config` holds `BaseURL`, `APIKey`, `InstanceID`, `HTTPClient`, `UserAgent`.
+- `config.Config` holds `BaseURL`, `APIKey`, `InstanceID`, `HTTPClient`, `UserAgent`, `Timeout`, `MaxRetries`.
 - Each sub-client stores `cfg *request.Config` and `instanceID string` (extracted via `cfg.ToRequestConfig()`).
-- `request.Config` is a subset: `BaseURL`, `APIKey`, `HTTPClient`, `UserAgent` (no InstanceID).
+- `request.Config` is the same minus `InstanceID`, plus test seams (`Sleep`, `NewKey`, `Jitter`). It is shared and must never be mutated after construction; per-request settings travel in `RequestOptions`.
 - Exception: `available.Client` does not need `instanceID` (its endpoints are not instance-scoped).
 
 ## 3. How to: Add a new resource
@@ -105,6 +160,7 @@ import (
 
     "github.com/blindpaylabs/blindpay-go/internal/config"
     "github.com/blindpaylabs/blindpay-go/internal/request"
+    "github.com/blindpaylabs/blindpay-go/option"
 )
 
 // Invoice represents an invoice.
@@ -142,19 +198,19 @@ func NewClient(cfg *config.Config) *Client {
 }
 
 // List retrieves all invoices.
-func (c *Client) List(ctx context.Context) ([]Invoice, error) {
-    path := fmt.Sprintf("/instances/%s/invoices", c.instanceID)
-    return request.Do[[]Invoice](c.cfg, ctx, "GET", path, nil)
+func (c *Client) List(ctx context.Context, opts ...option.RequestOption) ([]Invoice, error) {
+    path := request.Pathf("/instances/%s/invoices", c.instanceID)
+    return request.Do[[]Invoice](c.cfg, ctx, "GET", path, nil, opts...)
 }
 
 // Create creates a new invoice.
-func (c *Client) Create(ctx context.Context, params *CreateParams) (*CreateResponse, error) {
+func (c *Client) Create(ctx context.Context, params *CreateParams, opts ...option.RequestOption) (*CreateResponse, error) {
     if params == nil {
         return nil, fmt.Errorf("params cannot be nil")
     }
 
-    path := fmt.Sprintf("/instances/%s/invoices", c.instanceID)
-    return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, params)
+    path := request.Pathf("/instances/%s/invoices", c.instanceID)
+    return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, params, opts...)
 }
 ```
 
@@ -220,7 +276,14 @@ func TestInvoices_List(t *testing.T) {
 }
 ```
 
-### Step 4: Bump version
+### Step 4: Register the operation
+
+Add one entry per new operation to `opTable` in `opcoverage_test.go` (it fails
+for any operation in `testdata/fixtures/index.json` without one) and, for list
+operations with cursors, `ListPage`/`ListAutoPaging` (section 10, "Cursor-paginated
+lists"). Map new spec schemas in `.api-sync/spec-map.json` (section 11).
+
+### Step 5: Bump version
 
 Update `const Version` in `blindpay.go` (MINOR bump for new resource).
 
@@ -237,13 +300,13 @@ Example -- adding `GetByExternalID` to `customers`:
 // In customers/client.go
 
 // GetByExternalID retrieves a customer by external ID.
-func (c *Client) GetByExternalID(ctx context.Context, externalID string) (*Customer, error) {
+func (c *Client) GetByExternalID(ctx context.Context, externalID string, opts ...option.RequestOption) (*Customer, error) {
     if externalID == "" {
         return nil, fmt.Errorf("external ID cannot be empty")
     }
 
-    path := fmt.Sprintf("/instances/%s/customers/external/%s", c.instanceID, externalID)
-    return request.Do[*Customer](c.cfg, ctx, "GET", path, nil)
+    path := request.Pathf("/instances/%s/customers/external/%s", c.instanceID, externalID)
+    return request.Do[*Customer](c.cfg, ctx, "GET", path, nil, opts...)
 }
 ```
 
@@ -282,24 +345,23 @@ const NewEnumValue MyEnumType = "new_value"
 
 Bump version: MINOR.
 
-### Renaming a field
+### Renaming a field or changing its type
 
-Change the Go field name. If the API field name changed, also update the JSON tag. Bump version: MINOR (breaking).
-
-### Changing a field type (e.g. string to *string)
-
-Update the type. Bump version: MINOR (breaking).
+Don't (section 2, compatibility policy). Add a new field next to the old one
+(new JSON tag, or a new Go name for the same tag on a different struct) and
+mark the old one `// Deprecated:`. Only an unavoidable type change ships, in a
+MINOR, listed in the README "Upgrading" section.
 
 ### Fixing a JSON tag typo
 
 Fix the tag. Bump version: PATCH.
 
-## 6. How to: Remove a resource
+## 6. How to: Retire a resource or method
 
-1. Delete the resource directory (e.g. `rm -rf invoices/`).
-2. In `blindpay.go`: remove the import, the struct field, and the initialization line.
-3. If the resource's types were re-exported in root `types.go`, remove those aliases too.
-4. Bump version: MINOR (breaking).
+Never delete it (the module stays v1). Mark the package, client field or
+method `// Deprecated:` with the replacement, keep it compiling, and bump
+MINOR. A method whose route no longer exists stays too, documented as
+always failing (see `Payouts.Export`).
 
 ## 7. How to: Add a sub-resource (nested client pattern)
 
@@ -319,7 +381,7 @@ type QuotesClient struct {
     instanceID string
 }
 
-func (c *QuotesClient) Create(ctx context.Context, params *CreateQuoteParams) (*CreateQuoteResponse, error) {
+func (c *QuotesClient) Create(ctx context.Context, params *CreateQuoteParams, opts ...option.RequestOption) (*CreateQuoteResponse, error) {
     // ...
 }
 ```
@@ -438,7 +500,9 @@ Response-decoding tests must use these instead of hand-written JSON.
 - The SDK version is stored in `blindpay.go` as `const Version = "X.Y.Z"` (no `v` prefix).
 - Git tags use `v` prefix: `v1.4.0`.
 - The SDK stays on **v1.x forever**. Never create v2+ tags (Go module path would need `/v2`).
-- MINOR bump: new features, new fields, new enums, breaking changes to existing types.
+- MINOR bump: new features, methods, fields and enum values, and the rare
+  unavoidable type change (section 2), which must be listed in the README
+  "Upgrading" section.
 - PATCH bump: bug fixes, typo corrections, small non-breaking fixes.
 - Every PR that changes SDK behavior must bump the Version constant.
 - Releasing is automatic: on every push to main, `.github/workflows/release.yml` reads `const Version`. If tag `vX.Y.Z` doesn't exist yet, it builds, tests, pushes the tag and creates the GitHub release. Never tag by hand. To release, merge a PR that bumps the constant.
@@ -462,8 +526,13 @@ Response-decoding tests must use these instead of hand-written JSON.
 | `/available/*` | `available` | No instanceID in path |
 | `/e/payins/{id}` | `payins` (method `GetTrack`) | External/public tracking |
 | `/e/payouts/{id}` | `payouts` (method `GetTrack`) | External/public tracking |
-| `/instances/{id}/export/payins` | `payins` (method `Export`) | Deprecated: route does not exist (always 404); remove in next major |
-| `/instances/{id}/export/payouts` | `payouts` (method `Export`) | Deprecated: route does not exist (always 404); remove in next major |
+| `/instances/{id}` (GET), `/instances/{id}/onboarding/*`, `/instances/{id}/rfi` | `instances` (`Get`, `GetBusinessDetails`/`GetBusinessProfile`/`GetOwnershipDocuments`, `GetRfi`/`SubmitRfi`) | RFI types in `rfi` |
+| `/instances/{id}/customers/{cid}/rfi` | `customers` (`GetRfi`/`SubmitRfi`) | RFI types in `rfi` |
+| `/instances/{id}/payables` | `payables` | |
+| `/instances/{id}/customers/{cid}/wallets/{wid}/deposits` | `custodialwallets` (`ListDeposits`, `ListDepositsAutoPaging`) | Always an envelope |
+| `/upload`, `/upload/analyze`, `/presign` | `upload` (`Upload`, `Analyze`, `Presign`) | Send `?instance_id=` = the client's instance |
+| `/instances/{id}/export/payins` | `payins` (method `Export`) | Deprecated: route does not exist (always 404); kept for compatibility (v1 forever) |
+| `/instances/{id}/export/payouts` | `payouts` (method `Export`) | Deprecated: route does not exist (always 404); kept for compatibility (v1 forever) |
 
 ### HTTP method to Go function
 
@@ -472,8 +541,8 @@ Response-decoding tests must use these instead of hand-written JSON.
 | `GET` (single) | `Get` | `(*Resource, error)` |
 | `GET` (list) | `List` | `(*ListResponse, error)` or `([]Resource, error)` |
 | `POST` (create) | `Create` or `Create<Variant>` | `(*CreateResponse, error)` |
-| `PUT` (update) | `Update` | `error` (no response body) |
-| `DELETE` | `Delete` | `error` (no response body) |
+| `PUT` / `PATCH` (update) | `Update`, or an action name (`SetSelfCustody`) | `error` when the API returns only `{success}`, else the resource |
+| `DELETE` | `Delete` | `error` when the API returns nothing or `{success}`, else the resource (`Payables.Delete`) |
 | `POST` (action) | Descriptive name: `Export`, `SubmitDocuments`, `AuthorizeStellarToken` | Varies |
 
 ### Schema to struct
@@ -525,17 +594,62 @@ Every non-2xx response becomes `*request.APIError` (re-exported as
 
 ### Query parameters
 
-Build query params manually with `url.Values{}`. Do not use struct tags for query encoding:
+Build query params with `request.Query`, which skips unset values. Do not use
+struct tags for query encoding:
 
 ```go
-q := url.Values{}
-if params.Status != "" {
-    q.Set("status", string(params.Status))
-}
-if params.Limit > 0 {
-    q.Set("limit", fmt.Sprintf("%d", params.Limit))
-}
-if len(q) > 0 {
-    path += "?" + q.Encode()
-}
+var q request.Query
+q.Int("limit", params.Limit)                 // skipped when 0
+q.String("starting_after", params.StartingAfter)
+q.String("status", string(params.Status))    // skipped when ""
+path = q.Apply(path)
 ```
+
+### Cursor-paginated lists
+
+Ops whose spec accepts `starting_after` (payouts, payins, customers, transfers,
+payables, wallet deposits) expose `ListPage(ctx, *ListParams, opts...)
+(*pagination.Page[T], error)` and `ListAutoPaging(ctx, *ListParams, opts...)
+*pagination.Pager[T]`. Copy `payouts/client.go`: `ListAutoPaging` defaults
+`Limit` to `pagination.DefaultLimit` (100), rejects `EndingBefore` with
+`pagination.ErrEndingBeforeUnsupported`, and fetches each page through
+`ListPage` with `opts...`. Never change an existing `List` return type.
+
+### Webhooks
+
+`webhooks.go` verifies Svix signatures natively (no dependency): keep it
+stdlib-only. `webhook_events.go` maps every spec `webhook_event` to a typed
+payload (`webhookTypes`); a payload embeds `WebhookHeader` plus the resource
+struct. When the spec adds an event, add it to `webhookTypes`, the
+`WebhookEvent` enum, and the fixture copy; `webhook_events_test.go` fails
+otherwise. Never give an embedded resource struct an `UnmarshalJSON` method:
+it would be promoted to the webhook wrapper and drop `webhook_event`.
+
+## 11. api-sync (`cmd/apisync`)
+
+```bash
+go run ./cmd/apisync -validate-map                 # spec-map.json anchors resolve
+go run ./cmd/apisync -check                        # vs the committed snapshot (CI)
+go run ./cmd/apisync -check -spec <openapi.json>   # vs another spec, read-only
+go run ./cmd/apisync -apply -spec <openapi.json>   # WRITES code, Version, snapshot
+go run ./cmd/apisync -coverage [-spec <openapi.json>]   # METHOD+path coverage report
+```
+
+- Only `x-sdk: true` operations count; `x-sdk: false` ones (yield, card
+  payment, simulators, tos passthrough, upload/extract) are ignored, and their
+  schemas need no mapping. `-coverage` reports them if the SDK ever sends one.
+- Coverage is METHOD + path: it pairs each `request.Do*` call's HTTP method with
+  the path literals of the function and of same-package helpers it calls.
+- A new spec operation the SDK already sends (hand-written) is not
+  regenerated. Generated identifiers use Go initialisms (`PartnerFeeID`,
+  `LogoURL`); existing identifiers are never renamed.
+- `.api-sync/spec-snapshot.json` must be byte-identical to the spec the SDK was
+  synced against; `-apply` copies it. `-check` must be silent before merging.
+- `-apply` bumps `Version`; inside a PR that already bumped it, reset it to the
+  PR's version.
+- Classifying a new schema: map it in `spec-map.json` `types[]` (union-policy
+  types need a `property_sites` entry per new property), tie enum properties
+  to an `enums[]` symbol, or excuse it in `unmodeled.json` with a real reason.
+  Both files are hand-formatted: edit them in place, keeping one-line entries.
+- `cmd/apisync/golden_test.go` deletes and regenerates `partnerfees.Get`/`Create`
+  in a copy of the repo; keep its quoted source in sync when you edit them.

@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/blindpaylabs/blindpay-go/internal/types"
+	"github.com/blindpaylabs/blindpay-go/pagination"
 )
 
 // List is the decoded body of a list endpoint whose response shape depends
@@ -55,10 +56,24 @@ func (l *List[T]) UnmarshalJSON(data []byte) error {
 
 // DoList GETs a list endpoint that may answer with either shape (see List)
 // and returns the rows.
-func DoList[T any](cfg *Config, ctx context.Context, path string) ([]T, error) {
-	list, err := Do[List[T]](cfg, ctx, "GET", path, nil)
+func DoList[T any](cfg *Config, ctx context.Context, path string, opts ...RequestOption) ([]T, error) {
+	list, err := Do[List[T]](cfg, ctx, "GET", path, nil, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return list.Data, nil
+}
+
+// DoPage GETs one page of a list endpoint (either shape, see List). A bare
+// array (every row) yields a Page with zero-value Pagination.
+func DoPage[T any](cfg *Config, ctx context.Context, path string, opts ...RequestOption) (*pagination.Page[T], error) {
+	list, err := Do[List[T]](cfg, ctx, "GET", path, nil, opts...)
+	if err != nil {
+		return nil, err
+	}
+	page := &pagination.Page[T]{Data: list.Data}
+	if list.Pagination != nil {
+		page.Pagination = *list.Pagination
+	}
+	return page, nil
 }

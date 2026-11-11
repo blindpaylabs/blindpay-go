@@ -85,9 +85,9 @@
     },
     {
       "sdk": { "file": "internal/types/types.go", "symbol": "BusinessIndustry" },
-      "reexport": null,
+      "reexport": { "file": "types.go", "symbol": "BusinessIndustry" },
       "spec": { "schema": "CreateCustomerIn", "property": "business_industry" },
-      "note": "PRE-EXISTING BUG, not introduced by this PR: root types.go declares 'type BusinessIndustry = types.BusinessIndustry' but re-exports none of the 154 value constants (every other shared enum in this file has a matching const block; this one does not). Consumers of the public blindpay package cannot currently reference any BusinessIndustry value at all. Flagged prominently in this PR's description for a human to fix in its own PR (add the missing ~154-line const block to types.go); reexport intentionally left null here so map-validity does not fail on a re-export block that does not exist, and so a future enum-member addition does not try to patch it either. SDK also carries 11 qualitative categories (dapp, exchange, gambling, gaming, infra, marketplace, neo_bank, other, saas, social, wallet) absent from the current spec entirely; harmless (SDK superset)."
+      "note": "The root types.go re-exports every BusinessIndustry value (fixed in the SDK parity PR; it used to re-export the type only). Values are NAICS codes; the SDK also keeps 11 legacy qualitative categories (dapp, exchange, gambling, gaming, infra, marketplace, neo_bank, other, saas, social, wallet) that the spec no longer lists (harmless superset)."
     },
     {
       "sdk": { "file": "internal/types/types.go", "symbol": "AipriseDocumentType" },
@@ -111,6 +111,87 @@
       "reexport": null,
       "spec": { "schema": "CustomerOut", "property": "kyc_status" },
       "note": "Package-local enum (not in internal/types), so no root types.go re-export exists or is needed -- CLAUDE.md draws that line at package-specific vs shared enums."
+    },
+    {
+      "sdk": { "file": "internal/types/shared.go", "symbol": "Country" },
+      "reexport": { "file": "types.go", "symbol": "Country" },
+      "spec": { "schema": "BankAccountOut", "property": "faster_payments_beneficiary_country" }
+    },
+    {
+      "sdk": { "file": "internal/types/shared.go", "symbol": "Country" },
+      "reexport": { "file": "types.go", "symbol": "Country" },
+      "spec": { "schema": "CreateBankAccountIn", "property": "faster_payments_beneficiary_country" }
+    },
+    {
+      "sdk": { "file": "internal/types/shared.go", "symbol": "Country" },
+      "reexport": { "file": "types.go", "symbol": "Country" },
+      "spec": { "schema": "PayoutOut", "property": "faster_payments_beneficiary_country" }
+    },
+    {
+      "sdk": { "file": "internal/types/shared.go", "symbol": "Country" },
+      "reexport": { "file": "types.go", "symbol": "Country" },
+      "spec": { "schema": "PayoutOut", "property": "sepa_beneficiary_country" }
+    },
+    {
+      "sdk": { "file": "internal/types/shared.go", "symbol": "Currency" },
+      "reexport": { "file": "types.go", "symbol": "Currency" },
+      "spec": { "schema": "CreatePayableIn", "property": "currency" }
+    },
+    {
+      "sdk": { "file": "internal/types/shared.go", "symbol": "Currency" },
+      "reexport": { "file": "types.go", "symbol": "Currency" },
+      "spec": { "schema": "PayableOut", "property": "currency" }
+    },
+    {
+      "sdk": { "file": "payables/types.go", "symbol": "Status" },
+      "spec": { "schema": "PayableOut", "property": "status" }
+    },
+    {
+      "sdk": { "file": "payables/types.go", "symbol": "LastAttemptStatus" },
+      "spec": { "schema": "PayableOut", "property": "last_attempt_status" }
+    },
+    {
+      "sdk": { "file": "payables/types.go", "symbol": "BankAccountType" },
+      "spec": { "schema": "PayableBankAccount", "property": "type" }
+    },
+    {
+      "sdk": { "file": "instances/onboarding.go", "symbol": "Type" },
+      "spec": { "schema": "RetrieveInstanceOut", "property": "type" }
+    },
+    {
+      "sdk": { "file": "instances/onboarding.go", "symbol": "OnboardingStep" },
+      "spec": { "schema": "RetrieveInstanceOut", "property": "onboarding_step" }
+    },
+    {
+      "sdk": { "file": "rfi/rfi.go", "symbol": "Status" },
+      "spec": { "schema": "Rfi", "property": "status" }
+    },
+    {
+      "sdk": { "file": "rfi/rfi.go", "symbol": "Status" },
+      "spec": { "schema": "InstanceRfi", "property": "status" }
+    },
+    {
+      "sdk": { "file": "internal/types/shared.go", "symbol": "Network" },
+      "reexport": { "file": "types.go", "symbol": "Network" },
+      "spec": { "schema": "WalletDepositOut", "property": "network" }
+    },
+    {
+      "sdk": { "file": "internal/types/shared.go", "symbol": "StablecoinToken" },
+      "reexport": { "file": "types.go", "symbol": "StablecoinToken" },
+      "spec": { "schema": "WalletDepositOut", "property": "token" }
+    },
+    {
+      "sdk": { "file": "custodialwallets/deposits.go", "symbol": "DepositStatus" },
+      "spec": { "schema": "WalletDepositOut", "property": "status" }
+    },
+    {
+      "sdk": { "file": "internal/types/shared.go", "symbol": "StablecoinToken" },
+      "reexport": { "file": "types.go", "symbol": "StablecoinToken" },
+      "spec": { "schema": "WalletInboundTokenOut", "property": "symbol" }
+    },
+    {
+      "sdk": { "file": "customers/client.go", "symbol": "LimitIncreaseRequestSupportingDocumentType" },
+      "spec": { "schema": "LimitIncreaseSupportingDocument", "property": "type" }
     }
   ],
 
@@ -153,21 +234,21 @@
         "name": ["BankAccount", "CreateAchResponse", "CreateArgentinaTransfersResponse", "CreateColombiaAchResponse", "CreateInternationalSwiftResponse", "CreatePixResponse", "CreatePixSafeResponse", "CreateRtpResponse", "CreateSepaResponse", "CreateSpeiResponse", "CreateTedResponse", "CreateWireResponse"],
         "offramp_wallets": ["BankAccount"],
         "pix_key": ["BankAccount", "CreatePixResponse"],
-        "pix_safe_bank_code": ["CreatePixSafeResponse"],
-        "pix_safe_branch_code": ["CreatePixSafeResponse"],
-        "pix_safe_cpf_cnpj": ["CreatePixSafeResponse"],
+        "pix_safe_bank_code": ["BankAccount", "CreatePixSafeResponse"],
+        "pix_safe_branch_code": ["BankAccount", "CreatePixSafeResponse"],
+        "pix_safe_cpf_cnpj": ["BankAccount", "CreatePixSafeResponse"],
         "postal_code": ["BankAccount", "CreateAchResponse", "CreateInternationalSwiftResponse", "CreateRtpResponse", "CreateTedResponse", "CreateWireResponse"],
-        "recipient_relationship": ["CreateAchResponse", "CreateInternationalSwiftResponse", "CreateRtpResponse", "CreateSepaResponse", "CreateTedResponse", "CreateWireResponse"],
+        "recipient_relationship": ["BankAccount", "CreateAchResponse", "CreateInternationalSwiftResponse", "CreateRtpResponse", "CreateSepaResponse", "CreateTedResponse", "CreateWireResponse"],
         "routing_number": ["BankAccount", "CreateAchResponse", "CreateRtpResponse", "CreateWireResponse"],
-        "sepa_beneficiary_address_line_1": ["CreateSepaResponse"],
-        "sepa_beneficiary_address_line_2": ["CreateSepaResponse"],
+        "sepa_beneficiary_address_line_1": ["BankAccount", "CreateSepaResponse"],
+        "sepa_beneficiary_address_line_2": ["BankAccount", "CreateSepaResponse"],
         "sepa_beneficiary_bic": ["BankAccount", "CreateInternationalSwiftResponse", "CreateSepaResponse"],
-        "sepa_beneficiary_city": ["CreateSepaResponse"],
-        "sepa_beneficiary_country": ["CreateSepaResponse"],
-        "sepa_beneficiary_legal_name": ["CreateSepaResponse"],
-        "sepa_beneficiary_postal_code": ["CreateSepaResponse"],
-        "sepa_beneficiary_state_province_region": ["CreateSepaResponse"],
-        "sepa_iban": ["CreateSepaResponse"],
+        "sepa_beneficiary_city": ["BankAccount", "CreateSepaResponse"],
+        "sepa_beneficiary_country": ["BankAccount", "CreateSepaResponse"],
+        "sepa_beneficiary_legal_name": ["BankAccount", "CreateSepaResponse"],
+        "sepa_beneficiary_postal_code": ["BankAccount", "CreateSepaResponse"],
+        "sepa_beneficiary_state_province_region": ["BankAccount", "CreateSepaResponse"],
+        "sepa_iban": ["BankAccount", "CreateSepaResponse"],
         "spei_clabe": ["BankAccount", "CreateSpeiResponse"],
         "spei_institution_code": ["BankAccount", "CreateSpeiResponse"],
         "spei_protocol": ["BankAccount", "CreateSpeiResponse"],
@@ -192,14 +273,31 @@
         "swift_intermediary_bank_country": ["BankAccount", "CreateInternationalSwiftResponse"],
         "swift_intermediary_bank_name": ["BankAccount", "CreateInternationalSwiftResponse"],
         "swift_intermediary_bank_swift_code_bic": ["BankAccount", "CreateInternationalSwiftResponse"],
-        "swift_payment_code": ["CreateInternationalSwiftResponse"],
+        "swift_payment_code": ["BankAccount", "CreateInternationalSwiftResponse"],
         "ted_bank_code": ["BankAccount", "CreateTedResponse"],
         "ted_branch_code": ["BankAccount", "CreateTedResponse"],
         "ted_cpf_cnpj": ["BankAccount", "CreateTedResponse"],
         "transfers_account": ["BankAccount", "CreateArgentinaTransfersResponse"],
         "transfers_type": ["BankAccount", "CreateArgentinaTransfersResponse"],
         "tron_wallet_hash": ["BankAccount"],
-        "type": ["BankAccount", "CreateAchResponse", "CreateArgentinaTransfersResponse", "CreateColombiaAchResponse", "CreateInternationalSwiftResponse", "CreatePixResponse", "CreatePixSafeResponse", "CreateRtpResponse", "CreateSepaResponse", "CreateSpeiResponse", "CreateTedResponse", "CreateWireResponse"]
+        "type": ["BankAccount", "CreateAchResponse", "CreateArgentinaTransfersResponse", "CreateColombiaAchResponse", "CreateInternationalSwiftResponse", "CreatePixResponse", "CreatePixSafeResponse", "CreateRtpResponse", "CreateSepaResponse", "CreateSpeiResponse", "CreateTedResponse", "CreateWireResponse"],
+        "faster_payments_sort_code": ["BankAccount"],
+        "faster_payments_account_number": ["BankAccount"],
+        "faster_payments_beneficiary_legal_name": ["BankAccount"],
+        "faster_payments_beneficiary_address_line_1": ["BankAccount"],
+        "faster_payments_beneficiary_address_line_2": ["BankAccount"],
+        "faster_payments_beneficiary_city": ["BankAccount"],
+        "faster_payments_beneficiary_state_province_region": ["BankAccount"],
+        "faster_payments_beneficiary_postal_code": ["BankAccount"],
+        "faster_payments_beneficiary_country": ["BankAccount"],
+        "plaid_connected_at": ["BankAccount"],
+        "swift_intermediary_bank_routing_number": ["BankAccount"],
+        "business_industry": ["BankAccount"],
+        "date_of_birth": ["BankAccount"],
+        "phone_number": ["BankAccount"],
+        "status": ["BankAccount"],
+        "swift_ifsc_branch_code": ["BankAccount"],
+        "tax_id": ["BankAccount"]
       },
       "note": "POST create-bank-account returns BankAccountOut uniformly for every rail (verified against the spec response schema); the 11 per-rail CreateXxxResponse structs are each a narrower view of the same wire shape. Union policy: property_sites lists exactly which of the 12 sites carry each property (rail-specific fields are legitimately absent elsewhere); a new property added to the spec needs an explicit property_sites entry before it can be modeled -- never inferred from 'some site already has it'."
     },
@@ -217,11 +315,12 @@
         { "file": "bankaccounts/client.go", "symbol": "CreatePixSafeParams" },
         { "file": "bankaccounts/client.go", "symbol": "CreateRtpParams" },
         { "file": "bankaccounts/client.go", "symbol": "CreateTedParams" },
-        { "file": "bankaccounts/client.go", "symbol": "CreateSepaParams" }
+        { "file": "bankaccounts/client.go", "symbol": "CreateSepaParams" },
+        { "file": "bankaccounts/client.go", "symbol": "CreateFasterPaymentsParams" }
       ],
       "policy": "union",
       "property_sites": {
-        "account_class": ["CreateAchParams", "CreateInternationalSwiftParams", "CreateRtpParams", "CreateSepaParams", "CreateTedParams", "CreateWireParams"],
+        "account_class": ["CreateAchParams", "CreateInternationalSwiftParams", "CreateRtpParams", "CreateSepaParams", "CreateTedParams", "CreateWireParams", "CreateFasterPaymentsParams"],
         "account_number": ["CreateAchParams", "CreatePixSafeParams", "CreateRtpParams", "CreateWireParams"],
         "account_type": ["CreateAchParams", "CreateColombiaAchParams", "CreatePixSafeParams"],
         "ach_cop_bank_account": ["CreateColombiaAchParams"],
@@ -238,7 +337,7 @@
         "city": ["CreateAchParams", "CreateRtpParams", "CreateTedParams", "CreateWireParams"],
         "country": ["CreateAchParams", "CreateRtpParams", "CreateTedParams", "CreateWireParams"],
         "date_of_birth": ["CreateAchParams", "CreateInternationalSwiftParams", "CreateRtpParams", "CreateTedParams", "CreateWireParams"],
-        "name": ["CreateAchParams", "CreateArgentinaTransfersParams", "CreateColombiaAchParams", "CreateInternationalSwiftParams", "CreatePixParams", "CreatePixSafeParams", "CreateRtpParams", "CreateSepaParams", "CreateSpeiParams", "CreateTedParams", "CreateWireParams"],
+        "name": ["CreateAchParams", "CreateArgentinaTransfersParams", "CreateColombiaAchParams", "CreateInternationalSwiftParams", "CreatePixParams", "CreatePixSafeParams", "CreateRtpParams", "CreateSepaParams", "CreateSpeiParams", "CreateTedParams", "CreateWireParams", "CreateFasterPaymentsParams"],
         "phone_number": ["CreateAchParams", "CreateInternationalSwiftParams", "CreateRtpParams", "CreateTedParams", "CreateWireParams"],
         "pix_key": ["CreatePixParams"],
         "pix_safe_bank_code": ["CreatePixSafeParams"],
@@ -286,7 +385,19 @@
         "ted_branch_code": ["CreateTedParams"],
         "ted_cpf_cnpj": ["CreateTedParams"],
         "transfers_account": ["CreateArgentinaTransfersParams"],
-        "transfers_type": ["CreateArgentinaTransfersParams"]
+        "transfers_type": ["CreateArgentinaTransfersParams"],
+        "faster_payments_sort_code": ["CreateFasterPaymentsParams"],
+        "faster_payments_account_number": ["CreateFasterPaymentsParams"],
+        "faster_payments_beneficiary_legal_name": ["CreateFasterPaymentsParams"],
+        "faster_payments_beneficiary_address_line_1": ["CreateFasterPaymentsParams"],
+        "faster_payments_beneficiary_address_line_2": ["CreateFasterPaymentsParams"],
+        "faster_payments_beneficiary_city": ["CreateFasterPaymentsParams"],
+        "faster_payments_beneficiary_state_province_region": ["CreateFasterPaymentsParams"],
+        "faster_payments_beneficiary_postal_code": ["CreateFasterPaymentsParams"],
+        "faster_payments_beneficiary_country": ["CreateFasterPaymentsParams"],
+        "swift_intermediary_bank_routing_number": ["CreateInternationalSwiftParams"],
+        "force_cpf_cnpj": ["CreatePixParams"],
+        "swift_ifsc_branch_code": ["CreateInternationalSwiftParams"]
       },
       "note": "CreateBankAccountIn is one flat spec schema discriminated at runtime by 'type' (11 rail values); the SDK models 11 separate Create*Params structs plus a literal 'type' string injected in the request body (see bankaccounts/client.go CreatePix/CreateAch/etc.). Union policy: property_sites lists exactly which of the 11 sites accept each property; a new request property needs an explicit property_sites entry before it can be modeled."
     },
@@ -333,18 +444,21 @@
         "proof_of_address_doc_type": ["CreateBusinessStandardParams", "CreateIndividualEnhancedParams", "CreateIndividualStandardParams"],
         "proof_of_ownership_doc_file": ["CreateBusinessStandardParams"],
         "publicly_traded": ["CreateBusinessStandardParams"],
-        "purpose_of_transactions": ["CreateIndividualEnhancedParams"],
-        "purpose_of_transactions_explanation": ["CreateIndividualEnhancedParams"],
+        "purpose_of_transactions": ["CreateBusinessStandardParams", "CreateIndividualEnhancedParams", "CreateIndividualStandardParams"],
+        "purpose_of_transactions_explanation": ["CreateBusinessStandardParams", "CreateIndividualEnhancedParams", "CreateIndividualStandardParams"],
         "recipient_relationship": ["CreateBusinessStandardParams", "CreateIndividualEnhancedParams", "CreateIndividualStandardParams"],
-        "selfie_file": ["CreateIndividualEnhancedParams"],
+        "selfie_file": ["CreateBusinessStandardParams", "CreateIndividualEnhancedParams", "CreateIndividualStandardParams"],
         "sole_proprietor_doc_type": ["CreateBusinessStandardParams", "CreateIndividualEnhancedParams", "CreateIndividualStandardParams"],
-        "source_of_funds_doc_file": ["CreateIndividualEnhancedParams"],
-        "source_of_funds_doc_type": ["CreateIndividualEnhancedParams"],
+        "source_of_funds_doc_file": ["CreateBusinessStandardParams", "CreateIndividualEnhancedParams", "CreateIndividualStandardParams"],
+        "source_of_funds_doc_type": ["CreateBusinessStandardParams", "CreateIndividualEnhancedParams", "CreateIndividualStandardParams"],
         "source_of_wealth": ["CreateBusinessStandardParams"],
         "state_province_region": ["CreateBusinessStandardParams", "CreateIndividualEnhancedParams", "CreateIndividualStandardParams"],
         "tax_id": ["CreateBusinessStandardParams", "CreateIndividualEnhancedParams", "CreateIndividualStandardParams"],
         "tos_id": ["CreateBusinessStandardParams", "CreateIndividualEnhancedParams", "CreateIndividualStandardParams"],
-        "website": ["CreateBusinessStandardParams"]
+        "website": ["CreateBusinessStandardParams"],
+        "additional_info": ["CreateBusinessStandardParams", "CreateIndividualEnhancedParams", "CreateIndividualStandardParams"],
+        "latitude": ["CreateBusinessStandardParams", "CreateIndividualEnhancedParams", "CreateIndividualStandardParams"],
+        "longitude": ["CreateBusinessStandardParams", "CreateIndividualEnhancedParams", "CreateIndividualStandardParams"]
       },
       "note": "CreateCustomerIn is one flat kitchen-sink spec schema (individual+business, standard+enhanced fields all optional/nullable side by side), discriminated at runtime by 'type'+'kyc_type' literals injected by the SDK (see customers/client.go CreateIndividualWithStandardKYC/CreateIndividualWithEnhancedKYC/CreateBusinessWithStandardKYB). Union policy: property_sites lists exactly which of the 3 sites accept each property; there is no 'light' kyc_type or enhanced-business variant in the SDK today (pre-existing, not part of this sync). A new property needs an explicit property_sites entry before it can be modeled."
     },
@@ -492,10 +606,10 @@
       "policy": "union",
       "property_sites": {
         "address": ["CreateWithAddressParams"],
-        "customer_id": ["CreateWithAddressParams", "CreateWithHashParams"],
         "name": ["CreateWithAddressParams", "CreateWithHashParams"],
         "network": ["CreateWithAddressParams", "CreateWithHashParams"],
-        "signature_tx_hash": ["CreateWithHashParams"]
+        "signature_tx_hash": ["CreateWithHashParams"],
+        "is_self_custody": ["CreateWithAddressParams", "CreateWithHashParams"]
       },
       "note": "2-way discriminator fan-out: CreateWithAddress injects is_account_abstraction=true, CreateWithHash injects is_account_abstraction=false (see wallets/client.go). Union policy: property_sites lists exactly which of the 2 sites accept each property; a new property needs an explicit property_sites entry before it can be modeled."
     },
@@ -572,19 +686,102 @@
     {
       "spec": "Error",
       "sdk": [{ "file": "internal/request/request.go", "symbol": "APIError" }]
+    },
+    {
+      "spec": "WalletInboundTokenOut",
+      "sdk": [{ "file": "webhook_events.go", "symbol": "WalletInboundToken" }]
+    },
+    {
+      "spec": "PayableOut",
+      "sdk": [{ "file": "payables/types.go", "symbol": "Payable" }]
+    },
+    {
+      "spec": "PayableParty",
+      "sdk": [{ "file": "payables/types.go", "symbol": "Party" }]
+    },
+    {
+      "spec": "PayableLineItem",
+      "sdk": [{ "file": "payables/types.go", "symbol": "LineItem" }]
+    },
+    {
+      "spec": "PayableBankAccount",
+      "sdk": [{ "file": "payables/types.go", "symbol": "BankAccount" }]
+    },
+    {
+      "spec": "CreatePayableIn",
+      "sdk": [{ "file": "payables/client.go", "symbol": "CreateParams" }]
+    },
+    {
+      "spec": "CreatePlaidLinkIn",
+      "sdk": [{ "file": "bankaccounts/plaid.go", "symbol": "CreatePlaidLinkParams" }]
+    },
+    {
+      "spec": "PlaidLinkOut",
+      "sdk": [{ "file": "bankaccounts/plaid.go", "symbol": "PlaidLink" }]
+    },
+    {
+      "spec": "RetrieveInstanceOut",
+      "sdk": [{ "file": "instances/onboarding.go", "symbol": "Instance" }]
+    },
+    {
+      "spec": "UpdateOfframpWalletIn",
+      "sdk": [{ "file": "wallets/update.go", "symbol": "UpdateOfframpWalletParams" }]
+    },
+    {
+      "spec": "WalletDepositOut",
+      "sdk": [{ "file": "custodialwallets/deposits.go", "symbol": "Deposit" }]
+    },
+    {
+      "spec": "PresignIn",
+      "sdk": [{ "file": "upload/client.go", "symbol": "PresignParams" }]
+    },
+    {
+      "spec": "PresignOut",
+      "sdk": [{ "file": "upload/client.go", "symbol": "PresignResponse" }]
+    },
+    {
+      "spec": "UploadAnalyzeOut",
+      "sdk": [{ "file": "upload/client.go", "symbol": "AnalyzeResponse" }]
+    },
+    {
+      "spec": "YieldFee",
+      "sdk": [{ "file": "fees/client.go", "symbol": "YieldFee" }]
+    },
+    {
+      "spec": "CustomerCnaeCondition",
+      "sdk": [{ "file": "customers/client.go", "symbol": "CnaeCondition" }]
+    },
+    {
+      "spec": "CustomerVirtualAccountPreapproval",
+      "sdk": [{ "file": "customers/client.go", "symbol": "VirtualAccountPreapproval" }]
+    },
+    {
+      "spec": "LimitIncreaseSupportingDocument",
+      "sdk": [{ "file": "customers/client.go", "symbol": "LimitIncreaseSupportingDocument" }]
+    },
+    {
+      "spec": "Rfi",
+      "sdk": [{ "file": "rfi/rfi.go", "symbol": "CustomerRfi" }]
+    },
+    {
+      "spec": "InstanceRfi",
+      "sdk": [{ "file": "rfi/rfi.go", "symbol": "InstanceRfi" }]
+    },
+    {
+      "spec": "RfiSection",
+      "sdk": [{ "file": "rfi/rfi.go", "symbol": "Section" }]
+    },
+    {
+      "spec": "RfiField",
+      "sdk": [{ "file": "rfi/rfi.go", "symbol": "Field" }]
     }
   ],
 
   "ignore": {
     "schemas": [
-      { "schema": "Rfi", "reason": "RFI (request-for-information / compliance) resource has zero SDK coverage; adding it is a human task (naming, method shape) tracked separately from this sync, see design doc Phase C." },
-      { "schema": "RfiField", "reason": "Same Rfi family as Rfi." },
-      { "schema": "RfiSection", "reason": "Same Rfi family as Rfi." },
-      { "schema": "CreateRfiBody", "reason": "Same Rfi family as Rfi." },
-      { "schema": "CreateInstanceRfiBody", "reason": "Same Rfi family as Rfi (instance-level RFI operations)." },
-      { "schema": "InstanceRfi", "reason": "Same Rfi family as Rfi (instance-level RFI operations)." },
-      { "schema": "UploadAnalyzeIn", "reason": "POST /v1/upload/analyze has zero SDK coverage; adding it is a human task tracked separately from this sync, see design doc Phase C." },
-      { "schema": "UploadAnalyzeOut", "reason": "Same UploadAnalyze family as UploadAnalyzeIn (ApprovalRate is still tracked as an enum above since it happens to exactly match today)." },
+      { "schema": "CreateRfiBody", "reason": "Free-form answer map; rfi.Response (map[string]any) is sent as the whole body by Customers.SubmitRfi." },
+      { "schema": "CreateInstanceRfiBody", "reason": "Free-form answer map; rfi.Response is sent as the whole body by Instances.SubmitRfi." },
+      { "schema": "UploadAnalyzeIn", "reason": "Multipart body built by upload.Client.Analyze from AnalyzeParams (file, type, metadata); multipart parts have no json tags to reconcile, same as UploadIn. Covered by upload/analyze_test.go." },
       { "schema": "LedgerOperation", "reason": "Unreferenced by any public operation or webhook (zero $ref anywhere in the spec) -- an orphan schema, not reachable from any endpoint the SDK could call. funding_end_to_end_id and payer_tax_id live only here; there is no home to add them to." },
       { "schema": "ApiKeyPublic", "reason": "API Keys are intentionally absent from the public API reference per this repo's own CLAUDE.md; the SDK has no apikeys package by design (removed in v1.16.0, see git history)." },
       { "schema": "CreateApiKeyIn", "reason": "Same ApiKey family as ApiKeyPublic." },
@@ -610,7 +807,7 @@
       { "schema": "AuditLog", "reason": "Audit-log resource has zero SDK coverage; dashboard/back-office only today." },
       { "schema": "AuditLogOut", "reason": "Same audit family as AuditLog." },
       { "schema": "AuditActor", "reason": "Same audit family as AuditLog." },
-      { "schema": "BlockchainWalletWebhookOut", "reason": "Webhook payload schema; this SDK does not model typed per-event webhook payloads (webhooks.go only verifies the svix signature), so no webhook *WebhookOut schema has an SDK struct site." },
+      { "schema": "BlockchainWalletWebhookOut", "reason": "Webhook payload schema. webhook_events.go models each event as a typed payload that embeds the matching resource struct (mapped separately here) plus WebhookHeader, so drift is reconciled through the resource mapping; every variant of the shared webhook fixtures is decoded by webhook_events_test.go." },
       { "schema": "BankAccountWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
       { "schema": "CustomerNewWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
       { "schema": "CustomerUpdateWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
@@ -627,7 +824,7 @@
       { "schema": "LimitIncreaseUpdateWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
       { "schema": "TosAcceptWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
       { "schema": "CircleTransactionWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
-      { "schema": "WalletInboundSchemaOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut (wallet.inbound event)." },
+      { "schema": "WalletInboundSchemaOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
       { "schema": "AcceptTosIn", "reason": "Public/embedded terms-of-service acceptance page payload; no corresponding SDK operation (customers accept ToS via the hosted link, not an API call this SDK wraps)." },
       { "schema": "AcceptTosOut", "reason": "Same as AcceptTosIn." },
       { "schema": "CopyInstanceMembersIn", "reason": "Instance-member copy operation has zero SDK coverage." },
@@ -655,7 +852,22 @@
       { "schema": "AvailableBankDetails", "reason": "Same rationale as AvailableRails; available.Client.GetBankDetails returns []types.BankDetail, already a faithful field-for-field match." },
       { "schema": "AvailableNaicsList", "reason": "Same rationale as AvailableRails; available.Client.GetNaicsCodes returns []available.NaicsCode, already a faithful field-for-field match." },
       { "schema": "AdditionalInfoItem", "reason": "Generic label/value pair shared by AvailableNaicsList and others; not independently interesting to track." },
-      { "schema": "SwiftCodeResponse", "reason": "Wrapper/list-of envelope around SwiftCodeItem (already mapped); the wrapper itself carries no extra properties." }
+      { "schema": "SwiftCodeResponse", "reason": "Wrapper/list-of envelope around SwiftCodeItem (already mapped); the wrapper itself carries no extra properties." },
+      { "schema": "BlockchainWalletUpdateWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
+      { "schema": "PayableNewWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
+      { "schema": "PayableUpdateWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
+      { "schema": "PayableCompleteWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
+      { "schema": "TransferNewWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
+      { "schema": "TransferUpdateWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
+      { "schema": "TransferCompleteWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
+      { "schema": "VirtualAccountNewWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
+      { "schema": "VirtualAccountCompleteWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
+      { "schema": "WalletNewWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
+      { "schema": "WalletUpdateWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
+      { "schema": "WalletInboundWebhookOut", "reason": "Same webhook-payload family as BlockchainWalletWebhookOut." },
+      { "schema": "UpdateBlockchainWalletIn", "reason": "Single required boolean; Wallets.SetSelfCustody takes it as an argument and sends {is_self_custody} (wallets/update.go)." },
+      { "schema": "WalletDepositsOut", "reason": "List envelope {data, pagination}; decoded by request.List[custodialwallets.Deposit] into pagination.Page (PaginationMetadata is mapped)." },
+      { "schema": "YieldStatus", "reason": "String enum schema (not an object); modeled as custodialwallets.YieldStatus on CustodialWallet.YieldStatus." }
     ]
   }
 }

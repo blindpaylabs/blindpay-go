@@ -6,25 +6,50 @@ import (
 
 	"github.com/blindpaylabs/blindpay-go/internal/request"
 	"github.com/blindpaylabs/blindpay-go/internal/types"
+	"github.com/blindpaylabs/blindpay-go/option"
 )
 
 // CreateQuoteParams represents parameters for creating a payin quote.
 type CreateQuoteParams struct {
-	BlockchainWalletID string                `json:"blockchain_wallet_id"`
+	// BlockchainWalletID or WalletID (a managed wallet) receives the tokens.
+	BlockchainWalletID string                `json:"blockchain_wallet_id,omitempty"`
 	CurrencyType       types.CurrencyType    `json:"currency_type"`
 	PaymentMethod      string                `json:"payment_method"`
 	RequestAmount      float64               `json:"request_amount"`
 	Token              types.StablecoinToken `json:"token"`
-	CoverFees          bool                  `json:"cover_fees"`
+	CoverFees          bool                  `json:"cover_fees,omitempty"`
 	PartnerFeeID       *string               `json:"partner_fee_id,omitempty"`
 	PayerRules         PayerRules            `json:"payer_rules"`
 	IsOtc              *bool                 `json:"is_otc,omitempty"`
 	WalletID           *string               `json:"wallet_id,omitempty"`
+	// FundingBankAccountID is the customer's linked bank account to pull
+	// from (ACH pull payins).
+	FundingBankAccountID *string `json:"funding_bank_account_id,omitempty"`
 }
 
 // PayerRules represents payer rules for payin quotes.
 type PayerRules struct {
-	PixAllowedTaxIDs []string `json:"pix_allowed_tax_ids"`
+	PixAllowedTaxIDs      []string `json:"pix_allowed_tax_ids"`
+	TransfersAllowedTaxID *string  `json:"transfers_allowed_tax_id,omitempty"`
+	PseAllowedTaxIDs      []string `json:"pse_allowed_tax_ids,omitempty"`
+	PseFullName           *string  `json:"pse_full_name,omitempty"`
+	// PseDocumentType is "CC" or "NIT".
+	PseDocumentType   *string `json:"pse_document_type,omitempty"`
+	PseDocumentNumber *string `json:"pse_document_number,omitempty"`
+	PseEmail          *string `json:"pse_email,omitempty"`
+	PsePhone          *string `json:"pse_phone,omitempty"`
+	PseBankCode       *string `json:"pse_bank_code,omitempty"`
+}
+
+// CardInstruction tells a browser checkout how to collect a card payment.
+type CardInstruction struct {
+	// Provider names the card gateway, so the checkout loads its
+	// tokenization library.
+	Provider          string  `json:"provider"`
+	TokenizationKey   string  `json:"tokenization_key"`
+	CheckoutPublicKey *string `json:"checkout_public_key,omitempty"`
+	CheckoutToken     *string `json:"checkout_token,omitempty"`
+	CheckoutURL       *string `json:"checkout_url,omitempty"`
 }
 
 // CreateQuoteResponse represents the response when creating a payin quote.
@@ -37,6 +62,11 @@ type CreateQuoteResponse struct {
 	SenderAmount        float64  `json:"sender_amount"`
 	PartnerFeeAmount    *float64 `json:"partner_fee_amount,omitempty"`
 	FlatFee             *float64 `json:"flat_fee,omitempty"`
+	// CardInstruction is set for card payins: what a browser checkout needs
+	// to tokenize the card.
+	CardInstruction  *CardInstruction `json:"card_instruction,omitempty"`
+	BillingFeeAmount *float64         `json:"billing_fee_amount,omitempty"`
+	IsOtc            *bool            `json:"is_otc,omitempty"`
 }
 
 // GetFxRateParams represents parameters for getting payin FX rates.
@@ -63,21 +93,21 @@ type QuotesClient struct {
 }
 
 // Create creates a new payin quote.
-func (c *QuotesClient) Create(ctx context.Context, params *CreateQuoteParams) (*CreateQuoteResponse, error) {
+func (c *QuotesClient) Create(ctx context.Context, params *CreateQuoteParams, opts ...option.RequestOption) (*CreateQuoteResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	path := fmt.Sprintf("/instances/%s/payin-quotes", c.instanceID)
-	return request.Do[*CreateQuoteResponse](c.cfg, ctx, "POST", path, params)
+	path := request.Pathf("/instances/%s/payin-quotes", c.instanceID)
+	return request.Do[*CreateQuoteResponse](c.cfg, ctx, "POST", path, params, opts...)
 }
 
 // GetFxRate retrieves the current FX rate for a payin currency pair.
-func (c *QuotesClient) GetFxRate(ctx context.Context, params *GetFxRateParams) (*GetFxRateResponse, error) {
+func (c *QuotesClient) GetFxRate(ctx context.Context, params *GetFxRateParams, opts ...option.RequestOption) (*GetFxRateResponse, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	path := fmt.Sprintf("/instances/%s/payin-quotes/fx", c.instanceID)
-	return request.Do[*GetFxRateResponse](c.cfg, ctx, "POST", path, params)
+	path := request.Pathf("/instances/%s/payin-quotes/fx", c.instanceID)
+	return request.Do[*GetFxRateResponse](c.cfg, ctx, "POST", path, params, opts...)
 }
