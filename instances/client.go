@@ -87,21 +87,7 @@ func (c *Client) Update(ctx context.Context, params *UpdateParams, opts ...optio
 
 	path := request.Pathf("/instances/%s", c.instanceID)
 
-	body := map[string]any{
-		"name": params.Name,
-	}
-
-	if params.CustomerInviteRedirectURL != nil {
-		body["customer_invite_redirect_url"] = params.CustomerInviteRedirectURL
-	}
-	if params.EmailNotifications != nil {
-		body["email_notifications"] = *params.EmailNotifications
-	}
-	if params.RequirePasskey != nil {
-		body["require_passkey"] = *params.RequirePasskey
-	}
-
-	_, err := request.Do[struct{}](c.cfg, ctx, "PUT", path, body, opts...)
+	_, err := request.Do[struct{}](c.cfg, ctx, "PUT", path, params, opts...)
 	return err
 }
 
@@ -134,11 +120,7 @@ func (c *Client) UpdateMemberRole(ctx context.Context, params *UpdateMemberRoleP
 
 	path := request.Pathf("/instances/%s/members/%s", c.instanceID, params.MemberID)
 
-	body := map[string]any{
-		"user_role": params.Role,
-	}
-
-	_, err := request.Do[struct{}](c.cfg, ctx, "PUT", path, body, opts...)
+	_, err := request.Do[struct{}](c.cfg, ctx, "PUT", path, params, opts...)
 	return err
 }
 

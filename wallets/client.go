@@ -32,7 +32,7 @@ type GetMessageResponse struct {
 
 // CreateWithAddressParams represents parameters for creating a wallet with address.
 type CreateWithAddressParams struct {
-	CustomerID string        `json:"customer_id"`
+	CustomerID string        `json:"-"`
 	Name       string        `json:"name"`
 	Network    types.Network `json:"network"`
 	Address    string        `json:"address"`
@@ -45,7 +45,7 @@ type CreateWithAddressParams struct {
 
 // CreateWithHashParams represents parameters for creating a wallet with hash.
 type CreateWithHashParams struct {
-	CustomerID      string        `json:"customer_id"`
+	CustomerID      string        `json:"-"`
 	Name            string        `json:"name"`
 	Network         types.Network `json:"network"`
 	SignatureTxHash string        `json:"signature_tx_hash"`
@@ -129,18 +129,9 @@ func (c *Client) CreateWithAddress(ctx context.Context, params *CreateWithAddres
 
 	path := request.Pathf("/instances/%s/customers/%s/blockchain-wallets", c.instanceID, params.CustomerID)
 
-	body := struct {
-		Name                 string        `json:"name"`
-		Network              types.Network `json:"network"`
-		Address              string        `json:"address"`
-		IsAccountAbstraction bool          `json:"is_account_abstraction"`
-		IsSelfCustody        *bool         `json:"is_self_custody,omitempty"`
-	}{
-		Name:                 params.Name,
-		Network:              params.Network,
-		Address:              params.Address,
-		IsAccountAbstraction: true,
-		IsSelfCustody:        params.IsSelfCustody,
+	body, err := request.BodyWith(params, map[string]any{"is_account_abstraction": true})
+	if err != nil {
+		return nil, err
 	}
 
 	return request.Do[*BlockchainWallet](c.cfg, ctx, "POST", path, body, opts...)
@@ -157,18 +148,9 @@ func (c *Client) CreateWithHash(ctx context.Context, params *CreateWithHashParam
 
 	path := request.Pathf("/instances/%s/customers/%s/blockchain-wallets", c.instanceID, params.CustomerID)
 
-	body := struct {
-		Name                 string        `json:"name"`
-		Network              types.Network `json:"network"`
-		SignatureTxHash      string        `json:"signature_tx_hash"`
-		IsAccountAbstraction bool          `json:"is_account_abstraction"`
-		IsSelfCustody        *bool         `json:"is_self_custody,omitempty"`
-	}{
-		Name:                 params.Name,
-		Network:              params.Network,
-		SignatureTxHash:      params.SignatureTxHash,
-		IsAccountAbstraction: false,
-		IsSelfCustody:        params.IsSelfCustody,
+	body, err := request.BodyWith(params, map[string]any{"is_account_abstraction": false})
+	if err != nil {
+		return nil, err
 	}
 
 	return request.Do[*BlockchainWallet](c.cfg, ctx, "POST", path, body, opts...)
@@ -273,8 +255,8 @@ type OfframpWallet struct {
 
 // CreateOfframpWalletParams represents parameters for creating an offramp wallet.
 type CreateOfframpWalletParams struct {
-	CustomerID    string `json:"customer_id"`
-	BankAccountID string `json:"bank_account_id"`
+	CustomerID    string `json:"-"`
+	BankAccountID string `json:"-"`
 	ExternalID    string `json:"external_id"`
 	Network       string `json:"network"`
 }
@@ -330,15 +312,7 @@ func (c *OfframpClient) Create(ctx context.Context, params *CreateOfframpWalletP
 	path := request.Pathf("/instances/%s/customers/%s/bank-accounts/%s/offramp-wallets",
 		c.instanceID, params.CustomerID, params.BankAccountID)
 
-	body := struct {
-		ExternalID string `json:"external_id"`
-		Network    string `json:"network"`
-	}{
-		ExternalID: params.ExternalID,
-		Network:    params.Network,
-	}
-
-	return request.Do[*CreateOfframpWalletResponse](c.cfg, ctx, "POST", path, body, opts...)
+	return request.Do[*CreateOfframpWalletResponse](c.cfg, ctx, "POST", path, params, opts...)
 }
 
 // Get retrieves a specific offramp wallet.

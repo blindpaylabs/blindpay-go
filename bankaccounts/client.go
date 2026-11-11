@@ -621,10 +621,9 @@ func (c *Client) CreatePix(ctx context.Context, params *CreatePixParams, opts ..
 
 	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
-	body := map[string]any{
-		"type":    "pix",
-		"name":    params.Name,
-		"pix_key": params.PixKey,
+	body, err := request.BodyWith(params, map[string]any{"type": "pix"})
+	if err != nil {
+		return nil, err
 	}
 
 	return request.Do[*CreatePixResponse](c.cfg, ctx, "POST", path, body, opts...)
@@ -641,36 +640,9 @@ func (c *Client) CreateAch(ctx context.Context, params *CreateAchParams, opts ..
 
 	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
-	body := map[string]any{
-		"type":                   "ach",
-		"name":                   params.Name,
-		"account_class":          params.AccountClass,
-		"account_number":         params.AccountNumber,
-		"account_type":           params.AccountType,
-		"beneficiary_name":       params.BeneficiaryName,
-		"routing_number":         params.RoutingNumber,
-		"recipient_relationship": params.RecipientRelationship,
-		"address_line_1":         params.AddressLine1,
-		"city":                   params.City,
-		"state_province_region":  params.StateProvinceRegion,
-		"country":                params.Country,
-		"postal_code":            params.PostalCode,
-	}
-
-	if params.AddressLine2 != "" {
-		body["address_line_2"] = params.AddressLine2
-	}
-	if params.BusinessIndustry != "" {
-		body["business_industry"] = params.BusinessIndustry
-	}
-	if params.PhoneNumber != "" {
-		body["phone_number"] = params.PhoneNumber
-	}
-	if params.TaxID != "" {
-		body["tax_id"] = params.TaxID
-	}
-	if params.DateOfBirth != "" {
-		body["date_of_birth"] = params.DateOfBirth
+	body, err := request.BodyWith(params, map[string]any{"type": "ach"})
+	if err != nil {
+		return nil, err
 	}
 
 	return request.Do[*CreateAchResponse](c.cfg, ctx, "POST", path, body, opts...)
@@ -687,35 +659,9 @@ func (c *Client) CreateWire(ctx context.Context, params *CreateWireParams, opts 
 
 	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
-	body := map[string]any{
-		"type":                   "wire",
-		"name":                   params.Name,
-		"account_class":          params.AccountClass,
-		"account_number":         params.AccountNumber,
-		"beneficiary_name":       params.BeneficiaryName,
-		"routing_number":         params.RoutingNumber,
-		"recipient_relationship": params.RecipientRelationship,
-		"address_line_1":         params.AddressLine1,
-		"city":                   params.City,
-		"state_province_region":  params.StateProvinceRegion,
-		"country":                params.Country,
-		"postal_code":            params.PostalCode,
-	}
-
-	if params.AddressLine2 != "" {
-		body["address_line_2"] = params.AddressLine2
-	}
-	if params.BusinessIndustry != "" {
-		body["business_industry"] = params.BusinessIndustry
-	}
-	if params.PhoneNumber != "" {
-		body["phone_number"] = params.PhoneNumber
-	}
-	if params.TaxID != "" {
-		body["tax_id"] = params.TaxID
-	}
-	if params.DateOfBirth != "" {
-		body["date_of_birth"] = params.DateOfBirth
+	body, err := request.BodyWith(params, map[string]any{"type": "wire"})
+	if err != nil {
+		return nil, err
 	}
 
 	return request.Do[*CreateWireResponse](c.cfg, ctx, "POST", path, body, opts...)
@@ -732,12 +678,9 @@ func (c *Client) CreateArgentinaTransfers(ctx context.Context, params *CreateArg
 
 	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
-	body := map[string]any{
-		"type":              "transfers_bitso",
-		"name":              params.Name,
-		"beneficiary_name":  params.BeneficiaryName,
-		"transfers_account": params.TransfersAccount,
-		"transfers_type":    params.TransfersType,
+	body, err := request.BodyWith(params, map[string]any{"type": "transfers_bitso"})
+	if err != nil {
+		return nil, err
 	}
 
 	return request.Do[*CreateArgentinaTransfersResponse](c.cfg, ctx, "POST", path, body, opts...)
@@ -754,13 +697,9 @@ func (c *Client) CreateSpei(ctx context.Context, params *CreateSpeiParams, opts 
 
 	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
-	body := map[string]any{
-		"type":                  "spei_bitso",
-		"beneficiary_name":      params.BeneficiaryName,
-		"name":                  params.Name,
-		"spei_clabe":            params.SpeiClabe,
-		"spei_institution_code": params.SpeiInstitutionCode,
-		"spei_protocol":         params.SpeiProtocol,
+	body, err := request.BodyWith(params, map[string]any{"type": "spei_bitso"})
+	if err != nil {
+		return nil, err
 	}
 
 	return request.Do[*CreateSpeiResponse](c.cfg, ctx, "POST", path, body, opts...)
@@ -777,17 +716,9 @@ func (c *Client) CreateColombiaAch(ctx context.Context, params *CreateColombiaAc
 
 	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
-	body := map[string]any{
-		"type":                           "ach_cop_bitso",
-		"name":                           params.Name,
-		"account_type":                   params.AccountType,
-		"ach_cop_beneficiary_first_name": params.AchCopBeneficiaryFirstName,
-		"ach_cop_beneficiary_last_name":  params.AchCopBeneficiaryLastName,
-		"ach_cop_document_id":            params.AchCopDocumentID,
-		"ach_cop_document_type":          params.AchCopDocumentType,
-		"ach_cop_email":                  params.AchCopEmail,
-		"ach_cop_bank_code":              params.AchCopBankCode,
-		"ach_cop_bank_account":           params.AchCopBankAccount,
+	body, err := request.BodyWith(params, map[string]any{"type": "ach_cop_bitso"})
+	if err != nil {
+		return nil, err
 	}
 
 	return request.Do[*CreateColombiaAchResponse](c.cfg, ctx, "POST", path, body, opts...)
@@ -804,54 +735,9 @@ func (c *Client) CreateInternationalSwift(ctx context.Context, params *CreateInt
 
 	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
-	body := map[string]any{
-		"type":                                        "international_swift",
-		"name":                                        params.Name,
-		"account_class":                               params.AccountClass,
-		"recipient_relationship":                      params.RecipientRelationship,
-		"swift_account_holder_name":                   params.SwiftAccountHolderName,
-		"swift_account_number_iban":                   params.SwiftAccountNumberIban,
-		"swift_bank_address_line_1":                   params.SwiftBankAddressLine1,
-		"swift_bank_city":                             params.SwiftBankCity,
-		"swift_bank_country":                          params.SwiftBankCountry,
-		"swift_bank_name":                             params.SwiftBankName,
-		"swift_bank_postal_code":                      params.SwiftBankPostalCode,
-		"swift_bank_state_province_region":            params.SwiftBankStateProvinceRegion,
-		"swift_beneficiary_address_line_1":            params.SwiftBeneficiaryAddressLine1,
-		"swift_beneficiary_city":                      params.SwiftBeneficiaryCity,
-		"swift_beneficiary_country":                   params.SwiftBeneficiaryCountry,
-		"swift_beneficiary_postal_code":               params.SwiftBeneficiaryPostalCode,
-		"swift_beneficiary_state_province_region":     params.SwiftBeneficiaryStateProvinceRegion,
-		"swift_code_bic":                              params.SwiftCodeBic,
-		"swift_intermediary_bank_account_number_iban": params.SwiftIntermediaryBankAccountNumberIban,
-		"swift_intermediary_bank_country":             params.SwiftIntermediaryBankCountry,
-		"swift_intermediary_bank_name":                params.SwiftIntermediaryBankName,
-		"swift_intermediary_bank_swift_code_bic":      params.SwiftIntermediaryBankSwiftCodeBic,
-	}
-
-	if params.SwiftBankAddressLine2 != "" {
-		body["swift_bank_address_line_2"] = params.SwiftBankAddressLine2
-	}
-	if params.SwiftBeneficiaryAddressLine2 != "" {
-		body["swift_beneficiary_address_line_2"] = params.SwiftBeneficiaryAddressLine2
-	}
-	if params.SwiftPaymentCode != "" {
-		body["swift_payment_code"] = params.SwiftPaymentCode
-	}
-	if params.BusinessIndustry != "" {
-		body["business_industry"] = params.BusinessIndustry
-	}
-	if params.PhoneNumber != "" {
-		body["phone_number"] = params.PhoneNumber
-	}
-	if params.TaxID != "" {
-		body["tax_id"] = params.TaxID
-	}
-	if params.DateOfBirth != "" {
-		body["date_of_birth"] = params.DateOfBirth
-	}
-	if params.SepaBeneficiaryBic != nil {
-		body["sepa_beneficiary_bic"] = params.SepaBeneficiaryBic
+	body, err := request.BodyWith(params, map[string]any{"type": "international_swift"})
+	if err != nil {
+		return nil, err
 	}
 
 	return request.Do[*CreateInternationalSwiftResponse](c.cfg, ctx, "POST", path, body, opts...)
@@ -868,15 +754,9 @@ func (c *Client) CreatePixSafe(ctx context.Context, params *CreatePixSafeParams,
 
 	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
-	body := map[string]any{
-		"type":                 "pix_safe",
-		"name":                 params.Name,
-		"beneficiary_name":     params.BeneficiaryName,
-		"account_number":       params.AccountNumber,
-		"account_type":         params.AccountType,
-		"pix_safe_bank_code":   params.PixSafeBankCode,
-		"pix_safe_branch_code": params.PixSafeBranchCode,
-		"pix_safe_cpf_cnpj":    params.PixSafeCpfCnpj,
+	body, err := request.BodyWith(params, map[string]any{"type": "pix_safe"})
+	if err != nil {
+		return nil, err
 	}
 
 	return request.Do[*CreatePixSafeResponse](c.cfg, ctx, "POST", path, body, opts...)
@@ -893,35 +773,9 @@ func (c *Client) CreateRtp(ctx context.Context, params *CreateRtpParams, opts ..
 
 	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
-	body := map[string]any{
-		"type":                   "rtp",
-		"name":                   params.Name,
-		"account_class":          params.AccountClass,
-		"beneficiary_name":       params.BeneficiaryName,
-		"routing_number":         params.RoutingNumber,
-		"account_number":         params.AccountNumber,
-		"recipient_relationship": params.RecipientRelationship,
-		"address_line_1":         params.AddressLine1,
-		"city":                   params.City,
-		"state_province_region":  params.StateProvinceRegion,
-		"country":                params.Country,
-		"postal_code":            params.PostalCode,
-	}
-
-	if params.AddressLine2 != "" {
-		body["address_line_2"] = params.AddressLine2
-	}
-	if params.BusinessIndustry != "" {
-		body["business_industry"] = params.BusinessIndustry
-	}
-	if params.PhoneNumber != "" {
-		body["phone_number"] = params.PhoneNumber
-	}
-	if params.TaxID != "" {
-		body["tax_id"] = params.TaxID
-	}
-	if params.DateOfBirth != "" {
-		body["date_of_birth"] = params.DateOfBirth
+	body, err := request.BodyWith(params, map[string]any{"type": "rtp"})
+	if err != nil {
+		return nil, err
 	}
 
 	return request.Do[*CreateRtpResponse](c.cfg, ctx, "POST", path, body, opts...)
@@ -938,36 +792,9 @@ func (c *Client) CreateTed(ctx context.Context, params *CreateTedParams, opts ..
 
 	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
-	body := map[string]any{
-		"type":                   "ted",
-		"name":                   params.Name,
-		"beneficiary_name":       params.BeneficiaryName,
-		"ted_bank_code":          params.TedBankCode,
-		"ted_branch_code":        params.TedBranchCode,
-		"ted_cpf_cnpj":           params.TedCpfCnpj,
-		"account_class":          params.AccountClass,
-		"recipient_relationship": params.RecipientRelationship,
-		"address_line_1":         params.AddressLine1,
-		"city":                   params.City,
-		"state_province_region":  params.StateProvinceRegion,
-		"country":                params.Country,
-		"postal_code":            params.PostalCode,
-	}
-
-	if params.AddressLine2 != "" {
-		body["address_line_2"] = params.AddressLine2
-	}
-	if params.BusinessIndustry != "" {
-		body["business_industry"] = params.BusinessIndustry
-	}
-	if params.PhoneNumber != "" {
-		body["phone_number"] = params.PhoneNumber
-	}
-	if params.TaxID != "" {
-		body["tax_id"] = params.TaxID
-	}
-	if params.DateOfBirth != "" {
-		body["date_of_birth"] = params.DateOfBirth
+	body, err := request.BodyWith(params, map[string]any{"type": "ted"})
+	if err != nil {
+		return nil, err
 	}
 
 	return request.Do[*CreateTedResponse](c.cfg, ctx, "POST", path, body, opts...)
@@ -1019,24 +846,9 @@ func (c *Client) CreateSepa(ctx context.Context, params *CreateSepaParams, opts 
 
 	path := request.Pathf("/instances/%s/customers/%s/bank-accounts", c.instanceID, params.CustomerID)
 
-	body := map[string]any{
-		"type":                            "sepa",
-		"name":                            params.Name,
-		"account_class":                   params.AccountClass,
-		"sepa_iban":                       params.SepaIban,
-		"sepa_beneficiary_bic":            params.SepaBeneficiaryBic,
-		"sepa_beneficiary_legal_name":     params.SepaBeneficiaryLegalName,
-		"sepa_beneficiary_address_line_1": params.SepaBeneficiaryAddressLine1,
-		"sepa_beneficiary_city":           params.SepaBeneficiaryCity,
-		"sepa_beneficiary_postal_code":    params.SepaBeneficiaryPostalCode,
-		"sepa_beneficiary_country":        params.SepaBeneficiaryCountry,
-	}
-
-	if params.SepaBeneficiaryAddressLine2 != nil {
-		body["sepa_beneficiary_address_line_2"] = *params.SepaBeneficiaryAddressLine2
-	}
-	if params.SepaBeneficiaryStateProvinceRegion != nil {
-		body["sepa_beneficiary_state_province_region"] = *params.SepaBeneficiaryStateProvinceRegion
+	body, err := request.BodyWith(params, map[string]any{"type": "sepa"})
+	if err != nil {
+		return nil, err
 	}
 
 	return request.Do[*CreateSepaResponse](c.cfg, ctx, "POST", path, body, opts...)

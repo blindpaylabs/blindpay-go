@@ -92,16 +92,7 @@ func (c *Client) Create(ctx context.Context, params *CreateParams, opts ...optio
 
 	path := request.Pathf("/instances/%s/customers/%s/wallets", c.instanceID, params.CustomerID)
 
-	body := map[string]any{
-		"name":    params.Name,
-		"network": params.Network,
-	}
-
-	if params.ExternalID != nil {
-		body["external_id"] = *params.ExternalID
-	}
-
-	return request.Do[*CustodialWallet](c.cfg, ctx, "POST", path, body, opts...)
+	return request.Do[*CustodialWallet](c.cfg, ctx, "POST", path, params, opts...)
 }
 
 // GetBalance retrieves the balance of a custodial wallet.

@@ -334,7 +334,7 @@ type CreateIndividualStandardParams struct {
 	DateOfBirth           string                       `json:"date_of_birth"`
 	Email                 string                       `json:"email"`
 	FirstName             string                       `json:"first_name"`
-	PhoneNumber           *string                      `json:"phone_number"`
+	PhoneNumber           *string                      `json:"phone_number,omitempty"`
 	IDDocCountry          types.Country                `json:"id_doc_country"`
 	IDDocFrontFile        string                       `json:"id_doc_front_file"`
 	IDDocType             IdentificationDocument       `json:"id_doc_type"`
@@ -370,7 +370,7 @@ type CreateIndividualEnhancedParams struct {
 	SelfieFile                       string                       `json:"selfie_file"`
 	LastName                         string                       `json:"last_name"`
 	PostalCode                       string                       `json:"postal_code"`
-	PhoneNumber                      *string                      `json:"phone_number"`
+	PhoneNumber                      *string                      `json:"phone_number,omitempty"`
 	ProofOfAddressDocFile            string                       `json:"proof_of_address_doc_file"`
 	ProofOfAddressDocType            ProofOfAddressDocType        `json:"proof_of_address_doc_type"`
 	PurposeOfTransactions            PurposeOfTransactions        `json:"purpose_of_transactions"`
@@ -643,53 +643,9 @@ func (c *Client) CreateIndividualWithStandardKYC(ctx context.Context, params *Cr
 
 	path := request.Pathf("/instances/%s/customers", c.instanceID)
 
-	body := map[string]any{
-		"kyc_type":                  "standard",
-		"type":                      "individual",
-		"address_line_1":            params.AddressLine1,
-		"city":                      params.City,
-		"country":                   params.Country,
-		"date_of_birth":             params.DateOfBirth,
-		"email":                     params.Email,
-		"first_name":                params.FirstName,
-		"id_doc_country":            params.IDDocCountry,
-		"id_doc_front_file":         params.IDDocFrontFile,
-		"id_doc_type":               params.IDDocType,
-		"last_name":                 params.LastName,
-		"postal_code":               params.PostalCode,
-		"proof_of_address_doc_file": params.ProofOfAddressDocFile,
-		"proof_of_address_doc_type": params.ProofOfAddressDocType,
-		"state_province_region":     params.StateProvinceRegion,
-		"tax_id":                    params.TaxID,
-		"tos_id":                    params.TosID,
-	}
-
-	if params.AddressLine2 != nil {
-		body["address_line_2"] = params.AddressLine2
-	}
-	if params.PhoneNumber != nil {
-		body["phone_number"] = params.PhoneNumber
-	}
-	if params.IDDocBackFile != nil {
-		body["id_doc_back_file"] = params.IDDocBackFile
-	}
-	if params.ExternalID != nil {
-		body["external_id"] = params.ExternalID
-	}
-	if params.IPAddress != nil {
-		body["ip_address"] = params.IPAddress
-	}
-	if params.ImageURL != nil {
-		body["image_url"] = params.ImageURL
-	}
-	if params.Occupation != nil {
-		body["occupation"] = params.Occupation
-	}
-	if params.RecipientRelationship != nil {
-		body["recipient_relationship"] = params.RecipientRelationship
-	}
-	if params.SoleProprietorDocType != nil {
-		body["sole_proprietor_doc_type"] = params.SoleProprietorDocType
+	body, err := request.BodyWith(params, map[string]any{"kyc_type": "standard", "type": "individual"})
+	if err != nil {
+		return nil, err
 	}
 
 	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, body, opts...)
@@ -703,60 +659,9 @@ func (c *Client) CreateIndividualWithEnhancedKYC(ctx context.Context, params *Cr
 
 	path := request.Pathf("/instances/%s/customers", c.instanceID)
 
-	body := map[string]any{
-		"kyc_type":                  "enhanced",
-		"type":                      "individual",
-		"address_line_1":            params.AddressLine1,
-		"city":                      params.City,
-		"country":                   params.Country,
-		"date_of_birth":             params.DateOfBirth,
-		"email":                     params.Email,
-		"first_name":                params.FirstName,
-		"id_doc_country":            params.IDDocCountry,
-		"id_doc_front_file":         params.IDDocFrontFile,
-		"id_doc_type":               params.IDDocType,
-		"selfie_file":               params.SelfieFile,
-		"last_name":                 params.LastName,
-		"postal_code":               params.PostalCode,
-		"proof_of_address_doc_file": params.ProofOfAddressDocFile,
-		"proof_of_address_doc_type": params.ProofOfAddressDocType,
-		"purpose_of_transactions":   params.PurposeOfTransactions,
-		"source_of_funds_doc_file":  params.SourceOfFundsDocFile,
-		"source_of_funds_doc_type":  params.SourceOfFundsDocType,
-		"state_province_region":     params.StateProvinceRegion,
-		"tax_id":                    params.TaxID,
-		"tos_id":                    params.TosID,
-	}
-
-	if params.AddressLine2 != nil {
-		body["address_line_2"] = params.AddressLine2
-	}
-	if params.PhoneNumber != nil {
-		body["phone_number"] = params.PhoneNumber
-	}
-	if params.IDDocBackFile != nil {
-		body["id_doc_back_file"] = params.IDDocBackFile
-	}
-	if params.PurposeOfTransactionsExplanation != nil {
-		body["purpose_of_transactions_explanation"] = params.PurposeOfTransactionsExplanation
-	}
-	if params.ExternalID != nil {
-		body["external_id"] = params.ExternalID
-	}
-	if params.IPAddress != nil {
-		body["ip_address"] = params.IPAddress
-	}
-	if params.ImageURL != nil {
-		body["image_url"] = params.ImageURL
-	}
-	if params.Occupation != nil {
-		body["occupation"] = params.Occupation
-	}
-	if params.RecipientRelationship != nil {
-		body["recipient_relationship"] = params.RecipientRelationship
-	}
-	if params.SoleProprietorDocType != nil {
-		body["sole_proprietor_doc_type"] = params.SoleProprietorDocType
+	body, err := request.BodyWith(params, map[string]any{"kyc_type": "enhanced", "type": "individual"})
+	if err != nil {
+		return nil, err
 	}
 
 	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, body, opts...)
@@ -770,74 +675,9 @@ func (c *Client) CreateBusinessWithStandardKYB(ctx context.Context, params *Crea
 
 	path := request.Pathf("/instances/%s/customers", c.instanceID)
 
-	body := map[string]any{
-		"kyc_type":                    "standard",
-		"type":                        "business",
-		"address_line_1":              params.AddressLine1,
-		"alternate_name":              params.AlternateName,
-		"city":                        params.City,
-		"country":                     params.Country,
-		"email":                       params.Email,
-		"formation_date":              params.FormationDate,
-		"incorporation_doc_file":      params.IncorporationDocFile,
-		"legal_name":                  params.LegalName,
-		"owners":                      params.Owners,
-		"postal_code":                 params.PostalCode,
-		"proof_of_address_doc_file":   params.ProofOfAddressDocFile,
-		"proof_of_address_doc_type":   params.ProofOfAddressDocType,
-		"proof_of_ownership_doc_file": params.ProofOfOwnershipDocFile,
-		"state_province_region":       params.StateProvinceRegion,
-		"tax_id":                      params.TaxID,
-		"tos_id":                      params.TosID,
-	}
-
-	if params.AddressLine2 != nil {
-		body["address_line_2"] = params.AddressLine2
-	}
-	if params.Website != nil {
-		body["website"] = params.Website
-	}
-	if params.ExternalID != nil {
-		body["external_id"] = params.ExternalID
-	}
-	if params.PhoneNumber != nil {
-		body["phone_number"] = params.PhoneNumber
-	}
-	if params.IPAddress != nil {
-		body["ip_address"] = params.IPAddress
-	}
-	if params.ImageURL != nil {
-		body["image_url"] = params.ImageURL
-	}
-	if params.AccountPurpose != nil {
-		body["account_purpose"] = params.AccountPurpose
-	}
-	if params.AccountPurposeOther != nil {
-		body["account_purpose_other"] = params.AccountPurposeOther
-	}
-	if params.BusinessTypeField != nil {
-		body["business_type"] = params.BusinessTypeField
-	}
-	if params.BusinessDescription != nil {
-		body["business_description"] = params.BusinessDescription
-	}
-	if params.BusinessIndustry != nil {
-		body["business_industry"] = params.BusinessIndustry
-	}
-	if params.EstimatedAnnualRevenue != nil {
-		body["estimated_annual_revenue"] = params.EstimatedAnnualRevenue
-	}
-	if params.SourceOfWealth != nil {
-		body["source_of_wealth"] = params.SourceOfWealth
-	}
-	if params.PubliclyTraded != nil {
-		body["publicly_traded"] = params.PubliclyTraded
-	}
-	if params.RecipientRelationship != nil {
-		body["recipient_relationship"] = params.RecipientRelationship
-	}
-	if params.SoleProprietorDocType != nil {
-		body["sole_proprietor_doc_type"] = params.SoleProprietorDocType
+	body, err := request.BodyWith(params, map[string]any{"kyc_type": "standard", "type": "business"})
+	if err != nil {
+		return nil, err
 	}
 
 	return request.Do[*CreateResponse](c.cfg, ctx, "POST", path, body, opts...)
@@ -1049,13 +889,5 @@ func (c *Client) RequestLimitIncrease(ctx context.Context, params *RequestLimitI
 
 	path := request.Pathf("/instances/%s/customers/%s/limit-increase", c.instanceID, params.CustomerID)
 
-	body := map[string]any{
-		"daily":                    params.Daily,
-		"monthly":                  params.Monthly,
-		"per_transaction":          params.PerTransaction,
-		"supporting_document_file": params.SupportingDocumentFile,
-		"supporting_document_type": params.SupportingDocumentType,
-	}
-
-	return request.Do[*RequestLimitIncreaseResponse](c.cfg, ctx, "POST", path, body, opts...)
+	return request.Do[*RequestLimitIncreaseResponse](c.cfg, ctx, "POST", path, params, opts...)
 }

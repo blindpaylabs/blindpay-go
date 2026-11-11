@@ -344,17 +344,7 @@ func (c *Client) SubmitDocuments(ctx context.Context, params *SubmitDocumentsPar
 
 	path := request.Pathf("/instances/%s/payouts/%s/documents", c.instanceID, params.PayoutID)
 
-	body := map[string]any{
-		"transaction_document_type": params.TransactionDocumentType,
-		"transaction_document_id":   params.TransactionDocumentID,
-		"transaction_document_file": params.TransactionDocumentFile,
-	}
-
-	if params.Description != "" {
-		body["description"] = params.Description
-	}
-
-	return request.Do[*SubmitDocumentsResponse](c.cfg, ctx, "POST", path, body, opts...)
+	return request.Do[*SubmitDocumentsResponse](c.cfg, ctx, "POST", path, params, opts...)
 }
 
 // AuthorizeStellarToken authorizes a Stellar token for payout.

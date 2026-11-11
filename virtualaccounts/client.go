@@ -98,21 +98,7 @@ func (c *Client) Create(ctx context.Context, params *CreateParams, opts ...optio
 
 	path := request.Pathf("/instances/%s/customers/%s/virtual-accounts", c.instanceID, params.CustomerID)
 
-	body := struct {
-		BlockchainWalletID    string                `json:"blockchain_wallet_id"`
-		Token                 types.StablecoinToken `json:"token"`
-		BankingPartner        types.BankingPartner  `json:"banking_partner"`
-		SoleProprietorDocType *string               `json:"sole_proprietor_doc_type,omitempty"`
-		SoleProprietorDocFile *string               `json:"sole_proprietor_doc_file,omitempty"`
-	}{
-		BlockchainWalletID:    params.BlockchainWalletID,
-		Token:                 params.Token,
-		BankingPartner:        params.BankingPartner,
-		SoleProprietorDocType: params.SoleProprietorDocType,
-		SoleProprietorDocFile: params.SoleProprietorDocFile,
-	}
-
-	return request.Do[*VirtualAccount](c.cfg, ctx, "POST", path, body, opts...)
+	return request.Do[*VirtualAccount](c.cfg, ctx, "POST", path, params, opts...)
 }
 
 // Get retrieves a virtual account by ID.
@@ -152,14 +138,6 @@ func (c *Client) Update(ctx context.Context, params *UpdateParams, opts ...optio
 
 	path := request.Pathf("/instances/%s/customers/%s/virtual-accounts/%s", c.instanceID, params.CustomerID, params.VirtualAccountID)
 
-	body := struct {
-		BlockchainWalletID string                `json:"blockchain_wallet_id"`
-		Token              types.StablecoinToken `json:"token"`
-	}{
-		BlockchainWalletID: params.BlockchainWalletID,
-		Token:              params.Token,
-	}
-
-	_, err := request.Do[struct{}](c.cfg, ctx, "PUT", path, body, opts...)
+	_, err := request.Do[struct{}](c.cfg, ctx, "PUT", path, params, opts...)
 	return err
 }
