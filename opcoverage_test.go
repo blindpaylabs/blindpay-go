@@ -78,6 +78,11 @@ var opTable = map[string]opEntry{
 	}},
 
 	// Bank accounts.
+	"POST /v1/instances/{instance_id}/customers/{customer_id}/bank-accounts/plaid": {Name: "BankAccounts.CreatePlaidLink", Calls: []opCall{
+		call(func(ctx context.Context, c *Client) (any, error) {
+			return c.BankAccounts.CreatePlaidLink(ctx, &bankaccounts.CreatePlaidLinkParams{CustomerID: tCustomer})
+		}),
+	}},
 	"POST /v1/instances/{instance_id}/customers/{customer_id}/bank-accounts": {Name: "BankAccounts.CreateAch", Notes: "one method per rail: CreatePix, CreateAch, CreateWire, CreateArgentinaTransfers, CreateSpei, CreateColombiaAch, CreateInternationalSwift, CreatePixSafe, CreateRtp, CreateTed, CreateSepa", Calls: []opCall{
 		call(func(ctx context.Context, c *Client) (any, error) {
 			return c.BankAccounts.CreateAch(ctx, &bankaccounts.CreateAchParams{CustomerID: tCustomer})
@@ -126,6 +131,11 @@ var opTable = map[string]opEntry{
 	}},
 
 	// Blockchain wallets.
+	"PATCH /v1/instances/{instance_id}/customers/{customer_id}/blockchain-wallets/{id}": {Name: "Wallets.SetSelfCustody", Notes: "can be set once; 409 WALLETS_SELF_CUSTODY_ALREADY_SET", Calls: []opCall{
+		call(func(ctx context.Context, c *Client) (any, error) {
+			return c.Wallets.SetSelfCustody(ctx, tCustomer, tID, true)
+		}),
+	}},
 	"POST /v1/instances/{instance_id}/customers/{customer_id}/blockchain-wallets": {Name: "Wallets.CreateWithAddress", Notes: "also Wallets.CreateWithHash", Calls: []opCall{
 		call(func(ctx context.Context, c *Client) (any, error) {
 			return c.Wallets.CreateWithAddress(ctx, &wallets.CreateWithAddressParams{CustomerID: tCustomer})
@@ -249,6 +259,11 @@ var opTable = map[string]opEntry{
 	}},
 
 	// Offramp wallets.
+	"PUT /v1/instances/{instance_id}/customers/{customer_id}/bank-accounts/{bank_account_id}/offramp-wallets/{id}": {Name: "OfframpWallets.Update", Notes: "partner_fee_id tri-state: PartnerFeeID / ClearPartnerFee", Calls: []opCall{
+		func(ctx context.Context, c *Client) error {
+			return c.OfframpWallets.Update(ctx, &wallets.UpdateOfframpWalletParams{CustomerID: tCustomer, BankAccountID: tBankAccount, ID: tID, ClearPartnerFee: true})
+		},
+	}},
 	"POST /v1/instances/{instance_id}/customers/{customer_id}/bank-accounts/{bank_account_id}/offramp-wallets": {Name: "OfframpWallets.Create", Calls: []opCall{
 		call(func(ctx context.Context, c *Client) (any, error) {
 			return c.OfframpWallets.Create(ctx, &wallets.CreateOfframpWalletParams{CustomerID: tCustomer, BankAccountID: tBankAccount})
@@ -489,9 +504,6 @@ var opTable = map[string]opEntry{
 // fails if one of them gains a table entry without leaving this set, so it
 // can only shrink.
 var pendingOps = map[string]bool{
-	"POST /v1/instances/{instance_id}/customers/{customer_id}/bank-accounts/plaid":                                 true,
-	"PATCH /v1/instances/{instance_id}/customers/{customer_id}/blockchain-wallets/{id}":                            true,
-	"PUT /v1/instances/{instance_id}/customers/{customer_id}/bank-accounts/{bank_account_id}/offramp-wallets/{id}": true,
 	"POST /v1/presign":        true,
 	"POST /v1/upload/analyze": true,
 	"GET /v1/instances/{instance_id}/customers/{customer_id}/wallets/{id}/deposits": true,
