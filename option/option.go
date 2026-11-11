@@ -44,6 +44,9 @@ func WithHeader(name, value string) RequestOption {
 }
 
 // WithTimeout overrides the client's per-attempt timeout for this request.
+// It is the canonical name; blindpay.WithRequestTimeout is the same option,
+// re-exported under a name that does not clash with the client-wide
+// blindpay.WithTimeout.
 func WithTimeout(d time.Duration) RequestOption {
 	return request.WithTimeout(d)
 }

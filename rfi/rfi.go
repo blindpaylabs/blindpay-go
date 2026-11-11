@@ -18,6 +18,22 @@ const (
 	StatusCancelled Status = "cancelled"
 )
 
+// CustomerType is the kind of customer an RFI was opened for.
+type CustomerType string
+
+const (
+	CustomerTypeIndividual CustomerType = "individual"
+	CustomerTypeBusiness   CustomerType = "business"
+)
+
+// SubmitReason explains a SubmitResponse with Success false.
+type SubmitReason string
+
+const (
+	SubmitReasonNoPendingRfi    SubmitReason = "no_pending_rfi"
+	SubmitReasonAlreadyResolved SubmitReason = "already_resolved"
+)
+
 // FieldItem is one choice of a select-style field.
 type FieldItem struct {
 	Label string `json:"label"`
@@ -54,18 +70,17 @@ type Response map[string]any
 
 // CustomerRfi is an RFI opened for a customer.
 type CustomerRfi struct {
-	ID          string         `json:"id"`
-	CustomerID  string         `json:"customer_id"`
-	InstanceID  string         `json:"instance_id"`
-	Status      Status         `json:"status"`
-	Request     []Section      `json:"request"`
-	Response    map[string]any `json:"response"`
-	ExpiresAt   time.Time      `json:"expires_at"`
-	SubmittedAt *time.Time     `json:"submitted_at,omitempty"`
-	CreatedAt   time.Time      `json:"created_at"`
-	// CustomerType is "individual" or "business".
-	CustomerType      *string `json:"customer_type,omitempty"`
-	CustomerKycStatus *string `json:"customer_kyc_status,omitempty"`
+	ID                string         `json:"id"`
+	CustomerID        string         `json:"customer_id"`
+	InstanceID        string         `json:"instance_id"`
+	Status            Status         `json:"status"`
+	Request           []Section      `json:"request"`
+	Response          map[string]any `json:"response"`
+	ExpiresAt         time.Time      `json:"expires_at"`
+	SubmittedAt       *time.Time     `json:"submitted_at,omitempty"`
+	CreatedAt         time.Time      `json:"created_at"`
+	CustomerType      *CustomerType  `json:"customer_type,omitempty"`
+	CustomerKycStatus *string        `json:"customer_kyc_status,omitempty"`
 }
 
 // InstanceRfi is an RFI opened for the instance itself.
@@ -83,6 +98,6 @@ type InstanceRfi struct {
 // SubmitResponse is the result of SubmitRfi. Success is false, with Reason
 // "no_pending_rfi" or "already_resolved", when there was nothing to answer.
 type SubmitResponse struct {
-	Success bool    `json:"success"`
-	Reason  *string `json:"reason,omitempty"`
+	Success bool          `json:"success"`
+	Reason  *SubmitReason `json:"reason,omitempty"`
 }

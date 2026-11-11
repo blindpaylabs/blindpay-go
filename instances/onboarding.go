@@ -39,30 +39,52 @@ type Instance struct {
 	OnboardingStep OnboardingStep `json:"onboarding_step"`
 }
 
+// EntityType is the legal form of the instance's business. Unknown future
+// values decode as-is.
+type EntityType string
+
+const (
+	EntityTypeCooperative    EntityType = "cooperative"
+	EntityTypeCorporation    EntityType = "corporation"
+	EntityTypeCompany        EntityType = "company"
+	EntityTypePartnership    EntityType = "partnership"
+	EntityTypeSoleProprietor EntityType = "sole_proprietor"
+	EntityTypeTrust          EntityType = "trust"
+	EntityTypeOther          EntityType = "other"
+)
+
+// Scenario is how the instance holds customer funds.
+type Scenario string
+
+const (
+	ScenarioCustodial    Scenario = "custodial"
+	ScenarioCustodialMtl Scenario = "custodial_mtl"
+	ScenarioNonCustodial Scenario = "non_custodial"
+	ScenarioOther        Scenario = "other"
+)
+
 // BusinessDetails is the instance's onboarding business details.
 type BusinessDetails struct {
-	LegalName           *string        `json:"legal_name,omitempty"`
-	TaxID               *string        `json:"tax_id,omitempty"`
-	FormationDate       *string        `json:"formation_date,omitempty"`
-	TradingNames        []string       `json:"trading_names,omitempty"`
-	AddressLine1        *string        `json:"address_line_1,omitempty"`
-	AddressLine2        *string        `json:"address_line_2,omitempty"`
-	City                *string        `json:"city,omitempty"`
-	StateProvinceRegion *string        `json:"state_province_region,omitempty"`
-	PostalCode          *string        `json:"postal_code,omitempty"`
-	Country             *types.Country `json:"country,omitempty"`
-	// EntityType is e.g. "company", "corporation", "sole_proprietor".
-	EntityType           *string `json:"entity_type,omitempty"`
-	StateOfIncorporation *string `json:"state_of_incorporation,omitempty"`
+	LegalName            *string        `json:"legal_name,omitempty"`
+	TaxID                *string        `json:"tax_id,omitempty"`
+	FormationDate        *string        `json:"formation_date,omitempty"`
+	TradingNames         []string       `json:"trading_names,omitempty"`
+	AddressLine1         *string        `json:"address_line_1,omitempty"`
+	AddressLine2         *string        `json:"address_line_2,omitempty"`
+	City                 *string        `json:"city,omitempty"`
+	StateProvinceRegion  *string        `json:"state_province_region,omitempty"`
+	PostalCode           *string        `json:"postal_code,omitempty"`
+	Country              *types.Country `json:"country,omitempty"`
+	EntityType           *EntityType    `json:"entity_type,omitempty"`
+	StateOfIncorporation *string        `json:"state_of_incorporation,omitempty"`
 }
 
 // BusinessProfile is the instance's onboarding business profile.
 type BusinessProfile struct {
-	// Scenario is "custodial", "custodial_mtl", "non_custodial" or "other".
-	Scenario            *string `json:"scenario,omitempty"`
-	ScenarioDescription *string `json:"scenario_description,omitempty"`
-	HasKycScreening     *bool   `json:"has_kyc_screening,omitempty"`
-	IsRegulated         *bool   `json:"is_regulated,omitempty"`
+	Scenario            *Scenario `json:"scenario,omitempty"`
+	ScenarioDescription *string   `json:"scenario_description,omitempty"`
+	HasKycScreening     *bool     `json:"has_kyc_screening,omitempty"`
+	IsRegulated         *bool     `json:"is_regulated,omitempty"`
 	// BusinessIndustry is the instance's segment ("wallet", "exchange", ...),
 	// not a NAICS code.
 	BusinessIndustry   *string         `json:"business_industry,omitempty"`

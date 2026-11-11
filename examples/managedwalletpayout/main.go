@@ -20,7 +20,7 @@ func main() {
 	}
 	ctx := context.Background()
 
-	network, token := blindpay.NetworkBase, blindpay.StablecoinToken("USDC")
+	network, token := blindpay.NetworkBase, blindpay.StablecoinUSDC
 	quote, err := client.Quotes.Create(ctx, &quotes.CreateParams{
 		BankAccountID: "ba_000000000000",
 		CurrencyType:  blindpay.CurrencyTypeSender,

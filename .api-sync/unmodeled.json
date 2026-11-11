@@ -136,7 +136,7 @@
     { "schema": "PayoutOut", "property": "tracking_payment.refund_review_reason", "reason": "Typed as a plain string (open enum) like the other tracking reason fields; values documented on the field.", "owner": "sdk-parity" },
     { "schema": "UpdateInstanceIn", "property": "partner_tos_terms_accepted", "reason": "Single-value enum [true]; modeled as *bool PartnerTosTermsAccepted.", "owner": "sdk-parity" },
     { "schema": "CustomerVirtualAccountPreapproval", "property": "banking_partners", "reason": "Array of BankingPartner; typed []types.BankingPartner (enums[] mappings cannot target array items).", "owner": "sdk-parity" },
-    { "schema": "Rfi", "property": "customer_type", "reason": "Plain string (\"individual\"/\"business\") on rfi.CustomerRfi.CustomerType; open by design.", "owner": "sdk-parity" },
+    { "schema": "Rfi", "property": "customer_type", "reason": "Typed as rfi.CustomerType, an open string type (enums[] cannot map it without a const block of the same name).", "owner": "sdk-parity" },
     { "schema": "CustomerCnaeCondition", "property": "status", "reason": "Plain string on customers.CnaeCondition.Status (values documented); open by design.", "owner": "sdk-parity" },
     { "schema": "CustomerVirtualAccountPreapproval", "property": "status", "reason": "Plain string on customers.VirtualAccountPreapproval.Status (values documented); open by design.", "owner": "sdk-parity" }
   ],

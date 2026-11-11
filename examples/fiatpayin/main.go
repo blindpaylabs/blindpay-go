@@ -23,7 +23,7 @@ func main() {
 		CurrencyType:       blindpay.CurrencyTypeSender,
 		PaymentMethod:      "pix",
 		RequestAmount:      100000, // integer cents: 1,000.00 BRL
-		Token:              "USDC",
+		Token:              blindpay.StablecoinUSDC,
 	})
 	if err != nil {
 		log.Fatal(err)
