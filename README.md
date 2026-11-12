@@ -222,12 +222,23 @@ Payouts, payins, customers, transfers and payables have three list methods
 ```go
 // Every row (the API returns all rows when no page size is sent).
 all, err := client.Payouts.List(ctx, &payouts.ListParams{Status: blindpay.TransactionStatusCompleted})
+if err != nil {
+	return err
+}
+fmt.Println(len(all), "completed payouts")
 
-// One page with its metadata.
+// One page with its metadata. Check err before using the page: it is nil
+// on error.
 page, err := client.Payouts.ListPage(ctx, &payouts.ListParams{Limit: 50})
+if err != nil {
+	return err
+}
 if page.HasMore() {
 	next, err := client.Payouts.ListPage(ctx, &payouts.ListParams{Limit: 50, StartingAfter: page.NextCursor()})
-	_, _ = next, err
+	if err != nil {
+		return err
+	}
+	fmt.Println(len(next.Data), "more")
 }
 
 // Every row, fetched one page at a time (100 per page by default).
@@ -237,14 +248,21 @@ for pager.Next() {
 	fmt.Println(p.ID, p.Status)
 }
 if err := pager.Err(); err != nil {
-	log.Fatal(err)
+	return err
 }
 ```
 
 `Limit` accepts 10, 50, 100, 200, 500 or 1000. The auto-pager only goes
-forward and rejects `EndingBefore`. On Go 1.23+ you can also range over
-`pager.All()`. Prefer the auto-pager for large lists: an unpaginated `List`
-loads every row.
+forward and rejects `EndingBefore`, and it stops with an error (from
+`pager.Err()`) if the API ever returns the same cursor twice in a row instead
+of looping.
+
+Customers differ, for compatibility (the module stays v1): `Customers.List(ctx)`
+takes no filters, so filter with `Customers.ListWithParams`, `ListPage` or
+`ListAutoPaging`, and `customers.ListParams.Limit` is a string (`"50"`).
+
+On Go 1.23+ you can also range over `pager.All()`. Prefer the auto-pager for
+large lists: an unpaginated `List` loads every row.
 
 ## Webhooks
 
