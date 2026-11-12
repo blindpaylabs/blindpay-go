@@ -93,6 +93,10 @@ type syncOptions struct {
 	Apply      bool
 	SpecPath   string // empty means apply the mode-based default
 	ReportPath string // empty means do not write a report
+	// ErrorCodesOptional lets a spec without an Errors table pass when the
+	// repo has no generated error-code files. Test fixtures only: there is
+	// no CLI flag, so the real -check and -apply always require the table.
+	ErrorCodesOptional bool
 }
 
 // reconcileAndMaybeApply is the whole tool's core, independent of the CLI
@@ -149,7 +153,7 @@ func reconcileAndMaybeApply(repoRoot string, opts syncOptions) (quiet bool, err 
 	needsHuman = append(needsHuman, enumPlan.NeedsHuman...)
 	needsHuman = append(needsHuman, typePlan.NeedsHuman...)
 	needsHuman = append(needsHuman, checkWebhookCoverage(repoRoot, sm, um, newSpec, typePlan.Actions)...)
-	errorCodeActions, errorCodeNeedsHuman := planErrorCodes(repoRoot, newSpec)
+	errorCodeActions, errorCodeNeedsHuman := planErrorCodes(repoRoot, newSpec, opts.ErrorCodesOptional)
 	needsHuman = append(needsHuman, errorCodeNeedsHuman...)
 	sort.Strings(needsHuman)
 

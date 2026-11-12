@@ -108,7 +108,7 @@ func TestFanout_Uniform_BankAccountShapedSet_AddedFieldLandsOnEverySite(t *testi
 
 	root := fanoutFixture(t, variants, "", nil, oldSchema, newSchema)
 
-	quiet, err := reconcileAndMaybeApply(root, syncOptions{Apply: true})
+	quiet, err := reconcileAndMaybeApply(root, syncOptions{ErrorCodesOptional: true, Apply: true})
 	require.NoError(t, err)
 	require.False(t, quiet)
 
@@ -127,13 +127,13 @@ func TestFanout_Uniform_BankAccountShapedSet_AddedFieldLandsOnEverySite(t *testi
 	before := readFixture(t, root, "variants/client.go")
 	beforeVersion := readFixture(t, root, "blindpay.go")
 
-	quiet, err = reconcileAndMaybeApply(root, syncOptions{Apply: true})
+	quiet, err = reconcileAndMaybeApply(root, syncOptions{ErrorCodesOptional: true, Apply: true})
 	require.NoError(t, err)
 	require.False(t, quiet)
 	require.Equal(t, before, readFixture(t, root, "variants/client.go"), "second apply must be byte-identical (no duplicate insertions)")
 	require.Equal(t, beforeVersion, readFixture(t, root, "blindpay.go"), "second apply must not bump the version again")
 
-	quiet, err = reconcileAndMaybeApply(root, syncOptions{Check: true})
+	quiet, err = reconcileAndMaybeApply(root, syncOptions{ErrorCodesOptional: true, Check: true})
 	require.NoError(t, err)
 	require.True(t, quiet, "-check must be clean once every uniform site has caught up")
 }
@@ -149,7 +149,7 @@ func TestFanout_Uniform_CustomerKYCShapedSet_AddedFieldLandsOnEverySite(t *testi
 
 	root := fanoutFixture(t, variants, "", nil, oldSchema, newSchema)
 
-	quiet, err := reconcileAndMaybeApply(root, syncOptions{Apply: true})
+	quiet, err := reconcileAndMaybeApply(root, syncOptions{ErrorCodesOptional: true, Apply: true})
 	require.NoError(t, err)
 	require.False(t, quiet)
 
@@ -163,7 +163,7 @@ func TestFanout_Uniform_CustomerKYCShapedSet_AddedFieldLandsOnEverySite(t *testi
 	}
 
 	before := readFixture(t, root, "variants/client.go")
-	quiet, err = reconcileAndMaybeApply(root, syncOptions{Apply: true})
+	quiet, err = reconcileAndMaybeApply(root, syncOptions{ErrorCodesOptional: true, Apply: true})
 	require.NoError(t, err)
 	require.False(t, quiet)
 	require.Equal(t, before, readFixture(t, root, "variants/client.go"), "second apply must be byte-identical (no-op)")
@@ -184,7 +184,7 @@ func TestFanout_Union_AddedFieldLandsOnlyOnNamedSites(t *testing.T) {
 		"pix_key": {"BankAccount", "CreatePixResponse"},
 	}, oldSchema, newSchema)
 
-	_, err := reconcileAndMaybeApply(root, syncOptions{Apply: true})
+	_, err := reconcileAndMaybeApply(root, syncOptions{ErrorCodesOptional: true, Apply: true})
 	require.NoError(t, err)
 
 	src := readFixture(t, root, "variants/client.go")
@@ -214,7 +214,7 @@ func TestFanout_Union_NewPropertyWithoutPropertySitesEntryIsNeedsHuman(t *testin
 	}, oldSchema, newSchema)
 
 	before := readFixture(t, root, "variants/client.go")
-	_, err := reconcileAndMaybeApply(root, syncOptions{Apply: true})
+	_, err := reconcileAndMaybeApply(root, syncOptions{ErrorCodesOptional: true, Apply: true})
 	require.Error(t, err, "a union-policy property with no property_sites entry must block, not be silently skipped or added everywhere")
 	require.Equal(t, before, readFixture(t, root, "variants/client.go"), "a needs-human issue must block every applicable change, atomically")
 }
@@ -233,7 +233,7 @@ func TestFanout_Union_PropertySitesNamingAnUnknownSiteIsNeedsHuman(t *testing.T)
 	require.NoError(t, os.WriteFile(filepath.Join(root, ".api-sync", "spec-current.json"),
 		[]byte(readFixture(t, root, ".api-sync/spec-snapshot.json")), 0o644))
 
-	_, err := reconcileAndMaybeApply(root, syncOptions{Check: true})
+	_, err := reconcileAndMaybeApply(root, syncOptions{ErrorCodesOptional: true, Check: true})
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "1 needs-human")
 }

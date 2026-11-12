@@ -114,7 +114,7 @@ const baselineWidgetSchema = `{"type":"object","properties":{
 func TestIntegration_CheckIsCleanAgainstItsOwnBaseline(t *testing.T) {
 	root := integrationFixture(t, map[string]string{"Widget": baselineWidgetSchema})
 
-	quiet, err := reconcileAndMaybeApply(root, syncOptions{Check: true})
+	quiet, err := reconcileAndMaybeApply(root, syncOptions{ErrorCodesOptional: true, Check: true})
 	require.NoError(t, err)
 	require.True(t, quiet)
 }
@@ -130,7 +130,7 @@ func TestIntegration_ApplyThenIdempotent(t *testing.T) {
 		},"required":["id"]}`,
 	})
 
-	quiet, err := reconcileAndMaybeApply(root, syncOptions{Apply: true})
+	quiet, err := reconcileAndMaybeApply(root, syncOptions{ErrorCodesOptional: true, Apply: true})
 	require.NoError(t, err)
 	require.False(t, quiet)
 
@@ -145,7 +145,7 @@ func TestIntegration_ApplyThenIdempotent(t *testing.T) {
 
 	// The snapshot must now match spec-current.json's content, so a second
 	// -check against the (refreshed) baseline is clean...
-	quiet, err = reconcileAndMaybeApply(root, syncOptions{Check: true})
+	quiet, err = reconcileAndMaybeApply(root, syncOptions{ErrorCodesOptional: true, Check: true})
 	require.NoError(t, err)
 	require.True(t, quiet)
 
@@ -156,7 +156,7 @@ func TestIntegration_ApplyThenIdempotent(t *testing.T) {
 	beforeWidget := readFixture(t, root, "widgets/client.go")
 	beforeVersion := readFixture(t, root, "blindpay.go")
 
-	quiet, err = reconcileAndMaybeApply(root, syncOptions{Apply: true})
+	quiet, err = reconcileAndMaybeApply(root, syncOptions{ErrorCodesOptional: true, Apply: true})
 	require.NoError(t, err)
 	require.False(t, quiet) // "nothing to do" is a nil error, not the -check quiet path
 
@@ -179,7 +179,7 @@ func TestIntegration_RefreshedSnapshotIsAByteForByteCopyNotAReserialization(t *t
 	specCurrentPath := filepath.Join(root, ".api-sync", "spec-current.json")
 	require.NoError(t, os.WriteFile(specCurrentPath, []byte(oddSpecJSON), 0o644))
 
-	_, err := reconcileAndMaybeApply(root, syncOptions{Apply: true})
+	_, err := reconcileAndMaybeApply(root, syncOptions{ErrorCodesOptional: true, Apply: true})
 	require.NoError(t, err)
 
 	snapshot, err := os.ReadFile(filepath.Join(root, ".api-sync", "spec-snapshot.json"))
@@ -198,7 +198,7 @@ func TestIntegration_FieldOnlyChangeBumpsMinor(t *testing.T) {
 		},"required":["id"]}`,
 	})
 
-	_, err := reconcileAndMaybeApply(root, syncOptions{Apply: true})
+	_, err := reconcileAndMaybeApply(root, syncOptions{ErrorCodesOptional: true, Apply: true})
 	require.NoError(t, err)
 	require.Contains(t, readFixture(t, root, "blindpay.go"), `const Version = "1.1.0"`, "an added field is a new feature: minor")
 }
@@ -233,7 +233,7 @@ func TestIntegration_OperationSetChangeAloneBumpsMinorEvenForAFieldOnlyAction(t 
 	require.NoError(t, err)
 	require.NoError(t, os.WriteFile(filepath.Join(root, ".api-sync", "spec-current.json"), data, 0o644))
 
-	_, err = reconcileAndMaybeApply(root, syncOptions{Apply: true})
+	_, err = reconcileAndMaybeApply(root, syncOptions{ErrorCodesOptional: true, Apply: true})
 	require.NoError(t, err)
 	require.Contains(t, readFixture(t, root, "blindpay.go"), `const Version = "1.1.0"`, "an operation-set change alone escalates a field-only change to minor")
 }
@@ -254,7 +254,7 @@ func TestIntegration_ApplyRefusesToWriteAnythingWhenAnyNeedsHumanIssueExists(t *
 	beforeWidget := readFixture(t, root, "widgets/client.go")
 	beforeVersion := readFixture(t, root, "blindpay.go")
 
-	_, err := reconcileAndMaybeApply(root, syncOptions{Apply: true})
+	_, err := reconcileAndMaybeApply(root, syncOptions{ErrorCodesOptional: true, Apply: true})
 	require.Error(t, err)
 
 	require.Equal(t, beforeEnums, readFixture(t, root, "internal/types/enums.go"), "a needs-human issue anywhere must block every applicable change too, atomically")

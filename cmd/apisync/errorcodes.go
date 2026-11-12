@@ -136,17 +136,21 @@ func commentSafe(s string) string {
 }
 
 // planErrorCodes reconciles the generated error-code files with the target
-// spec. A code that disappears from the spec is NEEDS_HUMAN: its exported
-// constant is public API and the module stays v1.
-func planErrorCodes(repoRoot string, spec *specDoc) ([]action, []string) {
+// spec. A spec without an Errors table, or with a table that parses to zero
+// rows, is NEEDS_HUMAN (so -check and -apply fail) whether or not the
+// generated files exist yet. optional relaxes only the missing-table case,
+// and only while the repo has no generated file (test fixtures). A code that
+// disappears from the spec is NEEDS_HUMAN: its exported constant is public
+// API and the module stays v1.
+func planErrorCodes(repoRoot string, spec *specDoc, optional bool) ([]action, []string) {
 	internalPath := filepath.Join(repoRoot, errorCodesInternalFile)
 	existing, readErr := os.ReadFile(internalPath) //#nosec G304 -- fixed repo-relative path
 	rows, found, err := parseErrorCodeTable(spec.raw)
 	if !found {
-		if readErr == nil {
-			return nil, []string{"NEEDS_HUMAN: the target spec has no Errors tag, but " + errorCodesInternalFile + " exists; the error-code table cannot be checked"}
+		if optional && readErr != nil {
+			return nil, nil
 		}
-		return nil, nil // a spec and repo without typed error codes (e.g. a test fixture)
+		return nil, []string{"NEEDS_HUMAN: the target spec has no Errors tag, so the error-code table (" + errorCodesRootFile + ", " + errorCodesInternalFile + ") cannot be generated or checked"}
 	}
 	if err != nil {
 		return nil, []string{"NEEDS_HUMAN: " + err.Error()}
