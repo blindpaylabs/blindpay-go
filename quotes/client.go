@@ -51,33 +51,41 @@ type QuoteContract struct {
 
 // CreateResponse represents the response when creating a quote.
 type CreateResponse struct {
-	ID                  string        `json:"id"`
-	ExpiresAt           int64         `json:"expires_at"`
-	CommercialQuotation float64       `json:"commercial_quotation"`
-	BlindpayQuotation   float64       `json:"blindpay_quotation"`
-	ReceiverAmount      float64       `json:"receiver_amount"`
-	SenderAmount        float64       `json:"sender_amount"`
-	PartnerFeeAmount    float64       `json:"partner_fee_amount"`
-	FlatFee             float64       `json:"flat_fee"`
-	Contract            QuoteContract `json:"contract"`
-	CustomerLocalAmount float64       `json:"customer_local_amount"`
-	Description         string        `json:"description"`
-	BillingFeeAmount    *float64      `json:"billing_fee_amount,omitempty"`
+	ID                  string  `json:"id"`
+	ExpiresAt           int64   `json:"expires_at"`
+	CommercialQuotation float64 `json:"commercial_quotation"`
+	BlindpayQuotation   float64 `json:"blindpay_quotation"`
+	// ReceiverAmount is in integer cents (1000 = 10.00).
+	ReceiverAmount float64 `json:"receiver_amount"`
+	// SenderAmount is in integer cents (1000 = 10.00).
+	SenderAmount float64 `json:"sender_amount"`
+	// PartnerFeeAmount is in integer cents (1000 = 10.00).
+	PartnerFeeAmount float64 `json:"partner_fee_amount"`
+	// FlatFee is in integer cents (1000 = 10.00).
+	FlatFee  float64       `json:"flat_fee"`
+	Contract QuoteContract `json:"contract"`
+	// CustomerLocalAmount is in integer cents (1000 = 10.00).
+	CustomerLocalAmount float64 `json:"customer_local_amount"`
+	Description         string  `json:"description"`
+	// BillingFeeAmount is in integer cents (1000 = 10.00).
+	BillingFeeAmount *float64 `json:"billing_fee_amount,omitempty"`
 }
 
 // GetFxRateParams represents parameters for getting FX rates.
 type GetFxRateParams struct {
-	CurrencyType  types.CurrencyType `json:"currency_type"`
-	From          types.Currency     `json:"from"`
-	To            types.Currency     `json:"to"`
-	RequestAmount float64            `json:"request_amount"`
+	CurrencyType types.CurrencyType `json:"currency_type"`
+	From         types.Currency     `json:"from"`
+	To           types.Currency     `json:"to"`
+	// RequestAmount is in integer cents (1000 = 10.00).
+	RequestAmount float64 `json:"request_amount"`
 }
 
 // GetFxRateResponse represents the FX rate response.
 type GetFxRateResponse struct {
-	CommercialQuotation   float64 `json:"commercial_quotation"`
-	BlindpayQuotation     float64 `json:"blindpay_quotation"`
-	ResultAmount          float64 `json:"result_amount"`
+	CommercialQuotation float64 `json:"commercial_quotation"`
+	BlindpayQuotation   float64 `json:"blindpay_quotation"`
+	ResultAmount        float64 `json:"result_amount"`
+	// InstanceFlatFee is in integer cents (1000 = 10.00).
 	InstanceFlatFee       float64 `json:"instance_flat_fee"`
 	InstancePercentageFee float64 `json:"instance_percentage_fee"`
 }

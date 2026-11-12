@@ -262,9 +262,12 @@ type KycWarning struct {
 
 // Limits represents transaction limits.
 type Limits struct {
+	// PerTransaction is in integer cents (1000 = 10.00).
 	PerTransaction float64 `json:"per_transaction"`
-	Daily          float64 `json:"daily"`
-	Monthly        float64 `json:"monthly"`
+	// Daily is in integer cents (1000 = 10.00).
+	Daily float64 `json:"daily"`
+	// Monthly is in integer cents (1000 = 10.00).
+	Monthly float64 `json:"monthly"`
 }
 
 // CnaeCode is one Brazilian activity code (CNAE) with its description.
@@ -568,11 +571,15 @@ type UpdateParams struct {
 type LimitsResponse struct {
 	Limits struct {
 		Payin struct {
-			Daily   float64 `json:"daily"`
+			// Daily is in integer cents (1000 = 10.00).
+			Daily float64 `json:"daily"`
+			// Monthly is in integer cents (1000 = 10.00).
 			Monthly float64 `json:"monthly"`
 		} `json:"payin"`
 		Payout struct {
-			Daily   float64 `json:"daily"`
+			// Daily is in integer cents (1000 = 10.00).
+			Daily float64 `json:"daily"`
+			// Monthly is in integer cents (1000 = 10.00).
 			Monthly float64 `json:"monthly"`
 		} `json:"payout"`
 	} `json:"limits"`
@@ -580,11 +587,14 @@ type LimitsResponse struct {
 
 // LimitIncreaseRequest represents a limit increase request for a customer.
 type LimitIncreaseRequest struct {
-	ID                     string                                     `json:"id"`
-	CustomerID             string                                     `json:"customer_id"`
-	Status                 LimitIncreaseRequestStatus                 `json:"status"`
-	Daily                  float64                                    `json:"daily"`
-	Monthly                float64                                    `json:"monthly"`
+	ID         string                     `json:"id"`
+	CustomerID string                     `json:"customer_id"`
+	Status     LimitIncreaseRequestStatus `json:"status"`
+	// Daily is in integer cents (1000 = 10.00).
+	Daily float64 `json:"daily"`
+	// Monthly is in integer cents (1000 = 10.00).
+	Monthly float64 `json:"monthly"`
+	// PerTransaction is in integer cents (1000 = 10.00).
 	PerTransaction         float64                                    `json:"per_transaction"`
 	ApprovedPerTransaction *int                                       `json:"approved_per_transaction,omitempty"`
 	ApprovedDaily          *int                                       `json:"approved_daily,omitempty"`
@@ -622,9 +632,12 @@ type LimitIncreaseSupportingDocument struct {
 
 // RequestLimitIncreaseParams represents parameters for requesting a limit increase.
 type RequestLimitIncreaseParams struct {
-	CustomerID     string  `json:"-"`
-	Daily          float64 `json:"daily"`
-	Monthly        float64 `json:"monthly"`
+	CustomerID string `json:"-"`
+	// Daily is in integer cents (1000 = 10.00).
+	Daily float64 `json:"daily"`
+	// Monthly is in integer cents (1000 = 10.00).
+	Monthly float64 `json:"monthly"`
+	// PerTransaction is in integer cents (1000 = 10.00).
 	PerTransaction float64 `json:"per_transaction"`
 	// SupportingDocumentFile and SupportingDocumentType attach one
 	// document; SupportingDocuments attaches several.

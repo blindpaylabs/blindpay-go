@@ -114,12 +114,16 @@ func TestGolden_OperationInsertRegeneratesDeletedMethods(t *testing.T) {
 	removals := []string{
 		`// CreatePartnerFeeParams represents parameters for creating a partner fee.
 type CreatePartnerFeeParams struct {
-	VirtualAccountSet    *bool   ` + "`json:\"virtual_account_set,omitempty\"`" + `
-	EVMWalletAddress     string  ` + "`json:\"evm_wallet_address\"`" + `
-	Name                 string  ` + "`json:\"name\"`" + `
-	PayinFlatFee         float64 ` + "`json:\"payin_flat_fee\"`" + `
-	PayinPercentageFee   float64 ` + "`json:\"payin_percentage_fee\"`" + `
-	PayoutFlatFee        float64 ` + "`json:\"payout_flat_fee\"`" + `
+	VirtualAccountSet *bool  ` + "`json:\"virtual_account_set,omitempty\"`" + `
+	EVMWalletAddress  string ` + "`json:\"evm_wallet_address\"`" + `
+	Name              string ` + "`json:\"name\"`" + `
+	// PayinFlatFee is in integer cents (1000 = 10.00).
+	PayinFlatFee float64 ` + "`json:\"payin_flat_fee\"`" + `
+	// PayinPercentageFee is in basis points (100 = 1%).
+	PayinPercentageFee float64 ` + "`json:\"payin_percentage_fee\"`" + `
+	// PayoutFlatFee is in integer cents (1000 = 10.00).
+	PayoutFlatFee float64 ` + "`json:\"payout_flat_fee\"`" + `
+	// PayoutPercentageFee is in basis points (100 = 1%).
 	PayoutPercentageFee  float64 ` + "`json:\"payout_percentage_fee\"`" + `
 	StellarWalletAddress *string ` + "`json:\"stellar_wallet_address,omitempty\"`" + `
 }
