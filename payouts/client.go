@@ -1,3 +1,8 @@
+// Package payouts handles payouts (stablecoin in, fiat out) on EVM chains,
+// Solana and Stellar, from a customer wallet (SenderWalletAddress) or a
+// BlindPay-managed wallet (WalletID): creation from a quote, listing with
+// auto-paging, tracking and supporting documents. Amounts are integer cents
+// (1000 = 10.00). Use it through blindpay.Client.Payouts.
 package payouts
 
 import (

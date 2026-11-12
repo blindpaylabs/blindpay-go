@@ -1,3 +1,4 @@
+// Command getbankdetails prints the bank-detail fields a payment rail needs.
 package main
 
 import (

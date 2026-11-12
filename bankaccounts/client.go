@@ -1,3 +1,6 @@
+// Package bankaccounts creates, lists, gets and deletes a customer's bank
+// accounts (PIX, ACH, wire, SPEI, SWIFT, RTP, SEPA, ...) and links US accounts
+// through Plaid. Use it through blindpay.Client.BankAccounts.
 package bankaccounts
 
 import (

@@ -1,3 +1,7 @@
+// Package transfers moves stablecoins from a managed wallet to another
+// address, optionally swapping tokens: transfer quotes, transfers, listing
+// with auto-paging. A swap between different tokens needs at least 100 USDC,
+// measured on the USDC side. Use it through blindpay.Client.Transfers.
 package transfers
 
 import (

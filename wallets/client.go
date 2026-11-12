@@ -1,3 +1,8 @@
+// Package wallets manages a customer's self-custody blockchain wallets
+// (Client: sign-message registration, direct-address registration, Solana
+// delegation, Stellar trustlines) and the offramp wallets of a bank account
+// (OfframpClient). Use it through blindpay.Client.Wallets and
+// blindpay.Client.OfframpWallets.
 package wallets
 
 import (

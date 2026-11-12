@@ -1,3 +1,7 @@
+// Package payins handles payins (fiat in, stablecoin out): payin quotes and FX
+// rates (Client.Quotes), creating a payin from a quote, listing with
+// auto-paging, and the public tracking endpoint. Amounts are integer cents
+// (1000 = 10.00). Use it through blindpay.Client.Payins.
 package payins
 
 import (

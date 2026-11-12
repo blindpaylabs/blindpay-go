@@ -1,3 +1,7 @@
+// Package custodialwallets manages BlindPay-managed (custodial) wallets for a
+// customer: create, list, get, delete, balances and the deposit history
+// (ListDeposits, ListDepositsAutoPaging). Wallet balances are whole tokens
+// (10.5 = 10.5 USDC). Use it through blindpay.Client.CustodialWallets.
 package custodialwallets
 
 import (

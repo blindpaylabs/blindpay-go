@@ -1,3 +1,6 @@
+// Package fees reads the instance's BlindPay fee schedule (flat fees in
+// integer cents, percentage fees in basis points). Use it through
+// blindpay.Client.Fees.
 package fees
 
 import (

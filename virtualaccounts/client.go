@@ -1,3 +1,6 @@
+// Package virtualaccounts manages virtual bank accounts (US, MX, CO...) that
+// receive fiat and settle stablecoins to a customer wallet. Use it through
+// blindpay.Client.VirtualAccounts.
 package virtualaccounts
 
 import (

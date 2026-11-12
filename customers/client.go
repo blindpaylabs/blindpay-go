@@ -1,3 +1,7 @@
+// Package customers handles customers: individual and business creation with
+// standard or enhanced KYC/KYB, updates, transaction limits, limit-increase
+// requests (whose ReviewReason explains a rejection or a lower approval) and
+// requests for information (RFI). Use it through blindpay.Client.Customers.
 package customers
 
 import (

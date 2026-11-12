@@ -1,3 +1,6 @@
+// Package partnerfees manages partner fee configurations that a partner adds
+// on top of BlindPay's fees (flat fees in integer cents, percentage fees in
+// basis points). Use it through blindpay.Client.PartnerFees.
 package partnerfees
 
 import (

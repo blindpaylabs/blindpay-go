@@ -1,3 +1,8 @@
+// Package quotes creates payout quotes (to a bank account or a payable) and
+// indicative FX rates. Amounts are integer cents (1000 = 10.00); a quote
+// expires after about 5 minutes. The FX rate endpoint is rate limited per
+// instance (429 AUTH_RATE_LIMITED with Retry-After, which the SDK honours).
+// Use it through blindpay.Client.Quotes.
 package quotes
 
 import (
