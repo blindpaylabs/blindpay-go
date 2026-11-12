@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 	mathrand "math/rand"
 	"net/http"
 	"net/url"
@@ -381,6 +382,9 @@ func maxResponseBodyBytes(cfg *Config) int64 {
 // body of exactly limit bytes is accepted and a longer one is rejected
 // (returning no body) with ErrResponseTooLarge.
 func readBody(r io.Reader, limit int64) ([]byte, error) {
+	if limit == math.MaxInt64 { // limit+1 would overflow: no cap
+		return io.ReadAll(r)
+	}
 	body, err := io.ReadAll(io.LimitReader(r, limit+1))
 	if err != nil {
 		return nil, err

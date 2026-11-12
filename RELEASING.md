@@ -36,9 +36,10 @@ No registry credentials exist or are needed.
 
 ## Re-running a stuck release
 
-Tag-on-push has never completed on a real push event: v1.21.0 was tagged by
-a manual `workflow_dispatch` after the push run stayed queued. After every
-merge that bumps the version, check:
+Tag-on-push works (push run 43093086939 tagged v1.20.0 at the #51 merge),
+but v1.21.0 needed a manual `workflow_dispatch` because its push run stayed
+queued during a runner incident. After every merge that bumps the version,
+check:
 
 ```sh
 gh run list -R blindpaylabs/blindpay-go -w Release -L 3

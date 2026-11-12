@@ -86,8 +86,10 @@ client, err := blindpay.New(apiKey, instanceID,
   `RoundTripper` that logs or mocks requests). The SDK never sets its
   `Timeout`; the per-attempt timeout is applied through the request context.
 - `WithMaxResponseBodyBytes` caps how much of a response body is read
-  (default 32 MiB). A larger response fails with an error that wraps
-  `blindpay.ErrResponseTooLarge` and is not retried.
+  (default 32 MiB; `math.MaxInt64` removes the cap). A larger successful
+  response fails with a `*blindpay.NetworkError` that wraps
+  `blindpay.ErrResponseTooLarge` and is not retried; a larger error response
+  is an `*APIError` with its status but without the body.
 - A `*blindpay.Client` is immutable and safe for concurrent use. Printing it
   or any sub-client, by pointer or by value, with any verb (`%v`, `%+v`,
   `%#v`, `%s`) never shows the API key, and transport error messages never
@@ -353,6 +355,17 @@ Development instances settle with the test token USDB and move no real money:
 [`examples/`](examples) has compile-checked programs for the common workflows:
 webhook setup and verification, a managed-wallet payin then payout, a fiat payin, and
 reconciliation with the auto-pager.
+
+## Upgrading to 1.22
+
+Every API change is additive. Two runtime changes:
+
+- Response bodies are read up to 32 MiB by default. A larger successful
+  response, for example an unpaginated `List` on a very large instance,
+  now fails with `blindpay.ErrResponseTooLarge`; page it (`ListAutoPaging`)
+  or raise the cap with `WithMaxResponseBodyBytes`.
+- `blindpay.NetworkError` messages no longer include the request's query
+  string (the `*url.Error` in the chain has it stripped too).
 
 ## Upgrading to 1.21
 

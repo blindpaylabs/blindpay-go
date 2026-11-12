@@ -3,6 +3,7 @@ package request
 import (
 	"context"
 	"errors"
+	"math"
 	"net"
 	"net/http"
 	"net/url"
@@ -20,6 +21,10 @@ func TestReadBody_Limit(t *testing.T) {
 	body, err = readBody(strings.NewReader("123456"), 5)
 	require.ErrorIs(t, err, ErrResponseTooLarge)
 	require.Nil(t, body)
+
+	body, err = readBody(strings.NewReader(okBody), math.MaxInt64)
+	require.NoError(t, err, "MaxInt64 means no cap and must not overflow")
+	require.Equal(t, okBody, string(body))
 }
 
 func TestDo_ResponseTooLarge(t *testing.T) {
