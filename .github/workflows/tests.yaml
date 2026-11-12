@@ -23,5 +23,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go-version }}
+      - name: Build the examples
+        run: go build ./examples/...
       - name: Run tests
         run: go list ./... | grep -v '/examples/' | xargs go test -v -race
