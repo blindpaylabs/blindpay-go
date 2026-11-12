@@ -511,7 +511,7 @@ Response-decoding tests must use these instead of hand-written JSON.
   "Upgrading" section.
 - PATCH bump: bug fixes, typo corrections, small non-breaking fixes.
 - Every PR that changes SDK behavior must bump the Version constant.
-- Releasing is automatic: on every push to main, `.github/workflows/release.yml` reads `const Version`. If tag `vX.Y.Z` doesn't exist yet, it builds, tests, pushes the tag and creates the GitHub release. Never tag by hand. To release, merge a PR that bumps the constant.
+- Releasing: on every push to main, `.github/workflows/release.yml` reads `const Version`. If tag `vX.Y.Z` doesn't exist yet, it builds, tests, pushes the tag and creates the GitHub release. Never tag by hand. To release, merge a PR that bumps the constant, then check `gh run list -w Release`: the push trigger has never completed a real release yet (v1.21.0 needed `gh workflow run release.yml --ref main`). The full runbook is [RELEASING.md](RELEASING.md).
 - Verify on `https://pkg.go.dev/github.com/blindpaylabs/blindpay-go@vX.Y.Z`.
 
 ## 10. OpenAPI to SDK mapping rules

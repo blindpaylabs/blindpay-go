@@ -389,6 +389,7 @@ Runtime behaviour changes:
 ## Documentation
 
 - [BlindPay documentation](https://blindpay.com/docs/getting-started/overview)
+- [Releasing this SDK](RELEASING.md) (maintainers)
 - [API reference](https://api.blindpay.com/reference)
 
 ## Support
