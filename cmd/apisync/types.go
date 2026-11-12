@@ -77,9 +77,10 @@ type IgnoreEntry struct {
 
 // SpecMap is the parsed .api-sync/spec-map.json.
 type SpecMap struct {
-	Enums  []EnumMapping `json:"enums"`
-	Types  []TypeMapping `json:"types"`
-	Ignore struct {
+	Enums    []EnumMapping    `json:"enums"`
+	Types    []TypeMapping    `json:"types"`
+	Webhooks []WebhookMapping `json:"webhooks"`
+	Ignore   struct {
 		Schemas []IgnoreEntry `json:"schemas"`
 	} `json:"ignore"`
 }

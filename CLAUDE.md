@@ -662,6 +662,12 @@ go run ./cmd/apisync -coverage [-spec <openapi.json>]   # METHOD+path coverage r
   `internal/request/errorcodes_gen.go`. A new code is a pending change
   (CI fails until `-apply` regenerates both files); a code removed from the
   spec is NEEDS_HUMAN, because its exported constant is public API.
+- Webhook payload schemas (`*WebhookOut`) are mapped in `spec-map.json`
+  `webhooks[]` to the typed payload in `webhook_events.go` plus the resource
+  struct it embeds (the struct parser does not follow embedded fields, so
+  list both). `-check` fails (NEEDS_HUMAN) on a webhook property that none of
+  those structs models and no pending field addition covers, so
+  webhook-only drift is caught.
 - Classifying a new schema: map it in `spec-map.json` `types[]` (union-policy
   types need a `property_sites` entry per new property), tie enum properties
   to an `enums[]` symbol, or excuse it in `unmodeled.json` with a real reason.

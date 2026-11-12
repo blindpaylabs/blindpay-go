@@ -148,6 +148,7 @@ func reconcileAndMaybeApply(repoRoot string, opts syncOptions) (quiet bool, err 
 	typePlan := reconcileTypes(repoRoot, sm, um, oldSpec, newSpec)
 	needsHuman = append(needsHuman, enumPlan.NeedsHuman...)
 	needsHuman = append(needsHuman, typePlan.NeedsHuman...)
+	needsHuman = append(needsHuman, checkWebhookCoverage(repoRoot, sm, um, newSpec, typePlan.Actions)...)
 	errorCodeActions, errorCodeNeedsHuman := planErrorCodes(repoRoot, newSpec)
 	needsHuman = append(needsHuman, errorCodeNeedsHuman...)
 	sort.Strings(needsHuman)
