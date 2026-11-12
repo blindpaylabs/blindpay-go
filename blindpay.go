@@ -26,7 +26,7 @@ import (
 )
 
 // Version is the current version of the SDK.
-const Version = "1.21.0"
+const Version = "1.22.0"
 
 // Client is the main BlindPay client. It is immutable after New and safe
 // for concurrent use by multiple goroutines.

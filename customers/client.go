@@ -594,6 +594,11 @@ type LimitIncreaseRequest struct {
 	CreatedAt              string                                     `json:"created_at"`
 	UpdatedAt              string                                     `json:"updated_at"`
 	SupportingDocuments    []LimitIncreaseSupportingDocument          `json:"supporting_documents,omitempty"`
+	// ReviewReason explains why compliance rejected the request or approved
+	// lower limits than requested, and what to send to get the full amount.
+	// It is set when Status is rejected or the request was approved below the
+	// requested limits; nil otherwise (1-2000 characters).
+	ReviewReason *string `json:"review_reason,omitempty"`
 }
 
 // AdditionalInfoLabel names the kind of an additional document (e.g.
