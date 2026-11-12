@@ -660,7 +660,7 @@ go run ./cmd/apisync -coverage [-spec <openapi.json>]   # METHOD+path coverage r
   re-marshaled); blindpay-v2 ships it pretty-printed with 2 spaces, so a
   refresh is a small diff.
 - Error codes: `-check`/`-apply` also parse the spec's `Errors` tag table
-  (failing on zero rows) and compare it with `errorcodes_gen.go` and
+  (failing when it is missing or has zero rows) and compare it with `errorcodes_gen.go` and
   `internal/request/errorcodes_gen.go`. A new code is a pending change
   (CI fails until `-apply` regenerates both files); a code removed from the
   spec is NEEDS_HUMAN, because its exported constant is public API.
