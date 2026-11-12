@@ -45,7 +45,7 @@ func (v webhookVector) header() http.Header {
 
 func (v webhookVector) clock() WebhookOption {
 	now := time.Unix(v.Now, 0)
-	return withWebhookClock(func() time.Time { return now })
+	return WithWebhookClock(func() time.Time { return now })
 }
 
 func TestVerifyWebhook_Vectors(t *testing.T) {
@@ -106,7 +106,7 @@ func TestVerifyWebhook_HeaderAliasesAndCase(t *testing.T) {
 func TestVerifyWebhook_Tolerance(t *testing.T) {
 	v := loadWebhookVectors(t)[0]
 	late := time.Unix(v.Now+600, 0)
-	clock := withWebhookClock(func() time.Time { return late })
+	clock := WithWebhookClock(func() time.Time { return late })
 
 	require.False(t, VerifyWebhook([]byte(v.Payload), v.header(), v.Secret, clock))
 	require.True(t, VerifyWebhook([]byte(v.Payload), v.header(), v.Secret, clock, WithWebhookTolerance(10*time.Minute)))

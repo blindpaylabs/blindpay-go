@@ -289,8 +289,10 @@ func handleWebhook(w http.ResponseWriter, r *http.Request) {
 - `blindpay.VerifyWebhook(body, r.Header, secret)` returns only a `bool`.
 - `blindpay.ParseWebhookEvent(body)` decodes without verifying; use it only on
   trusted input.
-- The timestamp must be within 5 minutes; change it with
-  `blindpay.WithWebhookTolerance(d)`.
+- The timestamp must be within 5 minutes of now; change the window with
+  `blindpay.WithWebhookTolerance(d)` and the clock with
+  `blindpay.WithWebhookClock(func() time.Time { return receivedAt })` (to
+  verify a recorded delivery, or to run test vectors at a fixed time).
 - Never log the webhook secret.
 
 ## File upload
