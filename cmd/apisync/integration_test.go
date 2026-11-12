@@ -187,7 +187,7 @@ func TestIntegration_RefreshedSnapshotIsAByteForByteCopyNotAReserialization(t *t
 	require.Equal(t, oddSpecJSON, string(snapshot), "refreshSnapshot must copy spec-current.json's bytes verbatim, never re-marshal them")
 }
 
-func TestIntegration_FieldOnlyChangeBumpsPatch(t *testing.T) {
+func TestIntegration_FieldOnlyChangeBumpsMinor(t *testing.T) {
 	root := integrationFixture(t, map[string]string{"Widget": baselineWidgetSchema})
 	writeSpecCurrent(t, root, map[string]string{
 		"Widget": `{"type":"object","properties":{
@@ -200,7 +200,7 @@ func TestIntegration_FieldOnlyChangeBumpsPatch(t *testing.T) {
 
 	_, err := reconcileAndMaybeApply(root, syncOptions{Apply: true})
 	require.NoError(t, err)
-	require.Contains(t, readFixture(t, root, "blindpay.go"), `const Version = "1.0.1"`)
+	require.Contains(t, readFixture(t, root, "blindpay.go"), `const Version = "1.1.0"`, "an added field is a new feature: minor")
 }
 
 func TestIntegration_OperationSetChangeAloneBumpsMinorEvenForAFieldOnlyAction(t *testing.T) {

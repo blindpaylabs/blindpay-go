@@ -441,7 +441,8 @@ func (p *planResult) reconcileOneLevel(repoRoot, unmodeledSchemaKey, humanLabelP
 			p.Actions = append(p.Actions, action{
 				description: fmt.Sprintf("field %s.%s: add %s (%s)", shape.Symbol, goName, name, shape.File),
 				insert:      insertion{File: shape.File, Line: shape.LastFieldLine, Text: fieldLine},
-				bump:        "patch",
+				// A new field is a new feature: MINOR (CLAUDE.md section 9).
+				bump: "minor",
 			})
 		}
 	}
