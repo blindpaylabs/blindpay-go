@@ -10,6 +10,7 @@ import (
 	"io"
 	mathrand "math/rand"
 	"net/http"
+	"net/url"
 	"reflect"
 	"strconv"
 	"strings"
@@ -29,9 +30,11 @@ var ErrInvalidIdempotencyKey = errors.New("blindpay: idempotency key must be 1-2
 
 // NetworkError is returned when no usable HTTP response was received
 // (connection failure, DNS, TLS, per-attempt timeout, caller cancellation, a
-// 2xx whose body could not be read) or when the request could not be built
-// (bad base URL, invalid header). Use errors.Is on it for context.Canceled /
-// context.DeadlineExceeded.
+// 2xx whose body could not be read or was larger than the size limit) or
+// when the request could not be built (bad base URL, invalid header). Use
+// errors.Is on it for context.Canceled / context.DeadlineExceeded /
+// ErrResponseTooLarge. Its message never includes the request's query
+// string.
 type NetworkError struct {
 	Err error
 	// IdempotencyKey is the key the request carried, if any. Resending with
@@ -53,6 +56,17 @@ func (e *NetworkError) Unwrap() error { return e.Err }
 // ErrInvalidTimeout is returned, before any request is sent, when a
 // per-request timeout is zero or negative.
 var ErrInvalidTimeout = errors.New("blindpay: request timeout must be positive")
+
+// DefaultMaxResponseBodyBytes is the largest response body the SDK reads
+// when Config.MaxResponseBodyBytes is zero (32 MiB).
+const DefaultMaxResponseBodyBytes int64 = 32 << 20
+
+// ErrResponseTooLarge is wrapped by the error returned when a response body
+// is larger than the configured limit. A 2xx response that is too large
+// returns a *NetworkError (not retried: the same request would return the
+// same body); an error response that is too large returns an *APIError
+// without the body.
+var ErrResponseTooLarge = errors.New("blindpay: response body exceeds the size limit")
 
 // DecodeError is returned when a 2xx response body cannot be decoded into the
 // method's result type. The request succeeded on the server: do not resend it
@@ -229,6 +243,10 @@ func send(cfg *Config, ctx context.Context, req outgoing, o RequestOptions) (suc
 			if res.err == nil {
 				return success{status: res.status, header: res.header, body: res.body, key: key}, nil
 			}
+			if errors.Is(res.err, ErrResponseTooLarge) {
+				// Deterministic: resending returns the same body.
+				return success{}, &NetworkError{Err: res.err, IdempotencyKey: key}
+			}
 			// Success, but the body was lost. Resending is safe for a GET and
 			// for a keyed mutation (the API replays the stored response).
 			netErr := &NetworkError{Err: res.err, IdempotencyKey: key, Retryable: resendable && ctx.Err() == nil}
@@ -316,7 +334,7 @@ func attemptOnce(cfg *Config, ctx context.Context, req outgoing, o RequestOption
 	}
 	httpReq, err := http.NewRequestWithContext(attemptCtx, req.method, cfg.BaseURL+req.path, reader)
 	if err != nil {
-		return attemptResult{buildErr: fmt.Errorf("failed to create request: %w", err)}
+		return attemptResult{buildErr: fmt.Errorf("failed to create request: %w", redactURLError(err))}
 	}
 
 	for name, values := range o.Header {
@@ -327,7 +345,9 @@ func attemptOnce(cfg *Config, ctx context.Context, req outgoing, o RequestOption
 			httpReq.Header.Add(name, v)
 		}
 	}
-	httpReq.Header.Set("Authorization", "Bearer "+cfg.APIKey)
+	if cfg.APIKey != nil {
+		httpReq.Header.Set("Authorization", "Bearer "+*cfg.APIKey)
+	}
 	httpReq.Header.Set("User-Agent", cfg.UserAgent)
 	httpReq.Header.Set("Accept", "application/json")
 	if req.hasBody {
@@ -339,15 +359,56 @@ func attemptOnce(cfg *Config, ctx context.Context, req outgoing, o RequestOption
 
 	resp, err := httpClient(cfg).Do(httpReq)
 	if err != nil {
-		return attemptResult{err: err}
+		return attemptResult{err: redactURLError(err)}
 	}
-	body, err := io.ReadAll(resp.Body)
+	body, err := readBody(resp.Body, maxResponseBodyBytes(cfg))
 	_ = resp.Body.Close()
 	res := attemptResult{status: resp.StatusCode, header: resp.Header, body: body}
 	if err != nil {
 		res.err = fmt.Errorf("failed to read response body: %w", err)
 	}
 	return res
+}
+
+func maxResponseBodyBytes(cfg *Config) int64 {
+	if cfg.MaxResponseBodyBytes > 0 {
+		return cfg.MaxResponseBodyBytes
+	}
+	return DefaultMaxResponseBodyBytes
+}
+
+// readBody reads at most limit bytes. It reads one byte past the limit so a
+// body of exactly limit bytes is accepted and a longer one is rejected
+// (returning no body) with ErrResponseTooLarge.
+func readBody(r io.Reader, limit int64) ([]byte, error) {
+	body, err := io.ReadAll(io.LimitReader(r, limit+1))
+	if err != nil {
+		return nil, err
+	}
+	if int64(len(body)) > limit {
+		return nil, fmt.Errorf("%w (%d bytes)", ErrResponseTooLarge, limit)
+	}
+	return body, nil
+}
+
+// redactURLError drops the query string and fragment from the URL of the
+// *url.Error that net/http returns, so error messages and logs never contain
+// query parameters (filter values such as customer names are PII). The
+// chain is kept: errors.Is/As still reach the context error and the
+// *url.Error, whose Timeout method still works.
+func redactURLError(err error) error {
+	urlErr, ok := err.(*url.Error) //nolint:errorlint // net/http returns *url.Error unwrapped
+	if !ok {
+		return err
+	}
+	return &url.Error{Op: urlErr.Op, URL: stripQuery(urlErr.URL), Err: urlErr.Err}
+}
+
+func stripQuery(u string) string {
+	if i := strings.IndexAny(u, "?#"); i >= 0 {
+		return u[:i]
+	}
+	return u
 }
 
 // validHeaderName reports whether name is an RFC 7230 token, as net/http

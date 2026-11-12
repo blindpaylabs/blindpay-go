@@ -31,12 +31,16 @@ const Version = "1.22.0"
 // Client is the main BlindPay client. It is immutable after New and safe
 // for concurrent use by multiple goroutines.
 type Client struct {
+	// The API key is deliberately not a field: it lives only behind the
+	// sub-clients' shared request config, so no fmt verb applied to a
+	// Client (or a struct embedding one) can print it.
 	baseURL    string
-	apiKey     string
 	instanceID string
 	httpClient *http.Client
 	timeout    time.Duration
 	maxRetries int
+
+	maxResponseBodyBytes int64
 
 	Available        *available.Client
 	BankAccounts     *bankaccounts.Client
@@ -70,7 +74,6 @@ func New(apiKey, instanceID string, opts ...Option) (*Client, error) {
 
 	c := &Client{
 		baseURL:    "https://api.blindpay.com/v1",
-		apiKey:     apiKey,
 		instanceID: instanceID,
 		// No http.Client.Timeout: it would cut off the per-attempt timeout,
 		// which is applied through the request context instead.
@@ -85,12 +88,14 @@ func New(apiKey, instanceID string, opts ...Option) (*Client, error) {
 
 	cfg := &config.Config{
 		BaseURL:    c.baseURL,
-		APIKey:     c.apiKey,
+		APIKey:     apiKey,
 		InstanceID: c.instanceID,
 		HTTPClient: c.httpClient,
 		UserAgent:  c.userAgent(),
 		Timeout:    c.timeout,
 		MaxRetries: c.maxRetries,
+
+		MaxResponseBodyBytes: c.maxResponseBodyBytes,
 	}
 
 	c.Available = available.NewClient(cfg)
@@ -115,13 +120,16 @@ func New(apiKey, instanceID string, opts ...Option) (*Client, error) {
 	return c, nil
 }
 
-// String implements fmt.Stringer without exposing the API key.
-func (c *Client) String() string {
+// String implements fmt.Stringer without exposing the API key. It has a
+// value receiver so a Client printed by value (fmt.Sprintf("%+v", *c)) is
+// redacted too, not only *Client.
+func (c Client) String() string {
 	return fmt.Sprintf("blindpay.Client{instanceID: %q, baseURL: %q, apiKey: [REDACTED]}", c.instanceID, c.baseURL)
 }
 
-// GoString implements fmt.GoStringer without exposing the API key.
-func (c *Client) GoString() string {
+// GoString implements fmt.GoStringer (the %#v verb) without exposing the
+// API key.
+func (c Client) GoString() string {
 	return c.String()
 }
 

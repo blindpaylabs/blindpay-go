@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/blindpaylabs/blindpay-go/internal/request"
 	"github.com/blindpaylabs/blindpay-go/option"
 )
 
@@ -64,6 +65,22 @@ func WithMaxRetries(n int) Option {
 			n = 0
 		}
 		c.maxRetries = n
+	}
+}
+
+// DefaultMaxResponseBodyBytes is the largest response body the client reads
+// unless WithMaxResponseBodyBytes changes it (32 MiB).
+const DefaultMaxResponseBodyBytes = request.DefaultMaxResponseBodyBytes
+
+// WithMaxResponseBodyBytes caps how many bytes of a response body the client
+// reads (default DefaultMaxResponseBodyBytes). A larger response fails with
+// an error that wraps ErrResponseTooLarge. Zero or a negative value keeps
+// the default.
+func WithMaxResponseBodyBytes(n int64) Option {
+	return func(c *Client) {
+		if n > 0 {
+			c.maxResponseBodyBytes = n
+		}
 	}
 }
 

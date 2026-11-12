@@ -15,7 +15,7 @@ import (
 func newTestConfig(rt http.RoundTripper) *Config {
 	return &Config{
 		BaseURL:    "https://api.blindpay.com/v1",
-		APIKey:     "test_key",
+		APIKey:     ptrTo("test_key"),
 		HTTPClient: &http.Client{Transport: rt},
 		UserAgent:  "blindpay-go/test",
 	}
