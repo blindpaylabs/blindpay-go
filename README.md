@@ -351,7 +351,7 @@ Development instances settle with the test token USDB and move no real money:
 ## Examples
 
 [`examples/`](examples) has compile-checked programs for the common workflows:
-webhook setup and verification, a managed-wallet payout, a fiat payin, and
+webhook setup and verification, a managed-wallet payin then payout, a fiat payin, and
 reconciliation with the auto-pager.
 
 ## Upgrading to 1.21

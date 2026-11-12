@@ -36,7 +36,7 @@ never run there.
 | Example | Shows |
 |---|---|
 | `webhooks` | Register a webhook endpoint, verify deliveries on the raw body, dedupe on `svix-id`, branch on typed events |
-| `managedwalletpayout` | Quote to a bank account, pay out from a managed wallet (`WalletID`) with an idempotency key, handle a retryable 5xx |
+| `managedwalletpayout` | Fund a managed wallet with a payin (quote with `WalletID`), wait for it, then quote to a bank account and pay out from the wallet (`WalletID`) with an idempotency key; handle a retryable 5xx and an actionable error code |
 | `fiatpayin` | Payin quote, then payin; print the PIX code to pay |
 | `reconciliation` | Walk every completed payout of a customer with `ListAutoPaging` |
 

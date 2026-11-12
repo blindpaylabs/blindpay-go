@@ -1,5 +1,8 @@
-// Command managedwalletpayout quotes a payout to a bank account and pays it
-// from a BlindPay managed wallet (docs: migration guide, managed wallets).
+// Command managedwalletpayout funds a BlindPay managed wallet with a payin,
+// then pays out from it to a bank account using the wallet's ID (WalletID).
+// Run it against a development instance: settlement uses the test token
+// USDB, a payin completes after about 30 seconds, and a payout quote of
+// 66600 cents fails while 77700 is refunded.
 package main
 
 import (
@@ -7,10 +10,17 @@ import (
 	"errors"
 	"log"
 	"os"
+	"time"
 
 	"github.com/blindpaylabs/blindpay-go"
+	"github.com/blindpaylabs/blindpay-go/payins"
 	"github.com/blindpaylabs/blindpay-go/payouts"
 	"github.com/blindpaylabs/blindpay-go/quotes"
+)
+
+const (
+	walletID      = "wa_000000000000" // a managed wallet (client.CustodialWallets)
+	bankAccountID = "ba_000000000000" // the customer's bank account
 )
 
 func main() {
@@ -20,24 +30,56 @@ func main() {
 	}
 	ctx := context.Background()
 
-	network, token := blindpay.NetworkBase, blindpay.StablecoinUSDC
-	quote, err := client.Quotes.Create(ctx, &quotes.CreateParams{
-		BankAccountID: "ba_000000000000",
+	// 1. Payin into the managed wallet: quote with WalletID, then execute.
+	wallet := walletID
+	payinQuote, err := client.Payins.Quotes.Create(ctx, &payins.CreateQuoteParams{
+		WalletID:      &wallet,
 		CurrencyType:  blindpay.CurrencyTypeSender,
-		Network:       &network,
+		PaymentMethod: "pix",
+		RequestAmount: 100000, // integer cents: 1,000.00 BRL
+		Token:         blindpay.StablecoinUSDB,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	payin, err := client.Payins.CreateEvm(ctx, payinQuote.ID, blindpay.WithIdempotencyKey("payin-"+payinQuote.ID))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// 2. Wait for the payin to complete. In production, react to the
+	// payin.complete (or wallet.inbound) webhook instead of polling.
+	for payin.Status != blindpay.TransactionStatusCompleted {
+		if payin.Status == blindpay.TransactionStatusFailed || payin.Status == blindpay.TransactionStatusRefunded {
+			log.Fatalf("payin %s ended %s", payin.ID, payin.Status)
+		}
+		time.Sleep(10 * time.Second) // development instances are rate limited
+		p, err := client.Payins.Get(ctx, payin.ID)
+		if err != nil {
+			log.Fatal(err)
+		}
+		payin.Status = p.Status
+	}
+
+	// 3. Quote the payout to the bank account.
+	network, token := blindpay.NetworkBase, blindpay.StablecoinUSDB
+	quote, err := client.Quotes.Create(ctx, &quotes.CreateParams{
+		BankAccountID: bankAccountID,
+		CurrencyType:  blindpay.CurrencyTypeSender,
+		Network:       &network, // the managed wallet's network
 		Token:         &token,
-		RequestAmount: 10000, // integer cents: 100.00 USDC
+		RequestAmount: 10000, // integer cents: 100.00 USDB
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Pay from the managed wallet (WalletID), not a customer wallet
+	// 4. Pay from the managed wallet (WalletID), not a customer wallet
 	// (SenderWalletAddress): set exactly one. The idempotency key makes a
 	// resend safe.
 	payout, err := client.Payouts.CreateEvm(ctx, &payouts.CreateEvmParams{
 		QuoteID:  quote.ID,
-		WalletID: "wa_000000000000",
+		WalletID: walletID,
 	}, blindpay.WithIdempotencyKey("payout-"+quote.ID))
 
 	var apiErr *blindpay.APIError
@@ -46,6 +88,8 @@ func main() {
 		// A 5xx is not retried automatically: check whether the payout exists
 		// (e.g. list payouts) before resending with apiErr.IdempotencyKey.
 		log.Fatalf("payout outcome unknown, key %s: %v", apiErr.IdempotencyKey, err)
+	case errors.As(err, &apiErr) && apiErr.RetryClass() == blindpay.RetryClassActionable:
+		log.Fatalf("fix the request first (%s): %s", apiErr.Code, apiErr.Description)
 	case err != nil:
 		log.Fatal(err)
 	}
