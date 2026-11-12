@@ -69,10 +69,15 @@ type CreateQuoteParams struct {
 	CustomerWalletAddress string                `json:"customer_wallet_address"`
 	CustomerToken         types.StablecoinToken `json:"customer_token"`
 	CustomerNetwork       types.Network         `json:"customer_network"`
-	RequestAmount         float64               `json:"request_amount"`
-	CoverFees             bool                  `json:"cover_fees,omitempty"`
-	AmountReference       string                `json:"amount_reference"`
-	PartnerFeeID          *string               `json:"partner_fee_id,omitempty"`
+	// RequestAmount is in integer cents (1000 = 10.00). A swap between
+	// different tokens needs at least 100 USDC, measured on the USDC side;
+	// below that the API answers 400 with
+	// blindpay.ErrorCodeTransfersSwapAmountBelowMinimum
+	// (TRANSFERS_SWAP_AMOUNT_BELOW_MINIMUM).
+	RequestAmount   float64 `json:"request_amount"`
+	CoverFees       bool    `json:"cover_fees,omitempty"`
+	AmountReference string  `json:"amount_reference"`
+	PartnerFeeID    *string `json:"partner_fee_id,omitempty"`
 	// PartnerPercentageFee is in basis points (100 = 1%) and PartnerFlatFee
 	// in integer cents; they override the partner fee for this quote.
 	PartnerPercentageFee *int64 `json:"partner_percentage_fee,omitempty"`

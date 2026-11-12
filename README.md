@@ -76,6 +76,7 @@ client, err := blindpay.New(apiKey, instanceID,
 	blindpay.WithMaxRetries(3),           // default 2 (3 attempts); 0 disables retries
 	blindpay.WithHTTPClient(httpClient),  // custom transport, proxy, logging RoundTripper
 	blindpay.WithBaseURL("https://proxy.example.com/v1"),
+	blindpay.WithMaxResponseBodyBytes(8<<20), // default 32 MiB
 )
 ```
 
@@ -84,8 +85,13 @@ client, err := blindpay.New(apiKey, instanceID,
 - `WithHTTPClient` lets you inject an `http.Client` (for example with a
   `RoundTripper` that logs or mocks requests). The SDK never sets its
   `Timeout`; the per-attempt timeout is applied through the request context.
+- `WithMaxResponseBodyBytes` caps how much of a response body is read
+  (default 32 MiB). A larger response fails with an error that wraps
+  `blindpay.ErrResponseTooLarge` and is not retried.
 - A `*blindpay.Client` is immutable and safe for concurrent use. Printing it
-  (`%v`, `%#v`) never shows the API key.
+  or any sub-client, by pointer or by value, with any verb (`%v`, `%+v`,
+  `%#v`, `%s`) never shows the API key, and transport error messages never
+  include the request's query string.
 
 ### Per-request options
 
@@ -116,8 +122,15 @@ case errors.As(err, &apiErr):
 	// The API answered with a non-2xx status.
 	log.Printf("status=%d code=%s message=%s trace_id=%s request_id=%s",
 		apiErr.StatusCode, apiErr.Code, apiErr.Message, apiErr.TraceID, apiErr.RequestID)
-	if apiErr.Code == "PAYOUTS_INSUFFICIENT_BALANCE" {
-		// ...
+	switch blindpay.ErrorCode(apiErr.Code) {
+	case blindpay.ErrorCodeTransfersSwapAmountBelowMinimum:
+		// Swaps between different tokens need at least 100 USDC,
+		// measured on the USDC side: ask for a larger amount.
+	case blindpay.ErrorCodePayoutsInsufficientBalance:
+		// Fund the wallet, then retry.
+	}
+	if apiErr.RetryClass() == blindpay.RetryClassActionable {
+		// The request succeeds only after something is fixed.
 	}
 case errors.As(err, &netErr):
 	// No response: connection error, timeout or cancellation.
@@ -144,6 +157,23 @@ case err != nil:
 Non-JSON error bodies (for example a proxy's HTML 502) still produce an
 `*APIError` with the status.
 
+### Error codes
+
+`blindpay.ErrorCode*` has one constant per code in the API's error table
+(generated from the API spec), each documented with its typical status and
+retry class. Prefer `Code`; keep `Message` for the bodies that have no code
+(idempotency errors, some legacy paths), where the legacy `message` string
+(for example `idempotency_key_in_flight`) is the only identifier. The set is
+open: a code newer than this SDK still arrives in `Code` as a plain string.
+
+- `apiErr.RetryClass()` returns `RetryClassRetryable` (send the same request
+  again), `RetryClassTerminal` (do not retry), `RetryClassActionable` (fix
+  something first, e.g. fund a balance) or `RetryClassUnknown` (no code, or
+  a code this version does not know). It is guidance only: automatic
+  retries follow "Idempotency and retries" below.
+- `blindpay.LookupErrorCode(code)` returns the code's `ErrorCodeInfo`
+  (`Status`, `Retry`) and whether the code is known.
+
 ## Idempotency and retries
 
 `POST`, `PUT`, `PATCH` and `DELETE` calls accept an idempotency key. The API
@@ -168,6 +198,10 @@ honouring `Retry-After` up to 60 seconds):
 |---|---|
 | `GET` | network errors, timeouts, HTTP 408, 429, 500, 502, 503, 504 |
 | `POST`/`PUT`/`PATCH`/`DELETE` | network errors, timeouts, 429, 409 `idempotency_key_in_flight` |
+
+Indicative FX quote endpoints are rate limited per instance; a limited call
+returns 429 `AUTH_RATE_LIMITED` with a `Retry-After` header, which the SDK
+honours when it retries.
 
 Mutations are **never** retried on a 5xx, because the API releases the
 idempotency key on a 5xx and a retry would run the operation again. You get an
@@ -288,7 +322,20 @@ URL for an uploaded file.
 
 Payout, payin, quote and limit amounts are **integer cents** (`1000` = 10.00).
 Partner percentage fees are basis points (`100` = 1%), partner flat fees are
-cents, and wallet balances are whole tokens (`10.5` = 10.5 USDC).
+cents, and wallet balances are whole tokens (`10.5` = 10.5 USDC). The Go
+fields are `float64` for compatibility; the cent fields say so in their doc
+comments, and you still pass whole numbers (`1000`, not `10.00`).
+
+A transfer that swaps between different tokens needs at least 100 USDC,
+measured on the USDC side; below that the API answers 400
+`TRANSFERS_SWAP_AMOUNT_BELOW_MINIMUM` (`blindpay.ErrorCodeTransfersSwapAmountBelowMinimum`).
+
+## Limit increases
+
+`client.Customers.GetLimitIncreaseRequests` (and the `limitIncrease.new` /
+`limitIncrease.update` webhooks) carry `ReviewReason` when compliance
+rejected a request or approved lower limits than requested: why, and what
+to send to get the full amount. It is nil otherwise.
 
 ## Testing against a development instance
 
@@ -296,9 +343,10 @@ Development instances settle with the test token USDB and move no real money:
 
 - A payout of `66600` cents fails and `77700` is refunded.
 - Payins complete after about 30 seconds.
-- Quotes expire after 5 minutes.
-- Development instances are limited to 40 requests per minute (HTTP 429; the
-  SDK retries it).
+- Quotes expire after 5 minutes (OTC payin quotes after 10 seconds; a SEPA
+  payout quote can expire sooner).
+- Development instances are rate limited per instance on every route (HTTP
+  429 `AUTH_RATE_LIMITED` with `Retry-After`; the SDK retries it).
 
 ## Examples
 
