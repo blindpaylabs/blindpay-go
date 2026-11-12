@@ -148,9 +148,11 @@ func reconcileAndMaybeApply(repoRoot string, opts syncOptions) (quiet bool, err 
 	typePlan := reconcileTypes(repoRoot, sm, um, oldSpec, newSpec)
 	needsHuman = append(needsHuman, enumPlan.NeedsHuman...)
 	needsHuman = append(needsHuman, typePlan.NeedsHuman...)
+	errorCodeActions, errorCodeNeedsHuman := planErrorCodes(repoRoot, newSpec)
+	needsHuman = append(needsHuman, errorCodeNeedsHuman...)
 	sort.Strings(needsHuman)
 
-	actions := append(append(append([]action{}, enumPlan.Actions...), typePlan.Actions...), opPlan.Actions...)
+	actions := append(append(append(append([]action{}, enumPlan.Actions...), typePlan.Actions...), opPlan.Actions...), errorCodeActions...)
 	sort.Slice(actions, func(i, j int) bool { return actions[i].description < actions[j].description })
 
 	gaps := computeCoverageGaps(repoRoot, newSpec)
@@ -189,10 +191,17 @@ func reconcileAndMaybeApply(repoRoot string, opts syncOptions) (quiet bool, err 
 
 	insertions := make([]insertion, 0, len(actions))
 	touchedFiles := map[string]bool{}
+	writes := map[string][]byte{}
 	bump := "patch"
 	for _, a := range actions {
-		insertions = append(insertions, a.insert)
-		touchedFiles[a.insert.File] = true
+		if a.writes != nil {
+			for file, data := range a.writes {
+				writes[file] = data
+			}
+		} else {
+			insertions = append(insertions, a.insert)
+			touchedFiles[a.insert.File] = true
+		}
 		if a.bump == "minor" {
 			bump = "minor"
 		}
@@ -203,6 +212,11 @@ func reconcileAndMaybeApply(repoRoot string, opts syncOptions) (quiet bool, err 
 
 	if err := applyInsertions(repoRoot, insertions); err != nil {
 		return false, fmt.Errorf("applying changes: %w", err)
+	}
+	for file, data := range writes {
+		if err := os.WriteFile(filepath.Join(repoRoot, file), data, 0o600); err != nil { //#nosec G703 -- fixed repo-relative generated file
+			return false, fmt.Errorf("writing %s: %w", file, err)
+		}
 	}
 	for file := range touchedFiles {
 		if !strings.HasSuffix(file, ".go") {

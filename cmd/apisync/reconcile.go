@@ -11,7 +11,10 @@ import (
 type action struct {
 	description string
 	insert      insertion
-	bump        string // "minor" or "patch"
+	// writes, when set, replaces whole files (generated code) instead of
+	// splicing insert.
+	writes map[string][]byte
+	bump   string // "minor" or "patch"
 }
 
 // planResult is everything a single reconciliation pass produced.
