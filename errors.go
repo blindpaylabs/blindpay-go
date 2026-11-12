@@ -24,6 +24,13 @@ var ErrInvalidIdempotencyKey = request.ErrInvalidIdempotencyKey
 // per-request timeout is zero or negative.
 var ErrInvalidTimeout = request.ErrInvalidTimeout
 
+// ErrResponseTooLarge is wrapped by the error returned when a response body
+// is larger than the client's limit (WithMaxResponseBodyBytes). Check it with
+// errors.Is. A 2xx response that is too large returns a *NetworkError and is
+// not retried; an error response that is too large returns an *APIError
+// without the body.
+var ErrResponseTooLarge = request.ErrResponseTooLarge
+
 // DecodeError is returned when a 2xx response body cannot be decoded. It
 // keeps the status, request ID and idempotency key.
 type DecodeError = request.DecodeError

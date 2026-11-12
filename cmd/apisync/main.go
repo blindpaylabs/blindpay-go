@@ -93,6 +93,10 @@ type syncOptions struct {
 	Apply      bool
 	SpecPath   string // empty means apply the mode-based default
 	ReportPath string // empty means do not write a report
+	// ErrorCodesOptional lets a spec without an Errors table pass when the
+	// repo has no generated error-code files. Test fixtures only: there is
+	// no CLI flag, so the real -check and -apply always require the table.
+	ErrorCodesOptional bool
 }
 
 // reconcileAndMaybeApply is the whole tool's core, independent of the CLI
@@ -148,9 +152,12 @@ func reconcileAndMaybeApply(repoRoot string, opts syncOptions) (quiet bool, err 
 	typePlan := reconcileTypes(repoRoot, sm, um, oldSpec, newSpec)
 	needsHuman = append(needsHuman, enumPlan.NeedsHuman...)
 	needsHuman = append(needsHuman, typePlan.NeedsHuman...)
+	needsHuman = append(needsHuman, checkWebhookCoverage(repoRoot, sm, um, newSpec, typePlan.Actions)...)
+	errorCodeActions, errorCodeNeedsHuman := planErrorCodes(repoRoot, newSpec, opts.ErrorCodesOptional)
+	needsHuman = append(needsHuman, errorCodeNeedsHuman...)
 	sort.Strings(needsHuman)
 
-	actions := append(append(append([]action{}, enumPlan.Actions...), typePlan.Actions...), opPlan.Actions...)
+	actions := append(append(append(append([]action{}, enumPlan.Actions...), typePlan.Actions...), opPlan.Actions...), errorCodeActions...)
 	sort.Slice(actions, func(i, j int) bool { return actions[i].description < actions[j].description })
 
 	gaps := computeCoverageGaps(repoRoot, newSpec)
@@ -189,10 +196,17 @@ func reconcileAndMaybeApply(repoRoot string, opts syncOptions) (quiet bool, err 
 
 	insertions := make([]insertion, 0, len(actions))
 	touchedFiles := map[string]bool{}
+	writes := map[string][]byte{}
 	bump := "patch"
 	for _, a := range actions {
-		insertions = append(insertions, a.insert)
-		touchedFiles[a.insert.File] = true
+		if a.writes != nil {
+			for file, data := range a.writes {
+				writes[file] = data
+			}
+		} else {
+			insertions = append(insertions, a.insert)
+			touchedFiles[a.insert.File] = true
+		}
 		if a.bump == "minor" {
 			bump = "minor"
 		}
@@ -203,6 +217,11 @@ func reconcileAndMaybeApply(repoRoot string, opts syncOptions) (quiet bool, err 
 
 	if err := applyInsertions(repoRoot, insertions); err != nil {
 		return false, fmt.Errorf("applying changes: %w", err)
+	}
+	for file, data := range writes {
+		if err := os.WriteFile(filepath.Join(repoRoot, file), data, 0o600); err != nil { //#nosec G703 -- fixed repo-relative generated file
+			return false, fmt.Errorf("writing %s: %w", file, err)
+		}
 	}
 	for file := range touchedFiles {
 		if !strings.HasSuffix(file, ".go") {

@@ -12,8 +12,12 @@ import (
 // Config holds the configuration for making API requests. It is shared by
 // every resource client and must not be mutated after construction.
 type Config struct {
-	BaseURL    string
-	APIKey     string
+	BaseURL string
+	// APIKey is behind a pointer on purpose: every resource client keeps a
+	// *Config in an unexported field, and fmt prints a nested pointer as an
+	// address, so formatting a client with any verb (%v, %+v, %#v, %s...)
+	// never prints the key. A string field here would be printed by %s.
+	APIKey     *string
 	HTTPClient *http.Client
 	UserAgent  string
 
@@ -23,6 +27,9 @@ type Config struct {
 	// MaxRetries is the number of retries after the first attempt (rules on
 	// send). Zero disables retries and automatic idempotency keys.
 	MaxRetries int
+	// MaxResponseBodyBytes caps how much of a response body is read. Zero
+	// means DefaultMaxResponseBodyBytes.
+	MaxResponseBodyBytes int64
 
 	// Test seams. Nil means the production implementation.
 	Sleep  func(ctx context.Context, d time.Duration) error

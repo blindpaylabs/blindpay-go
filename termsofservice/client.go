@@ -1,3 +1,7 @@
+// Package termsofservice starts a terms-of-service acceptance: Initiate
+// returns a URL that the customer opens and accepts in a browser, which
+// yields the tos_id used to create the customer. Use it through
+// blindpay.Client.Tos.
 package termsofservice
 
 import (

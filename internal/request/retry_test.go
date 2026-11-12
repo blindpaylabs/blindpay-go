@@ -93,7 +93,7 @@ func retryConfig(tr http.RoundTripper, sl *fakeSleeper, maxRetries int) *Config 
 	n := 0
 	return &Config{
 		BaseURL:    "https://api.blindpay.com/v1",
-		APIKey:     "test_key",
+		APIKey:     ptrTo("test_key"),
 		HTTPClient: &http.Client{Transport: tr},
 		UserAgent:  "blindpay-go/test",
 		MaxRetries: maxRetries,

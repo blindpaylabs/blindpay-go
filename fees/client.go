@@ -1,3 +1,6 @@
+// Package fees reads the instance's BlindPay fee schedule (flat fees in
+// integer cents, percentage fees in basis points). Use it through
+// blindpay.Client.Fees.
 package fees
 
 import (
@@ -11,9 +14,13 @@ import (
 
 // FeeOptions represents fee configuration for a rail.
 type FeeOptions struct {
-	PayinFlat        float64 `json:"payin_flat"`
-	PayinPercentage  float64 `json:"payin_percentage"`
-	PayoutFlat       float64 `json:"payout_flat"`
+	// PayinFlat is in integer cents (1000 = 10.00).
+	PayinFlat float64 `json:"payin_flat"`
+	// PayinPercentage is in basis points (100 = 1%).
+	PayinPercentage float64 `json:"payin_percentage"`
+	// PayoutFlat is in integer cents (1000 = 10.00).
+	PayoutFlat float64 `json:"payout_flat"`
+	// PayoutPercentage is in basis points (100 = 1%).
 	PayoutPercentage float64 `json:"payout_percentage"`
 }
 

@@ -44,7 +44,7 @@ func TestReconcileTypes_AppliesNewOptionalScalarField(t *testing.T) {
 	require.Empty(t, plan.NeedsHuman)
 	require.Len(t, plan.Actions, 1)
 	require.Contains(t, plan.Actions[0].description, "score")
-	require.Equal(t, "patch", plan.Actions[0].bump)
+	require.Equal(t, "minor", plan.Actions[0].bump, "an added field is a minor bump")
 	require.Contains(t, plan.Actions[0].insert.Text, "Score")
 	require.Contains(t, plan.Actions[0].insert.Text, `json:"score,omitempty"`)
 }

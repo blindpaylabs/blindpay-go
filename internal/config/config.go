@@ -22,6 +22,9 @@ type Config struct {
 	// MaxRetries is the number of retries after the first attempt; zero
 	// disables retries and automatic idempotency keys.
 	MaxRetries int
+	// MaxResponseBodyBytes caps how much of a response body is read; zero
+	// means the default (32 MiB).
+	MaxResponseBodyBytes int64
 }
 
 /*
@@ -32,13 +35,16 @@ func (c *Config) ToRequestConfig() *request.Config {
 	if c == nil {
 		return nil
 	}
+	apiKey := c.APIKey
 
 	return &request.Config{
 		BaseURL:    c.BaseURL,
-		APIKey:     c.APIKey,
+		APIKey:     &apiKey,
 		HTTPClient: c.HTTPClient,
 		UserAgent:  c.UserAgent,
 		Timeout:    c.Timeout,
 		MaxRetries: c.MaxRetries,
+
+		MaxResponseBodyBytes: c.MaxResponseBodyBytes,
 	}
 }

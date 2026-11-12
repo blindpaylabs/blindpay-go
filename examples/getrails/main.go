@@ -1,3 +1,4 @@
+// Command getrails lists the payment rails BlindPay supports.
 package main
 
 import (

@@ -11,7 +11,17 @@ import (
 type action struct {
 	description string
 	insert      insertion
-	bump        string // "minor" or "patch"
+	// writes, when set, replaces whole files (generated code) instead of
+	// splicing insert.
+	writes map[string][]byte
+	bump   string // "minor" or "patch"
+	// addsField is set on field insertions: the struct (file + symbol) and
+	// json name the insertion adds, so later checks can count it as modeled.
+	addsField *plannedField
+}
+
+type plannedField struct {
+	File, Symbol, JSONName string
 }
 
 // planResult is everything a single reconciliation pass produced.
@@ -109,6 +119,17 @@ func checkMapValidity(repoRoot string, sm *SpecMap) []string {
 		}
 	}
 
+	for _, w := range sm.Webhooks {
+		if len(w.SDK) == 0 {
+			issues = append(issues, fmt.Sprintf("spec-map.json: webhook %s: no sdk sites", w.Spec))
+		}
+		for _, site := range w.SDK {
+			if _, err := findStructShape(repoRoot, site.File, site.Symbol); err != nil {
+				issues = append(issues, fmt.Sprintf("spec-map.json: webhook %s: %v", w.Spec, err))
+			}
+		}
+	}
+
 	sort.Strings(issues)
 	return issues
 }
@@ -128,6 +149,9 @@ func checkUnclassifiedSchemas(sm *SpecMap, spec *specDoc, pending map[string]boo
 	}
 	for _, i := range sm.Ignore.Schemas {
 		classified[i.Schema] = true
+	}
+	for _, w := range sm.Webhooks {
+		classified[w.Spec] = true
 	}
 
 	reachable := reachableSchemas(spec)
@@ -438,7 +462,9 @@ func (p *planResult) reconcileOneLevel(repoRoot, unmodeledSchemaKey, humanLabelP
 			p.Actions = append(p.Actions, action{
 				description: fmt.Sprintf("field %s.%s: add %s (%s)", shape.Symbol, goName, name, shape.File),
 				insert:      insertion{File: shape.File, Line: shape.LastFieldLine, Text: fieldLine},
-				bump:        "patch",
+				// A new field is a new feature: MINOR (CLAUDE.md section 9).
+				bump:      "minor",
+				addsField: &plannedField{File: shape.File, Symbol: shape.Symbol, JSONName: name},
 			})
 		}
 	}

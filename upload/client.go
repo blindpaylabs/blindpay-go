@@ -1,3 +1,6 @@
+// Package upload uploads documents (multipart, never retried), analyzes a
+// document before you submit it, and presigns a temporary URL for an
+// uploaded file. Use it through blindpay.Client.Upload.
 package upload
 
 import (

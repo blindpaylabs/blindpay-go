@@ -1,3 +1,7 @@
+// Package webhookendpoints registers, lists and deletes webhook endpoints,
+// reads an endpoint's signing secret (whsec_...) and opens the webhook
+// portal. Verify deliveries with blindpay.ConstructWebhookEvent. Use it
+// through blindpay.Client.WebhookEndpoints.
 package webhookendpoints
 
 import (

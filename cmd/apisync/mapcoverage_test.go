@@ -288,7 +288,7 @@ type Widget struct {
 		}`,
 	})
 
-	quiet, err := reconcileAndMaybeApply(root, syncOptions{Check: true})
+	quiet, err := reconcileAndMaybeApply(root, syncOptions{ErrorCodesOptional: true, Check: true})
 	require.NoError(t, err)
 	require.True(t, quiet, "baseline with no enum-constrained properties must be clean")
 
@@ -302,7 +302,7 @@ type Widget struct {
 		}}}}
 	}`), 0o644))
 
-	_, err = reconcileAndMaybeApply(root, syncOptions{Check: true, SpecPath: ".api-sync/spec-current.json"})
+	_, err = reconcileAndMaybeApply(root, syncOptions{ErrorCodesOptional: true, Check: true, SpecPath: ".api-sync/spec-current.json"})
 	require.Error(t, err, "checking the mutated spec directly must fail")
 
 	// This is how it actually gates in production: the api-sync workflow
@@ -310,7 +310,7 @@ type Widget struct {
 	// .github/workflows/api-sync.yml); NEEDS_HUMAN must block it, atomically,
 	// before anything is written or the snapshot is refreshed.
 	before := readFixture(t, root, ".api-sync/spec-snapshot.json")
-	_, err = reconcileAndMaybeApply(root, syncOptions{Apply: true})
+	_, err = reconcileAndMaybeApply(root, syncOptions{ErrorCodesOptional: true, Apply: true})
 	require.Error(t, err, "an unmapped, unrecorded enum-constrained property must block -apply")
 	require.Equal(t, before, readFixture(t, root, ".api-sync/spec-snapshot.json"), "a blocked apply must never refresh the snapshot")
 }
@@ -339,7 +339,7 @@ type Widget struct {
 		}`,
 	})
 
-	quiet, err := reconcileAndMaybeApply(root, syncOptions{Check: true})
+	quiet, err := reconcileAndMaybeApply(root, syncOptions{ErrorCodesOptional: true, Check: true})
 	require.NoError(t, err)
 	require.True(t, quiet)
 
@@ -353,11 +353,11 @@ type Widget struct {
 		}}}}
 	}`), 0o644))
 
-	_, err = reconcileAndMaybeApply(root, syncOptions{Check: true, SpecPath: ".api-sync/spec-current.json"})
+	_, err = reconcileAndMaybeApply(root, syncOptions{ErrorCodesOptional: true, Check: true, SpecPath: ".api-sync/spec-current.json"})
 	require.Error(t, err, "checking the mutated spec directly must fail")
 
 	before := readFixture(t, root, ".api-sync/spec-snapshot.json")
-	_, err = reconcileAndMaybeApply(root, syncOptions{Apply: true})
+	_, err = reconcileAndMaybeApply(root, syncOptions{ErrorCodesOptional: true, Apply: true})
 	require.Error(t, err, "an unmapped, unrecorded inline object shape must block -apply")
 	require.Equal(t, before, readFixture(t, root, ".api-sync/spec-snapshot.json"), "a blocked apply must never refresh the snapshot")
 }

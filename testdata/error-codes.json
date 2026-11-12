@@ -1,0 +1,1056 @@
+{
+  "source": "openapi-public.json tags[Errors] (blindpay-v2@7e49addd9)",
+  "count": 175,
+  "codes": [
+    {
+      "code": "AUTH_EMAIL_ALREADY_REGISTERED",
+      "status": 409,
+      "retry": "terminal",
+      "description": "This email address is already registered."
+    },
+    {
+      "code": "AUTH_FORBIDDEN",
+      "status": 403,
+      "retry": "terminal",
+      "description": "You do not have permission to perform this action."
+    },
+    {
+      "code": "AUTH_HOSTING_NETWORK_BLOCKED",
+      "status": 403,
+      "retry": "terminal",
+      "description": "This action is not available from a hosting or data center network. Contact support to continue."
+    },
+    {
+      "code": "AUTH_IP_BLOCKED",
+      "status": 403,
+      "retry": "terminal",
+      "description": "Requests from this IP address are not allowed for this API key."
+    },
+    {
+      "code": "AUTH_OAUTH_CONNECTION_NOT_BOUND",
+      "status": 403,
+      "retry": "actionable",
+      "description": "This OAuth connection is not linked to an instance. Open the BlindPay dashboard to choose the instance it should act on."
+    },
+    {
+      "code": "AUTH_OAUTH_CONNECTION_NOT_FOUND",
+      "status": 404,
+      "retry": "actionable",
+      "description": "The requested OAuth connection was not found."
+    },
+    {
+      "code": "AUTH_OAUTH_CONNECTION_REVOKED",
+      "status": 403,
+      "retry": "actionable",
+      "description": "This OAuth connection was revoked. Reconnect it from the BlindPay dashboard."
+    },
+    {
+      "code": "AUTH_RATE_LIMITED",
+      "status": 429,
+      "retry": "retryable",
+      "description": "Too many requests. Wait a moment and try again."
+    },
+    {
+      "code": "AUTH_SERVICE_UNAVAILABLE",
+      "status": 503,
+      "retry": "retryable",
+      "description": "The authentication service is temporarily unavailable. Try again shortly."
+    },
+    {
+      "code": "AUTH_TOKEN_INVALID",
+      "status": 401,
+      "retry": "actionable",
+      "description": "This link or token is invalid or has expired. Request a new one."
+    },
+    {
+      "code": "AUTH_UNAUTHORIZED",
+      "status": 401,
+      "retry": "actionable",
+      "description": "Authentication failed. Check your API key or session and try again."
+    },
+    {
+      "code": "BANK_ACCOUNTS_INCOMPLETE",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The bank account details are incomplete for this payment method. Provide the missing fields."
+    },
+    {
+      "code": "BANK_ACCOUNTS_INVALID_BANK_CODE",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The bank code provided is not valid for this payment rail. The message lists where to fetch the valid codes."
+    },
+    {
+      "code": "BANK_ACCOUNTS_INVALID_ROUTING",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The routing number provided is not valid. Check the number and try again."
+    },
+    {
+      "code": "BANK_ACCOUNTS_NOT_APPROVED",
+      "status": 403,
+      "retry": "actionable",
+      "description": "This bank account is not approved yet."
+    },
+    {
+      "code": "BANK_ACCOUNTS_NOT_FOUND",
+      "status": 404,
+      "retry": "actionable",
+      "description": "The requested bank account was not found."
+    },
+    {
+      "code": "BANK_ACCOUNTS_OWNED_BY_PAYABLE",
+      "status": 400,
+      "retry": "terminal",
+      "description": "This bank account belongs to an invoice payable and can only be paid through that payable. Quote the payable instead."
+    },
+    {
+      "code": "BANK_ACCOUNTS_PARTNER_NOT_SUPPORTED",
+      "status": 400,
+      "retry": "terminal",
+      "description": "This banking option is not supported for this operation."
+    },
+    {
+      "code": "BANK_ACCOUNTS_PLAID_CONNECTION_INVALID",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The bank connection could not be completed. Connect the account again."
+    },
+    {
+      "code": "BANK_ACCOUNTS_PLAID_LINK_FAILED",
+      "status": 502,
+      "retry": "retryable",
+      "description": "We could not start the bank connection. Try again, and contact support if the problem persists."
+    },
+    {
+      "code": "BANK_ACCOUNTS_PLAID_LINK_SESSION_INVALID",
+      "status": 404,
+      "retry": "actionable",
+      "description": "This bank connection link is unknown or has expired. Request a new link."
+    },
+    {
+      "code": "BANK_ACCOUNTS_PLAID_NOT_ENABLED",
+      "status": 400,
+      "retry": "terminal",
+      "description": "Instantly connected bank accounts are not enabled for this account. Contact support to enable them."
+    },
+    {
+      "code": "BANK_ACCOUNTS_PLAID_NOT_FIRST_PARTY",
+      "status": 400,
+      "retry": "terminal",
+      "description": "The connected bank account does not belong to this customer. Only accounts held in the customer's own name can be connected."
+    },
+    {
+      "code": "BANK_ACCOUNTS_RTP_NOT_SUPPORTED",
+      "status": 400,
+      "retry": "terminal",
+      "description": "The provided routing number does not support instant payments."
+    },
+    {
+      "code": "BANK_ACCOUNTS_SEPA_IBAN_NOT_EUR",
+      "status": 400,
+      "retry": "terminal",
+      "description": "SEPA payouts are only available to EUR accounts. This IBAN is from a country that holds another currency, so the payment would fail at settlement. Use an IBAN from a EUR account instead."
+    },
+    {
+      "code": "BILLING_INVOICE_NOT_FOUND",
+      "status": 404,
+      "retry": "actionable",
+      "description": "The requested invoice was not found."
+    },
+    {
+      "code": "BILLING_INVOICE_NOT_PAYABLE",
+      "status": 409,
+      "retry": "terminal",
+      "description": "This invoice cannot be paid or collected in its current state."
+    },
+    {
+      "code": "BILLING_NOT_AVAILABLE",
+      "status": 403,
+      "retry": "terminal",
+      "description": "Billing is not available for development instances."
+    },
+    {
+      "code": "BLOCKCHAIN_CALL_FAILED",
+      "status": 400,
+      "retry": "retryable",
+      "description": "The blockchain call could not be completed. Check the transaction details and try again."
+    },
+    {
+      "code": "BLOCKCHAIN_NETWORK_NOT_SUPPORTED",
+      "status": 400,
+      "retry": "terminal",
+      "description": "This network or token combination is not supported for this operation."
+    },
+    {
+      "code": "BLOCKCHAIN_TOKEN_NOT_SUPPORTED",
+      "status": 400,
+      "retry": "actionable",
+      "description": "This token is not supported for this instance type. Development instances settle in USDB; production instances settle in USDC or USDT."
+    },
+    {
+      "code": "BLOCKCHAIN_TX_FAILED",
+      "status": 502,
+      "retry": "retryable",
+      "description": "The blockchain transaction failed. Try again, and contact support if the problem persists."
+    },
+    {
+      "code": "BRL_RAILS_NOT_ENABLED",
+      "status": 403,
+      "retry": "terminal",
+      "description": "BRL rails (PIX and TED) are not enabled for this instance. Contact support to enable them."
+    },
+    {
+      "code": "COMPLIANCE_CNAE_CONDITION_INVALID",
+      "status": 400,
+      "retry": "actionable",
+      "description": "A CNAE condition can only be set on a Brazilian business customer."
+    },
+    {
+      "code": "COMPLIANCE_CNAE_CONDITION_STATE",
+      "status": 409,
+      "retry": "actionable",
+      "description": "The CNAE condition is not in a state that allows this action."
+    },
+    {
+      "code": "COMPLIANCE_CNPJ_LOOKUP_FAILED",
+      "status": 502,
+      "retry": "retryable",
+      "description": "The public CNPJ record could not be fetched. Try again later."
+    },
+    {
+      "code": "COMPLIANCE_RFI_IN_PROGRESS",
+      "status": 409,
+      "retry": "actionable",
+      "description": "An information request is already in progress. Resolve it before continuing."
+    },
+    {
+      "code": "COMPLIANCE_RFI_INVALID",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The information request could not be processed. Check the submitted fields."
+    },
+    {
+      "code": "CUSTOMERS_ALREADY_APPROVED",
+      "status": 409,
+      "retry": "terminal",
+      "description": "This customer is already approved."
+    },
+    {
+      "code": "CUSTOMERS_BUSINESS_ENHANCED_NOT_AVAILABLE",
+      "status": 400,
+      "retry": "terminal",
+      "description": "Enhanced verification is not available for business customers. Use standard verification (kyc_type: standard) for businesses."
+    },
+    {
+      "code": "CUSTOMERS_COUNTRY_NOT_SUPPORTED",
+      "status": 400,
+      "retry": "terminal",
+      "description": "This country is not supported for this operation."
+    },
+    {
+      "code": "CUSTOMERS_ENHANCED_KYC_REQUIRED",
+      "status": 400,
+      "retry": "actionable",
+      "description": "Individuals from high-risk countries must use enhanced verification (kyc_type: enhanced); standard verification is not available for them. See https://www.blindpay.com/docs/kb/supported-countries for country tiers."
+    },
+    {
+      "code": "CUSTOMERS_ID_DOCUMENT_INVALID",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The identity document is not accepted for this customer. Provide a valid passport, national ID, or a driver license with a valid SSN or ITIN as the tax ID."
+    },
+    {
+      "code": "CUSTOMERS_INVALID_DATA",
+      "status": 422,
+      "retry": "actionable",
+      "description": "The customer data was rejected by the banking provider. Check the highlighted fields and try again."
+    },
+    {
+      "code": "CUSTOMERS_INVALID_PHONE",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The phone number provided is not valid. Check the number and try again."
+    },
+    {
+      "code": "CUSTOMERS_INVALID_TAX_ID",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The tax ID provided is not valid. Check the value and try again."
+    },
+    {
+      "code": "CUSTOMERS_KYC_NOT_APPROVED",
+      "status": 403,
+      "retry": "actionable",
+      "description": "This customer has not completed verification yet. Complete the verification before continuing."
+    },
+    {
+      "code": "CUSTOMERS_KYC_TYPE_NOT_AVAILABLE",
+      "status": 400,
+      "retry": "terminal",
+      "description": "The requested verification type is not available for this customer. Use a supported verification type and try again."
+    },
+    {
+      "code": "CUSTOMERS_NAME_INVALID",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The name registered for this customer is not accepted. Review it and try again."
+    },
+    {
+      "code": "CUSTOMERS_NOT_FOUND",
+      "status": 404,
+      "retry": "actionable",
+      "description": "The requested customer was not found."
+    },
+    {
+      "code": "CUSTOMERS_ONBOARDING_INCOMPLETE",
+      "status": 400,
+      "retry": "actionable",
+      "description": "Onboarding is not complete yet. Finish the remaining steps before continuing."
+    },
+    {
+      "code": "CUSTOMERS_OWNERSHIP_INVALID",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The ownership information for this business customer is incomplete or inconsistent. Review the registered owners and try again."
+    },
+    {
+      "code": "CUSTOMERS_REJECTED_DOCUMENTS_LOCKED",
+      "status": 409,
+      "retry": "actionable",
+      "description": "Documents of a rejected customer cannot be replaced, because updating a customer does not start a new verification. Create a new customer with the new documents instead."
+    },
+    {
+      "code": "DATA_INTEGRITY_ERROR",
+      "status": 422,
+      "retry": "terminal",
+      "description": "This record could not be loaded because it contains invalid stored data. Contact support with the ID below."
+    },
+    {
+      "code": "FEES_NOT_FOUND",
+      "status": 404,
+      "retry": "actionable",
+      "description": "The requested fee configuration was not found."
+    },
+    {
+      "code": "FEES_PARTNER_FEE_EXCEEDED",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The partner fee exceeds the allowed maximum for this transaction."
+    },
+    {
+      "code": "FILES_ANALYSIS_FAILED",
+      "status": 502,
+      "retry": "retryable",
+      "description": "The document could not be analyzed. Try again, and contact support if the problem persists."
+    },
+    {
+      "code": "FILES_EMPTY",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The uploaded file is empty. Upload a valid file."
+    },
+    {
+      "code": "FILES_PAGE_LIMIT_EXCEEDED",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The document has too many pages. Upload a PDF with at most 150 pages, keeping only the pages that show the required information."
+    },
+    {
+      "code": "FILES_TOO_LARGE",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The file is too large. Upload a smaller file."
+    },
+    {
+      "code": "FILES_TYPE_NOT_ALLOWED",
+      "status": 400,
+      "retry": "actionable",
+      "description": "This file type is not allowed. Upload a supported file type."
+    },
+    {
+      "code": "FILES_UNREADABLE",
+      "status": 400,
+      "retry": "actionable",
+      "description": "We could not read the uploaded file. Check the file and try again."
+    },
+    {
+      "code": "FILES_URL_INVALID",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The file_url is not a BlindPay file URL. Pass the file_url returned by POST /upload."
+    },
+    {
+      "code": "INSTANCES_BLOCKED",
+      "status": 403,
+      "retry": "terminal",
+      "description": "This account is blocked. Contact support for assistance."
+    },
+    {
+      "code": "INSTANCES_DEVELOPMENT_CREATION_DISABLED",
+      "status": 403,
+      "retry": "terminal",
+      "description": "Creating development instances is temporarily disabled. Contact support if you need one."
+    },
+    {
+      "code": "INSTANCES_INVITE_NOT_FOUND",
+      "status": 404,
+      "retry": "actionable",
+      "description": "The requested invite was not found."
+    },
+    {
+      "code": "INSTANCES_LIMIT_REACHED",
+      "status": 400,
+      "retry": "terminal",
+      "description": "You reached the maximum number of instances allowed for your account."
+    },
+    {
+      "code": "INSTANCES_NOT_FOUND",
+      "status": 404,
+      "retry": "actionable",
+      "description": "The requested instance was not found."
+    },
+    {
+      "code": "INSTANCES_ONBOARDING_ALREADY_COMPLETED",
+      "status": 400,
+      "retry": "terminal",
+      "description": "This instance has already finished onboarding."
+    },
+    {
+      "code": "INSTANCES_ONBOARDING_ALREADY_SUBMITTED",
+      "status": 400,
+      "retry": "terminal",
+      "description": "This application was already submitted and is under review, so it can no longer be changed."
+    },
+    {
+      "code": "INSTANCES_TAX_ID_ALREADY_ONBOARDED",
+      "status": 400,
+      "retry": "terminal",
+      "description": "Your account already has an instance of this type onboarded with this tax id. Contact support if you need another one."
+    },
+    {
+      "code": "INTERNAL_ERROR",
+      "status": 500,
+      "retry": "retryable",
+      "description": "Something went wrong on our side. Try again, and contact support with the trace ID if the problem persists."
+    },
+    {
+      "code": "LIMITS_AMOUNT_OUT_OF_RANGE",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The amount is outside the allowed range. The message includes the allowed range."
+    },
+    {
+      "code": "LIMITS_VOLUME_EXCEEDED",
+      "status": 400,
+      "retry": "actionable",
+      "description": "You exceeded your transaction volume limit. The message includes the remaining amount available."
+    },
+    {
+      "code": "ONBOARDING_HELD_FOR_REVIEW",
+      "status": 400,
+      "retry": "terminal",
+      "description": "This application needs a manual check before it can be submitted. Contact support to continue."
+    },
+    {
+      "code": "PAYABLES_ALREADY_PAID_OR_EXPIRED",
+      "status": 400,
+      "retry": "terminal",
+      "description": "This payment code was already paid or has expired and can no longer be paid."
+    },
+    {
+      "code": "PAYABLES_ALREADY_PAID_OR_IN_FLIGHT",
+      "status": 400,
+      "retry": "actionable",
+      "description": "This payable is already being paid or was already paid. Only draft payables can be quoted; a failed or refunded attempt returns the payable to draft."
+    },
+    {
+      "code": "PAYABLES_AMOUNT_NEGATIVE",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The payable total (line items plus taxes minus discount) cannot be negative."
+    },
+    {
+      "code": "PAYABLES_AMOUNT_TOO_LARGE",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The payable total is above the maximum amount we accept."
+    },
+    {
+      "code": "PAYABLES_BANK_ACCOUNT_INVALID",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The bank_account details on this invoice payable were rejected. Check the errors list for the field that failed."
+    },
+    {
+      "code": "PAYABLES_BOLETO_WOULD_BE_OVERDUE",
+      "status": 400,
+      "retry": "terminal",
+      "description": "This boleto is due before the next banking day, so it can no longer be paid on time. Boletos do not clear on weekends or outside banking hours."
+    },
+    {
+      "code": "PAYABLES_CODE_UNRESOLVABLE",
+      "status": 400,
+      "retry": "actionable",
+      "description": "We could not read this payment code. Check the code and try again."
+    },
+    {
+      "code": "PAYABLES_CURRENCY_MUST_BE_BRL",
+      "status": 400,
+      "retry": "actionable",
+      "description": "Boleto and PIX payables must use BRL."
+    },
+    {
+      "code": "PAYABLES_DESTINATION_NOT_SUPPORTED",
+      "status": 400,
+      "retry": "terminal",
+      "description": "Only boleto, arrecadação (utility/tax) and PIX QR code payables can be paid right now. Bank-destination invoice payables are not payable yet."
+    },
+    {
+      "code": "PAYABLES_DOCUMENT_INVALID",
+      "status": 400,
+      "retry": "terminal",
+      "description": "document_file must be a URL returned by POST /upload with bucket `documents`, uploaded by this instance."
+    },
+    {
+      "code": "PAYABLES_DOCUMENT_NOT_ALLOWED_FOR_PIX",
+      "status": 400,
+      "retry": "terminal",
+      "description": "PIX payables have no document. document_file is accepted only for boleto and bank-details payables."
+    },
+    {
+      "code": "PAYABLES_DUPLICATE",
+      "status": 400,
+      "retry": "actionable",
+      "description": "This payment code already has a payable registered, in progress or completed for this instance."
+    },
+    {
+      "code": "PAYABLES_NETWORK_NOT_SUPPORTED",
+      "status": 400,
+      "retry": "terminal",
+      "description": "Only EVM wallets can fund payables right now."
+    },
+    {
+      "code": "PAYABLES_NOT_CANCELABLE",
+      "status": 400,
+      "retry": "terminal",
+      "description": "Only draft payables can be deleted. Once a payout is executing this payable it can no longer be canceled."
+    },
+    {
+      "code": "PAYABLES_NOT_FOUND",
+      "status": 404,
+      "retry": "terminal",
+      "description": "This payable was not found."
+    },
+    {
+      "code": "PAYABLES_PIX_AMOUNT_REQUIRED",
+      "status": 400,
+      "retry": "terminal",
+      "description": "This PIX code has no fixed amount and no amount was provided. Send the amount as line_items when registering a PIX code that lets the payer choose the value."
+    },
+    {
+      "code": "PAYABLES_REVIEW_STATE_INVALID",
+      "status": 400,
+      "retry": "terminal",
+      "description": "This payable is not awaiting compliance review."
+    },
+    {
+      "code": "PAYINS_ALREADY_TERMINAL",
+      "status": 409,
+      "retry": "terminal",
+      "description": "This payin already reached a final status and cannot be changed."
+    },
+    {
+      "code": "PAYINS_CARD_ALREADY_CHARGED",
+      "status": 409,
+      "retry": "terminal",
+      "description": "A card charge attempt is already recorded for this payin. Each payin accepts exactly one card charge."
+    },
+    {
+      "code": "PAYINS_CARD_CHECKOUT_TOKEN_INVALID",
+      "status": 401,
+      "retry": "terminal",
+      "description": "The card checkout link is missing, expired or belongs to another payin. Use the checkout_token (or checkout_url) from the payin's card_instruction; tokens are valid for 1 hour after the payin is created."
+    },
+    {
+      "code": "PAYINS_CARD_GATEWAY_ENVIRONMENT_MISMATCH",
+      "status": 400,
+      "retry": "terminal",
+      "description": "Card payins are not available in this environment. Contact support."
+    },
+    {
+      "code": "PAYINS_CARD_PAYMENT_DECLINED",
+      "status": 402,
+      "retry": "actionable",
+      "description": "The card payment was declined by the gateway or issuer. The payin is still open: tokenize the card again and retry, or use another card."
+    },
+    {
+      "code": "PAYINS_CARD_PAYMENT_PENDING",
+      "status": 502,
+      "retry": "terminal",
+      "description": "The card charge outcome could not be confirmed with the gateway. Do not retry: the charge may have gone through. The gateway webhook or an operator resolves the final state."
+    },
+    {
+      "code": "PAYINS_CUSTOMER_USD_REGISTRATION_PENDING",
+      "status": 400,
+      "retry": "retryable",
+      "description": "The customer is still being set up for US bank transfer payins (ACH, wire, RTP). Wait about a minute, then create a new payin quote and try again."
+    },
+    {
+      "code": "PAYINS_CUSTOMER_USD_REGISTRATION_REJECTED",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The customer could not be set up for US bank transfer payins (ACH, wire, RTP) because some of their details were rejected. Correct the tax_id or phone_number listed in errors with PUT /customers/{id}, create a new payin quote, wait about a minute, and try again. For any other reason, contact support with the trace_id."
+    },
+    {
+      "code": "PAYINS_FUNDING_ACCOUNT_INVALID",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The selected funding bank account cannot fund this payin. Use a Plaid-connected account that belongs to the same customer, on an ach_pull payin."
+    },
+    {
+      "code": "PAYINS_FUNDING_PULL_FAILED",
+      "status": 502,
+      "retry": "retryable",
+      "description": "We could not debit the selected bank account. The payin was not started. Request a new quote and try again."
+    },
+    {
+      "code": "PAYINS_METHOD_NOT_SUPPORTED",
+      "status": 400,
+      "retry": "terminal",
+      "description": "This payment method is not supported for this operation."
+    },
+    {
+      "code": "PAYINS_NOT_FOUND",
+      "status": 404,
+      "retry": "actionable",
+      "description": "The requested payin was not found."
+    },
+    {
+      "code": "PAYINS_TAX_ID_REQUIRED",
+      "status": 400,
+      "retry": "actionable",
+      "description": "A tax ID is required for this payment method. Provide the tax ID and try again."
+    },
+    {
+      "code": "PAYINS_VIRTUAL_ACCOUNT_REQUIRED",
+      "status": 400,
+      "retry": "actionable",
+      "description": "International SWIFT payins require the receiver to have an approved virtual account. Create a virtual account for this receiver and try again."
+    },
+    {
+      "code": "PAYOUTS_ALLOWANCE_NOT_CONFIRMED",
+      "status": 400,
+      "retry": "retryable",
+      "description": "The token approval for this payout has not been confirmed on-chain yet, or the approved amount is lower than the payout amount. Wait for the approval transaction to confirm and execute the quote again."
+    },
+    {
+      "code": "PAYOUTS_AMOUNT_BELOW_MINIMUM",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The amount is below the minimum for this payment rail."
+    },
+    {
+      "code": "PAYOUTS_BENEFICIARY_DETAILS_INVALID",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The payment rail rejected the beneficiary name or address on this bank account (for example, unsupported characters or an invalid format). Update the bank account details and try again."
+    },
+    {
+      "code": "PAYOUTS_DOCUMENTS_NOT_ACCEPTED",
+      "status": 400,
+      "retry": "terminal",
+      "description": "A document cannot be submitted for this payout in its current state."
+    },
+    {
+      "code": "PAYOUTS_INSUFFICIENT_BALANCE",
+      "status": 400,
+      "retry": "actionable",
+      "description": "There is not enough balance to complete this payout. Fund your balance and try again."
+    },
+    {
+      "code": "PAYOUTS_NOT_FOUND",
+      "status": 404,
+      "retry": "actionable",
+      "description": "The requested payout was not found."
+    },
+    {
+      "code": "PLATFORM_TEMPORARILY_UNAVAILABLE",
+      "status": 503,
+      "retry": "retryable",
+      "description": "This action is temporarily unavailable. Try again shortly."
+    },
+    {
+      "code": "QUOTES_ALREADY_USED",
+      "status": 409,
+      "retry": "actionable",
+      "description": "This quote was already used. Request a new quote."
+    },
+    {
+      "code": "QUOTES_AMOUNT_BELOW_PROVIDER_MINIMUM",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The amount is below the minimum the liquidity provider accepts for this pair. Try a larger amount."
+    },
+    {
+      "code": "QUOTES_AMOUNT_OUTSIDE_PROVIDER_LIMITS",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The amount is outside the limits accepted for this payment rail. Adjust the amount and try again."
+    },
+    {
+      "code": "QUOTES_EXPIRED",
+      "status": 400,
+      "retry": "actionable",
+      "description": "This quote has expired. Request a new quote and try again."
+    },
+    {
+      "code": "QUOTES_INSUFFICIENT_LIQUIDITY",
+      "status": 400,
+      "retry": "actionable",
+      "description": "There is not enough market liquidity to fill this amount right now. Try a smaller amount or try again later."
+    },
+    {
+      "code": "QUOTES_INVALID_STATE",
+      "status": 400,
+      "retry": "actionable",
+      "description": "This quote cannot be authorized in its current state. Request a new quote and try again."
+    },
+    {
+      "code": "QUOTES_NOT_FOUND",
+      "status": 404,
+      "retry": "actionable",
+      "description": "The requested quote was not found."
+    },
+    {
+      "code": "QUOTES_OTC_NOT_SUPPORTED",
+      "status": 400,
+      "retry": "actionable",
+      "description": "This OTC configuration is not supported. OTC requires BRL with USDT or USDC (USDC on Base, Polygon, Ethereum, Arbitrum or Solana), and either the sender amount with fees not covered, or the receiver amount with fees covered."
+    },
+    {
+      "code": "QUOTES_RAIL_REQUIRES_USDC",
+      "status": 400,
+      "retry": "actionable",
+      "description": "This payment rail only accepts USDC. Request the quote again with token USDC."
+    },
+    {
+      "code": "QUOTES_RATE_UNAVAILABLE",
+      "status": 502,
+      "retry": "retryable",
+      "description": "An exchange rate is temporarily unavailable. Try again shortly."
+    },
+    {
+      "code": "REQUEST_REJECTED",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The request was rejected. Check the error message for details."
+    },
+    {
+      "code": "SSO_CONNECTIONS_CONFIGURATION_REJECTED",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The identity provider settings were rejected. Check them and try again."
+    },
+    {
+      "code": "SSO_CONNECTIONS_DOMAIN_IN_USE",
+      "status": 400,
+      "retry": "terminal",
+      "description": "One of the email domains is already configured on another SSO connection."
+    },
+    {
+      "code": "SSO_CONNECTIONS_DOMAIN_NOT_OWNED",
+      "status": 400,
+      "retry": "terminal",
+      "description": "Single sign-on can only route the email domain you sign in with. Contact support to add other domains."
+    },
+    {
+      "code": "SSO_CONNECTIONS_DOMAIN_NOT_VERIFIED",
+      "status": 400,
+      "retry": "actionable",
+      "description": "Verify your email domain before turning single sign-on on. Add the DNS record shown on the page, then check it."
+    },
+    {
+      "code": "SSO_CONNECTIONS_DOMAIN_VERIFICATION_FAILED",
+      "status": 400,
+      "retry": "retryable",
+      "description": "We could not find the DNS record for your domain yet. Check the record name and value, and try again in a few minutes."
+    },
+    {
+      "code": "SSO_CONNECTIONS_IDENTITY_PROVIDER_MISSING",
+      "status": 400,
+      "retry": "actionable",
+      "description": "Connect your identity provider before turning single sign-on on."
+    },
+    {
+      "code": "SSO_CONNECTIONS_METADATA_UNREADABLE",
+      "status": 400,
+      "retry": "actionable",
+      "description": "We could not read the identity provider metadata. Check the URL, or paste the metadata XML instead."
+    },
+    {
+      "code": "SSO_CONNECTIONS_NOT_ENABLED",
+      "status": 403,
+      "retry": "terminal",
+      "description": "Single sign-on is not enabled for this instance. Contact support to turn it on."
+    },
+    {
+      "code": "SSO_CONNECTIONS_NOT_FOUND",
+      "status": 404,
+      "retry": "actionable",
+      "description": "The requested SSO connection was not found."
+    },
+    {
+      "code": "SSO_CONNECTIONS_PROVIDER_FAILED",
+      "status": 502,
+      "retry": "retryable",
+      "description": "We could not save the SSO connection with the identity service. Try again, and contact support if the problem persists."
+    },
+    {
+      "code": "TOS_ALREADY_ACCEPTED",
+      "status": 409,
+      "retry": "terminal",
+      "description": "These terms of service were already accepted."
+    },
+    {
+      "code": "TOS_NOT_ACCEPTED",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The terms of service must be accepted before continuing."
+    },
+    {
+      "code": "TOS_NOT_FOUND",
+      "status": 404,
+      "retry": "actionable",
+      "description": "The requested terms of service record was not found."
+    },
+    {
+      "code": "TOS_PASSTHROUGH_ATTESTATION_INVALID",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The acceptance data does not look like it was collected from the customer device. Send the public IP address and the User-Agent of the customer browser, right after the acceptance."
+    },
+    {
+      "code": "TOS_PASSTHROUGH_NOT_ENABLED",
+      "status": 403,
+      "retry": "terminal",
+      "description": "Passthrough Terms of Service is not enabled for this instance. Contact support to enable it."
+    },
+    {
+      "code": "TOS_PASSTHROUGH_SETUP_INCOMPLETE",
+      "status": 400,
+      "retry": "actionable",
+      "description": "Finish the passthrough Terms of Service setup in the instance settings: add the terms link and screenshot, then accept the partner agreement."
+    },
+    {
+      "code": "TRANSFERS_NOT_FOUND",
+      "status": 404,
+      "retry": "actionable",
+      "description": "The requested transfer was not found."
+    },
+    {
+      "code": "TRANSFERS_SWAP_AMOUNT_BELOW_MINIMUM",
+      "status": 400,
+      "retry": "actionable",
+      "description": "Swaps between different tokens require at least 100 USDC, measured on the USDC side. Increase the amount and try again."
+    },
+    {
+      "code": "VALIDATION_FAILED",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The request contains invalid fields. Check the errors list for details."
+    },
+    {
+      "code": "VALIDATION_INVALID_REQUEST",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The request is not valid for this operation. Check the parameters and try again."
+    },
+    {
+      "code": "VALIDATION_MISSING_BODY",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The request body is missing or malformed. Send valid JSON with the Content-Type: application/json header."
+    },
+    {
+      "code": "VALIDATION_MISSING_REQUIRED_FIELDS",
+      "status": 400,
+      "retry": "actionable",
+      "description": "Required fields are missing. Provide the missing fields and try again."
+    },
+    {
+      "code": "VIRTUAL_ACCOUNTS_DISABLED",
+      "status": 403,
+      "retry": "terminal",
+      "description": "Virtual accounts are not enabled for this account. Contact support to enable them."
+    },
+    {
+      "code": "VIRTUAL_ACCOUNTS_DOCUMENTS_REQUIRED",
+      "status": 400,
+      "retry": "actionable",
+      "description": "Additional documents are required to create this virtual account. Upload the requested documents."
+    },
+    {
+      "code": "VIRTUAL_ACCOUNTS_NOT_APPROVED",
+      "status": 403,
+      "retry": "actionable",
+      "description": "This virtual account is not approved yet."
+    },
+    {
+      "code": "VIRTUAL_ACCOUNTS_NOT_FOUND",
+      "status": 404,
+      "retry": "actionable",
+      "description": "The requested virtual account was not found."
+    },
+    {
+      "code": "VIRTUAL_ACCOUNTS_PARTNER_NOT_ELIGIBLE",
+      "status": 400,
+      "retry": "terminal",
+      "description": "This banking partner is not available for this customer. Choose a different banking partner."
+    },
+    {
+      "code": "VIRTUAL_ACCOUNTS_PROVISION_FAILED",
+      "status": 502,
+      "retry": "retryable",
+      "description": "We could not create the virtual account. Try again, and contact support if the problem persists."
+    },
+    {
+      "code": "VIRTUAL_ACCOUNTS_REGION_NOT_SUPPORTED",
+      "status": 400,
+      "retry": "terminal",
+      "description": "Virtual accounts are not available for this country or region."
+    },
+    {
+      "code": "WALLETS_ATTACHED_TO_VIRTUAL_ACCOUNT",
+      "status": 400,
+      "retry": "terminal",
+      "description": "This wallet is attached to a virtual account and cannot be deleted. Delete the virtual account first."
+    },
+    {
+      "code": "WALLETS_BALANCE_UNAVAILABLE",
+      "status": 503,
+      "retry": "retryable",
+      "description": "The wallet balance is temporarily unavailable. Try again shortly."
+    },
+    {
+      "code": "WALLETS_DEPOSIT_UNDER_REVIEW",
+      "status": 400,
+      "retry": "terminal",
+      "description": "A deposit into this wallet is under compliance review. Transfers out of the wallet are paused until the review is resolved."
+    },
+    {
+      "code": "WALLETS_DESTINATION_REQUIRED",
+      "status": 400,
+      "retry": "actionable",
+      "description": "Choose the wallet that receives the funds. Send exactly one of blockchain_wallet_id or wallet_id."
+    },
+    {
+      "code": "WALLETS_DESTINATION_SANCTIONED",
+      "status": 400,
+      "retry": "terminal",
+      "description": "The destination wallet address is on a sanctions list. Funds cannot be sent to it."
+    },
+    {
+      "code": "WALLETS_HAS_FUNDS",
+      "status": 400,
+      "retry": "actionable",
+      "description": "This wallet still holds funds. Transfer them out before deleting it."
+    },
+    {
+      "code": "WALLETS_LIMIT_REACHED",
+      "status": 400,
+      "retry": "terminal",
+      "description": "You reached the maximum of 10 wallets for this customer. Delete an existing wallet first."
+    },
+    {
+      "code": "WALLETS_NOT_FOUND",
+      "status": 404,
+      "retry": "actionable",
+      "description": "The requested wallet was not found."
+    },
+    {
+      "code": "WALLETS_NOT_OWNED_BY_CUSTOMER",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The selected wallet belongs to a different customer. Choose one of this customer's wallets."
+    },
+    {
+      "code": "WALLETS_SELF_CUSTODY_ALREADY_SET",
+      "status": 409,
+      "retry": "terminal",
+      "description": "The self-custody answer for this wallet was already saved and cannot be changed. Contact support if it is wrong."
+    },
+    {
+      "code": "WALLETS_SELF_CUSTODY_REQUIRED",
+      "status": 400,
+      "retry": "actionable",
+      "description": "Brazilian customers must declare whether the wallet is self-custodied. Send is_self_custody as true or false."
+    },
+    {
+      "code": "WEBHOOKS_ENDPOINT_NOT_FOUND",
+      "status": 404,
+      "retry": "actionable",
+      "description": "The requested webhook endpoint was not found."
+    },
+    {
+      "code": "WEBHOOKS_LIMIT_REACHED",
+      "status": 400,
+      "retry": "terminal",
+      "description": "You reached the maximum number of webhook endpoints."
+    },
+    {
+      "code": "WEBHOOKS_SIGNATURE_INVALID",
+      "status": 401,
+      "retry": "terminal",
+      "description": "The webhook signature is missing or invalid."
+    },
+    {
+      "code": "WEBHOOKS_TRANSFORMATION_INVALID",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The transformation code is not valid JavaScript on its own. Check for unbalanced braces or an unclosed string."
+    },
+    {
+      "code": "WEBHOOKS_URL_INVALID",
+      "status": 400,
+      "retry": "actionable",
+      "description": "The webhook URL is not valid. Use a reachable HTTPS URL."
+    },
+    {
+      "code": "YIELD_INVALID_STATE",
+      "status": 409,
+      "retry": "actionable",
+      "description": "The wallet yield status is changing. Check the current yield_status and retry when it settles."
+    },
+    {
+      "code": "YIELD_NOT_AVAILABLE_FOR_NETWORK",
+      "status": 400,
+      "retry": "terminal",
+      "description": "Yield is not available on this wallet network."
+    },
+    {
+      "code": "YIELD_NOT_ENABLED_FOR_INSTANCE",
+      "status": 403,
+      "retry": "terminal",
+      "description": "Yield is not enabled for this account. Contact support to enable it."
+    },
+    {
+      "code": "YIELD_POSITION_UNAVAILABLE",
+      "status": 503,
+      "retry": "retryable",
+      "description": "The wallet yield position is temporarily unavailable. Try again shortly."
+    },
+    {
+      "code": "YIELD_VAULT_IDENTITY_LOCKED",
+      "status": 400,
+      "retry": "terminal",
+      "description": "This yield vault is referenced by transactions, so its address, network and token cannot be changed."
+    },
+    {
+      "code": "YIELD_WALLET_NOT_EMPTY",
+      "status": 400,
+      "retry": "actionable",
+      "description": "This wallet still has funds earning yield. Disable yield and wait for it to settle before deleting the wallet."
+    }
+  ]
+}

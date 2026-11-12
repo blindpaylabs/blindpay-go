@@ -1,3 +1,7 @@
+// Package transfers moves stablecoins from a managed wallet to another
+// address, optionally swapping tokens: transfer quotes, transfers, listing
+// with auto-paging. A swap between different tokens needs at least 100 USDC,
+// measured on the USDC side. Use it through blindpay.Client.Transfers.
 package transfers
 
 import (
@@ -48,18 +52,21 @@ type Transfer struct {
 	LegalName                     string                        `json:"legal_name,omitempty"`
 	WalletID                      string                        `json:"wallet_id"`
 	SenderToken                   types.StablecoinToken         `json:"sender_token"`
-	SenderAmount                  float64                       `json:"sender_amount"`
-	ReceiverAmount                float64                       `json:"receiver_amount"`
-	CustomerNetwork               types.Network                 `json:"customer_network"`
-	CustomerToken                 types.StablecoinToken         `json:"customer_token"`
-	CustomerWalletAddress         string                        `json:"customer_wallet_address"`
-	PartnerFeeAmount              *float64                      `json:"partner_fee_amount"`
-	ExternalID                    *string                       `json:"external_id,omitempty"`
-	CustomerID                    string                        `json:"customer_id"`
-	Address                       string                        `json:"address"`
-	Network                       types.Network                 `json:"network"`
-	PartnerFlatFee                *int                          `json:"partner_flat_fee,omitempty"`
-	PartnerPercentageFee          *int                          `json:"partner_percentage_fee,omitempty"`
+	// SenderAmount is in integer cents (1000 = 10.00).
+	SenderAmount float64 `json:"sender_amount"`
+	// ReceiverAmount is in integer cents (1000 = 10.00).
+	ReceiverAmount        float64               `json:"receiver_amount"`
+	CustomerNetwork       types.Network         `json:"customer_network"`
+	CustomerToken         types.StablecoinToken `json:"customer_token"`
+	CustomerWalletAddress string                `json:"customer_wallet_address"`
+	// PartnerFeeAmount is in integer cents (1000 = 10.00).
+	PartnerFeeAmount     *float64      `json:"partner_fee_amount"`
+	ExternalID           *string       `json:"external_id,omitempty"`
+	CustomerID           string        `json:"customer_id"`
+	Address              string        `json:"address"`
+	Network              types.Network `json:"network"`
+	PartnerFlatFee       *int          `json:"partner_flat_fee,omitempty"`
+	PartnerPercentageFee *int          `json:"partner_percentage_fee,omitempty"`
 }
 
 // CreateQuoteParams represents parameters for creating a transfer quote.
@@ -69,10 +76,15 @@ type CreateQuoteParams struct {
 	CustomerWalletAddress string                `json:"customer_wallet_address"`
 	CustomerToken         types.StablecoinToken `json:"customer_token"`
 	CustomerNetwork       types.Network         `json:"customer_network"`
-	RequestAmount         float64               `json:"request_amount"`
-	CoverFees             bool                  `json:"cover_fees,omitempty"`
-	AmountReference       string                `json:"amount_reference"`
-	PartnerFeeID          *string               `json:"partner_fee_id,omitempty"`
+	// RequestAmount is in integer cents (1000 = 10.00). A swap between
+	// different tokens needs at least 100 USDC, measured on the USDC side;
+	// below that the API answers 400 with
+	// blindpay.ErrorCodeTransfersSwapAmountBelowMinimum
+	// (TRANSFERS_SWAP_AMOUNT_BELOW_MINIMUM).
+	RequestAmount   float64 `json:"request_amount"`
+	CoverFees       bool    `json:"cover_fees,omitempty"`
+	AmountReference string  `json:"amount_reference"`
+	PartnerFeeID    *string `json:"partner_fee_id,omitempty"`
 	// PartnerPercentageFee is in basis points (100 = 1%) and PartnerFlatFee
 	// in integer cents; they override the partner fee for this quote.
 	PartnerPercentageFee *int64 `json:"partner_percentage_fee,omitempty"`
@@ -81,16 +93,20 @@ type CreateQuoteParams struct {
 
 // CreateQuoteResponse represents the response when creating a transfer quote.
 type CreateQuoteResponse struct {
-	ID                   string   `json:"id"`
-	ExpiresAt            *float64 `json:"expires_at"`
-	CommercialQuotation  *float64 `json:"commercial_quotation"`
-	BlindpayQuotation    *float64 `json:"blindpay_quotation"`
-	ReceiverAmount       float64  `json:"receiver_amount"`
-	SenderAmount         float64  `json:"sender_amount"`
-	PartnerFeeAmount     *float64 `json:"partner_fee_amount"`
-	FlatFee              float64  `json:"flat_fee"`
-	PartnerFlatFee       *int     `json:"partner_flat_fee,omitempty"`
-	PartnerPercentageFee *int     `json:"partner_percentage_fee,omitempty"`
+	ID                  string   `json:"id"`
+	ExpiresAt           *float64 `json:"expires_at"`
+	CommercialQuotation *float64 `json:"commercial_quotation"`
+	BlindpayQuotation   *float64 `json:"blindpay_quotation"`
+	// ReceiverAmount is in integer cents (1000 = 10.00).
+	ReceiverAmount float64 `json:"receiver_amount"`
+	// SenderAmount is in integer cents (1000 = 10.00).
+	SenderAmount float64 `json:"sender_amount"`
+	// PartnerFeeAmount is in integer cents (1000 = 10.00).
+	PartnerFeeAmount *float64 `json:"partner_fee_amount"`
+	// FlatFee is in integer cents (1000 = 10.00).
+	FlatFee              float64 `json:"flat_fee"`
+	PartnerFlatFee       *int    `json:"partner_flat_fee,omitempty"`
+	PartnerPercentageFee *int    `json:"partner_percentage_fee,omitempty"`
 }
 
 // CreateParams represents parameters for creating a transfer.

@@ -1,3 +1,7 @@
+// Package instances reads and updates the instance itself: its settings and
+// members, the onboarding (business details, profile, ownership documents)
+// and instance-level requests for information. Use it through
+// blindpay.Client.Instances.
 package instances
 
 import (

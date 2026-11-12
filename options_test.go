@@ -1,9 +1,11 @@
 package blindpay
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"strings"
 	"sync"
@@ -81,4 +83,40 @@ func TestClient_StringRedactsAPIKey(t *testing.T) {
 		require.NotContains(t, s, "sk_secret_value")
 		require.Contains(t, s, "[REDACTED]")
 	}
+}
+
+// TestClient_PrintingNeverRevealsAPIKey covers the value form too: a Client
+// printed by value (fmt.Sprintf("%+v", *c)) used to print the key.
+func TestClient_PrintingNeverRevealsAPIKey(t *testing.T) {
+	const key = "sk_secret_value"
+	c, err := New(key, "in_000000000000", WithMaxResponseBodyBytes(1024))
+	require.NoError(t, err)
+
+	var logged bytes.Buffer
+	slog.New(slog.NewTextHandler(&logged, nil)).Info("client", "c", c, "v", *c)
+	slog.New(slog.NewJSONHandler(&logged, nil)).Info("client", "c", c, "v", *c)
+
+	outputs := []string{logged.String()}
+	for _, v := range []any{c, *c, struct{ c Client }{*c}, c.Payouts, *c.Payouts, c.Payins.Quotes, c.Upload} {
+		for _, verb := range []string{"%v", "%+v", "%#v", "%s", "%q", "%x", "%d"} {
+			outputs = append(outputs, fmt.Sprintf(verb, v))
+		}
+	}
+	for _, s := range outputs {
+		require.NotContains(t, s, key)
+	}
+	require.Contains(t, fmt.Sprintf("%+v", *c), "[REDACTED]")
+	require.Contains(t, fmt.Sprintf("%#v", *c), "[REDACTED]")
+}
+
+func TestWithMaxResponseBodyBytes(t *testing.T) {
+	tr := &countingTransport{status: []int{200}}
+	c, err := New("test_key", "in_000000000000", WithHTTPClient(&http.Client{Transport: tr}), WithMaxResponseBodyBytes(4))
+	require.NoError(t, err)
+	_, err = c.Payouts.Get(context.Background(), "po_000000000000")
+	require.ErrorIs(t, err, ErrResponseTooLarge)
+	var netErr *NetworkError
+	require.ErrorAs(t, err, &netErr)
+	require.Equal(t, 1, tr.calls)
+	require.Equal(t, int64(32<<20), int64(DefaultMaxResponseBodyBytes))
 }

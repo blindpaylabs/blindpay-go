@@ -1,3 +1,6 @@
+// Package available looks up BlindPay reference data that is not tied to an
+// instance: payment rails, the bank-detail fields each rail needs, NAICS codes
+// and SWIFT/BIC codes. Use it through blindpay.Client.Available.
 package available
 
 import (

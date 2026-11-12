@@ -1,3 +1,6 @@
+// Package partnerfees manages partner fee configurations that a partner adds
+// on top of BlindPay's fees (flat fees in integer cents, percentage fees in
+// basis points). Use it through blindpay.Client.PartnerFees.
 package partnerfees
 
 import (
@@ -11,12 +14,16 @@ import (
 
 // PartnerFee represents a partner fee configuration.
 type PartnerFee struct {
-	ID                   string  `json:"id"`
-	InstanceID           string  `json:"instance_id"`
-	Name                 string  `json:"name"`
-	PayoutPercentageFee  float64 `json:"payout_percentage_fee"`
-	PayoutFlatFee        float64 `json:"payout_flat_fee"`
-	PayinPercentageFee   float64 `json:"payin_percentage_fee"`
+	ID         string `json:"id"`
+	InstanceID string `json:"instance_id"`
+	Name       string `json:"name"`
+	// PayoutPercentageFee is in basis points (100 = 1%).
+	PayoutPercentageFee float64 `json:"payout_percentage_fee"`
+	// PayoutFlatFee is in integer cents (1000 = 10.00).
+	PayoutFlatFee float64 `json:"payout_flat_fee"`
+	// PayinPercentageFee is in basis points (100 = 1%).
+	PayinPercentageFee float64 `json:"payin_percentage_fee"`
+	// PayinFlatFee is in integer cents (1000 = 10.00).
 	PayinFlatFee         float64 `json:"payin_flat_fee"`
 	EVMWalletAddress     string  `json:"evm_wallet_address,omitempty"`
 	StellarWalletAddress string  `json:"stellar_wallet_address,omitempty"`
@@ -24,12 +31,16 @@ type PartnerFee struct {
 
 // CreatePartnerFeeParams represents parameters for creating a partner fee.
 type CreatePartnerFeeParams struct {
-	VirtualAccountSet    *bool   `json:"virtual_account_set,omitempty"`
-	EVMWalletAddress     string  `json:"evm_wallet_address"`
-	Name                 string  `json:"name"`
-	PayinFlatFee         float64 `json:"payin_flat_fee"`
-	PayinPercentageFee   float64 `json:"payin_percentage_fee"`
-	PayoutFlatFee        float64 `json:"payout_flat_fee"`
+	VirtualAccountSet *bool  `json:"virtual_account_set,omitempty"`
+	EVMWalletAddress  string `json:"evm_wallet_address"`
+	Name              string `json:"name"`
+	// PayinFlatFee is in integer cents (1000 = 10.00).
+	PayinFlatFee float64 `json:"payin_flat_fee"`
+	// PayinPercentageFee is in basis points (100 = 1%).
+	PayinPercentageFee float64 `json:"payin_percentage_fee"`
+	// PayoutFlatFee is in integer cents (1000 = 10.00).
+	PayoutFlatFee float64 `json:"payout_flat_fee"`
+	// PayoutPercentageFee is in basis points (100 = 1%).
 	PayoutPercentageFee  float64 `json:"payout_percentage_fee"`
 	StellarWalletAddress *string `json:"stellar_wallet_address,omitempty"`
 }
