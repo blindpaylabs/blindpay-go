@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"sort"
+	"strings"
 )
 
 // WebhookMapping ties a spec webhook payload schema (*WebhookOut) to the Go
@@ -29,10 +30,10 @@ type WebhookMapping struct {
 // property is new on the REST schema and the webhook at once) counts as
 // modeled, so -apply still works unattended.
 func checkWebhookCoverage(repoRoot string, sm *SpecMap, um *Unmodeled, spec *specDoc, pending []action) []string {
-	planned := map[string]bool{}
+	planned := map[plannedField]bool{}
 	for _, a := range pending {
 		if f := a.addsField; f != nil {
-			planned[f.File+"\x00"+f.Symbol+"\x00"+f.JSONName] = true
+			planned[*f] = true
 		}
 	}
 	var issues []string
@@ -64,19 +65,16 @@ func checkWebhookCoverage(repoRoot string, sm *SpecMap, um *Unmodeled, spec *spe
 }
 
 func siteSymbols(sites []SDKSite) string {
-	out := ""
-	for i, s := range sites {
-		if i > 0 {
-			out += ", "
-		}
-		out += s.Symbol
+	names := make([]string, 0, len(sites))
+	for _, s := range sites {
+		names = append(names, s.Symbol)
 	}
-	return out
+	return strings.Join(names, ", ")
 }
 
-func plannedOnAnySite(planned map[string]bool, sites []SDKSite, jsonName string) bool {
+func plannedOnAnySite(planned map[plannedField]bool, sites []SDKSite, jsonName string) bool {
 	for _, s := range sites {
-		if planned[s.File+"\x00"+s.Symbol+"\x00"+jsonName] {
+		if planned[plannedField{File: s.File, Symbol: s.Symbol, JSONName: jsonName}] {
 			return true
 		}
 	}
