@@ -37,10 +37,21 @@ func WithWebhookTolerance(d time.Duration) WebhookOption {
 	}
 }
 
-// withWebhookClock is the test seam for the current time.
-func withWebhookClock(now func() time.Time) WebhookOption {
+// WithWebhookClock sets the time the webhook timestamp is checked against
+// (default time.Now). Use it to verify a recorded delivery at the moment it
+// was received, or to run the shared conformance vectors:
+//
+//	at := time.Unix(1762790400, 0)
+//	ok := blindpay.VerifyWebhook(body, header, secret,
+//		blindpay.WithWebhookClock(func() time.Time { return at }))
+//
+// The timestamp must still be within the tolerance (WithWebhookTolerance)
+// of now(), in both directions. A nil now keeps the default.
+func WithWebhookClock(now func() time.Time) WebhookOption {
 	return func(c *webhookConfig) {
-		c.now = now
+		if now != nil {
+			c.now = now
+		}
 	}
 }
 

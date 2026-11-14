@@ -58,7 +58,9 @@ blindpay-go/
   cmd/contractcheck/       # `go run ./cmd/contractcheck` -- wire-contract check, see section 8.
   cmd/apisync/             # `go run ./cmd/apisync` -- spec sync tool (-check / -apply / -coverage).
   testdata/fixtures/       # Shared spec-shaped fixtures (verbatim copy of the cross-SDK set), see section 8.
-  testdata/webhook-vectors.json # Shared Svix conformance vectors (14), run by webhooks_vectors_test.go.
+  testdata/webhook-vectors.json # Shared Svix conformance vectors (14), run by both webhooks_vectors_test.go
+                           # (internal package) and webhooks_public_test.go (package blindpay_test, public API only).
+  readme_snippets_test.go  # Extracts every ```go block from README.md and type-checks it (go vet) in a scratch module.
   testdata/error-codes.json # Cross-SDK error-code oracle (175 codes); errorcodes_test.go compares the generated table with it.
   RELEASING.md             # Release runbook: what a merge to main does, dispatch fallback, verification.
   requestoptions_guard_test.go  # go/ast guard: every ctx method ends with opts ...option.RequestOption and forwards it.
