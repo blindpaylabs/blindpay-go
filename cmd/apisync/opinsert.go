@@ -827,7 +827,7 @@ func classifyAndPlanOperation(repoRoot string, sm *SpecMap, spec *specDoc, entry
 	pieces = append(pieces, methodText)
 
 	clientFile := target.Dir + "/client.go"
-	if src, err := os.ReadFile(filepath.Join(repoRoot, clientFile)); err != nil {
+	if src, err := os.ReadFile(filepath.Join(repoRoot, clientFile)); err != nil { //#nosec G304 -- path is developer-supplied (CLI arg or repo-relative), this is a local codegen tool
 		return nil, nil, fmt.Sprintf("could not read %s: %v", clientFile, err)
 	} else if !strings.Contains(string(src), optionImport) {
 		return nil, nil, fmt.Sprintf("%s does not import %s, which generated methods need for their request options", clientFile, optionImport)

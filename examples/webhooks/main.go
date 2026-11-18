@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/blindpaylabs/blindpay-go"
 	"github.com/blindpaylabs/blindpay-go/webhookendpoints"
@@ -33,8 +34,17 @@ func main() {
 		log.Fatal(err)
 	}
 
-	http.Handle("/webhooks/blindpay", handler(secret.Key))
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	mux := http.NewServeMux()
+	mux.Handle("/webhooks/blindpay", handler(secret.Key))
+	srv := &http.Server{
+		Addr:              ":8080",
+		Handler:           mux,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       10 * time.Second,
+		WriteTimeout:      10 * time.Second,
+		IdleTimeout:       60 * time.Second,
+	}
+	log.Fatal(srv.ListenAndServe())
 }
 
 // handler verifies the raw body, ignores repeated deliveries (same svix-id)
