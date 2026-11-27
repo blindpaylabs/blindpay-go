@@ -5,6 +5,7 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"sort"
@@ -288,8 +289,19 @@ func allStructShapesInDir(repoRoot, dir string) ([]*StructShape, error) {
 	return out, nil
 }
 
+// readRepoFile reads a repo-relative, slash-separated path through an
+// fs.FS rooted at repoRoot. fs.ReadFile rejects absolute paths and any
+// ".." element (fs.ValidPath), so a crafted spec-map entry cannot make
+// apisync read outside the repository.
+func readRepoFile(repoRoot, file string) ([]byte, error) {
+	if !fs.ValidPath(file) {
+		return nil, fmt.Errorf("%s: not a valid repo-relative path", file)
+	}
+	return fs.ReadFile(os.DirFS(repoRoot), file)
+}
+
 func lastLineOf(repoRoot, file string) (int, error) {
-	data, err := os.ReadFile(filepath.Join(repoRoot, file)) //#nosec G304 -- path is developer-supplied (CLI arg or repo-relative), this is a local codegen tool
+	data, err := readRepoFile(repoRoot, file)
 	if err != nil {
 		return 0, err
 	}
@@ -306,7 +318,7 @@ func lastLineOf(repoRoot, file string) (int, error) {
 // is the only way to add an entry without reordering/reformatting
 // everything else in the file.
 func jsonArrayOpenLine(repoRoot, file, key string) (int, error) {
-	data, err := os.ReadFile(filepath.Join(repoRoot, file)) //#nosec G304 -- path is developer-supplied (CLI arg or repo-relative), this is a local codegen tool
+	data, err := readRepoFile(repoRoot, file)
 	if err != nil {
 		return 0, err
 	}
@@ -827,7 +839,7 @@ func classifyAndPlanOperation(repoRoot string, sm *SpecMap, spec *specDoc, entry
 	pieces = append(pieces, methodText)
 
 	clientFile := target.Dir + "/client.go"
-	if src, err := os.ReadFile(filepath.Join(repoRoot, clientFile)); err != nil { //#nosec G304 -- path is developer-supplied (CLI arg or repo-relative), this is a local codegen tool
+	if src, err := readRepoFile(repoRoot, clientFile); err != nil {
 		return nil, nil, fmt.Sprintf("could not read %s: %v", clientFile, err)
 	} else if !strings.Contains(string(src), optionImport) {
 		return nil, nil, fmt.Sprintf("%s does not import %s, which generated methods need for their request options", clientFile, optionImport)
